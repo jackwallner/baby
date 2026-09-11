@@ -4,9 +4,9 @@ An iPhone and Apple Watch baby tracker for the first months: one tap to log a
 feed, a wet or dirty diaper, or sleep, and one glance to answer "when did she
 last eat, and which side".
 
-Not built yet. This repository is the Caffeine Tracker chassis, renamed, plus
-the market research and fleet context for the build. Start with `CLAUDE.md` and
-`marketreport.md`.
+Not built yet: there is no app code in this repository. It holds the release
+scripts, store and site setup, market research, and reference code from other
+fleet apps (`research/donor-code/`). Start with `CLAUDE.md`.
 
 ## What makes it different
 

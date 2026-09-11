@@ -25,7 +25,7 @@ PRODUCT_ID = "com.jackwallner.baby.pro.lifetime"
 PRODUCT_REFERENCE_NAME = "Baby Plus Lifetime"
 PRODUCT_DISPLAY_NAME = "Baby+ Lifetime"
 PRODUCT_DESCRIPTION = "Unlock Baby+ forever. One payment."
-PRICE = "59.99"
+PRICE = "39.99"
 
 V1 = "https://api.appstoreconnect.apple.com/v1"
 V2 = "https://api.appstoreconnect.apple.com/v2"
@@ -52,7 +52,7 @@ def main() -> None:
                             "name": PRODUCT_REFERENCE_NAME,
                             "productId": PRODUCT_ID,
                             "inAppPurchaseType": "NON_CONSUMABLE",
-                            "reviewNote": "One-time purchase that unlocks Baby+ forever.",
+                            "reviewNote": "One-time purchase that unlocks Baby+ reporting (pediatrician summary PDF, trends, export) forever. Logging is free.",
                         },
                         "relationships": {"app": {"data": {"type": "apps", "id": app_id}}},
                     }

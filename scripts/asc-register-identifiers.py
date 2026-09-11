@@ -8,10 +8,17 @@ import asc_lib
 
 
 IDENTIFIERS = {
-    "com.jackwallner.baby": ("Baby Tracker", {"HEALTHKIT", "APP_GROUPS", "IN_APP_PURCHASE"}),
-    "com.jackwallner.baby.widget": ("Baby Widget", {"APP_GROUPS"}),
-    "com.jackwallner.baby.watch": ("Baby Watch", {"HEALTHKIT", "APP_GROUPS"}),
-    "com.jackwallner.baby.watch.widget": ("Baby Watch Widget", {"APP_GROUPS"}),
+    # iCloud carries partner sharing (CloudKit); push lets CloudKit deliver
+    # changes from the other parent's phone. No HealthKit: it has no infant types.
+    "com.jackwallner.baby": ("Baby Tracker", {"APP_GROUPS", "IN_APP_PURCHASE", "ICLOUD", "PUSH_NOTIFICATIONS"}),
+    "com.jackwallner.baby.widget": ("Baby Tracker Widget", {"APP_GROUPS"}),
+    "com.jackwallner.baby.watch": ("Baby Tracker Watch", {"APP_GROUPS", "ICLOUD"}),
+    "com.jackwallner.baby.watch.widget": ("Baby Tracker Watch Widget", {"APP_GROUPS"}),
+}
+
+# ICLOUD is rejected without its version setting; the others take none.
+CAPABILITY_SETTINGS = {
+    "ICLOUD": [{"key": "ICLOUD_VERSION", "options": [{"key": "XCODE_6", "enabled": True}]}],
 }
 
 
@@ -52,7 +59,7 @@ def ensure_capabilities(
             {
                 "data": {
                     "type": "bundleIdCapabilities",
-                    "attributes": {"capabilityType": capability},
+                    "attributes": {"capabilityType": capability, **({"settings": CAPABILITY_SETTINGS[capability]} if capability in CAPABILITY_SETTINGS else {})},
                     "relationships": {
                         "bundleId": {"data": {"type": "bundleIds", "id": bundle_id_id}}
                     },

@@ -18,17 +18,12 @@ BUNDLE = "com.jackwallner.baby"
 GROUP_REFERENCE_NAME = "Baby Plus"
 GROUP_DISPLAY_NAME = "Baby+"
 SUBS = [
-    ("com.jackwallner.baby.monthly", "Baby Plus Monthly", "Baby+ Monthly", "ONE_MONTH", "5.99", "Monthly access to Baby+."),
-    ("com.jackwallner.baby.yearly", "Baby Plus Yearly", "Baby+ Yearly", "ONE_YEAR", "29.99", "Yearly access to Baby+."),
+    ("com.jackwallner.baby.monthly", "Baby Plus Monthly", "Baby+ Monthly", "ONE_MONTH", "3.99", "Monthly access to Baby+."),
+    ("com.jackwallner.baby.yearly", "Baby Plus Yearly", "Baby+ Yearly", "ONE_YEAR", "24.99", "Yearly access to Baby+."),
 ]
-TIERS = {
-    "IND": ("4.99", "0.69"), "PAK": ("4.99", "0.69"), "BGD": ("4.99", "0.69"), "IDN": ("4.99", "0.69"),
-    "VNM": ("4.99", "0.69"), "PHL": ("4.99", "0.69"), "EGY": ("4.99", "0.69"), "NGA": ("4.99", "0.69"),
-    "TUR": ("7.99", "0.99"), "BRA": ("7.99", "0.99"), "MEX": ("7.99", "0.99"), "COL": ("7.99", "0.99"),
-    "CHL": ("7.99", "0.99"), "THA": ("7.99", "0.99"), "MYS": ("7.99", "0.99"), "POL": ("7.99", "0.99"),
-    "HUN": ("7.99", "0.99"), "ROU": ("7.99", "0.99"), "ZAF": ("7.99", "0.99"), "RUS": ("7.99", "0.99"),
-    "SAU": ("11.99", "1.49"), "ARE": ("11.99", "1.49"), "CZE": ("11.99", "1.49"), "CHN": ("11.99", "1.49"),
-}
+# PPP is applied afterwards with the fleet curve in ~/ios/pricing (plan.py),
+# not the Vitals tiers, which were sized for a $14.99 yearly base.
+TIERS: dict[str, tuple[str, str]] = {}
 FX = {
     "IND": .012, "PAK": .0036, "BGD": .0082, "IDN": .000062, "VNM": .0000395, "PHL": .0173,
     "EGY": .020, "NGA": .00065, "TUR": .029, "BRA": .20, "MEX": .049, "COL": .00024,
@@ -85,7 +80,7 @@ def main() -> None:
     for index, (pid, name, display_name, period, price, description) in enumerate(SUBS):
         sub = existing.get(pid)
         if not sub:
-            sub = c.post("/subscriptions", {"data": {"type": "subscriptions", "attributes": {"name": name, "productId": pid, "subscriptionPeriod": period, "familySharable": False, "groupLevel": 1, "reviewNote": "Unlocks Baby+: the on-device Personal Baby Model, history past seven days, the month-over-month baby comparison, and a reminder before the daily deadline. Baby remaining, sunrise and sunset, the daily target, the head-out-by time, source controls, widgets, complications, and seven days of history are free."}, "relationships": {"group": {"data": {"type": "subscriptionGroups", "id": group_id}}}}})["data"]
+            sub = c.post("/subscriptions", {"data": {"type": "subscriptions", "attributes": {"name": name, "productId": pid, "subscriptionPeriod": period, "familySharable": False, "groupLevel": 1, "reviewNote": "Unlocks Baby+ reporting: the pediatrician summary PDF, trends, and export. Logging feeds, diapers, and sleep, partner sharing, widgets, and the Apple Watch app are free."}, "relationships": {"group": {"data": {"type": "subscriptionGroups", "id": group_id}}}}})["data"]
         sid = sub["id"]
         locs = {x["attributes"]["locale"]: x for x in asc_lib.list_all(c, f"/subscriptions/{sid}/subscriptionLocalizations")}
         product_prefix = "monthly" if period == "ONE_MONTH" else "yearly"
