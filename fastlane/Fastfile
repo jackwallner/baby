@@ -1,0 +1,63 @@
+opt_out_usage
+
+default_platform(:ios)
+
+APP_BUNDLE_ID = "com.jackwallner.baby"
+
+def asc_api_key
+  app_store_connect_api_key(
+    key_id: ENV["ASC_API_KEY_ID"],
+    issuer_id: ENV["ASC_ISSUER_ID"],
+    key_filepath: ENV["ASC_KEY_PATH"]
+  )
+end
+
+platform :ios do
+  desc "Upload localized metadata to App Store Connect"
+  lane :upload_metadata do
+    version = ENV["ASC_APP_VERSION"]
+    UI.user_error!("Set ASC_APP_VERSION") unless version && !version.empty?
+
+    deliver(
+      api_key: asc_api_key,
+      app_identifier: APP_BUNDLE_ID,
+      app_version: version,
+      skip_app_version_update: true,
+      force: true,
+      ignore_language_directory_validation: true,
+      precheck_include_in_app_purchases: false,
+      version_check_wait_retry_limit: 7,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_metadata: false,
+      submit_for_review: false,
+      automatic_release: false,
+      run_precheck_before_submit: false,
+      submission_information: {
+        add_id_info_uses_idfa: false
+      }
+    )
+  end
+
+  desc "Upload App Store screenshots (no binary, no metadata, no submit)"
+  lane :upload_screenshots do
+    version = ENV["ASC_APP_VERSION"]
+    UI.user_error!("Set ASC_APP_VERSION") unless version && !version.empty?
+
+    deliver(
+      api_key: asc_api_key,
+      app_identifier: APP_BUNDLE_ID,
+      app_version: version,
+      skip_app_version_update: true,
+      force: true,
+      ignore_language_directory_validation: true,
+      overwrite_screenshots: true,
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_screenshots: false,
+      submit_for_review: false,
+      automatic_release: false,
+      run_precheck_before_submit: false
+    )
+  end
+end

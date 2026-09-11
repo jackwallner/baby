@@ -1,0 +1,57 @@
+name: Sync landing page to jackwallner.com
+
+# This page is also served at https://jackwallner.com/ios/baby/, which is real
+# files in the portfolio repo -- GitHub Pages cannot proxy, so the mirror has to
+# be pushed. Doing it here means the mirror updates when the page does, instead
+# of the portfolio repo polling 16 repos on a timer to find nothing.
+#
+# Auth is PORTFOLIO_DEPLOY_KEY, an SSH deploy key with write access to
+# jackwallner/portfolio and nothing else.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+concurrency:
+  group: sync-landing-page
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the portfolio repo
+        uses: actions/checkout@v4
+        with:
+          repository: jackwallner/portfolio
+          ssh-key: ${{ secrets.PORTFOLIO_DEPLOY_KEY }}
+          path: portfolio
+
+      - name: Mirror this app's page
+        run: python3 portfolio/scripts/sync_ios_pages.py baby
+
+      - name: Commit and push
+        working-directory: portfolio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/ios/baby
+          if git diff --cached --quiet; then
+            echo "Mirror is already current."
+            exit 0
+          fi
+          git commit -m "chore: sync baby landing page"
+          # Another app repo may have pushed between our clone and our push.
+          # Our commit only touches docs/ios/baby, so a rebase is always clean.
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push rejected, rebasing (attempt $attempt)."
+            git pull --rebase
+          done
+          echo "Could not push after 5 attempts." >&2
+          exit 1
