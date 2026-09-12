@@ -98,7 +98,7 @@ struct StainHelperView: View {
             SectionLabel(text: "What happened")
             Picker("What happened", selection: $stain) {
                 ForEach(StainGuide.Stain.allCases) { stain in
-                    Text(stain.label).tag(stain)
+                    Text(stain.shortLabel).tag(stain)
                 }
             }
             .pickerStyle(.segmented)

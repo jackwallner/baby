@@ -72,6 +72,18 @@ enum StainGuide {
             }
         }
 
+        /// The segmented control is five wide on a 390pt screen, so it gets
+        /// the short words and the rest of the app gets the real ones.
+        var shortLabel: String {
+            switch self {
+            case .blowout: "Blowout"
+            case .poop: "Poop"
+            case .spitUp: "Spit-up"
+            case .breastMilk: "Milk"
+            case .formula: "Formula"
+            }
+        }
+
         var symbolName: String {
             switch self {
             case .blowout: "exclamationmark.triangle.fill"

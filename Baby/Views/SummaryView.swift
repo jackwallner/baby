@@ -10,7 +10,10 @@ struct SummaryView: View {
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var store: StoreService
 
-    @State private var since = Date.now
+    /// nil until the child is known. Resolving it lazily rather than in
+    /// `onAppear` keeps the first render from using today and then flickering
+    /// to the real range.
+    @State private var chosenSince: Date?
     @State private var pdfData: Data?
     @State private var preview: UIImage?
     @State private var showFullPreview = false
@@ -39,7 +42,6 @@ struct SummaryView: View {
         .navigationTitle("Summary")
         .navigationBarTitleDisplayMode(.large)
         .task(id: reportKey) { await rebuild() }
-        .onAppear { since = defaultSince }
         .sheet(isPresented: $showFullPreview) { fullPreview }
         .sheet(item: $paywallFocus) { focus in
             BabyPaywallView(paywallImpressionID: "baby_summary_\(focus.rawValue)", focus: focus)
@@ -47,6 +49,17 @@ struct SummaryView: View {
     }
 
     // MARK: - Report
+
+    private var since: Date { chosenSince ?? defaultSince }
+
+    private var sinceBinding: Binding<Date> {
+        Binding(get: { since }, set: { value in
+            chosenSince = value
+            guard let child = events.child else { return }
+            child.lastVisitAt = value
+            events.save()
+        })
+    }
 
     private var defaultSince: Date {
         if let stored = events.child?.lastVisitAt { return stored }
@@ -87,18 +100,15 @@ struct SummaryView: View {
     private var sinceCard: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             SectionLabel(text: "Since the last visit")
-            DatePicker("First day in the summary", selection: $since, in: ...Date.now, displayedComponents: .date)
+            DatePicker("First day", selection: sinceBinding, in: ...Date.now, displayedComponents: .date)
                 .datePickerStyle(.compact)
-                .onChange(of: since) { _, value in
-                    guard let child = events.child else { return }
-                    child.lastVisitAt = value
-                    events.save()
-                }
             Button("Today was the visit") {
-                since = Calendar.current.startOfDay(for: .now)
+                sinceBinding.wrappedValue = Calendar.current.startOfDay(for: .now)
+                Haptics.selected()
             }
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(AppTheme.accent)
+            .buttonStyle(.bordered)
+            .tint(AppTheme.accent)
             .frame(minHeight: 44)
             Text("Bright Futures well visits fall at 3 to 5 days, 1 month, 2, 4, 6, 9 and 12 months. Set this after each one and the next summary starts there.")
                 .font(.footnote)

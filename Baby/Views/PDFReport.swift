@@ -15,8 +15,8 @@ enum PDFReport {
         static let title = UIFont.systemFont(ofSize: 22, weight: .bold)
         static let subtitle = UIFont.systemFont(ofSize: 11, weight: .regular)
         static let sectionLabel = UIFont.systemFont(ofSize: 9, weight: .semibold)
-        static let statValue = UIFont.monospacedDigitSystemFont(ofSize: 17, weight: .semibold)
-        static let statLabel = UIFont.systemFont(ofSize: 9, weight: .regular)
+        static let statValue = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: .semibold)
+        static let statLabel = UIFont.systemFont(ofSize: 7.5, weight: .regular)
         static let columnHeader = UIFont.systemFont(ofSize: 8.5, weight: .semibold)
         static let cell = UIFont.monospacedDigitSystemFont(ofSize: 10, weight: .regular)
         static let cellStrong = UIFont.monospacedDigitSystemFont(ofSize: 10, weight: .semibold)
@@ -39,28 +39,32 @@ enum PDFReport {
         let value: @Sendable (SummaryReport.Day) -> String
     }
 
+    /// The widths add up to the 516pt content width exactly, and every cell is
+    /// drawn 6pt narrower than its column so two numbers can never touch.
+    private static let gutter: CGFloat = 6
+
     private static let columns: [Column] = [
-        Column(title: "DATE", width: 78, alignment: .left) {
+        Column(title: "DATE", width: 76, alignment: .left) {
             $0.date.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
         },
-        Column(title: "DAY", width: 34, alignment: .right) { $0.dayOfLife.map(String.init) ?? "" },
-        Column(title: "FEEDS", width: 46, alignment: .right) { String($0.feeds) },
-        Column(title: "WET", width: 40, alignment: .right) { String($0.wet) },
-        Column(title: "DIRTY", width: 44, alignment: .right) { String($0.dirty) },
-        Column(title: "BOTTLE", width: 54, alignment: .right) {
+        Column(title: "DAY", width: 30, alignment: .right) { $0.dayOfLife.map(String.init) ?? "" },
+        Column(title: "FEEDS", width: 42, alignment: .right) { String($0.feeds) },
+        Column(title: "WET", width: 36, alignment: .right) { String($0.wet) },
+        Column(title: "DIRTY", width: 40, alignment: .right) { String($0.dirty) },
+        Column(title: "BOTTLE", width: 50, alignment: .right) {
             $0.bottleMillilitres > 0 ? "\(Int($0.bottleMillilitres)) ml" : ""
         },
-        Column(title: "SLEEP", width: 52, alignment: .right) {
+        Column(title: "SLEEP", width: 50, alignment: .right) {
             $0.sleepSeconds >= 60 ? Format.compactDuration($0.sleepSeconds) : ""
         },
-        Column(title: "LONGEST", width: 58, alignment: .right) {
+        Column(title: "LONGEST", width: 54, alignment: .right) {
             $0.longestSleepSeconds >= 60 ? Format.compactDuration($0.longestSleepSeconds) : ""
         },
-        Column(title: "STOOL", width: 66, alignment: .left) {
+        Column(title: "STOOL", width: 88, alignment: .left) {
             let colors = Array(Set($0.stoolColors.map(\.label))).sorted()
             return colors.joined(separator: ", ")
         },
-        Column(title: "WEIGHT", width: 44, alignment: .right) {
+        Column(title: "WEIGHT", width: 50, alignment: .right) {
             $0.weightGrams.map { Format.grams($0) } ?? ""
         },
     ]
@@ -165,36 +169,43 @@ enum PDFReport {
 
     private static func drawStats(_ report: SummaryReport, at y: CGFloat) -> CGFloat {
         let stats: [(String, String)] = [
-            (oneDecimal(report.averageFeedsPerDay), "feeds a day"),
-            (oneDecimal(report.averageWetPerDay), "wet a day"),
-            (oneDecimal(report.averageDirtyPerDay), "dirty a day"),
-            (report.averageSleepSeconds >= 60 ? Format.compactDuration(report.averageSleepSeconds) : "—", "sleep a day"),
-            (report.longestSleepSeconds >= 60 ? Format.compactDuration(report.longestSleepSeconds) : "—", "longest stretch"),
-            (weightLine(report), "weight"),
+            (oneDecimal(report.averageFeedsPerDay), "feeds / day"),
+            (oneDecimal(report.averageWetPerDay), "wet / day"),
+            (oneDecimal(report.averageDirtyPerDay), "dirty / day"),
+            (report.averageSleepSeconds >= 60 ? Format.compactDuration(report.averageSleepSeconds) : "—", "sleep / day"),
+            (report.longestSleepSeconds >= 60 ? Format.compactDuration(report.longestSleepSeconds) : "—", "longest"),
+            (weightValue(report), weightLabel(report)),
         ]
         let width = (pageSize.width - margin * 2) / CGFloat(stats.count)
         for (index, stat) in stats.enumerated() {
             let x = margin + CGFloat(index) * width
-            draw(stat.0, font: Font.statValue, color: Ink.primary, at: CGPoint(x: x, y: y))
-            draw(stat.1.uppercased(), font: Font.statLabel, color: Ink.secondary, at: CGPoint(x: x, y: y + 21))
+            draw(stat.0, font: Font.statValue, color: Ink.primary,
+                 at: CGPoint(x: x, y: y), width: width - gutter, alignment: .left)
+            draw(stat.1.uppercased(), font: Font.statLabel, color: Ink.secondary,
+                 at: CGPoint(x: x, y: y + 19), width: width - gutter, alignment: .left)
         }
         let bottom = y + 40
         rule(at: bottom)
         return bottom + 16
     }
 
-    private static func weightLine(_ report: SummaryReport) -> String {
-        guard let latest = report.latestWeight else { return "—" }
-        guard let change = report.weightChangeGrams else { return Format.grams(latest) }
+    private static func weightValue(_ report: SummaryReport) -> String {
+        report.latestWeight.map { Format.grams($0) } ?? "—"
+    }
+
+    /// The change rides in the label rather than the value, which is how a
+    /// six-tile row stays legible at 86 points each.
+    private static func weightLabel(_ report: SummaryReport) -> String {
+        guard let change = report.weightChangeGrams else { return "weight" }
         let sign = change > 0 ? "+" : "−"
-        return "\(Format.grams(latest)) (\(sign)\(Int(abs(change)))g)"
+        return "weight \(sign)\(Int(abs(change)))g"
     }
 
     private static func drawTableHeader(at y: CGFloat) -> CGFloat {
         var x = margin
         for column in columns {
             draw(column.title, font: Font.columnHeader, color: Ink.secondary,
-                 at: CGPoint(x: x, y: y), width: column.width, alignment: column.alignment)
+                 at: CGPoint(x: x, y: y), width: column.width - gutter, alignment: column.alignment)
             x += column.width
         }
         rule(at: y + 13)
@@ -214,7 +225,7 @@ enum PDFReport {
             draw(value.isEmpty && index > 1 ? "·" : value,
                  font: font,
                  color: empty && index > 1 ? Ink.faint : (value.isEmpty ? Ink.faint : Ink.primary),
-                 at: CGPoint(x: x, y: y), width: column.width, alignment: column.alignment)
+                 at: CGPoint(x: x, y: y), width: column.width - gutter, alignment: column.alignment)
             x += column.width
         }
     }

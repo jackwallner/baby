@@ -1,145 +1,138 @@
 # Baby Tracker: Feeds & Diapers
 
-A baby tracker for the first months: one tap to log a feed, a wet or dirty
-diaper, or sleep, and one glance to answer "when did she last eat, and which
-side". Planned XcodeGen project and scheme: `Baby`. Simulator lease owners:
-`baby` and `baby-watch`.
+One tap to log a feed, a wet or dirty diaper, or sleep, and one glance to
+answer "when did she last eat, and which side". XcodeGen project and scheme:
+`Baby`. Simulator lease owners: `baby` and `baby-watch`.
 
 ## Status (2026-09-11)
 
-**No app code yet.** The build is deliberately left for a separate session.
-Everything operational is done: identifiers, the App Store Connect record,
-products and prices, RevenueCat, TestFlight group, site, and fleet registration.
+The app is built and on TestFlight (build 3). Version 1.0 is
+`PREPARE_FOR_SUBMISSION` and has not been submitted for review.
 
-- There is no `project.yml`, no Swift, and no `.storekit` in this repo. Create
-  them from the reference copy below.
-- `research/donor-code/caffeine-app/` is `~/caffeine` at `7baa2f9`, untouched:
-  the iOS app, widget, Watch app, Watch widget, tests, `project.yml`, and
-  `Caffeine.storekit`, under their original names. It is reference, not a build
-  target. Delete it once the app has its own code, because it holds Caffeine's
-  RevenueCat key.
-- `scripts/` is the Caffeine release tooling renamed to Baby, with the later
-  fixes from `~/daylight` at `48d0560` (`asc_lib.py` retry and backoff, review
-  phone read from `~/.baby_credentials`, `--replace` review screenshots).
-- `docs/` is a pre-release landing page, privacy policy, terms, and support page
-  written for this app. Re-verify the privacy policy against what ships.
+Shipped in build 3: the four buttons, the Now card, the first-weeks tally, full
+history, both widgets, Siri and the Action button, the Live Activity, the Watch
+app and complication, partner sharing through iCloud, the Baby+ reporting tab
+(pediatrician PDF, trends, CSV, more than one baby), and the stain helper.
 
-## Read first
+## Product
 
-Items marked (local) are gitignored because this repo is public: they carry
-personal dates and fleet revenue figures. They exist on this Mac only.
+Three things the category does not do, in the order a new user meets them:
 
-1. `marketreport.md` (local): verdict, demand, competition, the #1 app's revolt,
-   product angle (free capture, optional reporting, never list, stain helper),
-   pricing, positioning, channels, risks. **This is the brief.**
-2. `research/idea-screen-2026-09-11.md` (local): the fleet idea screen that led here.
-3. `research/data/`: the baby screen scripts and raw output
-   (`baby-screen-2026-09-11-raw.txt`, local).
-4. `aso-plan.md`: keyword table, subtitle candidates, screenshot story.
-5. `research/donor-docs/`: `caffeine-CLAUDE.md` (the donor's guide: 4.3 story,
-   onboarding CTA frame, paywall rules), `babydocs-CLAUDE.md` +
-   `babydocs-design.md` + `babydocs-design-audit.py` (sibling newborn app, why
-   CloudKit `CKShare` rather than a server, an enforced design system), and the
-   fleet playbooks `current-paywall-playbook.md`, `trial-conversion-thumb-zone.md`,
-   `simulator-testing.md` (canonical copies in `~/ios/`).
-6. `research/donor-code/`: `caffeine-app/` (above), `simpleglp-widget-intent/`
-   (one-tap log button in a widget via `AppIntent`), `posture-live-activity/`
-   (ActivityKit Live Activity and its controller).
+1. **The 3am answer.** The Now card leads with "Fed 2h 14m ago · Left" and
+   "Last diaper 47m ago · Wet", above four buttons that never move.
+2. **The first-weeks tally.** The hospital's paper sheet as a screen: wet and
+   dirty counts per day of life beside the typical range, with the
+   "call your pediatrician if" list under the table.
+3. **The pediatrician summary.** One page since the last visit, previewed on
+   screen for free (a stamped worked example until there is data) and shared as
+   a PDF with Baby+.
 
-## Reusable parts of the Caffeine reference
+Never: ads, AI panels or predictions, moving or renaming the four buttons, or
+locking something that shipped free.
 
-Worth porting (fleet plumbing that took several review cycles to get right):
-`Shared/Services/StoreService.swift` (RevenueCat, simulator early-return, intro
-eligibility, cached Pro in the App Group), `ConversionDiagnostics.swift` +
-`ConversionCopy.swift` + `PaywallFunnelTests` + `PaywallFunnelUITests` (paywall
-funnel record and Test Store purchase probe), `ReviewPromptService.swift` +
-`AppStoreReviewLinks.swift`, `PaywallView.swift` (3.1.2 footer in every state),
-`OnboardingView.swift` (shared `page(...)` builder keeping the CTA frame fixed),
-`DataService.swift`, `WatchSyncService.swift`, `Theme.swift`, the widget and
-complication shells.
+## Architecture
 
-Not relevant: the caffeine domain (half-life math, drink presets, HealthKit and
-body insights, Now/Cutoff/Timeline tabs) and Caffeine's artwork.
-
-## Stack and identifiers
-
-- Planned: Swift 6, SwiftUI, WidgetKit, ActivityKit, App Intents, WatchConnectivity,
-  CloudKit sharing. **No HealthKit**: it has no infant data types.
+- Swift 6, SwiftUI, Core Data + `NSPersistentCloudKitContainer`, WidgetKit,
+  ActivityKit, App Intents, WatchConnectivity. **No HealthKit**: it has no
+  infant data types.
 - iOS 17+, watchOS 10+, team `YXG4MP6W39`.
-- Bundle IDs registered in ASC: app `com.jackwallner.baby` (App Groups, In-App
-  Purchase, iCloud, Push Notifications), `.widget` (App Groups), `.watch` (App
-  Groups, iCloud), `.watch.widget` (App Groups). App Group
-  `group.com.jackwallner.baby` and the iCloud container are created by Xcode
-  automatic signing on the first build.
-- App Store Connect app **`6811133796`**, name `Baby Tracker: Feeds & Diapers`,
-  SKU `com.jackwallner.baby`, version 1.0 `PREPARE_FOR_SUBMISSION`.
-- RevenueCat project `proj0b545ae2` (dashboard name "Create a project called
-  Baby"), App Store app `app53361f54f1`, Test Store app `appf48b1dd074`.
-  Entitlement lookup key **`baby`**, display name `Baby+`. Public SDK key
-  `appl_qiLuKnhdneTEYzRYOtaovXNgZRa`. The `sk_` key, the public key, and
-  `ASC_REVIEW_PHONE` are in `~/.baby_credentials`, never in this repo.
+- `Persistence` opens two stores against one model: `private.sqlite` mirrored to
+  the private CloudKit database, and `shared.sqlite` mirrored to the shared one.
+  A baby another parent shared arrives in the second store, and every query runs
+  across both. Only the app process mirrors; widgets and intents open the same
+  files with mirroring off and write, and the app exports their rows from
+  persistent history on its next run.
+- `EventStore` is the single door to the log: every tap, edit, undo and delete
+  goes through it, and it republishes `NowSummary` to the widgets, the Watch and
+  the Live Activity after each change.
+- `NowSummary` is the one derived value (last feed and side, last diaper,
+  running feed or sleep, today's counts). The Watch keeps its own copy plus the
+  taps the phone has not confirmed, so the wrist never shows a stale answer.
+- `SummaryReport` derives the daily rows, the CSV and the PDF numbers; it is
+  pure, so the page, the charts and the export cannot disagree.
+- Sharing is `CKShare` on the baby's record zone through `UICloudSharingController`.
+  No accounts, no server.
 
-## Store setup already done
+Key files: `Shared/Services/Persistence.swift`, `EventStore.swift`,
+`NowSummary.swift`, `SummaryReport.swift`, `SharingService.swift`,
+`WatchSyncService.swift`, `WatchStore.swift`, `StoreService.swift`,
+`Shared/Utilities/Guidance.swift`, `StainGuide.swift`, `AppTheme.swift`,
+`AppIntents.swift`, `Baby/Views/`, `BabyWidget/`, `BabyWatch/`.
 
-- Listing: name, privacy URL, support and marketing URLs (github.io/baby),
-  primary category Medical, secondary Health & Fitness (matching Baby Tracker -
-  Newborn Log, Huckleberry, Nestling), copyright, manual release, content rights,
-  age rating (Vitals answers), review contact. Declared **not** a regulated
-  medical device. Free app, available in all 175 territories.
-- Products (subscription group `Baby Plus`, display `Baby+`):
-  - `com.jackwallner.baby.monthly` $3.99, 1-week free trial in all territories
-  - `com.jackwallner.baby.yearly` $24.99, 1-week free trial in all territories
-  - `com.jackwallner.baby.pro.lifetime` $39.99 non-consumable
-  - Fleet PPP ladder applied (`~/ios/pricing/plan_baby.py`, 348 subscription
-    rows, 23 lifetime territories).
-  - All three are `MISSING_METADATA` until a paywall review screenshot is
-    uploaded from the real app (`scripts/asc-finish-products.py`).
-- RevenueCat: the three App Store products are attached to entitlement `baby`
-  and the `default` offering (`$rc_monthly`, `$rc_annual`, `$rc_lifetime`);
-  the public offerings endpoint serves 3 packages.
-- TestFlight: internal group `jack` with access to all builds.
+## Design system
 
-## Still to do, and why it waits for the app
+`Shared/Utilities/AppTheme.swift` holds every spacing, radius and colour, and
+`python3 scripts/design-audit.py` fails any view that types its own. Four-point
+spacing scale, one 20pt margin, one continuous 14pt radius, colour that means
+only "which of the four kinds this is". Run the audit before a release.
 
-- Review screenshots for the three products, description, keywords, subtitle,
-  screenshots, `REVIEW_NOTES` in `scripts/asc-configure-listing.py`: all
-  describe the real app.
-- App Privacy labels (ASC web UI only): depend on the SDKs that ship. Fleet
-  norm with RevenueCat only is Purchases (App Functionality, Analytics), not
-  linked to tracking.
-- Fleet probe: `~/ios/fleet-probe/probe_config.json` `ignore_apps.baby` stays
-  until app code with the RevenueCat key exists; then delete the entry and run
-  `~/ios/fleet-probe/deploy.sh`.
-- Astro: temporary app `132` tracks 28 keywords; migrate to `6811133796` at launch.
-- Replace `docs/icon_256.png` (Caffeine's artwork, also mirrored to jackwallner.com).
+## Access model
+
+Free forever: logging, the first-weeks tally, full history, both widgets, the
+Watch app and complication, the Live Activity, partner sharing, the stain
+helper.
+
+Baby+ (`PlusFeature`): sharing or exporting the pediatrician PDF, the trends
+charts, CSV export, and more than one baby. Nothing else may move behind it.
+
+## Identifiers
+
+- App `com.jackwallner.baby`, widget `.widget`, Watch `.watch`, Watch widget
+  `.watch.widget`, tests `.tests`, UI tests `.uitests`.
+- App Group `group.com.jackwallner.baby`, iCloud container
+  `iCloud.com.jackwallner.baby`.
+- App Store Connect app **`6811133796`**, version 1.0.
+- RevenueCat project `proj0b545ae2`, entitlement lookup key **`baby`**, display
+  name `Baby+`, public SDK key `appl_qiLuKnhdneTEYzRYOtaovXNgZRa`. The `sk_`
+  key, the Test Store key and `ASC_REVIEW_PHONE` live in `~/.baby_credentials`,
+  never in this repo.
+- Products: `com.jackwallner.baby.monthly` $3.99 (1-week trial),
+  `.yearly` $24.99 (1-week trial), `.pro.lifetime` $39.99. All three are
+  `READY_TO_SUBMIT`.
+
+## Screenshots and renders
+
+- `BabyUITests/PaywallScreenshotUITests` renders the real paywall under StoreKit
+  Testing, one plan at a time (`-PaywallSnapshot yearly|monthly|lifetime`), and
+  attaches the PNG. `scripts/asc-upload-review-screenshots.py --dir
+  build/paywall-shots` puts each render on its own product, because each product
+  has to show its own billed amount.
+- `StoreService.start()` must keep loading simulator products when
+  `ScreenshotConfig.isEnabled`. Without that the render is the "Couldn't load
+  plans" state, which is exactly what App Review rejects.
+- App Store screenshots use the fleet renderer: manifest at
+  `~/ios/appstore-screenshots/configs/baby.json`, captures into
+  `samples/baby/capture-proof/`.
+- `-SeedScreenshotData` seeds a day-three newborn log; `-ScreenshotTab N`,
+  `-StartTab N` and `-OnboardingStep N` open a surface directly (all DEBUG).
 
 ## App Review constraints
 
-- **4.3:** Protein and Caffeine were both rejected as design spam. A reviewer
-  on a fresh install must reach the first-week tally and a preview of the
-  pediatrician summary without a purchase or days of data.
+- **4.3:** a reviewer on a fresh install reaches the first-weeks tally (tab 2)
+  and a full preview of the pediatrician summary (tab 4) with no purchase and no
+  data. The summary preview renders a worked example stamped
+  "EXAMPLE, NOT YOUR BABY'S DATA" until something is logged.
 - **1.4.1 and 1.1.6:** diaper and feed counts are "typical range" and "call your
-  pediatrician if", cited, never normal or abnormal. Disclaimer in onboarding,
-  the tally screen, and Settings.
-- **3.1.2:** every paywall state and any purchasing onboarding step renders the
-  billed amount, disclosure, Restore, Terms of Use and Privacy Policy. EULA link
-  in every localized description, no price figures in descriptions.
-- Medical category keeps claims scrutiny high: never diagnose or assess.
+  pediatrician if", sourced to the American Academy of Pediatrics, never normal,
+  abnormal or a verdict. The disclaimer is in onboarding, First Weeks, Summary
+  and Settings. Declared not a regulated medical device.
+- **3.1.2:** every paywall state, including loading and failure, and the Baby+
+  onboarding step render the billed amount, the renewal disclosure, Restore,
+  Terms of Use and Privacy Policy. No price figures in the description.
 - Not a Kids Category app: the user is the parent.
-
-## Fleet registration
-
-GitHub `jackwallner/baby` (public, Pages on `/docs`), portfolio mirror and
-`docs/projects.json`, `PORTFOLIO_DEPLOY_KEY`, `~/ios/fleet-audit-823/fleet_manifest.json`,
-`~/.rc-clean/apps.json` on this Mac and the MacBook Pro, fleet-probe and
-crashwatch redeployed with the ASC id, Astro app `132`, the `ios-dev` skill
-fleet map, memory `project_baby`.
 
 ## Release
 
-Once the app exists: `xcodegen generate`, tests on a leased simulator UDID, then
-`./scripts/testflight.sh` (the ASC record and TestFlight group are ready).
+`xcodegen generate`, tests on a leased simulator UDID, then
+`./scripts/testflight.sh`. ASC scripts target `6811133796`.
+
+**CloudKit schema (by hand, once).** TestFlight and App Store builds use the
+CloudKit **Production** environment, and Core Data can only create record types
+in Development. Until the schema is deployed, sync and sharing do nothing on
+TestFlight while local logging works normally. Run a Debug build on a device
+signed in to iCloud, log one feed, then deploy the schema in the CloudKit
+Console (Development to Production).
 
 ---
-Shared iOS conventions (build, simulator, release/TestFlight, ASC key, signing, review funnel, gotchas):
-always-loaded global CLAUDE.md + the `ios-dev` skill.
+Shared iOS conventions (build, simulator, release/TestFlight, ASC key, signing,
+review funnel, gotchas): always-loaded global CLAUDE.md + the `ios-dev` skill.

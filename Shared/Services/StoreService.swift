@@ -177,6 +177,13 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
             // paywall. Each screenshot launch starts from what its own arguments
             // say.
             isPro = false
+            #if targetEnvironment(simulator)
+            // The paywall review screenshot is taken in exactly this mode, so
+            // the plan cards and the billed amount still have to load. Without
+            // this the render is the "Couldn't load plans" state, which is the
+            // one App Review rejects.
+            Task { await loadStoreKitTestingProducts() }
+            #endif
             return
         }
         #endif

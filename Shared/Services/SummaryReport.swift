@@ -42,9 +42,10 @@ struct SummaryReport: Equatable, Sendable {
     var totalDirty: Int { days.reduce(0) { $0 + $1.dirty } }
 
     /// Averages skip today, which is still being filled in and would drag every
-    /// average down on the day the report is made.
+    /// average down on the day the report is made. A report whose only day is
+    /// today keeps it: "no average yet" is less use than today's own count.
     var completeDays: [Day] {
-        guard let last = days.last, Calendar.current.isDateInToday(last.date) else { return days }
+        guard days.count > 1, let last = days.last, Calendar.current.isDateInToday(last.date) else { return days }
         return days.dropLast()
     }
 
