@@ -1,3 +1,4 @@
+import CloudKit
 import Combine
 import CoreData
 import Foundation
@@ -35,13 +36,15 @@ final class EventStore: ObservableObject {
     private let logger = Logger(subsystem: AppGroup.subsystem, category: "EventStore")
     private var observers: [Any] = []
     private var undoTask: Task<Void, Never>?
+    private let sharedZoneID: (Child) -> CKRecordZone.ID?
     /// How long the undo stays offered after a tap.
     static let undoWindow: TimeInterval = 8
 
     var context: NSManagedObjectContext { persistence.viewContext }
 
-    init(persistence: Persistence) {
+    init(persistence: Persistence, sharedZoneID: ((Child) -> CKRecordZone.ID?)? = nil) {
         self.persistence = persistence
+        self.sharedZoneID = sharedZoneID ?? { persistence.container.recordID(for: $0.objectID)?.zoneID }
         reload()
         let center = NotificationCenter.default
         observers.append(center.addObserver(
@@ -57,6 +60,7 @@ final class EventStore: ObservableObject {
 
     func reload() {
         children = persistence.allChildren(in: context)
+        finishPendingShareImport()
         child = persistence.activeChild(in: context)
         if let child {
             events = persistence.events(for: child, in: context)
@@ -114,16 +118,23 @@ final class EventStore: ObservableObject {
         reload()
     }
 
-    /// After accepting a share: the shared baby becomes active, and the empty
-    /// placeholder from onboarding goes away so there is never a second "Baby".
-    func adoptSharedChildIfNeeded() {
-        let children = persistence.allChildren(in: context)
-        guard let shared = children.first(where: { persistence.isShared($0) }) else { return }
-        for local in children where !persistence.isShared(local) && local.eventCount == 0 {
-            context.delete(local)
-        }
-        persistence.save(context)
-        setActive(shared)
+    /// Acceptance can finish before CloudKit imports the baby. Persist the
+    /// exact zone and retry on remote changes, including after an app restart.
+    func adoptSharedChildIfNeeded(in zoneID: CKRecordZone.ID) {
+        AppGroup.defaults.set(["name": zoneID.zoneName, "owner": zoneID.ownerName], forKey: AppGroup.Key.pendingSharedZone)
+        reload()
+    }
+
+    private func finishPendingShareImport() {
+        guard let pending = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone),
+              let name = pending["name"] as? String, let owner = pending["owner"] as? String else { return }
+        let zoneID = CKRecordZone.ID(zoneName: name, ownerName: owner)
+        guard let shared = children.first(where: { persistence.isShared($0) && sharedZoneID($0) == zoneID }),
+              let id = shared.id else { return }
+        // Keep every existing baby and log. An invitation must never delete
+        // a parent's other profiles just because they have no entries yet.
+        AppGroup.defaults.set(id.uuidString, forKey: AppGroup.Key.activeChildID)
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.pendingSharedZone)
     }
 
     // MARK: - Logging

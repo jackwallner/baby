@@ -33,18 +33,37 @@ struct BabyApp: App {
                 .environmentObject(events)
                 .environmentObject(sharing)
                 .preferredColorScheme(settings.appearance.colorScheme)
+                .alert("Couldn't join this baby's log", isPresented: Binding(
+                    get: { sharing.invitationError != nil },
+                    set: { if !$0 { sharing.invitationError = nil } }
+                )) {
+                    Button("OK", role: .cancel) { sharing.invitationError = nil }
+                } message: {
+                    Text(sharing.invitationError ?? "")
+                }
                 .task {
+                    #if DEBUG
+                    if ProcessInfo.processInfo.arguments.contains("-InitializeCloudKitSchema") {
+                        // This setup-only launch must not create purchase SDK
+                        // customers or silently swallow a failed cloud setup.
+                        do {
+                            guard try await sharing.ckContainer.accountStatus() == .available else {
+                                print("BABY_SCHEMA_INITIALIZATION_FAILED: Sign in to iCloud on this device.")
+                                return
+                            }
+                            try events.persistence.container.initializeCloudKitSchema(options: [.printSchema])
+                            print("BABY_SCHEMA_INITIALIZATION_SUCCEEDED")
+                        } catch {
+                            print("BABY_SCHEMA_INITIALIZATION_FAILED: \(error)")
+                        }
+                        return
+                    }
+                    #endif
                     store.start()
                     #if DEBUG
                     if ScreenshotConfig.isEnabled {
                         settings.hasCompletedSetup = true
                         ScreenshotFixtures.seed(into: events)
-                    }
-                    if ProcessInfo.processInfo.arguments.contains("-InitializeCloudKitSchema") {
-                        // Run once from Xcode on a device signed in to iCloud,
-                        // then deploy the schema to Production in the CloudKit
-                        // Console. TestFlight and App Store builds use Production.
-                        try? events.persistence.container.initializeCloudKitSchema(options: [])
                     }
                     #endif
                     await sharing.refresh(for: events.child)
@@ -55,6 +74,9 @@ struct BabyApp: App {
                     Task { await sharing.refresh(for: events.child) }
                 }
                 .onChange(of: events.child) { _, child in
+                    if let child, events.persistence.isShared(child) {
+                        settings.hasCompletedSetup = true
+                    }
                     Task { await sharing.refresh(for: child) }
                 }
         }
@@ -80,6 +102,11 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 }
 
 final class SceneDelegate: NSObject, UIWindowSceneDelegate {
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        guard let metadata = connectionOptions.cloudKitShareMetadata else { return }
+        Task { @MainActor in SharingService.shared.accept(metadata) }
+    }
+
     func windowScene(_ windowScene: UIWindowScene, userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata) {
         Task { @MainActor in SharingService.shared.accept(cloudKitShareMetadata) }
     }
@@ -94,7 +121,7 @@ private struct RootView: View {
             BabyPaywallView(displayCloseButton: false)
         } else if let startTab = Self.startTab {
             BabyHomeView(initialScreen: startTab)
-        } else if !settings.hasCompletedSetup && !ScreenshotConfig.isEnabled {
+        } else if !settings.hasCompletedSetup && !hasSharedChild && !ScreenshotConfig.isEnabled {
             BabyOnboardingView()
         } else if events.child == nil && !ScreenshotConfig.isEnabled {
             // Setup finished but the baby is gone (a stopped share, a restore
@@ -104,6 +131,10 @@ private struct RootView: View {
         } else {
             BabyHomeView(initialScreen: Self.screenshotTab ?? 0)
         }
+    }
+
+    private var hasSharedChild: Bool {
+        events.child.map { events.persistence.isShared($0) } ?? false
     }
 
     static var startTab: Int? {

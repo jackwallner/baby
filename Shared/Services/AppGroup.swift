@@ -22,6 +22,7 @@ enum AppGroup {
         static let cachedPro = "isPro"
         static let hasCompletedSetup = "hasCompletedSetup"
         static let activeChildID = "activeChildID"
+        static let pendingSharedZone = "pendingSharedZone"
         static let appearance = "appearance"
         /// The Watch's copy of the phone's summary, and the phone's last push.
         static let nowSummary = "nowSummary"

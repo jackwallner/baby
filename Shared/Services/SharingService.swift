@@ -7,17 +7,20 @@ import os
 /// so every event under that baby follows it. No accounts, no server of ours.
 @MainActor
 final class SharingService: ObservableObject {
-    static let shared = SharingService(persistence: .shared)
+    static let shared = SharingService(persistence: .shared, events: .shared)
 
     @Published private(set) var share: CKShare?
     @Published private(set) var iCloudAvailable = false
+    @Published var invitationError: String?
 
     private let persistence: Persistence
+    private let events: EventStore
     private let logger = Logger(subsystem: AppGroup.subsystem, category: "Sharing")
 
-    init(persistence: Persistence, share: CKShare? = nil) {
+    init(persistence: Persistence, share: CKShare? = nil, events: EventStore? = nil) {
         self.persistence = persistence
         self.share = share
+        self.events = events ?? EventStore(persistence: persistence)
     }
 
     var ckContainer: CKContainer { CKContainer(identifier: AppGroup.cloudKitContainerID) }
@@ -42,7 +45,12 @@ final class SharingService: ObservableObject {
 
     /// Existing share, or a new one for the baby. The caller presents it.
     func shareForPresentation(child: Child) async throws -> CKShare {
-        if let share { return share }
+        // The active baby may have changed since the last async refresh.
+        // Never reuse a cached invitation belonging to a different baby.
+        if let existing = try persistence.container.fetchShares(matching: [child.objectID])[child.objectID] {
+            share = existing
+            return existing
+        }
         let (_, newShare, _) = try await persistence.container.share([child], to: nil)
         newShare[CKShare.SystemFieldKey.title] = "\(child.displayName)'s log" as CKRecordValue
         share = newShare
@@ -65,21 +73,29 @@ final class SharingService: ObservableObject {
             _ = try await persistence.container.purgeObjectsAndRecordsInZone(with: share.recordID.zoneID, in: store)
         }
         self.share = nil
-        EventStore.shared.reload()
+        events.reload()
     }
 
     /// An invite link was opened. Accept it into the shared store; the store
     /// then sees a new baby on its next remote-change notification.
     func accept(_ metadata: CKShare.Metadata) {
+        invitationError = nil
+        let zoneID = metadata.share.recordID.zoneID
         persistence.container.acceptShareInvitations(from: [metadata], into: persistence.sharedStore) { _, error in
-            if let error {
-                self.logger.error("acceptShareInvitations failed: \(String(describing: error), privacy: .public)")
-                return
-            }
             Task { @MainActor in
-                EventStore.shared.adoptSharedChildIfNeeded()
+                self.finishAcceptingInvitation(in: zoneID, error: error)
             }
         }
+    }
+
+    func finishAcceptingInvitation(in zoneID: CKRecordZone.ID, error: Error?) {
+        if let error {
+            logger.error("acceptShareInvitations failed: \(String(describing: error), privacy: .public)")
+            invitationError = "Check your internet connection and that iCloud is signed in, then open the invitation again. Your existing log is safe."
+            return
+        }
+        invitationError = nil
+        events.adoptSharedChildIfNeeded(in: zoneID)
     }
 
     /// People on the share other than the owner, for the Settings row.

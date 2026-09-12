@@ -1,0 +1,34 @@
+name: BabyCloudSchema
+options:
+  deploymentTarget:
+    macOS: "14.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    DEVELOPMENT_TEAM: YXG4MP6W39
+    CODE_SIGN_STYLE: Automatic
+targets:
+  BabyCloudSchema:
+    type: application
+    platform: macOS
+    sources:
+      - SchemaMain.swift
+      - ../../Shared/Models/BabyModel.swift
+      - ../../Shared/Utilities/DateHelpers.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby
+        INFOPLIST_FILE: SchemaInfo.plist
+        SCHEMA_CLOUDKIT_ENVIRONMENT: Development
+        CODE_SIGN_ENTITLEMENTS: Schema.entitlements
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_HARDENED_RUNTIME: YES
+      configs:
+        Release:
+          CODE_SIGN_ENTITLEMENTS: SchemaProduction.entitlements
+          SCHEMA_CLOUDKIT_ENVIRONMENT: Production
+schemes:
+  BabyCloudSchema:
+    build:
+      targets:
+        BabyCloudSchema: all

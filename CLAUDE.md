@@ -114,12 +114,14 @@ charts, CSV export, and more than one baby. Nothing else may move behind it.
 `xcodegen generate`, tests on a leased simulator UDID, then
 `./scripts/testflight.sh`. ASC scripts target `6811133796`.
 
-**CloudKit schema (by hand, once).** TestFlight and App Store builds use the
-CloudKit **Production** environment, and Core Data can only create record types
-in Development. Until the schema is deployed, sync and sharing do nothing on
-TestFlight while local logging works normally. Run a Debug build on a device
-signed in to iCloud, log one feed, then deploy the schema in the CloudKit
-Console (Development to Production).
+**CloudKit schema: deployed and verified in Production (2026-09-12).** Do not
+re-run initialization or reset an environment. `scripts/cloudkit-schema/` is a
+native Mac tool built from the real `Shared/Models/BabyModel.swift`; it creates
+the Development schema, and its Release build verifies a Production export /
+fresh-store import round trip. Read its README before touching either
+environment, especially the rule that it must be launched with `open`, not by
+running the executable path. Any model change needs Development initialization
+and a fresh Development-to-Production deploy before the build that ships it.
 
 ## Focused rules
 
