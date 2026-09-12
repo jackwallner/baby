@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import asc_lib as A  # noqa: E402
 
 BUNDLE_ID = "com.jackwallner.baby"
-EXPECTED_NAME = "Baby Tracker"
+EXPECTED_NAME = "Baby Tracker: Feeds & Diapers"
 EXPECTED_CATEGORY = "HEALTH_AND_FITNESS"
 DENSE_SCRIPT_LOCALES = {"ja", "ko", "zh-Hans", "zh-Hant"}
 EXPECTED_SCREENSHOTS_BY_TYPE = {
@@ -160,9 +160,15 @@ def main() -> None:
                 urls.add(value)
             else:
                 fails(field, locale)
-        for screenshot_set in A.list_all(
+        screenshot_sets = A.list_all(
             client, f"/appStoreVersionLocalizations/{localization['id']}/appScreenshotSets"
-        ):
+        )
+        if locale == "en-US":
+            actual_types = {s["attributes"]["screenshotDisplayType"] for s in screenshot_sets}
+            for display_type in EXPECTED_SCREENSHOTS_BY_TYPE:
+                if display_type not in actual_types:
+                    check(f"screenshots {display_type} ({locale})", "missing", False)
+        for screenshot_set in screenshot_sets:
             images = A.list_all(
                 client, f"/appScreenshotSets/{screenshot_set['id']}/appScreenshots"
             )

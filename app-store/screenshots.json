@@ -9,7 +9,7 @@
     "audience": "parents in the first weeks, handing the baby back and forth at 3am",
     "problem": "At 3am the question is when she last ate and which side, and the category's biggest apps answer it through ad banners, AI panels and buttons that move between updates",
     "advantage": "One calm logging screen for feeds, diapers and sleep, with full history one tap away and optional reports tucked into More",
-    "competitive_context": "Every incumbent already has an Apple Watch app, so the wrist alone is not the difference. The difference is a stable four-button layout with no ads and no AI, the day-of-life diaper ranges on screen, and a doctor-ready summary",
+    "competitive_context": "An Apple Watch companion is common in the category. The difference is stable logging controls with no ads and no AI, with day-of-life diaper counts and a doctor-ready summary available in More",
     "search_intent": [
       "newborn tracker",
       "diaper tracker",
@@ -18,7 +18,7 @@
     ],
     "proof_points": [
       {
-        "claim": "The Now card reads Fed 2h 13m ago, Left",
+        "claim": "The home card shows Last feed, 2h 13m ago, and Left breast",
         "source": "capture/01_now.png"
       },
       {
@@ -169,7 +169,7 @@
             "benefit": "One glance answers the question you wake up with",
             "problem": "At 3am, in the dark, with a baby in one arm, nobody wants to read a list",
             "advantage": "The last feed, the side, and the last diaper are the first line on the screen",
-            "proof": "The Now card reads Fed 2h 13m ago, Left",
+            "proof": "The home card shows Last feed, 2h 13m ago, and Left breast",
             "header_problem": "not knowing when she last ate",
             "header_advantage": "the answer on the first line",
             "search_terms": [
@@ -324,16 +324,16 @@
         },
         {
           "filename": "06-sleep.png",
-          "header": "Know how long she’s slept",
+          "header": "Time each nap in one tap",
           "story_role": "support",
-          "story_focus": "how long she’s slept",
+          "story_focus": "Time each nap",
           "device": "iphone",
           "source": "capture/06_sleep.png",
           "source_evidence": "capture/06_sleep.png",
           "capture_flow": "sleep",
           "evidence_status": "canonical",
           "pitch": {
-            "benefit": "See the running sleep timer at a glance",
+            "benefit": "Start timing a nap without filling in a form",
             "problem": "Remembering when a nap started adds another task",
             "advantage": "One tap starts sleep and the same button ends it",
             "proof": "The Wake control shows Asleep with the elapsed time",

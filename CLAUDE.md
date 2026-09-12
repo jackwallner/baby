@@ -124,6 +124,7 @@ Console (Development to Production).
 ## Focused rules
 
 - `.claude/rules/interface.md`: simplicity decisions and verification expectations.
+- `.claude/rules/release-verification.md`: build 5 test and screenshot evidence.
 
 ---
 Shared iOS conventions (build, simulator, release/TestFlight, ASC key, signing,

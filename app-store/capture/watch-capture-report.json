@@ -1,0 +1,31 @@
+{
+  "status": "ok",
+  "flow": "watch-native-log-feed-and-wet",
+  "captured_at_local_date": "2026-09-11",
+  "app_source_commit": "66bf7148038098e1e489040c61aa42ff0b3cbd09",
+  "bundle_id": "com.jackwallner.baby.watch",
+  "binary": "build/PolishDerived/Build/Products/Debug-watchsimulator/BabyWatch.app",
+  "lease": "baby-watch",
+  "lease_checked_in": true,
+  "device": {
+    "udid": "BCDBFB27-A122-4644-9878-D8451BA793F6",
+    "name": "agent-sim-8",
+    "type": "Apple Watch Series 11 (46mm)",
+    "runtime": "watchOS 26.5"
+  },
+  "steps": [
+    "Install and launch the actual Watch target on the leased simulator",
+    "Inspect accessibility controls and tap L, then Wet",
+    "Verify the last-feed and last-diaper labels reflect both taps",
+    "Capture the actual framebuffer using simctl io screenshot"
+  ],
+  "source": "watch-now.png",
+  "source_sha256": "36c95b35e5b1679fbbcc81d2ecaa4a33a4f2fe5a7553346ec00bc8d4b4e6c652",
+  "dimensions": [416, 496],
+  "submission": "../../fastlane/screenshots/en-US/7_APP_WATCH_SERIES_10_now.png",
+  "submission_sha256": "d94a49e3cb2c9fef7b23dfaef9f77bedba752e457383c1d9b4f6b2fe4188bf8f",
+  "conversion": "RGBA to RGB only; source alpha is uniformly 255; RGB pixels unchanged",
+  "synthetic_presentation": false,
+  "independent_review": "Luna 5.6 Max, no blocking findings",
+  "limitations": "This verifies native Watch logging and visual evidence, not physical-device WatchConnectivity delivery"
+}

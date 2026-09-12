@@ -1,0 +1,129 @@
+{
+  "status": "ok",
+  "manifest": "/Users/jackwallner/baby/app-store/screenshots.json",
+  "app": "baby",
+  "mode": "generic",
+  "lease": "baby-store-capture",
+  "output": "/Users/jackwallner/baby/app-store/capture",
+  "proof_only": false,
+  "checkout_options": [],
+  "lease_checked_in": true,
+  "screenshots": [
+    "01_now.png",
+    "02_log.png",
+    "03_first_weeks.png",
+    "04_summary.png",
+    "05_history.png",
+    "06_sleep.png"
+  ],
+  "screenshot_records": [
+    {
+      "name": "01_now.png",
+      "path": "/Users/jackwallner/baby/app-store/capture/01_now.png",
+      "size": [
+        1206,
+        2622
+      ],
+      "mode": "RGBA",
+      "sha256": "93ace27c4b080f3033b7c43d688d49febe041ffd971314a6173d6fa70f21a07c"
+    },
+    {
+      "name": "02_log.png",
+      "path": "/Users/jackwallner/baby/app-store/capture/02_log.png",
+      "size": [
+        1206,
+        2622
+      ],
+      "mode": "RGBA",
+      "sha256": "953cbe9a4a956622a14eeff00c919eed64c8ba6057d91462607b90dd33eda30d"
+    },
+    {
+      "name": "03_first_weeks.png",
+      "path": "/Users/jackwallner/baby/app-store/capture/03_first_weeks.png",
+      "size": [
+        1206,
+        2622
+      ],
+      "mode": "RGBA",
+      "sha256": "a47a572bbfca274bd238b5ab4d9aa380573d96e32421b5cf4b417545c6db87c0"
+    },
+    {
+      "name": "04_summary.png",
+      "path": "/Users/jackwallner/baby/app-store/capture/04_summary.png",
+      "size": [
+        1206,
+        2622
+      ],
+      "mode": "RGBA",
+      "sha256": "c9cfefd67c0c11fc9155acc1cf7f46bdf48c5495fbaa618d718da9776e6ac878"
+    },
+    {
+      "name": "05_history.png",
+      "path": "/Users/jackwallner/baby/app-store/capture/05_history.png",
+      "size": [
+        1206,
+        2622
+      ],
+      "mode": "RGBA",
+      "sha256": "17bbe95ce139a08789be49f14f37578935be9c841266ba1d88c9165655f75200"
+    },
+    {
+      "name": "06_sleep.png",
+      "path": "/Users/jackwallner/baby/app-store/capture/06_sleep.png",
+      "size": [
+        1206,
+        2622
+      ],
+      "mode": "RGBA",
+      "sha256": "8078021ef26ba5c5014cce34753fbaf18400525bf7226f0e34988b71097dac15"
+    }
+  ],
+  "flows": [
+    {
+      "id": "now",
+      "screenshots": [
+        "01_now.png"
+      ]
+    },
+    {
+      "id": "log",
+      "screenshots": [
+        "02_log.png"
+      ]
+    },
+    {
+      "id": "first_weeks",
+      "screenshots": [
+        "03_first_weeks.png"
+      ]
+    },
+    {
+      "id": "summary",
+      "screenshots": [
+        "04_summary.png"
+      ]
+    },
+    {
+      "id": "history",
+      "screenshots": [
+        "05_history.png"
+      ]
+    },
+    {
+      "id": "sleep",
+      "screenshots": [
+        "06_sleep.png"
+      ]
+    }
+  ],
+  "app_repo": {
+    "path": "~/baby",
+    "git_commit": "66bf7148038098e1e489040c61aa42ff0b3cbd09"
+  },
+  "device": {
+    "udid": "2C7A80C1-1228-411A-B9AD-A7DEED683F79",
+    "name": "agent-sim-1",
+    "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+    "device_type": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro"
+  }
+}
