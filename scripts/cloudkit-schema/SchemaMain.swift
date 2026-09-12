@@ -35,6 +35,15 @@ struct SchemaMain {
                 try await listChildren(in: container)
                 exit(EXIT_SUCCESS)
             }
+            if CommandLine.arguments.contains("--purge-share-zones") {
+                try await purgeShareZones(in: cloud)
+                exit(EXIT_SUCCESS)
+            }
+            if CommandLine.arguments.contains("--verify-share") {
+                try await verifyShare(using: container, cloud: cloud)
+                report("BABY_SHARE_VERIFIED_AND_FIXTURE_REMOVED")
+                exit(EXIT_SUCCESS)
+            }
             if CommandLine.arguments.contains("--verify-sync") {
                 try await verifySync(using: container, cloud: cloud)
                 report("BABY_CLOUD_SYNC_VERIFIED_AND_FIXTURE_REMOVED")
@@ -61,6 +70,75 @@ struct SchemaMain {
         report("BABY_CLOUD_CHILD_COUNT: \(children.count)")
         for child in children {
             report("BABY_CLOUD_CHILD: \(child.name ?? "(unnamed)")")
+        }
+    }
+
+    /// Exercises the owner half of partner sharing against the real account:
+    /// a `CKShare` on the baby's zone, an invitation URL, and the stop-sharing
+    /// purge. The accept half needs a second iCloud account and a device.
+    private static func verifyShare(using source: NSPersistentCloudKitContainer, cloud: CKContainer) async throws {
+        let child = Child.make(in: source.viewContext, name: "Temporary share verification", birthDate: nil)
+        let fixtureID = child.id!
+        _ = LogEvent.make(in: source.viewContext, child: child, kind: .wet, at: .now)
+        try source.viewContext.save()
+        report("BABY_SHARE_FIXTURE: \(fixtureID.uuidString)")
+
+        // Sharing before mirroring has finished its first setup fails inside
+        // Core Data with a missing ANSCKRECORDMETADATA table. A completed
+        // export is the observable proof that setup is done.
+        try await waitUntil { source.recordID(for: child.objectID) != nil }
+        report("BABY_SHARE_STORE_READY")
+
+        let (_, share, _) = try await source.share([child], to: nil)
+        share[CKShare.SystemFieldKey.title] = "\(child.displayName)'s log" as CKRecordValue
+        guard let store = child.objectID.persistentStore else { throw SchemaError.shareHasNoStore }
+        let saved = try await source.persistUpdatedShare(share, in: store)
+
+        guard let url = saved.url else { throw SchemaError.shareHasNoURL }
+        report("BABY_SHARE_URL: \(url.host ?? "none")")
+
+        let zoneID = saved.recordID.zoneID
+        guard zoneID.zoneName != "com.apple.coredata.cloudkit.zone" else {
+            throw SchemaError.shareNotInItsOwnZone
+        }
+        report("BABY_SHARE_ZONE: \(zoneID.zoneName)")
+
+        do {
+            let record = try await cloud.privateCloudDatabase.record(for: saved.recordID)
+            guard let cloudShare = record as? CKShare else { throw SchemaError.shareNotInCloud }
+            let owners = cloudShare.participants.filter { $0.role == .owner }
+            guard owners.count == 1, cloudShare.participants.count == 1 else {
+                throw SchemaError.shareNotInCloud
+            }
+            report("BABY_SHARE_RECORD_VERIFIED_IN_CLOUD")
+            guard cloudShare.publicPermission == .none else { throw SchemaError.sharePubliclyReadable }
+            report("BABY_SHARE_IS_INVITE_ONLY")
+        } catch let error as CKError where error.code == .unknownItem {
+            throw SchemaError.shareNotInCloud
+        }
+
+        _ = try await source.purgeObjectsAndRecordsInZone(with: zoneID, in: store)
+        try await waitUntil {
+            do {
+                _ = try await cloud.privateCloudDatabase.record(for: saved.recordID)
+                return false
+            } catch let error as CKError where error.code == .unknownItem || error.code == .zoneNotFound {
+                return true
+            }
+        }
+        report("BABY_SHARE_STOPPED_AND_ZONE_PURGED")
+    }
+
+    /// Removes the share zones a failed verification can leave behind. Core
+    /// Data names every one of them `com.apple.coredata.cloudkit.share.*`, and
+    /// the app's own records live in `com.apple.coredata.cloudkit.zone`.
+    private static func purgeShareZones(in cloud: CKContainer) async throws {
+        let zones = try await cloud.privateCloudDatabase.allRecordZones()
+        let strays = zones.filter { $0.zoneID.zoneName.hasPrefix("com.apple.coredata.cloudkit.share.") }
+        report("BABY_SHARE_ZONE_COUNT: \(strays.count)")
+        for zone in strays {
+            try await cloud.privateCloudDatabase.deleteRecordZone(withID: zone.zoneID)
+            report("BABY_SHARE_ZONE_DELETED: \(zone.zoneID.zoneName)")
         }
     }
 
@@ -149,5 +227,10 @@ struct SchemaMain {
         case noAccount
         case syncTimedOut
         case wrongEnvironment
+        case shareHasNoStore
+        case shareHasNoURL
+        case shareNotInCloud
+        case shareNotInItsOwnZone
+        case sharePubliclyReadable
     }
 }

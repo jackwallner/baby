@@ -119,8 +119,10 @@ re-run initialization or reset an environment. `scripts/cloudkit-schema/` is a
 native Mac tool built from the real `Shared/Models/BabyModel.swift`; it creates
 the Development schema, and its Release build verifies a Production export /
 fresh-store import round trip. Read its README before touching either
-environment, especially the rule that it must be launched with `open`, not by
-running the executable path. Any model change needs Development initialization
+environment, especially two rules: it must be launched with `open`, not by
+running the executable path, and `cloudkit.share` is a record type that schema
+initialization never creates, so Production rejects every invitation until
+something shares a record in Development and that is deployed. Any model change needs Development initialization
 and a fresh Development-to-Production deploy before the build that ships it.
 
 ## Focused rules

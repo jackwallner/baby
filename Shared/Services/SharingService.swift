@@ -51,10 +51,27 @@ final class SharingService: ObservableObject {
             share = existing
             return existing
         }
+        await waitForFirstExport(of: child)
         let (_, newShare, _) = try await persistence.container.share([child], to: nil)
         newShare[CKShare.SystemFieldKey.title] = "\(child.displayName)'s log" as CKRecordValue
         share = newShare
         return newShare
+    }
+
+    /// A fresh install can reach this screen before Core Data has finished its
+    /// first CloudKit setup, and sharing then fails inside Core Data with a
+    /// missing `ANSCKRECORDMETADATA` table rather than a useful error. An
+    /// exported record is the observable proof that setup is done. Verified
+    /// against the real Production container by
+    /// `scripts/cloudkit-schema` `--verify-share`.
+    private func waitForFirstExport(of child: Child) async {
+        guard persistence.cloudKitEnabled else { return }
+        let deadline = Date.now.addingTimeInterval(20)
+        while Date.now < deadline {
+            if persistence.container.recordID(for: child.objectID) != nil { return }
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        logger.error("share requested before the first CloudKit export finished")
     }
 
     /// Called from the sharing controller after it saves, and after a share is

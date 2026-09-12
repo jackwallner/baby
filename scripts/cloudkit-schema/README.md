@@ -30,8 +30,31 @@ The Debug executable is
   verifies export, imports both into a fresh local store, then deletes the
   fixture and verifies its cloud records are gone. This writes real test data
   to the signed-in account. Do not run it as a read-only status check.
+- `--verify-share`: creates a temporary baby, puts a real `CKShare` on its zone,
+  checks the invitation URL, that the share sits in its own zone, that it is
+  invite-only rather than publicly readable, then stops sharing and confirms the
+  zone is purged. This is the owner half of partner sharing; the accept half
+  still needs a second iCloud account.
 - `--list-children`: imports the account's babies into a fresh store and names
   them, so a leftover verification fixture cannot hide in the environment.
+- `--purge-share-zones`: deletes the `com.apple.coredata.cloudkit.share.*` zones
+  a failed verification leaves behind. It never touches
+  `com.apple.coredata.cloudkit.zone`, where the app's own records live.
+
+**`cloudkit.share` is a record type, and it is not created by schema
+initialization.** `initializeCloudKitSchema` only creates `CD_Child` and
+`CD_LogEvent`, so a Production container that was deployed from that alone
+rejects every real invitation with `Cannot create new type cloudkit.share in
+production schema` (CKError 12/2006) while local logging looks perfectly
+healthy. The type only appears in Development once something actually shares a
+record. Run `--verify-share` against Development first, then deploy Development
+to Production, then run it against Production. Do this again after any model
+change that redeploys the schema.
+
+Sharing also fails with a missing `ANSCKRECORDMETADATA` table if it runs before
+Core Data has finished its first CloudKit setup, which takes about two minutes
+on a new store. Wait for a record to export before sharing;
+`SharingService.waitForFirstExport(of:)` does this in the app.
 
 **Launch it through LaunchServices, never by running the executable path.**
 Core Data schedules its CloudKit export and import through

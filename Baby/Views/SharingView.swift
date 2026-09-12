@@ -44,7 +44,7 @@ struct SharingSheet: View {
             do {
                 share = try await sharing.shareForPresentation(child: child)
             } catch {
-                errorMessage = "iCloud did not respond. Check your connection and try again."
+                errorMessage = "iCloud did not respond. If you just installed Baby Tracker, give it a moment to finish setting up, then try again."
             }
         }
     }
