@@ -16,6 +16,7 @@ final class EventStore: ObservableObject {
     static let shared = EventStore(persistence: .shared)
 
     @Published private(set) var child: Child?
+    @Published private(set) var children: [Child] = []
     @Published private(set) var events: [LogEvent] = []
     @Published private(set) var summary: NowSummary = .empty
     /// The last thing logged from a button, offered for undo for a short while.
@@ -53,6 +54,7 @@ final class EventStore: ObservableObject {
     // MARK: - Reading
 
     func reload() {
+        children = persistence.allChildren(in: context)
         child = persistence.activeChild(in: context)
         if let child {
             events = persistence.events(for: child, in: context)

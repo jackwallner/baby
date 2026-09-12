@@ -1,0 +1,5 @@
+The first version.
+
+Four buttons that never move, the first-weeks diaper tally with typical ranges by day of life, full history, lock screen and home screen widgets, an Apple Watch app and complication, a Live Activity while a feed or sleep is running, partner sharing through iCloud, and the stain helper.
+
+Baby+ adds the one-page pediatrician summary, trends, CSV export, and more than one baby.

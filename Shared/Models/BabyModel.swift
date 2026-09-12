@@ -133,6 +133,7 @@ enum BabyModel {
             attribute("name", .stringAttributeType),
             attribute("birthDate", .dateAttributeType),
             attribute("createdAt", .dateAttributeType),
+            attribute("lastVisitAt", .dateAttributeType),
             childEvents,
         ]
         event.properties = [
@@ -161,6 +162,8 @@ final class Child: NSManagedObject {
     @NSManaged var name: String?
     @NSManaged var birthDate: Date?
     @NSManaged var createdAt: Date?
+    /// The last pediatrician visit, which is what the summary counts from.
+    @NSManaged var lastVisitAt: Date?
     @NSManaged var events: NSSet?
 
     /// Never empty: the Now screen, the widgets and the PDF all need a word.

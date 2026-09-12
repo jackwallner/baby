@@ -21,6 +21,9 @@ final class SharingService: ObservableObject {
 
     var ckContainer: CKContainer { CKContainer(identifier: AppGroup.cloudKitContainerID) }
 
+    /// True when this baby arrived from someone else's iCloud.
+    func isSharedChild(_ child: Child) -> Bool { persistence.isShared(child) }
+
     func refresh(for child: Child?) async {
         iCloudAvailable = (try? await ckContainer.accountStatus()) == .available
         guard let child, persistence.cloudKitEnabled else {

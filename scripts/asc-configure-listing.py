@@ -18,11 +18,31 @@ APP_NAME = "Baby Tracker"
 AGE_TEMPLATE_BUNDLE_ID = os.environ.get(
     "ASC_AGE_TEMPLATE_BUNDLE_ID", "com.jackwallner.vitals"
 )
-# Carried over from the Daylight copy of this script and emptied, because every
-# line of it described Daylight's HealthKit and sunset features. Write the Baby
-# review notes (fresh-install path to the first-week tally, partner sharing,
-# what is free versus paid) before running this script.
-REVIEW_NOTES = ""
+# The 4.3 answer, in the order a reviewer meets it: the fresh-install path to
+# the first-weeks tally and to a preview of the pediatrician PDF, neither of
+# which needs a purchase or days of data.
+REVIEW_NOTES = """Baby Tracker is a log for the first months: feeds, wet and dirty diapers, and sleep. There is no account of any kind, so no demo account is needed.
+
+WHAT A FRESH INSTALL SHOWS, WITH NO PURCHASE AND NO DATA
+1. Onboarding, three steps. Step two asks for a name and birth date; both are optional, and Continue moves on without them. Step three offers Baby+ and carries a "Get Started" free exit, the billed amount, the renewal disclosure, Restore, Terms of Use and Privacy Policy.
+2. Now tab: the four log buttons. One tap logs at the current time; a long press on any button opens the editor for the time, the side, the bottle amount or the stool colour. Undo sits in a toast for a few seconds.
+3. First Weeks tab: the diaper tally sheet, with the typical range for each day of life beside each day and the "call your pediatrician if" lines under the table. It renders with no data and with no purchase.
+4. Summary tab: a full-page preview of the pediatrician PDF. With nothing logged it renders a worked example whose page is stamped "EXAMPLE, NOT YOUR BABY'S DATA" and whose numbers are invented. No purchase is required to see it.
+
+FREE, AND STAYING FREE
+Logging, the first-weeks tally, full history, both widgets, the Apple Watch app and complication, the Live Activity, partner sharing, and the stain helper.
+
+BABY+ (com.jackwallner.baby.monthly, com.jackwallner.baby.yearly, com.jackwallner.baby.pro.lifetime)
+Sharing or exporting the PDF file, the trends charts, CSV export, and more than one baby. Nothing that ships free is locked later.
+
+PARTNER SHARING
+CloudKit CKShare between the two parents' own iCloud accounts (private and shared databases). There is no server of ours and no account to create. It needs an iCloud account on the device; without one, logging is unaffected and the rest of the app works.
+
+HEALTH CLAIMS
+Diaper and feed counts are presented as typical ranges for healthy full-term newborns, drawn from the American Academy of Pediatrics' parent guidance, with a "call your pediatrician if" list. The app never says normal or abnormal, never assesses or diagnoses, and is not a medical device. The disclaimer appears in onboarding, on the First Weeks tab, on the Summary tab and in Settings.
+
+PRIVACY
+Entries stay on the device and in the user's own iCloud. RevenueCat receives an anonymous app user id and purchase state only."""
 
 
 def review_phone() -> str:

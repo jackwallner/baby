@@ -135,9 +135,10 @@ private struct RootView: View {
     }
 }
 
-/// Three tabs. The first-weeks tally is a tab rather than a card so the thing
-/// this app does that the category does not is in every screenshot and one
-/// tap from a reviewer on a fresh install (4.3).
+/// Four tabs. The first-weeks tally and the pediatrician summary are tabs
+/// rather than cards so the two things this app does that the category does
+/// not are in every screenshot and one tap from a reviewer on a fresh install,
+/// with no purchase and no days of data (4.3).
 struct BabyTabView: View {
     @State private var selection: Int
 
@@ -156,6 +157,9 @@ struct BabyTabView: View {
             NavigationStack { HistoryView() }
                 .tabItem { Label("History", systemImage: "list.bullet") }
                 .tag(2)
+            NavigationStack { SummaryView() }
+                .tabItem { Label("Summary", systemImage: "doc.text") }
+                .tag(3)
         }
         .tint(AppTheme.accent)
     }

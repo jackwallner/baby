@@ -68,10 +68,13 @@ targetTemplates:
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Services/Persistence.swift
       - path: Shared/Services/NowSummary.swift
+      - path: Shared/Services/SummaryReport.swift
+      - path: Shared/Services/SampleReport.swift
       - path: Shared/Services/AppGroup.swift
       - path: Shared/Utilities/AppTheme.swift
       - path: Shared/Utilities/DateHelpers.swift
       - path: Shared/Utilities/Guidance.swift
+      - path: Shared/Utilities/StainGuide.swift
 
 targets:
   Baby:
@@ -89,6 +92,9 @@ targets:
       - path: Baby/Views/SharingView.swift
       - path: Baby/Views/OnboardingView.swift
       - path: Baby/Views/PaywallView.swift
+      - path: Baby/Views/SummaryView.swift
+      - path: Baby/Views/StainHelperView.swift
+      - path: Baby/Views/PDFReport.swift
       - path: Baby/Views/Components.swift
       - path: Baby/Assets.xcassets
       - path: Baby/PrivacyInfo.xcprivacy
@@ -153,12 +159,15 @@ targets:
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Services/NowSummary.swift
+      - path: Shared/Services/SummaryReport.swift
+      - path: Shared/Services/SampleReport.swift
       - path: Shared/Services/AppGroup.swift
       - path: Shared/Services/WatchStore.swift
       - path: Shared/Services/WatchSyncService.swift
       - path: Shared/Utilities/AppTheme.swift
       - path: Shared/Utilities/DateHelpers.swift
       - path: Shared/Utilities/Guidance.swift
+      - path: Shared/Utilities/StainGuide.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby.watch
@@ -178,11 +187,14 @@ targets:
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Services/NowSummary.swift
+      - path: Shared/Services/SummaryReport.swift
+      - path: Shared/Services/SampleReport.swift
       - path: Shared/Services/AppGroup.swift
       - path: Shared/Services/WatchStore.swift
       - path: Shared/Utilities/AppTheme.swift
       - path: Shared/Utilities/DateHelpers.swift
       - path: Shared/Utilities/Guidance.swift
+      - path: Shared/Utilities/StainGuide.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby.watch.widget

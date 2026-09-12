@@ -16,6 +16,7 @@ struct SettingsView: View {
     var body: some View {
         Form {
             babySection
+            babiesSection
             sharingSection
             plusSection
             aboutSection
@@ -60,6 +61,57 @@ struct SettingsView: View {
                 LabeledContent("Day of life", value: "\(day)")
             }
         }
+    }
+
+    /// More than one baby is Baby+ (twins, or the next one). The list itself
+    /// is always visible: someone who stops paying keeps every baby they made
+    /// and can still switch between them.
+    @ViewBuilder
+    private var babiesSection: some View {
+        if events.children.count > 1 || store.isPro {
+            Section {
+                ForEach(events.children, id: \.objectID) { child in
+                    Button {
+                        events.setActive(child)
+                    } label: {
+                        HStack {
+                            Text(child.displayName)
+                                .foregroundStyle(AppTheme.ink)
+                            if sharing.isSharedChild(child) {
+                                Image(systemName: "person.2.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if child.objectID == events.child?.objectID {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(AppTheme.accent)
+                            }
+                        }
+                    }
+                }
+                Button("Add a baby") { addBaby() }
+            } header: {
+                Text("Babies")
+            } footer: {
+                Text("Each baby keeps its own log, its own first-weeks tally and its own summary.")
+            }
+        } else {
+            Section("Babies") {
+                Button("Add another baby with Baby+") { showPaywall = true }
+            }
+        }
+    }
+
+    private func addBaby() {
+        guard store.isPro else {
+            showPaywall = true
+            return
+        }
+        events.createChild(name: nil, birthDate: Date.now)
+        name = ""
+        hasBirthDate = true
+        birthDate = .now
     }
 
     private var sharingSection: some View {

@@ -65,6 +65,7 @@ struct SectionLabel: View {
 struct UndoToast: View {
     let logged: EventStore.LoggedEvent
     let undo: () -> Void
+    var stainHelp: (() -> Void)?
 
     var body: some View {
         HStack(spacing: AppTheme.spacing) {
@@ -76,6 +77,12 @@ struct UndoToast: View {
                 .foregroundStyle(AppTheme.ink)
                 .lineLimit(1)
             Spacer(minLength: AppTheme.tightSpacing)
+            if logged.kind == .dirty, let stainHelp {
+                Button("Stain?", action: stainHelp)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink2)
+                    .frame(minHeight: 44)
+            }
             Button("Undo", action: undo)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppTheme.accent)

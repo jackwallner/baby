@@ -11,6 +11,7 @@ struct NowView: View {
     @State private var editor: EditorRequest?
     @State private var showSettings = false
     @State private var showSharing = false
+    @State private var stainStain: StainGuide.Stain?
     @State private var now = Date.now
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -21,6 +22,7 @@ struct NowView: View {
                 nowCard
                 LogButtons { kind, side in editor = EditorRequest(kind: kind, side: side) }
                 todayCard
+                stainRow
                 if sharing.share == nil, !settings.hasDismissedShareCard {
                     shareCard
                 }
@@ -39,7 +41,7 @@ struct NowView: View {
         }
         .overlay(alignment: .bottom) {
             if let logged = events.lastLogged {
-                UndoToast(logged: logged) { events.undoLast() }
+                UndoToast(logged: logged, undo: { events.undoLast() }, stainHelp: { stainStain = .blowout })
                     .padding(.horizontal, AppTheme.margin)
                     .padding(.bottom, AppTheme.tightSpacing)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -51,6 +53,9 @@ struct NowView: View {
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack { SettingsView() }
+        }
+        .sheet(item: $stainStain) { stain in
+            StainHelperView(initialStain: stain)
         }
         .sheet(isPresented: $showSharing) {
             if let child = events.child {
@@ -162,6 +167,31 @@ struct NowView: View {
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.color(for: kind))
         }
+    }
+
+    /// The stain helper lives here and in the undo toast, never in the four
+    /// buttons.
+    private var stainRow: some View {
+        Button {
+            stainStain = .blowout
+        } label: {
+            HStack(spacing: AppTheme.tightSpacing) {
+                Image(systemName: "tshirt.fill")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink2)
+                Text("Blowout on your clothes? Stain helper")
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.ink2)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink3)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .pressableCard()
+        .accessibilityIdentifier("stainRow")
     }
 
     private var shareCard: some View {
