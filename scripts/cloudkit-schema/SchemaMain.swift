@@ -93,7 +93,7 @@ struct SchemaMain {
         // Sharing before mirroring has finished its first setup fails inside
         // Core Data with a missing ANSCKRECORDMETADATA table. A completed
         // export is the observable proof that setup is done.
-        try await waitUntil { source.recordID(for: child.objectID) != nil }
+        try await waitUntil(timeout: 600) { source.recordID(for: child.objectID) != nil }
         report("BABY_SHARE_STORE_READY")
 
         let (_, share, _) = try await source.share([child], to: nil)
@@ -248,7 +248,10 @@ struct SchemaMain {
         report("BABY_SYNC_FIXTURE: \(fixtureID.uuidString)")
         var recordIDs: [CKRecord.ID] = []
         do {
-            try await waitUntil {
+            // The first export cannot start until CloudKit setup finishes, and
+            // a cold setup on this account runs well past two minutes. The
+            // default deadline turns that wait into a false sync failure.
+            try await waitUntil(timeout: 600) {
                 recordIDs = [child.objectID, event.objectID].compactMap { source.recordID(for: $0) }
                 guard recordIDs.count == 2 else { return false }
                 do {
@@ -262,7 +265,7 @@ struct SchemaMain {
             }
             report("BABY_SYNC_EXPORT_VERIFIED")
             let destination = try await makeContainer()
-            try await waitUntil {
+            try await waitUntil(timeout: 600) {
                 let request = NSFetchRequest<Child>(entityName: "Child")
                 request.predicate = NSPredicate(format: "id == %@", fixtureID as NSUUID)
                 guard let imported = try destination.viewContext.fetch(request).first else { return false }
