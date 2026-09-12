@@ -30,13 +30,20 @@ struct SchemaMain {
             guard try await cloud.accountStatus() == .available else {
                 throw SchemaError.noAccount
             }
-            let container = try await makeContainer()
-            if CommandLine.arguments.contains("--list-children") {
-                try await listChildren(in: container)
+            // These two open no store of their own, so they run before the
+            // single-store container exists. A stray extra store would show up
+            // in the two-store setup check as a third identifier.
+            if CommandLine.arguments.contains("--verify-shared-store") {
+                try await verifyTwoStoreSetup()
                 exit(EXIT_SUCCESS)
             }
             if CommandLine.arguments.contains("--purge-share-zones") {
                 try await purgeShareZones(in: cloud)
+                exit(EXIT_SUCCESS)
+            }
+            let container = try await makeContainer()
+            if CommandLine.arguments.contains("--list-children") {
+                try await listChildren(in: container)
                 exit(EXIT_SUCCESS)
             }
             if CommandLine.arguments.contains("--verify-share") {
@@ -142,6 +149,76 @@ struct SchemaMain {
         }
     }
 
+    /// The app opens two stores, and only the `.shared` one receives a baby
+    /// another parent invited us to. A single-store check never touches that
+    /// half, so this mirrors `Persistence` and waits for both stores to report
+    /// a successful CloudKit setup.
+    private static func verifyTwoStoreSetup() async throws {
+        let log = SetupLog()
+        let token = NotificationCenter.default.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: nil,
+            queue: nil
+        ) { note in
+            guard let event = note.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
+                as? NSPersistentCloudKitContainer.Event else { return }
+            log.record(event)
+        }
+        defer { NotificationCenter.default.removeObserver(token) }
+
+        let container = try await makeTwoStoreContainer()
+        let scopes = container.persistentStoreDescriptions.compactMap {
+            $0.cloudKitContainerOptions?.databaseScope
+        }
+        guard scopes.contains(.private), scopes.contains(.shared) else {
+            throw SchemaError.storeScopesWrong
+        }
+        do {
+            // A cold two-store setup runs well past the default deadline: the
+            // single-store case alone took over two minutes on this account.
+            try await waitUntil(timeout: 600) {
+                if let (store, error) = log.firstFailure {
+                    throw SchemaError.storeSetupFailed(store, error)
+                }
+                return log.succeededCount == 2
+            }
+        } catch {
+            report("BABY_SETUP_EVENTS_SEEN: \(log.summary)")
+            throw error
+        }
+        report("BABY_BOTH_STORES_SET_UP")
+    }
+
+    private static func makeTwoStoreContainer() async throws -> NSPersistentCloudKitContainer {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("BabyStores-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let container = NSPersistentCloudKitContainer(name: "Baby", managedObjectModel: BabyModel.model)
+        let privateDescription = NSPersistentStoreDescription(url: directory.appendingPathComponent("private.sqlite"))
+        let sharedDescription = NSPersistentStoreDescription(url: directory.appendingPathComponent("shared.sqlite"))
+        for description in [privateDescription, sharedDescription] {
+            description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+            description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        }
+        let privateOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.jackwallner.baby")
+        privateOptions.databaseScope = .private
+        privateDescription.cloudKitContainerOptions = privateOptions
+        let sharedOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.com.jackwallner.baby")
+        sharedOptions.databaseScope = .shared
+        sharedDescription.cloudKitContainerOptions = sharedOptions
+        container.persistentStoreDescriptions = [privateDescription, sharedDescription]
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            var remaining = 2
+            container.loadPersistentStores { _, error in
+                if let error { continuation.resume(throwing: error); remaining = -1; return }
+                remaining -= 1
+                if remaining == 0 { continuation.resume() }
+            }
+        }
+        container.viewContext.automaticallyMergesChangesFromParent = true
+        return container
+    }
+
     private static func makeContainer() async throws -> NSPersistentCloudKitContainer {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("BabySchema-\(UUID().uuidString)", isDirectory: true)
@@ -214,8 +291,8 @@ struct SchemaMain {
         }
     }
 
-    private static func waitUntil(_ condition: () async throws -> Bool) async throws {
-        let deadline = Date.now.addingTimeInterval(120)
+    private static func waitUntil(timeout: TimeInterval = 120, _ condition: () async throws -> Bool) async throws {
+        let deadline = Date.now.addingTimeInterval(timeout)
         while Date.now < deadline {
             if try await condition() { return }
             try await Task.sleep(for: .seconds(2))
@@ -232,5 +309,46 @@ struct SchemaMain {
         case shareNotInCloud
         case shareNotInItsOwnZone
         case sharePubliclyReadable
+        case storeScopesWrong
+        case storeSetupFailed(String, Error)
+    }
+
+    /// Setup events arrive on Core Data's own queue, so this is locked.
+    private final class SetupLog: @unchecked Sendable {
+        private let lock = NSLock()
+        private var succeeded: Set<String> = []
+        private var failures: [(String, Error)] = []
+        private var allTypes: Set<String> = []
+
+        func record(_ event: NSPersistentCloudKitContainer.Event) {
+            lock.lock()
+            allTypes.insert("\(event.type.rawValue):\(event.storeIdentifier):\(event.endDate == nil ? "open" : "done")")
+            lock.unlock()
+            guard event.type == .setup, event.endDate != nil else { return }
+            lock.lock()
+            defer { lock.unlock() }
+            if let error = event.error { failures.append((event.storeIdentifier, error)) }
+            else { succeeded.insert(event.storeIdentifier) }
+        }
+
+        var succeededCount: Int {
+            lock.lock()
+            defer { lock.unlock() }
+            return succeeded.count
+        }
+
+        var summary: String {
+            lock.lock()
+            defer { lock.unlock() }
+            let ok = succeeded.sorted().joined(separator: ",")
+            let bad = failures.map { "\($0.0)=\($0.1)" }.joined(separator: ",")
+            return "succeeded=[\(ok)] failed=[\(bad)] allEvents=\(allTypes.sorted().joined(separator: ","))"
+        }
+
+        var firstFailure: (String, Error)? {
+            lock.lock()
+            defer { lock.unlock() }
+            return failures.first
+        }
     }
 }

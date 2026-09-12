@@ -10,6 +10,9 @@ Verified without a second account (`scripts/cloudkit-schema`, Production):
 - A record exports, imports into a fresh store, and deletes cleanly.
 - A real `CKShare` is created on the baby's own zone, is invite-only, carries an
   `icloud.com` invitation URL, and stops cleanly.
+- The app's two-store layout, private and shared scope both, completes CloudKit
+  setup against Production. The invited parent's baby arrives in the shared
+  store, so this is the half a single-store check would miss.
 
 Not verified without a second account: accepting the invitation.
 

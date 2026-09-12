@@ -37,6 +37,11 @@ The Debug executable is
   still needs a second iCloud account.
 - `--list-children`: imports the account's babies into a fresh store and names
   them, so a leftover verification fixture cannot hide in the environment.
+- `--verify-shared-store`: opens the app's real two-store layout (one `.private`
+  and one `.shared` scope) and waits for both to report a successful CloudKit
+  setup. The invited parent's baby lands in the `.shared` store, so a
+  single-store check never touches that half. Allow ten minutes: a cold setup
+  takes minutes per store.
 - `--purge-share-zones`: deletes the `com.apple.coredata.cloudkit.share.*` zones
   a failed verification leaves behind. It never touches
   `com.apple.coredata.cloudkit.zone`, where the app's own records live.
