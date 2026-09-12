@@ -20,11 +20,15 @@ enum AppTheme {
     static let looseSpacing: CGFloat = 20
     /// The `.insetGrouped` inset on iPhone, so cards and Settings share an edge.
     static let margin: CGFloat = 20
-    static let cardRadius: CGFloat = 14
-    static let buttonRadius: CGFloat = 14
+    static let cardRadius: CGFloat = 20
+    static let buttonRadius: CGFloat = 20
     /// The four log buttons: tall enough to hit while holding a baby.
     static let logButtonHeight: CGFloat = 72
     static let ctaHeight: CGFloat = 52
+    static let iconSize: CGFloat = 36
+    static let welcomeIconSize: CGFloat = 72
+
+    static let feedbackAnimation = Animation.spring(response: 0.32, dampingFraction: 0.82)
 
     static var cardShape: RoundedRectangle {
         RoundedRectangle(cornerRadius: cardRadius, style: .continuous)
@@ -58,7 +62,7 @@ enum AppTheme {
     static let ink2 = Color(light: .init(0.42, 0.40, 0.38), dark: .init(0.68, 0.66, 0.63))
     static let ink3 = Color(light: .init(0.62, 0.60, 0.58), dark: .init(0.48, 0.46, 0.44))
     /// Kind colours. Amber, blue, brown, indigo: distinct at a glance and at 3am.
-    static let feed = Color(light: .init(0.80, 0.50, 0.12), dark: .init(0.95, 0.68, 0.30))
+    static let feed = Color(light: .init(0.58, 0.35, 0.10), dark: .init(0.95, 0.68, 0.30))
     static let wet = Color(light: .init(0.20, 0.47, 0.82), dark: .init(0.45, 0.68, 0.95))
     static let dirty = Color(light: .init(0.52, 0.38, 0.22), dark: .init(0.72, 0.58, 0.40))
     static let sleep = Color(light: .init(0.36, 0.34, 0.78), dark: .init(0.62, 0.60, 0.95))

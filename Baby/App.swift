@@ -93,16 +93,16 @@ private struct RootView: View {
         if Self.paywallSnapshot {
             BabyPaywallView(displayCloseButton: false)
         } else if let startTab = Self.startTab {
-            BabyTabView(initialTab: startTab)
+            BabyHomeView(initialScreen: startTab)
         } else if !settings.hasCompletedSetup && !ScreenshotConfig.isEnabled {
             BabyOnboardingView()
         } else if events.child == nil && !ScreenshotConfig.isEnabled {
             // Setup finished but the baby is gone (a stopped share, a restore
             // from a backup): ask for the baby again rather than logging into
             // nothing.
-            BabyOnboardingView(startAtBabyStep: true)
+            BabyOnboardingView()
         } else {
-            BabyTabView(initialTab: Self.screenshotTab ?? 0)
+            BabyHomeView(initialScreen: Self.screenshotTab ?? 0)
         }
     }
 
@@ -135,31 +135,18 @@ private struct RootView: View {
     }
 }
 
-/// Four tabs. The first-weeks tally and the pediatrician summary are tabs
-/// rather than cards so the two things this app does that the category does
-/// not are in every screenshot and one tap from a reviewer on a fresh install,
-/// with no purchase and no days of data (4.3).
-struct BabyTabView: View {
-    @State private var selection: Int
-
-    init(initialTab: Int = 0) {
-        _selection = State(initialValue: initialTab)
-    }
+/// One home screen. The alternate entry points are for existing capture flows.
+struct BabyHomeView: View {
+    var initialScreen = 0
 
     var body: some View {
-        TabView(selection: $selection) {
-            NavigationStack { NowView() }
-                .tabItem { Label("Now", systemImage: "clock.fill") }
-                .tag(0)
-            NavigationStack { FirstWeeksView() }
-                .tabItem { Label("First Weeks", systemImage: "checklist") }
-                .tag(1)
-            NavigationStack { HistoryView() }
-                .tabItem { Label("History", systemImage: "list.bullet") }
-                .tag(2)
-            NavigationStack { SummaryView() }
-                .tabItem { Label("Summary", systemImage: "doc.text") }
-                .tag(3)
+        NavigationStack {
+            switch initialScreen {
+            case 1: FirstWeeksView()
+            case 2: HistoryView()
+            case 3: SummaryView()
+            default: NowView()
+            }
         }
         .tint(AppTheme.accent)
     }

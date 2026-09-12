@@ -9,19 +9,24 @@ struct SettingsView: View {
     @EnvironmentObject private var sharing: SharingService
     @State private var showPaywall = false
     @State private var showSharing = false
+    @State private var showStainHelper = false
     @State private var name = ""
     @State private var hasBirthDate = false
     @State private var birthDate = Date.now
 
     var body: some View {
         Form {
+            toolsSection
             babySection
             babiesSection
             sharingSection
             plusSection
             aboutSection
         }
-        .navigationTitle("Settings")
+        .scrollContentBackground(.hidden)
+        .background(AppTheme.paper)
+        .tint(AppTheme.accent)
+        .navigationTitle("More")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
@@ -34,14 +39,32 @@ struct SettingsView: View {
         .sheet(isPresented: $showSharing) {
             if let child = events.child { SharingSheet(child: child) }
         }
-        .onAppear {
-            name = events.child?.name ?? ""
-            hasBirthDate = events.child?.birthDate != nil
-            birthDate = events.child?.birthDate ?? .now
-        }
+        .sheet(isPresented: $showStainHelper) { StainHelperView() }
+        .onAppear { loadChild() }
+        .onChange(of: events.child?.objectID) { _, _ in loadChild() }
         .onChange(of: name) { _, _ in saveChild() }
         .onChange(of: hasBirthDate) { _, _ in saveChild() }
         .onChange(of: birthDate) { _, _ in saveChild() }
+    }
+
+    private var toolsSection: some View {
+        Section("When you need them") {
+            NavigationLink { FirstWeeksView() } label: {
+                Label("First Weeks", systemImage: "checklist")
+            }
+            NavigationLink { SummaryView() } label: {
+                Label("Pediatrician summary", systemImage: "doc.text")
+            }
+            Button { showStainHelper = true } label: {
+                Label("Stain helper", systemImage: "tshirt")
+            }
+        }
+    }
+
+    private func loadChild() {
+        name = events.child?.name ?? ""
+        hasBirthDate = events.child?.birthDate != nil
+        birthDate = events.child?.birthDate ?? .now
     }
 
     private func saveChild() {

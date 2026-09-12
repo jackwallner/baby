@@ -88,6 +88,9 @@ struct EventEditorView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.paper)
+            .tint(AppTheme.accent)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -101,6 +104,7 @@ struct EventEditorView: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
     private var title: String {

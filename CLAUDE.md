@@ -4,28 +4,16 @@ One tap to log a feed, a wet or dirty diaper, or sleep, and one glance to
 answer "when did she last eat, and which side". XcodeGen project and scheme:
 `Baby`. Simulator lease owners: `baby` and `baby-watch`.
 
-## Status (2026-09-11)
-
-The app is built and on TestFlight (build 3). Version 1.0 is
-`PREPARE_FOR_SUBMISSION` and has not been submitted for review.
-
-Shipped in build 3: the four buttons, the Now card, the first-weeks tally, full
-history, both widgets, Siri and the Action button, the Live Activity, the Watch
-app and complication, partner sharing through iCloud, the Baby+ reporting tab
-(pediatrician PDF, trends, CSV, more than one baby), and the stain helper.
-
 ## Product
 
-Three things the category does not do, in the order a new user meets them:
+The everyday app is one screen: last feed and side, last diaper, Feed / Wet /
+Dirty / Sleep controls, and quiet daily totals. History is one tap away through
+the top-left clock. More is the top-right ellipsis.
 
-1. **The 3am answer.** The Now card leads with "Fed 2h 14m ago · Left" and
-   "Last diaper 47m ago · Wet", above four buttons that never move.
-2. **The first-weeks tally.** The hospital's paper sheet as a screen: wet and
-   dirty counts per day of life beside the typical range, with the
-   "call your pediatrician if" list under the table.
-3. **The pediatrician summary.** One page since the last visit, previewed on
-   screen for free (a stamped worked example until there is data) and shared as
-   a PDF with Baby+.
+Everything outside logging lives in More: First Weeks, Pediatrician summary,
+partner sharing, stain helper, baby settings, and Baby+. No tab bar, automatic
+review prompts, promotional cards, or purchase screen during onboarding.
+Onboarding is one optional name/birth-date screen with Start tracking.
 
 Never: ads, AI panels or predictions, moving or renaming the four buttons, or
 locking something that shipped free.
@@ -63,8 +51,9 @@ Key files: `Shared/Services/Persistence.swift`, `EventStore.swift`,
 
 `Shared/Utilities/AppTheme.swift` holds every spacing, radius and colour, and
 `python3 scripts/design-audit.py` fails any view that types its own. Four-point
-spacing scale, one 20pt margin, one continuous 14pt radius, colour that means
+spacing scale, one 20pt margin, one continuous 20pt radius, colour that means
 only "which of the four kinds this is". Run the audit before a release.
+Motion respects Reduce Motion; accessibility text sizes use stacked layouts.
 
 ## Access model
 
@@ -100,24 +89,23 @@ charts, CSV export, and more than one baby. Nothing else may move behind it.
 - `StoreService.start()` must keep loading simulator products when
   `ScreenshotConfig.isEnabled`. Without that the render is the "Couldn't load
   plans" state, which is exactly what App Review rejects.
-- App Store screenshots use the fleet renderer: manifest at
-  `~/ios/appstore-screenshots/configs/baby.json`, captures into
-  `samples/baby/capture-proof/`.
+- App Store screenshots use the fleet renderer with `app-store/screenshots.json`.
+  Raw evidence lives in `app-store/capture/`.
 - `-SeedScreenshotData` seeds a day-three newborn log; `-ScreenshotTab N`,
-  `-StartTab N` and `-OnboardingStep N` open a surface directly (all DEBUG).
+  and `-StartTab N` open a surface directly (all DEBUG, legacy screen numbers).
 
 ## App Review constraints
 
-- **4.3:** a reviewer on a fresh install reaches the first-weeks tally (tab 2)
-  and a full preview of the pediatrician summary (tab 4) with no purchase and no
+- **4.3:** a reviewer on a fresh install reaches More > First Weeks
+  and More > Pediatrician summary with no purchase and no
   data. The summary preview renders a worked example stamped
   "EXAMPLE, NOT YOUR BABY'S DATA" until something is logged.
 - **1.4.1 and 1.1.6:** diaper and feed counts are "typical range" and "call your
   pediatrician if", sourced to the American Academy of Pediatrics, never normal,
   abnormal or a verdict. The disclaimer is in onboarding, First Weeks, Summary
   and Settings. Declared not a regulated medical device.
-- **3.1.2:** every paywall state, including loading and failure, and the Baby+
-  onboarding step render the billed amount, the renewal disclosure, Restore,
+- **3.1.2:** every paywall state, including loading and failure,
+  renders the billed amount, the renewal disclosure, Restore,
   Terms of Use and Privacy Policy. No price figures in the description.
 - Not a Kids Category app: the user is the parent.
 
@@ -132,6 +120,10 @@ in Development. Until the schema is deployed, sync and sharing do nothing on
 TestFlight while local logging works normally. Run a Debug build on a device
 signed in to iCloud, log one feed, then deploy the schema in the CloudKit
 Console (Development to Production).
+
+## Focused rules
+
+- `.claude/rules/interface.md`: simplicity decisions and verification expectations.
 
 ---
 Shared iOS conventions (build, simulator, release/TestFlight, ASC key, signing,

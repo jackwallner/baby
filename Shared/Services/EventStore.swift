@@ -19,6 +19,7 @@ final class EventStore: ObservableObject {
     @Published private(set) var children: [Child] = []
     @Published private(set) var events: [LogEvent] = []
     @Published private(set) var summary: NowSummary = .empty
+    @Published private(set) var revision = 0
     /// The last thing logged from a button, offered for undo for a short while.
     @Published private(set) var lastLogged: LoggedEvent?
 
@@ -27,6 +28,7 @@ final class EventStore: ObservableObject {
         let kind: EventKind
         let detail: String?
         let at: Date
+        var reopensTimer = false
     }
 
     let persistence: Persistence
@@ -62,6 +64,7 @@ final class EventStore: ObservableObject {
             events = []
         }
         summary = NowSummary.make(child: child, events: events)
+        revision += 1
         summary.store()
         publish()
     }
@@ -157,7 +160,7 @@ final class EventStore: ObservableObject {
         running.endedAt = max(date, running.start)
         running.updatedAt = .now
         persistence.save(context)
-        if remember { rememberForUndo(running) }
+        if remember { rememberForUndo(running, reopensTimer: true) }
         reload()
         return true
     }
@@ -188,8 +191,8 @@ final class EventStore: ObservableObject {
 
     // MARK: - Undo
 
-    private func rememberForUndo(_ event: LogEvent) {
-        lastLogged = LoggedEvent(objectID: event.objectID, kind: event.eventKind, detail: event.detailText, at: .now)
+    private func rememberForUndo(_ event: LogEvent, reopensTimer: Bool = false) {
+        lastLogged = LoggedEvent(objectID: event.objectID, kind: event.eventKind, detail: event.detailText, at: .now, reopensTimer: reopensTimer)
         undoTask?.cancel()
         undoTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(Self.undoWindow))
@@ -204,7 +207,7 @@ final class EventStore: ObservableObject {
             return
         }
         // Undoing a "stop" reopens the row; undoing a log removes it.
-        if event.eventKind.canRun, event.endedAt != nil, event.endedAt != event.startedAt, lastLogged.at.timeIntervalSince(event.endedAt ?? .distantPast) < Self.undoWindow + 1 {
+        if lastLogged.reopensTimer {
             event.endedAt = nil
             event.updatedAt = .now
             persistence.save(context)

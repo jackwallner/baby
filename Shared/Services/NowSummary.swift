@@ -99,7 +99,7 @@ struct NowSummary: Codable, Equatable, Sendable {
             }
         }
         // A running feed still counts as the most recent feed for "which side".
-        if summary.lastFeedAt == nil, let start = summary.runningFeedStart {
+        if let start = summary.runningFeedStart, start >= (summary.lastFeedAt ?? .distantPast) {
             summary.lastFeedAt = start
             summary.lastFeedSide = summary.runningFeedSide
         }

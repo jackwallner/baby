@@ -26,26 +26,31 @@ extension View {
 }
 
 struct PressableCardStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
             .opacity(configuration.isPressed ? 0.85 : 1)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+            .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: configuration.isPressed)
     }
 }
 
 /// Onboarding and paywall primary action. One height everywhere, so the
 /// thumb never has to move between steps.
 struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .frame(height: AppTheme.ctaHeight)
+            .padding(.vertical, AppTheme.spacing)
+            .frame(minHeight: AppTheme.ctaHeight)
             .background(AppTheme.accent, in: AppTheme.buttonShape)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
+            .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: configuration.isPressed)
     }
 }
 
@@ -65,24 +70,17 @@ struct SectionLabel: View {
 struct UndoToast: View {
     let logged: EventStore.LoggedEvent
     let undo: () -> Void
-    var stainHelp: (() -> Void)?
 
     var body: some View {
         HStack(spacing: AppTheme.spacing) {
-            Circle()
-                .fill(AppTheme.color(for: logged.kind))
-                .frame(width: AppTheme.tightSpacing, height: AppTheme.tightSpacing)
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(AppTheme.color(for: logged.kind))
+                .accessibilityHidden(true)
             Text(title)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(AppTheme.ink)
-                .lineLimit(1)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: AppTheme.tightSpacing)
-            if logged.kind == .dirty, let stainHelp {
-                Button("Stain?", action: stainHelp)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink2)
-                    .frame(minHeight: 44)
-            }
             Button("Undo", action: undo)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppTheme.accent)
@@ -92,7 +90,7 @@ struct UndoToast: View {
         .padding(.vertical, AppTheme.hairSpacing)
         .background(AppTheme.cardElevated, in: AppTheme.cardShape)
         .shadow(color: .black.opacity(0.12), radius: AppTheme.spacing, y: AppTheme.hairSpacing)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("undoToast")
     }
 
@@ -106,6 +104,20 @@ struct UndoToast: View {
         }
         if let detail = logged.detail, !detail.isEmpty { return "\(base) · \(detail)" }
         return base
+    }
+}
+
+/// A quiet icon tile shared by summaries, history and onboarding.
+struct KindIcon: View {
+    let kind: EventKind
+
+    var body: some View {
+        Image(systemName: kind.symbolName)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(AppTheme.color(for: kind))
+            .frame(width: AppTheme.iconSize, height: AppTheme.iconSize)
+            .background(AppTheme.fill(for: kind), in: Circle())
+            .accessibilityHidden(true)
     }
 }
 

@@ -96,7 +96,7 @@ struct HistoryView: View {
 
     private func row(_ event: LogEvent) -> some View {
         HStack(spacing: AppTheme.spacing) {
-            KindDot(kind: event.eventKind)
+            KindIcon(kind: event.eventKind)
             VStack(alignment: .leading, spacing: 0) {
                 Text(event.eventKind.label)
                     .font(.body.weight(.medium))

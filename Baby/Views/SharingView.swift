@@ -15,9 +15,8 @@ struct SharingSheet: View {
     var body: some View {
         Group {
             if let share {
-                CloudSharingController(share: share, container: sharing.ckContainer) { saved in
-                    if let saved { sharing.persist(saved, for: child) } else { sharing.stopped(for: child) }
-                    dismiss()
+                CloudSharingController(share: share, container: sharing.ckContainer) { outcome in
+                    Task { await complete(outcome) }
                 }
                 .ignoresSafeArea()
             } else if let errorMessage {
@@ -36,6 +35,7 @@ struct SharingSheet: View {
                 ProgressView("Preparing…")
             }
         }
+        .background(AppTheme.paper)
         .task {
             guard sharing.iCloudAvailable else {
                 errorMessage = "Sign in to iCloud on this iPhone (Settings › your name) to share with your partner."
@@ -48,12 +48,35 @@ struct SharingSheet: View {
             }
         }
     }
+
+    private func complete(_ outcome: SharingOutcome) async {
+        do {
+            switch outcome {
+            case .saved(let updated): try await sharing.persist(updated, for: child)
+            case .stopped: try await sharing.stopped(for: child)
+            case .failed:
+                share = nil
+                errorMessage = "The invitation could not be saved. Your baby's log is safe. Check your connection and try again."
+                return
+            }
+            dismiss()
+        } catch {
+            share = nil
+            errorMessage = "iCloud could not save that change. Check your connection and try again."
+        }
+    }
 }
 
-private struct CloudSharingController: UIViewControllerRepresentable {
+enum SharingOutcome {
+    case saved(CKShare)
+    case stopped
+    case failed
+}
+
+struct CloudSharingController: UIViewControllerRepresentable {
     let share: CKShare
     let container: CKContainer
-    let finished: (CKShare?) -> Void
+    let finished: (SharingOutcome) -> Void
 
     func makeUIViewController(context: Context) -> UICloudSharingController {
         let controller = UICloudSharingController(share: share, container: container)
@@ -67,26 +90,26 @@ private struct CloudSharingController: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(finished: finished, title: share[CKShare.SystemFieldKey.title] as? String) }
 
     final class Coordinator: NSObject, UICloudSharingControllerDelegate {
-        let finished: (CKShare?) -> Void
+        let finished: (SharingOutcome) -> Void
         let title: String?
 
-        init(finished: @escaping (CKShare?) -> Void, title: String?) {
+        init(finished: @escaping (SharingOutcome) -> Void, title: String?) {
             self.finished = finished
             self.title = title
         }
 
         func cloudSharingController(_ csc: UICloudSharingController, failedToSaveShareWithError error: Error) {
-            finished(nil)
+            finished(.failed)
         }
 
         func itemTitle(for csc: UICloudSharingController) -> String? { title ?? "Baby log" }
 
         func cloudSharingControllerDidSaveShare(_ csc: UICloudSharingController) {
-            finished(csc.share)
+            if let share = csc.share { finished(.saved(share)) }
         }
 
         func cloudSharingControllerDidStopSharing(_ csc: UICloudSharingController) {
-            finished(nil)
+            finished(.stopped)
         }
     }
 }

@@ -1,17 +1,13 @@
 import SwiftUI
 
-/// The home screen: the answer to "when did she last eat, and which side",
-/// the four buttons, today's tally against the typical range, and (until it is
-/// done) the partner invite. Nothing here is more than one tap deep.
+/// The whole everyday app: the last feed, four log controls and today's totals.
+/// History is one tap away. Everything else lives in More.
 struct NowView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
-    @EnvironmentObject private var sharing: SharingService
-    @EnvironmentObject private var settings: BabySettings
-    @StateObject private var reviews = ReviewPromptService.shared
     @State private var editor: EditorRequest?
     @State private var showSettings = false
-    @State private var showSharing = false
-    @State private var stainStain: StainGuide.Stain?
     @State private var now = Date.now
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -20,205 +16,148 @@ struct NowView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
                 nowCard
-                LogButtons { kind, side in editor = EditorRequest(kind: kind, side: side) }
-                todayCard
-                stainRow
-                if sharing.share == nil, !settings.hasDismissedShareCard {
-                    shareCard
+                VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+                    LogButtons { kind, side in editor = EditorRequest(kind: kind, side: side) }
+                    Text("Tap to log now. Hold to add details.")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.ink2)
+                        .frame(maxWidth: .infinity)
                 }
+                todayTotals
             }
             .padding(.horizontal, AppTheme.margin)
             .padding(.vertical, AppTheme.spacing)
         }
         .background(AppTheme.paper)
         .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink { HistoryView() } label: { Image(systemName: "clock.arrow.circlepath") }
+                    .accessibilityLabel("History")
+            }
             ToolbarItem(placement: .topBarTrailing) {
-                Button { showSettings = true } label: { Image(systemName: "gearshape") }
-                    .accessibilityLabel("Settings")
+                Button { showSettings = true } label: { Image(systemName: "ellipsis") }
+                    .accessibilityLabel("More")
+                    .accessibilityIdentifier("more")
             }
         }
-        .overlay(alignment: .bottom) {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             if let logged = events.lastLogged {
-                UndoToast(logged: logged, undo: { events.undoLast() }, stainHelp: { stainStain = .blowout })
+                UndoToast(logged: logged, undo: { events.undoLast() })
                     .padding(.horizontal, AppTheme.margin)
                     .padding(.bottom, AppTheme.tightSpacing)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.snappy, value: events.lastLogged)
+        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.lastLogged)
         .sheet(item: $editor) { request in
             EventEditorView(request: request)
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack { SettingsView() }
         }
-        .sheet(item: $stainStain) { stain in
-            StainHelperView(initialStain: stain)
+        .onReceive(clock) { date in
+            if !Calendar.current.isDate(now, inSameDayAs: date) { events.reload() }
+            now = date
         }
-        .sheet(isPresented: $showSharing) {
-            if let child = events.child {
-                SharingSheet(child: child)
-            }
-        }
-        .sheet(isPresented: $reviews.isPresented) {
-            ReviewPromptSheet()
-        }
-        .onReceive(clock) { now = $0 }
         .onChange(of: events.events.count) { _, _ in
-            reviews.recordLoggingDay()
             now = .now
         }
     }
 
     private var title: String {
         guard let child = events.child else { return "Now" }
-        if let day = child.dayOfLife(on: now) { return "\(child.displayName) · Day \(day)" }
         return child.displayName
     }
 
     // MARK: - Cards
 
     private var nowCard: some View {
-        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            line(events.summary.feedLine(now: now), kind: .feed, prominent: true)
-            line(events.summary.diaperLine(now: now), kind: events.summary.lastDiaperKind ?? .wet)
-            if let sleep = events.summary.sleepLine(now: now) {
-                HStack(spacing: AppTheme.spacing) {
-                    line(sleep, kind: .sleep)
-                    Spacer(minLength: 0)
-                    Button("Wake") { events.toggleSleep() }
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(AppTheme.accent)
+        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+            (dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
+                : AnyLayout(HStackLayout())) {
+                Label(events.summary.isFeeding ? "Feeding now" : "Last feed", systemImage: EventKind.feed.symbolName)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppTheme.feed)
+                if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: AppTheme.tightSpacing) }
+                if let day = events.summary.dayOfLife {
+                    Text("Day \(day)")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(AppTheme.ink2)
                 }
             }
+            VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
+                Text(feedTime)
+                    .font(.system(.largeTitle, design: .rounded, weight: .semibold))
+                    .foregroundStyle(AppTheme.ink)
+                    .monospacedDigit()
+                    .contentTransition(reduceMotion ? .identity : .numericText())
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(feedDetail)
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(events.summary.feedLine(now: now))
             if events.summary.isFeeding {
-                Button("Stop feed") { events.stopRunning(.feed) }
+                Button("Finish feed") { events.stopRunning(.feed) }
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(AppTheme.accent)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("finishFeed")
+            }
+            Divider().overlay(AppTheme.cardElevated)
+            HStack(spacing: AppTheme.tightSpacing) {
+                Image(systemName: (events.summary.lastDiaperKind ?? .wet).symbolName)
+                    .foregroundStyle(AppTheme.color(for: events.summary.lastDiaperKind ?? .wet))
+                    .accessibilityHidden(true)
+                Text(events.summary.diaperLine(now: now))
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.ink2)
+                    .monospacedDigit()
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .card()
+        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.summary)
         .accessibilityIdentifier("nowCard")
     }
 
-    private func line(_ text: String, kind: EventKind, prominent: Bool = false) -> some View {
-        HStack(spacing: AppTheme.spacing) {
-            KindDot(kind: kind)
-            Text(text)
-                .font(prominent ? .title3.weight(.semibold) : .body)
-                .foregroundStyle(AppTheme.ink)
-                .monospacedDigit()
-                .lineLimit(2)
-                .minimumScaleFactor(0.8)
+    private var feedTime: String {
+        if let start = events.summary.runningFeedStart { return Format.compactDuration(now.timeIntervalSince(start)) }
+        guard let date = events.summary.lastFeedAt else { return "A fresh start" }
+        return Format.ago(date, now: now)
+    }
+
+    private var feedDetail: String {
+        let summary = events.summary
+        guard let date = summary.runningFeedStart ?? summary.lastFeedAt else {
+            return "Log a first feed below. We’ll remember the time and side."
         }
+        let side = summary.runningFeedSide ?? summary.lastFeedSide
+        let label = side.map { $0 == .bottle ? "Bottle" : "\($0.label) breast" }
+        return [label, Format.time(date)].compactMap { $0 }.joined(separator: " · ")
     }
 
-    private var todayCard: some View {
-        NavigationLink {
-            FirstWeeksView()
-        } label: {
-            VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-                HStack {
-                    SectionLabel(text: todayLabel)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(AppTheme.ink3)
-                }
-                HStack(spacing: AppTheme.looseSpacing) {
-                    stat(events.summary.todayWet, "wet", kind: .wet)
-                    stat(events.summary.todayDirty, "dirty", kind: .dirty)
-                    stat(events.summary.todayFeeds, "feeds", kind: .feed)
-                    Spacer(minLength: 0)
-                }
-                if let day = events.summary.dayOfLife {
-                    let range = Guidance.range(forDayOfLife: day)
-                    Text("Typical by day \(min(day, 6)): \(range.summary)")
-                        .font(.footnote)
-                        .foregroundStyle(AppTheme.ink2)
-                        .fixedSize(horizontal: false, vertical: true)
-                } else {
-                    Text("Add a birth date in Settings to see typical ranges by day of life.")
-                        .font(.footnote)
-                        .foregroundStyle(AppTheme.ink2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .card()
-        }
-        .pressableCard()
-        .accessibilityIdentifier("todayCard")
-    }
-
-    private var todayLabel: String {
-        if let day = events.summary.dayOfLife { return "Today · Day \(day)" }
-        return "Today"
-    }
-
-    private func stat(_ value: Int, _ label: String, kind: EventKind) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: AppTheme.hairSpacing) {
-            Text("\(value)")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(AppTheme.ink)
-                .monospacedDigit()
-            Text(label)
+    private var todayTotals: some View {
+        VStack(spacing: AppTheme.hairSpacing) {
+            SectionLabel(text: "Today")
+            Text(events.summary.todayLine)
                 .font(.subheadline)
-                .foregroundStyle(AppTheme.color(for: kind))
+                .foregroundStyle(AppTheme.ink2)
+                .monospacedDigit()
+                .contentTransition(reduceMotion ? .identity : .numericText())
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
-    }
-
-    /// The stain helper lives here and in the undo toast, never in the four
-    /// buttons.
-    private var stainRow: some View {
-        Button {
-            stainStain = .blowout
-        } label: {
-            HStack(spacing: AppTheme.tightSpacing) {
-                Image(systemName: "tshirt.fill")
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.ink2)
-                Text("Blowout on your clothes? Stain helper")
-                    .font(.subheadline)
-                    .foregroundStyle(AppTheme.ink2)
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink3)
-            }
-            .frame(minHeight: 44)
-            .contentShape(Rectangle())
-        }
-        .pressableCard()
-        .accessibilityIdentifier("stainRow")
-    }
-
-    private var shareCard: some View {
-        Button {
-            showSharing = true
-        } label: {
-            HStack(spacing: AppTheme.spacing) {
-                Image(systemName: "person.2.fill")
-                    .foregroundStyle(AppTheme.accent)
-                VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
-                    Text("Share with your partner")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(AppTheme.ink)
-                    Text("Both of you log and see the same list, through iCloud. No accounts.")
-                        .font(.footnote)
-                        .foregroundStyle(AppTheme.ink2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink3)
-            }
-            .card()
-        }
-        .pressableCard()
-        .accessibilityIdentifier("shareCard")
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Today: \(events.summary.todayLine)")
+        .accessibilityIdentifier("todayTotals")
+        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.summary.todayLine)
     }
 }
 

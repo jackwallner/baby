@@ -32,7 +32,7 @@ struct SummaryView: View {
                 exportCard
                 Text(Guidance.disclaimer)
                     .font(.caption)
-                    .foregroundStyle(AppTheme.ink3)
+                    .foregroundStyle(AppTheme.ink2)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, AppTheme.margin)
@@ -42,6 +42,7 @@ struct SummaryView: View {
         .navigationTitle("Summary")
         .navigationBarTitleDisplayMode(.large)
         .task(id: reportKey) { await rebuild() }
+        .onChange(of: events.child?.objectID) { _, _ in chosenSince = nil }
         .sheet(isPresented: $showFullPreview) { fullPreview }
         .sheet(item: $paywallFocus) { focus in
             BabyPaywallView(paywallImpressionID: "baby_summary_\(focus.rawValue)", focus: focus)
@@ -68,7 +69,7 @@ struct SummaryView: View {
     }
 
     private var reportKey: String {
-        "\(events.events.count)-\(DateHelpers.dayKey(for: since))-\(events.child?.id?.uuidString ?? "")"
+        "\(events.revision)-\(DateHelpers.dayKey(for: since))-\(events.child?.id?.uuidString ?? "")"
     }
 
     private var report: SummaryReport {
@@ -91,6 +92,7 @@ struct SummaryView: View {
         let image = await Task.detached(priority: .userInitiated) {
             PDFReport.firstPageImage(data, width: 900)
         }.value
+        guard !Task.isCancelled else { return }
         pdfData = data
         preview = image
     }
@@ -110,7 +112,7 @@ struct SummaryView: View {
             .buttonStyle(.bordered)
             .tint(AppTheme.accent)
             .frame(minHeight: 44)
-            Text("Bright Futures well visits fall at 3 to 5 days, 1 month, 2, 4, 6, 9 and 12 months. Set this after each one and the next summary starts there.")
+            Text("Choose a start date. Bring a simple record of feeds, diapers and sleep to your next visit.")
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .fixedSize(horizontal: false, vertical: true)

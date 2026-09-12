@@ -15,8 +15,9 @@ final class SharingService: ObservableObject {
     private let persistence: Persistence
     private let logger = Logger(subsystem: AppGroup.subsystem, category: "Sharing")
 
-    init(persistence: Persistence) {
+    init(persistence: Persistence, share: CKShare? = nil) {
         self.persistence = persistence
+        self.share = share
     }
 
     var ckContainer: CKContainer { CKContainer(identifier: AppGroup.cloudKitContainerID) }
@@ -50,24 +51,21 @@ final class SharingService: ObservableObject {
 
     /// Called from the sharing controller after it saves, and after a share is
     /// stopped, so Core Data's copy of the share matches iCloud.
-    func persist(_ updated: CKShare, for child: Child) {
+    func persist(_ updated: CKShare, for child: Child) async throws {
         guard let store = child.objectID.persistentStore else { return }
-        do {
-            try persistence.container.persistUpdatedShare(updated, in: store)
-            share = updated
-        } catch {
-            logger.error("persistUpdatedShare failed: \(String(describing: error), privacy: .public)")
-        }
+        let saved = try await persistence.container.persistUpdatedShare(updated, in: store)
+        share = saved
     }
 
-    func stopped(for child: Child) {
+    func stopped(for child: Child) async throws {
         guard let share, let store = child.objectID.persistentStore else { return }
-        do {
-            try persistence.container.purgeObjectsAndRecordsInZone(with: share.recordID.zoneID, in: store)
-        } catch {
-            logger.error("purge after stop failed: \(String(describing: error), privacy: .public)")
+        // Leaving someone else's share removes its local copy. Stopping our
+        // own share must never purge the baby's original log.
+        if persistence.isShared(child) {
+            _ = try await persistence.container.purgeObjectsAndRecordsInZone(with: share.recordID.zoneID, in: store)
         }
         self.share = nil
+        EventStore.shared.reload()
     }
 
     /// An invite link was opened. Accept it into the shared store; the store
@@ -76,6 +74,7 @@ final class SharingService: ObservableObject {
         persistence.container.acceptShareInvitations(from: [metadata], into: persistence.sharedStore) { _, error in
             if let error {
                 self.logger.error("acceptShareInvitations failed: \(String(describing: error), privacy: .public)")
+                return
             }
             Task { @MainActor in
                 EventStore.shared.adoptSharedChildIfNeeded()

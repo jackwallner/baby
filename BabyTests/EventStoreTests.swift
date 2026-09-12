@@ -81,6 +81,31 @@ final class EventStoreTests: XCTestCase {
         XCTAssertNil(store.runningSleep)
     }
 
+    func testUndoOfBackdatedWakeReopensSleep() {
+        let start = Date.now.addingTimeInterval(-7200)
+        store.startTimed(.sleep, at: start)
+        store.stopRunning(.sleep, at: start.addingTimeInterval(3600))
+        store.undoLast()
+        XCTAssertEqual(store.events.count, 1)
+        XCTAssertEqual(store.runningSleep?.startedAt, start)
+    }
+
+    func testUndoOfNewEntryWithEditedDurationRemovesIt() {
+        let start = Date.now.addingTimeInterval(-600)
+        let entry = store.log(.feed, side: .left, at: start)!
+        entry.endedAt = .now
+        store.save()
+        store.undoLast()
+        XCTAssertTrue(store.events.isEmpty, "Undo must not turn an edited feed into a running timer")
+    }
+
+    func testRunningFeedIsTheLatestSideEvenWithAnEarlierFeed() {
+        store.log(.feed, side: .left, at: Date.now.addingTimeInterval(-3600))
+        store.startTimed(.feed, side: .right)
+        XCTAssertEqual(store.summary.lastFeedSide, .right)
+        XCTAssertEqual(store.summary.suggestedSide, .left)
+    }
+
     func testTallyCountsByCalendarDayAndSplitsSleepAtMidnight() {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)

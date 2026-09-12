@@ -4,6 +4,7 @@ import SwiftUI
 /// beside each day's count and the "call your pediatrician if" lines under
 /// the table. Free, on a fresh install, with or without data.
 struct FirstWeeksView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
     @State private var now = Date.now
 
@@ -19,7 +20,7 @@ struct FirstWeeksView: View {
                 callCard
                 Text(Guidance.sourceLine)
                     .font(.caption)
-                    .foregroundStyle(AppTheme.ink3)
+                    .foregroundStyle(AppTheme.ink2)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, AppTheme.margin)
@@ -67,7 +68,7 @@ struct FirstWeeksView: View {
     private func table(birthDate: Date) -> some View {
         let today = DateHelpers.dayOfLife(birthDate: birthDate, on: now) ?? 0
         return VStack(spacing: 0) {
-            header
+            if !dynamicTypeSize.isAccessibilitySize { header }
             ForEach(1...Guidance.tallyDays, id: \.self) { day in
                 let date = DateHelpers.date(forDayOfLife: day, birthDate: birthDate)
                 let tally = events.tally(on: date, now: now)
@@ -103,26 +104,39 @@ struct FirstWeeksView: View {
     private func row(day: Int, date: Date, tally: DayTally, range: Guidance.DayRange, state: RowState) -> some View {
         let dim = state == .future
         return VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
-            HStack(spacing: AppTheme.tightSpacing) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("\(day)")
-                        .font(.body.weight(state == .today ? .bold : .medium))
-                    Text(date.formatted(.dateTime.month(.abbreviated).day()))
-                        .font(.caption2)
-                        .foregroundStyle(AppTheme.ink3)
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+                    Text("Day \(day) · \(date.formatted(.dateTime.month(.abbreviated).day()))")
+                        .font(.headline)
+                    Text(dim ? "Not yet logged" : "\(tally.wet) wet · \(tally.dirty) dirty · \(tally.feeds) feeds")
+                        .font(.body)
+                    Text("Typical: \(range.summary)")
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.ink2)
                 }
-                .frame(width: 44, alignment: .leading)
-                count(dim ? nil : tally.wet, kind: .wet, min: range.wetMin, complete: state == .past)
-                count(dim ? nil : tally.dirty, kind: .dirty, min: range.dirtyMin, complete: state == .past)
-                count(dim ? nil : tally.feeds, kind: .feed, min: range.feedsMin, complete: state == .past)
-                VStack(alignment: .trailing, spacing: 0) {
-                    Text("\(range.wetMin)+ · \(range.dirtyMin)+")
-                    Text("\(range.feedsMin) to \(range.feedsMax)")
+                .fixedSize(horizontal: false, vertical: true)
+            } else {
+                HStack(spacing: AppTheme.tightSpacing) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("\(day)")
+                            .font(.body.weight(state == .today ? .bold : .medium))
+                        Text(date.formatted(.dateTime.month(.abbreviated).day()))
+                            .font(.caption2)
+                            .foregroundStyle(AppTheme.ink3)
+                    }
+                    .frame(width: 44, alignment: .leading)
+                    count(dim ? nil : tally.wet, kind: .wet, min: range.wetMin, complete: state == .past)
+                    count(dim ? nil : tally.dirty, kind: .dirty, min: range.dirtyMin, complete: state == .past)
+                    count(dim ? nil : tally.feeds, kind: .feed, min: range.feedsMin, complete: state == .past)
+                    VStack(alignment: .trailing, spacing: 0) {
+                        Text("\(range.wetMin)+ · \(range.dirtyMin)+")
+                        Text("\(range.feedsMin) to \(range.feedsMax)")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink2)
+                    .monospacedDigit()
+                    .frame(width: 92, alignment: .trailing)
                 }
-                .font(.caption)
-                .foregroundStyle(AppTheme.ink2)
-                .monospacedDigit()
-                .frame(width: 92, alignment: .trailing)
             }
             if state == .past, let line = Guidance.comparison(wet: tally.wet, dirty: tally.dirty, day: day, dayComplete: true) {
                 Text(line)
@@ -136,7 +150,9 @@ struct FirstWeeksView: View {
         .padding(.vertical, AppTheme.tightSpacing)
         .background(state == .today ? AppTheme.cardElevated : Color.clear)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Day \(day): \(tally.wet) wet, \(tally.dirty) dirty, \(tally.feeds) feeds. Typical \(range.summary).")
+        .accessibilityLabel(dim
+            ? "Day \(day), upcoming. Typical \(range.summary)."
+            : "Day \(day): \(tally.wet) wet, \(tally.dirty) dirty, \(tally.feeds) feeds. Typical \(range.summary).")
     }
 
     private func count(_ value: Int?, kind: EventKind, min: Int, complete: Bool) -> some View {

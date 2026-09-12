@@ -1,0 +1,359 @@
+{
+  "app": "baby",
+  "display_name": "Baby Tracker",
+  "target": "iphone_69",
+  "copy_contract": "single-header-benefit-story-v3",
+  "health_app": true,
+  "market": {
+    "category": "newborn feed, diaper and sleep trackers",
+    "audience": "parents in the first weeks, handing the baby back and forth at 3am",
+    "problem": "At 3am the question is when she last ate and which side, and the category's biggest apps answer it through ad banners, AI panels and buttons that move between updates",
+    "advantage": "One calm logging screen for feeds, diapers and sleep, with full history one tap away and optional reports tucked into More",
+    "competitive_context": "Every incumbent already has an Apple Watch app, so the wrist alone is not the difference. The difference is a stable four-button layout with no ads and no AI, the day-of-life diaper ranges on screen, and a doctor-ready summary",
+    "search_intent": [
+      "newborn tracker",
+      "diaper tracker",
+      "baby log",
+      "breastfeeding tracker"
+    ],
+    "proof_points": [
+      {
+        "claim": "The Now card reads Fed 2h 13m ago, Left",
+        "source": "capture/01_now.png"
+      },
+      {
+        "claim": "Tapping Feed, Left logs the feed and shows Undo",
+        "source": "capture/02_log.png"
+      },
+      {
+        "claim": "History shows today at 3 wet, 3 dirty, 5 feeds and 3h 45m sleep",
+        "source": "capture/05_history.png"
+      },
+      {
+        "claim": "Day three shows 3 wet and 3 dirty beside a typical 3+ and 3+",
+        "source": "capture/03_first_weeks.png"
+      },
+      {
+        "claim": "The summary page lists daily feeds, wet and dirty counts, sleep and weights",
+        "source": "capture/04_summary.png"
+      },
+      {
+        "claim": "The Wake control shows Asleep with the elapsed time",
+        "source": "capture/06_sleep.png"
+      }
+    ]
+  },
+  "capture_report": "capture/capture-report.json",
+  "theme": {
+    "background": "#f5f0e8",
+    "background_2": "#e8ded0",
+    "icon_source": "../Baby/Assets.xcassets/AppIcon.appiconset/icon_1024.png",
+    "ink": "#1c1a17",
+    "muted": "#6b6660",
+    "accent": "#c65d40",
+    "accent_2": "#4a8ae0",
+    "headline_font": "rounded",
+    "body_font": "sans"
+  },
+  "capture": {
+    "mode": "generic",
+    "lease": "baby-store-capture",
+    "project_root": "~/baby",
+    "project": "Baby.xcodeproj",
+    "scheme": "Baby",
+    "configuration": "Debug",
+    "generate_project": false,
+    "app_name": "Baby",
+    "bundle_id": "com.jackwallner.baby",
+    "launch_args": ["-SeedScreenshotData", "-NoCloudKit"],
+    "flows": [
+      {
+        "id": "now",
+        "launch_args": ["-ScreenshotTab", "0"],
+        "ready_labels": ["Last feed"],
+        "ready_timeout": 60,
+        "launch_wait": 6,
+        "screenshots": [
+          {
+            "name": "01_now.png"
+          }
+        ]
+      },
+      {
+        "id": "log",
+        "launch_args": ["-ScreenshotTab", "0"],
+        "ready_labels": ["Feed, Left"],
+        "ready_timeout": 60,
+        "launch_wait": 6,
+        "tap_labels": ["Feed, Left"],
+        "dwell": 1.5,
+        "screenshots": [
+          {
+            "name": "02_log.png"
+          }
+        ]
+      },
+      {
+        "id": "first_weeks",
+        "launch_args": ["-ScreenshotTab", "1"],
+        "ready_labels": ["First Weeks"],
+        "ready_timeout": 60,
+        "launch_wait": 6,
+        "screenshots": [
+          {
+            "name": "03_first_weeks.png"
+          }
+        ]
+      },
+      {
+        "id": "summary",
+        "launch_args": ["-ScreenshotTab", "3"],
+        "ready_labels": ["Summary"],
+        "ready_timeout": 60,
+        "launch_wait": 9,
+        "screenshots": [
+          {
+            "name": "04_summary.png"
+          }
+        ]
+      },
+      {
+        "id": "history",
+        "launch_args": ["-ScreenshotTab", "2"],
+        "ready_labels": ["History"],
+        "ready_timeout": 60,
+        "launch_wait": 6,
+        "screenshots": [
+          {
+            "name": "05_history.png"
+          }
+        ]
+      },
+      {
+        "id": "sleep",
+        "launch_args": ["-ScreenshotTab", "0"],
+        "ready_labels": ["Sleep"],
+        "ready_timeout": 60,
+        "launch_wait": 4,
+        "tap_labels": ["Sleep"],
+        "dwell": 9,
+        "screenshots": [
+          {
+            "name": "06_sleep.png"
+          }
+        ]
+      }
+    ]
+  },
+  "sets": [
+    {
+      "id": "simple-care",
+      "submission": true,
+      "style": "warm-paper",
+      "story": {
+        "throughline": "Know the last feed, log in one tap, and keep the history",
+        "sequence": ["problem", "mechanism", "proof"]
+      },
+      "frames": [
+        {
+          "filename": "01-when-she-last-ate.png",
+          "header": "Know when she last ate",
+          "story_role": "problem",
+          "story_focus": "when she last ate",
+          "device": "iphone",
+          "source": "capture/01_now.png",
+          "source_evidence": "capture/01_now.png",
+          "capture_flow": "now",
+          "evidence_status": "canonical",
+          "pitch": {
+            "benefit": "One glance answers the question you wake up with",
+            "problem": "At 3am, in the dark, with a baby in one arm, nobody wants to read a list",
+            "advantage": "The last feed, the side, and the last diaper are the first line on the screen",
+            "proof": "The Now card reads Fed 2h 13m ago, Left",
+            "header_problem": "not knowing when she last ate",
+            "header_advantage": "the answer on the first line",
+            "search_terms": [
+              "newborn tracker",
+              "breastfeeding tracker",
+              "baby log"
+            ]
+          },
+          "layout": {
+            "header_top": 112,
+            "header_size": 170,
+            "header_min_size": 140,
+            "header_max_lines": 2,
+            "header_margin": 42,
+            "header_bottom_padding": 28,
+            "phone_top": 500,
+            "bottom_margin": 24,
+            "phone_width": 1170
+          }
+        },
+        {
+          "filename": "02-one-tap.png",
+          "header": "Log a feed in one tap",
+          "story_role": "mechanism",
+          "story_focus": "in one tap",
+          "device": "iphone",
+          "source": "capture/02_log.png",
+          "source_evidence": "capture/02_log.png",
+          "capture_flow": "log",
+          "evidence_status": "canonical",
+          "pitch": {
+            "benefit": "Logging costs one tap, and taking it back costs one more",
+            "problem": "Trackers that ask for a sheet of details do not get used at four in the morning",
+            "advantage": "Four buttons that never move, a long press for the time, and undo in a toast",
+            "proof": "Tapping Feed, Left logs the feed and shows Undo",
+            "header_problem": "forms in the middle of the night",
+            "header_advantage": "one tap, and undo",
+            "search_terms": [
+              "diaper tracker",
+              "baby feeding tracker",
+              "simple baby tracker"
+            ]
+          },
+          "layout": {
+            "header_top": 112,
+            "header_size": 170,
+            "header_min_size": 140,
+            "header_max_lines": 2,
+            "header_margin": 42,
+            "header_bottom_padding": 28,
+            "phone_top": 500,
+            "bottom_margin": 24,
+            "phone_width": 1170
+          }
+        },
+        {
+          "filename": "03-history.png",
+          "header": "Keep every feed and diaper",
+          "story_role": "proof",
+          "story_focus": "every feed and diaper",
+          "device": "iphone",
+          "source": "capture/05_history.png",
+          "source_evidence": "capture/05_history.png",
+          "capture_flow": "history",
+          "evidence_status": "canonical",
+          "pitch": {
+            "benefit": "Yesterday is still there, with the day's totals on the header",
+            "problem": "Apps that lock old entries make you pay to read what you already wrote",
+            "advantage": "Full history is free, grouped by day, editable by tapping a row",
+            "proof": "History shows today at 3 wet, 3 dirty, 5 feeds and 3h 45m sleep",
+            "header_problem": "history behind a paywall",
+            "header_advantage": "every entry, kept",
+            "search_terms": ["baby log", "feeding tracker", "baby tracker"]
+          },
+          "layout": {
+            "header_top": 112,
+            "header_size": 170,
+            "header_min_size": 140,
+            "header_max_lines": 2,
+            "header_margin": 42,
+            "header_bottom_padding": 28,
+            "phone_top": 500,
+            "bottom_margin": 24,
+            "phone_width": 1170
+          }
+        },
+        {
+          "filename": "04-first-week-diapers.png",
+          "header": "Count diapers by day of life",
+          "story_role": "support",
+          "story_focus": "by day of life",
+          "device": "iphone",
+          "source": "capture/03_first_weeks.png",
+          "source_evidence": "capture/03_first_weeks.png",
+          "capture_flow": "first_weeks",
+          "evidence_status": "canonical",
+          "pitch": {
+            "benefit": "The paper sheet from the hospital, filled in by your taps",
+            "problem": "The discharge sheet asks for wet and dirty counts per day of life, and it lives on the fridge",
+            "advantage": "Each day sits next to the typical range for that day, with the call-your-pediatrician lines under the table",
+            "proof": "Day three shows 3 wet and 3 dirty beside a typical 3+ and 3+",
+            "header_problem": "a paper tally on the fridge",
+            "header_advantage": "the range for today, on screen",
+            "search_terms": [
+              "diaper tracker",
+              "newborn tracker",
+              "wet diaper count"
+            ]
+          },
+          "layout": {
+            "header_top": 112,
+            "header_size": 170,
+            "header_min_size": 140,
+            "header_max_lines": 2,
+            "header_margin": 42,
+            "header_bottom_padding": 28,
+            "phone_top": 500,
+            "bottom_margin": 24,
+            "phone_width": 1170
+          }
+        },
+        {
+          "filename": "05-pediatrician-page.png",
+          "header": "Hand over one clean page",
+          "story_role": "support",
+          "story_focus": "one clean page",
+          "device": "iphone",
+          "source": "capture/04_summary.png",
+          "source_evidence": "capture/04_summary.png",
+          "capture_flow": "summary",
+          "evidence_status": "canonical",
+          "pitch": {
+            "benefit": "Walk into the well visit with the answers already written down",
+            "problem": "Every visit opens with feeds, diapers, sleep and weight, and nobody remembers a week of them",
+            "advantage": "A free one-page preview, with PDF sharing available through Baby+",
+            "proof": "The summary page lists daily feeds, wet and dirty counts, sleep and weights",
+            "header_problem": "reciting the week from memory",
+            "header_advantage": "one page, already written",
+            "search_terms": ["baby log", "newborn tracker", "pediatrician"]
+          },
+          "layout": {
+            "header_top": 112,
+            "header_size": 170,
+            "header_min_size": 140,
+            "header_max_lines": 2,
+            "header_margin": 42,
+            "header_bottom_padding": 28,
+            "phone_top": 500,
+            "bottom_margin": 24,
+            "phone_width": 1170
+          }
+        },
+        {
+          "filename": "06-sleep.png",
+          "header": "Know how long she’s slept",
+          "story_role": "support",
+          "story_focus": "how long she’s slept",
+          "device": "iphone",
+          "source": "capture/06_sleep.png",
+          "source_evidence": "capture/06_sleep.png",
+          "capture_flow": "sleep",
+          "evidence_status": "canonical",
+          "pitch": {
+            "benefit": "See the running sleep timer at a glance",
+            "problem": "Remembering when a nap started adds another task",
+            "advantage": "One tap starts sleep and the same button ends it",
+            "proof": "The Wake control shows Asleep with the elapsed time",
+            "header_problem": "forgetting when sleep began",
+            "header_advantage": "the running timer beside Wake",
+            "search_terms": ["baby sleep tracker", "newborn tracker"]
+          },
+          "layout": {
+            "header_top": 112,
+            "header_size": 170,
+            "header_min_size": 140,
+            "header_max_lines": 2,
+            "header_margin": 42,
+            "header_bottom_padding": 28,
+            "phone_top": 500,
+            "bottom_margin": 24,
+            "phone_width": 1170
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// Opened from the undo toast after a dirty diaper, and from a quiet row on
-/// Now. Never from the four buttons, which do not move.
+/// An optional tool in More. It never interrupts logging.
 struct StainHelperView: View {
     @Environment(\.dismiss) private var dismiss
 
