@@ -13,6 +13,7 @@ struct SettingsView: View {
     @State private var name = ""
     @State private var hasBirthDate = false
     @State private var birthDate = Date.now
+    @State private var showSaveError = false
 
     var body: some View {
         Form {
@@ -40,6 +41,11 @@ struct SettingsView: View {
             if let child = events.child { SharingSheet(child: child) }
         }
         .sheet(isPresented: $showStainHelper) { StainHelperView() }
+        .alert("Couldn't save changes", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Your baby's details were not changed. Please try again.")
+        }
         .onAppear { loadChild() }
         .onChange(of: events.child?.objectID) { _, _ in loadChild() }
         .onChange(of: name) { _, _ in saveChild() }
@@ -70,7 +76,9 @@ struct SettingsView: View {
     private func saveChild() {
         guard let child = events.child else { return }
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        events.update(child: child, name: trimmed.isEmpty ? nil : trimmed, birthDate: hasBirthDate ? birthDate : nil)
+        if !events.update(child: child, name: trimmed.isEmpty ? nil : trimmed, birthDate: hasBirthDate ? birthDate : nil) {
+            showSaveError = true
+        }
     }
 
     private var babySection: some View {
@@ -131,26 +139,37 @@ struct SettingsView: View {
             showPaywall = true
             return
         }
-        events.createChild(name: nil, birthDate: Date.now)
+        guard events.createChild(name: nil, birthDate: nil) else {
+            showSaveError = true
+            return
+        }
         name = ""
-        hasBirthDate = true
+        hasBirthDate = false
         birthDate = .now
     }
 
     private var sharingSection: some View {
         Section {
-            if let share = sharing.share {
+            if sharing.share != nil {
                 let names = sharing.participantNames
                 LabeledContent("Shared with", value: names.isEmpty ? "Invite pending" : names.joined(separator: ", "))
-                Button(sharing.isOwner ? "Manage sharing" : "Leave") { showSharing = true }
-                let _ = share
+                Button {
+                    showSharing = true
+                } label: {
+                    Label(sharing.isOwner ? "Manage sharing" : "Leave shared log", systemImage: sharing.isOwner ? "person.2.fill" : "rectangle.portrait.and.arrow.right")
+                }
             } else {
-                Button("Share with your partner") { showSharing = true }
+                Button {
+                    showSharing = true
+                } label: {
+                    Label("Share with your partner", systemImage: "person.badge.plus")
+                }
+                .accessibilityIdentifier("settings.partner.share")
             }
         } header: {
             Text("Partner")
         } footer: {
-            Text("Sharing goes through iCloud, from your Apple ID to theirs. Both of you log to the same list. There are no accounts and nothing is stored on our servers.")
+            Text("One log for both parents, shared privately through iCloud. Review access and sync details before inviting.")
         }
     }
 

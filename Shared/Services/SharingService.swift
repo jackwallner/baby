@@ -47,11 +47,11 @@ final class SharingService: ObservableObject {
     func shareForPresentation(child: Child) async throws -> CKShare {
         // The active baby may have changed since the last async refresh.
         // Never reuse a cached invitation belonging to a different baby.
+        await waitForFirstExport(of: child)
         if let existing = try persistence.container.fetchShares(matching: [child.objectID])[child.objectID] {
             share = existing
             return existing
         }
-        await waitForFirstExport(of: child)
         let (_, newShare, _) = try await persistence.container.share([child], to: nil)
         newShare[CKShare.SystemFieldKey.title] = "\(child.displayName)'s log" as CKRecordValue
         share = newShare

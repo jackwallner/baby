@@ -3,6 +3,10 @@ import CoreData
 import Foundation
 import WidgetKit
 
+private struct IntentSaveError: LocalizedError {
+    var errorDescription: String? { "I couldn't save that change. Please try again." }
+}
+
 /// One-tap logging from the home screen, the lock screen, Siri, Shortcuts and
 /// the Action button. Runs in whichever process hosts the widget, writes
 /// straight into the shared store, and lets the app export it later.
@@ -42,13 +46,17 @@ struct LogEventIntent: AppIntent {
             default: summary.suggestedSide
             }
             persistence.insert(kind: .feed, at: now, side: side, ended: now, for: child, in: context)
-            persistence.save(context)
+            guard persistence.save(context) else {
+                return .result(dialog: "I couldn't save that feed. Please try again.")
+            }
             WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: "Logged a feed, \(side.label.lowercased()).")
         case .wet, .dirty:
             let kind: EventKind = what == .wet ? .wet : .dirty
             persistence.insert(kind: kind, at: now, side: nil, ended: nil, for: child, in: context)
-            persistence.save(context)
+            guard persistence.save(context) else {
+                return .result(dialog: "I couldn't save that diaper. Please try again.")
+            }
             WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: "Logged a \(kind.label.lowercased()) diaper.")
         case .sleep:
@@ -56,12 +64,16 @@ struct LogEventIntent: AppIntent {
             if let running {
                 running.endedAt = now
                 running.updatedAt = now
-                persistence.save(context)
+                guard persistence.save(context) else {
+                    return .result(dialog: "I couldn't save that wake. Please try again.")
+                }
                 WidgetCenter.shared.reloadAllTimelines()
                 return .result(dialog: "Sleep ended.")
             }
             persistence.insert(kind: .sleep, at: now, side: nil, ended: nil, for: child, in: context)
-            persistence.save(context)
+            guard persistence.save(context) else {
+                return .result(dialog: "I couldn't save that sleep. Please try again.")
+            }
             WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: "Sleep started.")
         }
@@ -150,7 +162,7 @@ struct StopRunningIntent: LiveActivityIntent {
             event.endedAt = now
             event.updatedAt = now
         }
-        persistence.save(context)
+        guard persistence.save(context) else { throw IntentSaveError() }
         WidgetCenter.shared.reloadAllTimelines()
         return .result()
     }

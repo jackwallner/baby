@@ -8,25 +8,39 @@ struct NowView: View {
     @EnvironmentObject private var events: EventStore
     @State private var editor: EditorRequest?
     @State private var showSettings = false
+    @State private var showUndoError = false
     @State private var now = Date.now
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-                nowCard
-                VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-                    LogButtons { kind, side in editor = EditorRequest(kind: kind, side: side) }
-                    Text("Tap to log now. Hold to add details.")
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.ink2)
-                        .frame(maxWidth: .infinity)
+        GeometryReader { geometry in
+            ScrollView {
+                Group {
+                    if geometry.size.width >= AppTheme.wideLayout && !dynamicTypeSize.isAccessibilitySize {
+                        HStack(alignment: .top, spacing: AppTheme.looseSpacing) {
+                            VStack(spacing: AppTheme.looseSpacing) {
+                                NowStatusCard(now: now)
+                                TodayTotalsView()
+                            }
+                            LoggingControls(height: AppTheme.maxLogButtonHeight, editor: $editor)
+                        }
+                    } else {
+                        VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
+                            NowStatusCard(now: now)
+                            LoggingControls(height: min(AppTheme.maxLogButtonHeight, max(AppTheme.logButtonHeight, (geometry.size.height - AppTheme.homeSummaryAllowance) / 3)), editor: $editor)
+                            Spacer(minLength: 0)
+                            TodayTotalsView()
+                        }
+                        .frame(minHeight: max(0, geometry.size.height - AppTheme.looseSpacing * 2), alignment: .top)
+                    }
                 }
-                todayTotals
+                .frame(maxWidth: AppTheme.contentWidth)
+                .padding(.horizontal, AppTheme.margin)
+                .padding(.vertical, AppTheme.looseSpacing)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, AppTheme.margin)
-            .padding(.vertical, AppTheme.spacing)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .background(AppTheme.paper)
         .navigationTitle(title)
@@ -44,7 +58,7 @@ struct NowView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if let logged = events.lastLogged {
-                UndoToast(logged: logged, undo: { events.undoLast() })
+                UndoToast(logged: logged, undo: { showUndoError = !events.undoLast() })
                     .padding(.horizontal, AppTheme.margin)
                     .padding(.bottom, AppTheme.tightSpacing)
                     .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
@@ -56,6 +70,11 @@ struct NowView: View {
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack { SettingsView() }
+        }
+        .alert("Couldn't undo this entry", isPresented: $showUndoError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("The entry is unchanged. Please try again or edit it in History.")
         }
         .onReceive(clock) { date in
             if !Calendar.current.isDate(now, inSameDayAs: date) { events.reload() }
@@ -71,9 +90,33 @@ struct NowView: View {
         return child.displayName
     }
 
-    // MARK: - Cards
+}
 
-    private var nowCard: some View {
+private struct LoggingControls: View {
+    let height: CGFloat
+    @Binding var editor: EditorRequest?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+            LogButtons(minimumHeight: height) { kind, side in
+                editor = EditorRequest(kind: kind, side: side)
+            }
+            Text("Tap to log now. Hold to add details.")
+                .font(.caption)
+                .foregroundStyle(AppTheme.ink2)
+                .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+private struct NowStatusCard: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @EnvironmentObject private var events: EventStore
+    @State private var showSaveError = false
+    let now: Date
+
+    var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             (dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
@@ -90,7 +133,7 @@ struct NowView: View {
             }
             VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
                 Text(feedTime)
-                    .font(.system(.largeTitle, design: .rounded, weight: .semibold))
+                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
                     .foregroundStyle(AppTheme.ink)
                     .monospacedDigit()
                     .contentTransition(reduceMotion ? .identity : .numericText())
@@ -103,7 +146,7 @@ struct NowView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(events.summary.feedLine(now: now))
             if events.summary.isFeeding {
-                Button("Finish feed") { events.stopRunning(.feed) }
+                Button("Finish feed") { showSaveError = !events.stopRunning(.feed) }
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(AppTheme.accent)
                     .frame(minHeight: 44)
@@ -124,6 +167,11 @@ struct NowView: View {
         .card()
         .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.summary)
         .accessibilityIdentifier("nowCard")
+        .alert("Couldn't finish this feed", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("The timer is still running. Please try again.")
+        }
     }
 
     private var feedTime: String {
@@ -141,8 +189,13 @@ struct NowView: View {
         let label = side.map { $0 == .bottle ? "Bottle" : "\($0.label) breast" }
         return [label, Format.time(date)].compactMap { $0 }.joined(separator: " · ")
     }
+}
 
-    private var todayTotals: some View {
+private struct TodayTotalsView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @EnvironmentObject private var events: EventStore
+
+    var body: some View {
         VStack(spacing: AppTheme.hairSpacing) {
             SectionLabel(text: "Today")
             Text(events.summary.todayLine)

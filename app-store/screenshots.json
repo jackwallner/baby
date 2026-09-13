@@ -30,7 +30,7 @@
         "source": "capture/05_history.png"
       },
       {
-        "claim": "Day three shows 3 wet and 3 dirty beside a typical 3+ and 3+",
+        "claim": "Day three shows the logged diaper counts beside the labeled breastfeeding reference of 3+ wet and 2+ dirty",
         "source": "capture/03_first_weeks.png"
       },
       {
@@ -269,8 +269,8 @@
           "pitch": {
             "benefit": "The paper sheet from the hospital, filled in by your taps",
             "problem": "The discharge sheet asks for wet and dirty counts per day of life, and it lives on the fridge",
-            "advantage": "Each day sits next to the typical range for that day, with the call-your-pediatrician lines under the table",
-            "proof": "Day three shows 3 wet and 3 dirty beside a typical 3+ and 3+",
+            "advantage": "Daily logged counts sit beside a clearly scoped breastfeeding reference, with source links and reasons to call a pediatrician",
+            "proof": "Day three shows the logged diaper counts beside the labeled breastfeeding reference of 3+ wet and 2+ dirty",
             "header_problem": "a paper tally on the fridge",
             "header_advantage": "the range for today, on screen",
             "search_terms": [

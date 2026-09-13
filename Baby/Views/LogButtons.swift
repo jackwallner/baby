@@ -7,19 +7,29 @@ struct LogButtons: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
+    @State private var showSaveError = false
     @ScaledMetric(relativeTo: .title3) private var buttonHeight = AppTheme.logButtonHeight
+    var minimumHeight: CGFloat = AppTheme.logButtonHeight
     let onEdit: (EventKind, FeedSide?) -> Void
 
     var body: some View {
         VStack(spacing: AppTheme.spacing) {
             feedRow
-            HStack(spacing: AppTheme.spacing) {
-                kindButton(.wet, label: "Wet") { events.log(.wet) }
-                kindButton(.dirty, label: "Dirty") { events.log(.dirty) }
+            (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: AppTheme.spacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
+                kindButton(.wet, label: "Wet") { events.log(.wet) != nil }
+                kindButton(.dirty, label: "Dirty") { events.log(.dirty) != nil }
             }
             kindButton(.sleep, label: events.runningSleep == nil ? "Sleep" : "Wake", symbol: events.runningSleep == nil ? "moon.fill" : "sun.max.fill") {
-                events.toggleSleep()
+                if events.runningSleep != nil {
+                    return events.stopRunning(.sleep)
+                }
+                return events.startTimed(.sleep) != nil
             }
+        }
+        .alert("Couldn't save this entry", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Nothing was logged. Please try again.")
         }
     }
 
@@ -29,10 +39,10 @@ struct LogButtons: View {
         (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 0)) : AnyLayout(HStackLayout(spacing: 0))) {
             ForEach(Array(FeedSide.allCases.enumerated()), id: \.element) { index, side in
                 Button {
-                    Haptics.logged()
-                    events.log(.feed, side: side)
+                    reportSave(events.log(.feed, side: side) != nil)
                 } label: {
                     VStack(spacing: AppTheme.hairSpacing) {
+                        CareGraphic(kind: .feed, side: side)
                         Text(side.label)
                             .font(.title3.weight(.semibold))
                         Text("Feed")
@@ -40,7 +50,8 @@ struct LogButtons: View {
                             .foregroundStyle(AppTheme.ink2)
                     }
                     .frame(maxWidth: .infinity)
-                    .frame(minHeight: buttonHeight)
+                    .padding(.vertical, AppTheme.tightSpacing)
+                    .frame(minHeight: max(buttonHeight, minimumHeight))
                     .contentShape(Rectangle())
                 }
                 .foregroundStyle(AppTheme.ink)
@@ -65,17 +76,31 @@ struct LogButtons: View {
             }
         }
         .background(AppTheme.fill(for: .feed), in: AppTheme.buttonShape)
+        .graphicBorder()
     }
 
-    private func kindButton(_ kind: EventKind, label: String, symbol: String? = nil, action: @escaping () -> Void) -> some View {
-        Button {
+    private func reportSave(_ saved: Bool) {
+        if saved {
             Haptics.logged()
-            action()
+        } else {
+            showSaveError = true
+        }
+    }
+
+    private func kindButton(_ kind: EventKind, label: String, symbol: String? = nil, action: @escaping () -> Bool) -> some View {
+        Button {
+            reportSave(action())
         } label: {
             HStack(spacing: AppTheme.tightSpacing) {
-                Image(systemName: symbol ?? kind.symbolName)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(AppTheme.color(for: kind))
+                if kind == .sleep, events.runningSleep != nil {
+                    Image(systemName: "sun.max.fill")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(AppTheme.sleep)
+                        .frame(width: AppTheme.graphicSize, height: AppTheme.graphicSize)
+                        .accessibilityHidden(true)
+                } else {
+                    CareGraphic(kind: kind)
+                }
                 VStack(spacing: AppTheme.hairSpacing) {
                     Text(label)
                         .font(.title3.weight(.semibold))
@@ -91,8 +116,10 @@ struct LogButtons: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(minHeight: buttonHeight)
+            .padding(.vertical, AppTheme.tightSpacing)
+            .frame(minHeight: max(buttonHeight, minimumHeight))
             .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
+            .graphicBorder()
             .contentShape(AppTheme.buttonShape)
         }
         .pressableCard()

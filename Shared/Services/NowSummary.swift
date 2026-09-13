@@ -5,6 +5,9 @@ import Foundation
 /// phone can push it to the Watch as-is.
 struct NowSummary: Codable, Equatable, Sendable {
     var childName: String = "Baby"
+    /// Identifies the profile this summary belongs to. Optional for summaries
+    /// written by older builds, and for the empty state before setup.
+    var childID: UUID?
     var dayOfLife: Int?
     var lastFeedAt: Date?
     var lastFeedSide: FeedSide?
@@ -17,8 +20,13 @@ struct NowSummary: Codable, Equatable, Sendable {
     var todayWet: Int = 0
     var todayDirty: Int = 0
     var generatedAt: Date = .now
+    /// Recent event IDs already represented by this summary. Optional keeps
+    /// cached summaries from older builds decodable and gives Watch replay a
+    /// real acknowledgement watermark instead of guessing from `generatedAt`.
+    var knownEventIDs: [UUID]?
 
     static let empty = NowSummary()
+    static let knownEventLimit = 256
 
     /// The side to offer next, for a one-tap feed with no side chosen.
     var suggestedSide: FeedSide { lastFeedSide?.next ?? .left }
@@ -65,8 +73,10 @@ struct NowSummary: Codable, Equatable, Sendable {
         summary.generatedAt = now
         guard let child else { return summary }
         summary.childName = child.displayName
+        summary.childID = child.id
         summary.dayOfLife = child.dayOfLife(on: now, calendar: calendar)
         let sorted = events.sorted { $0.start > $1.start }
+        summary.knownEventIDs = Array(sorted.prefix(Self.knownEventLimit).reversed().compactMap(\.id))
         for event in sorted {
             switch event.eventKind {
             case .feed:
@@ -123,14 +133,23 @@ struct NowSummary: Codable, Equatable, Sendable {
 extension NowSummary {
     /// A wrist tap replayed onto a summary, so the Watch shows the tap before
     /// the phone confirms it. Pure, and shared with the tests.
-    func applying(_ payload: WatchLogPayload, calendar: Calendar = .current) -> NowSummary {
-        var s = self
-        let sameDay = calendar.isDate(payload.at, inSameDayAs: s.generatedAt)
+    func applying(
+        _ payload: WatchLogPayload,
+        calendar: Calendar = .current,
+        now: Date = .now
+    ) -> NowSummary {
+        var s = resetTodayIfNeeded(calendar: calendar, now: now)
+        guard payload.childID == nil || payload.childID == s.childID else { return s }
+        // `generatedAt` is a sync timestamp, not a calendar-day watermark.
+        // An overnight offline tap must be compared with the current day.
+        let sameDay = calendar.isDate(payload.at, inSameDayAs: now)
+        if s.knownEventIDs?.contains(payload.id) == true { return s }
         switch payload.action {
         case .log:
             switch payload.kind {
             case .feed:
-                if s.lastFeedAt == nil || payload.at >= (s.lastFeedAt ?? .distantPast) {
+                let mostRecentFeedAt = max(s.lastFeedAt ?? .distantPast, s.runningFeedStart ?? .distantPast)
+                if payload.at >= mostRecentFeedAt {
                     s.lastFeedAt = payload.at
                     s.lastFeedSide = payload.side
                 }
@@ -147,12 +166,48 @@ extension NowSummary {
                 break
             }
         case .startSleep:
-            s.runningSleepStart = payload.at
+            if s.runningSleepStart == nil || payload.at >= (s.runningSleepStart ?? .distantPast) {
+                s.runningSleepStart = payload.at
+            }
         case .stopSleep:
-            s.runningSleepStart = nil
+            if s.runningSleepStart == nil || payload.at >= (s.runningSleepStart ?? .distantPast) {
+                s.runningSleepStart = nil
+            }
         }
-        s.generatedAt = max(s.generatedAt, payload.at)
+        var ids = s.knownEventIDs ?? []
+        ids.removeAll { $0 == payload.id }
+        ids.append(payload.id)
+        if ids.count > Self.knownEventLimit {
+            ids.removeFirst(ids.count - Self.knownEventLimit)
+        }
+        s.knownEventIDs = ids
+        s.generatedAt = now
         return s
+    }
+
+    /// Reapplies only Watch actions that are not already represented by the
+    /// phone summary. The summary generation time cannot acknowledge an event
+    /// because a summary may be generated after an offline tap but before that
+    /// tap reaches the phone.
+    func applyingPending(
+        _ pending: [WatchLogPayload],
+        calendar: Calendar = .current,
+        now: Date = .now
+    ) -> NowSummary {
+        pending.reduce(resetTodayIfNeeded(calendar: calendar, now: now)) { summary, payload in
+            guard payload.childID == nil || payload.childID == summary.childID else { return summary }
+            return summary.applying(payload, calendar: calendar, now: now)
+        }
+    }
+
+    private func resetTodayIfNeeded(calendar: Calendar, now: Date) -> NowSummary {
+        guard !calendar.isDate(generatedAt, inSameDayAs: now) else { return self }
+        var summary = self
+        summary.todayFeeds = 0
+        summary.todayWet = 0
+        summary.todayDirty = 0
+        summary.generatedAt = now
+        return summary
     }
 }
 

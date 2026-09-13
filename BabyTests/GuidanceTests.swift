@@ -19,20 +19,22 @@ final class GuidanceTests: XCTestCase {
         }
         XCTAssertEqual(Guidance.range(forDayOfLife: 6).wetMin, 6)
         XCTAssertEqual(Guidance.range(forDayOfLife: 40).wetMin, 6)
-        XCTAssertEqual(Guidance.range(forDayOfLife: 3).dirtyMin, 3)
-        XCTAssertEqual(Guidance.range(forDayOfLife: 12).dirtyMin, 3)
+        XCTAssertEqual(Guidance.range(forDayOfLife: 2).dirtyMin, 1)
+        XCTAssertEqual(Guidance.range(forDayOfLife: 3).dirtyMin, 2)
+        XCTAssertEqual(Guidance.range(forDayOfLife: 12).dirtyMin, 2)
         XCTAssertEqual(Guidance.range(forDayOfLife: 0).day, 1)
     }
 
-    func testComparisonOnlySpeaksAboutCompleteDaysAndNeverDiagnoses() {
-        XCTAssertNil(Guidance.comparison(wet: 0, dirty: 0, day: 3, dayComplete: false))
-        XCTAssertNil(Guidance.comparison(wet: 3, dirty: 3, day: 3, dayComplete: true))
-        let line = Guidance.comparison(wet: 1, dirty: 3, day: 3, dayComplete: true)!
-        XCTAssertTrue(line.contains("typical wet range"))
-        XCTAssertTrue(line.contains("pediatrician"))
-        for banned in ["normal", "abnormal", "dehydrat", "healthy", "diagnos"] {
-            XCTAssertFalse(line.lowercased().contains(banned), "comparison must not read as a verdict: \(banned)")
-        }
+    func testReferenceIdentifiesItsScopeAndFeverAdviceHasAgeAndMethod() {
+        XCTAssertTrue(Guidance.referenceScope.contains("breastfeeding"))
+        XCTAssertTrue(Guidance.referenceScope.contains("Formula or mixed"))
+        XCTAssertTrue(Guidance.referenceScope.contains("only what you log"))
+        XCTAssertEqual(Guidance.diaperSource.host, "www.swlondon-healthiertogether.nhs.uk")
+        let fever = Guidance.callIf.first { $0.contains("100.4") }
+        XCTAssertNotNil(fever)
+        XCTAssertTrue(fever?.contains("3 months or younger") == true)
+        XCTAssertTrue(fever?.contains("rectal") == true)
+        XCTAssertTrue(fever?.contains("immediate") == true)
     }
 
     func testClaimLanguageStaysOutOfEveryGuidanceString() {

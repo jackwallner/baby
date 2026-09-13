@@ -22,6 +22,13 @@ struct FirstWeeksView: View {
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
                     .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+                    Link("NHS breastfeeding reference", destination: Guidance.diaperSource)
+                    Link("AAP feeding guidance", destination: Guidance.feedingSource)
+                    Link("AAP fever guidance", destination: Guidance.feverSource)
+                }
+                .font(.footnote.weight(.semibold))
+                .tint(AppTheme.accent)
             }
             .padding(.horizontal, AppTheme.margin)
             .padding(.vertical, AppTheme.spacing)
@@ -33,7 +40,7 @@ struct FirstWeeksView: View {
     }
 
     private var intro: some View {
-        Text("Wet and dirty diapers per day, next to the typical range for that day of life. The same sheet the hospital sends home, filled in by your taps.")
+        Text(Guidance.referenceScope)
             .font(.subheadline)
             .foregroundStyle(AppTheme.ink2)
             .fixedSize(horizontal: false, vertical: true)
@@ -41,23 +48,23 @@ struct FirstWeeksView: View {
 
     private var noBirthDate: some View {
         VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            Text("Typical ranges by day of life")
+            Text("Breastfeeding reference by day")
                 .font(.headline)
                 .foregroundStyle(AppTheme.ink)
             ForEach(1...6, id: \.self) { day in
                 let range = Guidance.range(forDayOfLife: day)
-                HStack {
+                (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.hairSpacing)) : AnyLayout(HStackLayout())) {
                     Text(day == 6 ? "Day 6 on" : "Day \(day)")
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(AppTheme.ink)
-                        .frame(width: 80, alignment: .leading)
+                        .frame(minWidth: 80, alignment: .leading)
                     Text(range.summary)
                         .font(.subheadline)
                         .foregroundStyle(AppTheme.ink2)
                         .monospacedDigit()
                 }
             }
-            Text("Add your baby's birth date in Settings and this fills in day by day.")
+            Text("Add your baby's birth date in More and this fills in day by day.")
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .padding(.top, AppTheme.hairSpacing)
@@ -82,6 +89,7 @@ struct FirstWeeksView: View {
         }
         .padding(.vertical, AppTheme.tightSpacing)
         .background(AppTheme.card, in: AppTheme.cardShape)
+        .graphicBorder()
         .accessibilityIdentifier("tallyTable")
     }
 
@@ -93,7 +101,7 @@ struct FirstWeeksView: View {
             Text("WET").frame(maxWidth: .infinity)
             Text("DIRTY").frame(maxWidth: .infinity)
             Text("FEEDS").frame(maxWidth: .infinity)
-            Text("TYPICAL").frame(width: 92, alignment: .trailing)
+            Text("GUIDE").frame(width: 92, alignment: .trailing)
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(AppTheme.ink3)
@@ -110,7 +118,7 @@ struct FirstWeeksView: View {
                         .font(.headline)
                     Text(dim ? "Not yet logged" : "\(tally.wet) wet · \(tally.dirty) dirty · \(tally.feeds) feeds")
                         .font(.body)
-                    Text("Typical: \(range.summary)")
+                    Text("Breastfeeding reference: \(range.summary)")
                         .font(.subheadline)
                         .foregroundStyle(AppTheme.ink2)
                 }
@@ -138,12 +146,6 @@ struct FirstWeeksView: View {
                     .frame(width: 92, alignment: .trailing)
                 }
             }
-            if state == .past, let line = Guidance.comparison(wet: tally.wet, dirty: tally.dirty, day: day, dayComplete: true) {
-                Text(line)
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.notice)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
         }
         .foregroundStyle(dim ? AppTheme.ink3 : AppTheme.ink)
         .padding(.horizontal, AppTheme.looseSpacing)
@@ -151,8 +153,8 @@ struct FirstWeeksView: View {
         .background(state == .today ? AppTheme.cardElevated : Color.clear)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(dim
-            ? "Day \(day), upcoming. Typical \(range.summary)."
-            : "Day \(day): \(tally.wet) wet, \(tally.dirty) dirty, \(tally.feeds) feeds. Typical \(range.summary).")
+            ? "Day \(day), upcoming. Breastfeeding reference: \(range.summary)."
+            : "Day \(day): \(tally.wet) wet, \(tally.dirty) dirty, \(tally.feeds) feeds logged. Breastfeeding reference: \(range.summary).")
     }
 
     private func count(_ value: Int?, kind: EventKind, min: Int, complete: Bool) -> some View {

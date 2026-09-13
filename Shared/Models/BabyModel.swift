@@ -281,6 +281,9 @@ struct WatchLogPayload: Codable, Equatable, Sendable {
     var kind: EventKind
     var side: FeedSide?
     var at: Date
+    /// The baby selected on the Watch when this action was created. Optional
+    /// keeps transfers queued by older builds compatible.
+    var childID: UUID?
 
     static let key = "watchLog"
 
@@ -289,17 +292,40 @@ struct WatchLogPayload: Codable, Equatable, Sendable {
         return [Self.key: data]
     }
 
-    init(id: UUID = UUID(), action: Action, kind: EventKind, side: FeedSide? = nil, at: Date = .now) {
+    init(
+        id: UUID = UUID(),
+        action: Action,
+        kind: EventKind,
+        side: FeedSide? = nil,
+        at: Date = .now,
+        childID: UUID? = nil
+    ) {
         self.id = id
         self.action = action
         self.kind = kind
         self.side = side
         self.at = at
+        self.childID = childID
     }
 
     init?(userInfo: [String: Any]) {
         guard let data = userInfo[Self.key] as? Data,
               let payload = try? JSONDecoder().decode(WatchLogPayload.self, from: data) else { return nil }
         self = payload
+    }
+
+    var isSleepToggle: Bool { action == .startSleep || action == .stopSleep }
+
+    /// The queued actions that may go to the phone now. A sleep start or stop
+    /// waits until every earlier toggle is confirmed saved: if a start failed
+    /// and its stop arrived first, the retried start would reopen a sleep the
+    /// wrist already ended.
+    static func sendable(from pending: [WatchLogPayload]) -> [WatchLogPayload] {
+        var blocked = false
+        return pending.filter { payload in
+            guard payload.isSleepToggle else { return true }
+            defer { blocked = true }
+            return !blocked
+        }
     }
 }

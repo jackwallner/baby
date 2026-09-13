@@ -3,6 +3,7 @@ import SwiftUI
 /// Every entry, newest first, grouped by day with the day's totals in the
 /// header. Tap a row to edit it, swipe to delete. Never locked.
 struct HistoryView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
     @State private var editor: EditorRequest?
 
@@ -95,7 +96,7 @@ struct HistoryView: View {
     }
 
     private func row(_ event: LogEvent) -> some View {
-        HStack(spacing: AppTheme.spacing) {
+        (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
             KindIcon(kind: event.eventKind)
             VStack(alignment: .leading, spacing: 0) {
                 Text(event.eventKind.label)
@@ -112,7 +113,7 @@ struct HistoryView: View {
                         .lineLimit(1)
                 }
             }
-            Spacer(minLength: AppTheme.tightSpacing)
+            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: AppTheme.tightSpacing) }
             Text(Format.time(event.start))
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.ink2)

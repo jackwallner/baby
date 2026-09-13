@@ -33,11 +33,7 @@ final class WatchStore: ObservableObject {
     /// The phone's summary wins, then the taps it has not seen yet are
     /// replayed on top, so the wrist never shows an older state than its own.
     func receive(_ phoneSummary: NowSummary) {
-        var merged = phoneSummary
-        for payload in pending where payload.at > phoneSummary.generatedAt {
-            merged = merged.applying(payload)
-        }
-        summary = merged
+        summary = phoneSummary.applyingPending(pending)
         summary.store()
         WidgetCenter.shared.reloadAllTimelines()
     }
@@ -61,15 +57,25 @@ final class WatchStore: ObservableObject {
     func markDelivered(_ id: UUID) {
         pending.removeAll { $0.id == id }
         persistPending()
+        // A confirmed sleep toggle releases the one queued behind it.
+        retryPending()
+    }
+
+    /// Retries unacknowledged actions when the Watch is active again. The
+    /// sender deduplicates transfers already queued by WatchConnectivity.
+    func retryPending() {
+        for payload in WatchLogPayload.sendable(from: pending) { sender?(payload) }
     }
 
     private func send(_ payload: WatchLogPayload) {
+        var payload = payload
+        payload.childID = summary.childID
         pending.append(payload)
         persistPending()
         summary = summary.applying(payload)
         summary.store()
         WidgetCenter.shared.reloadAllTimelines()
-        sender?(payload)
+        if WatchLogPayload.sendable(from: pending).contains(payload) { sender?(payload) }
         toastTask?.cancel()
         toastTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(4))

@@ -12,6 +12,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     static let shared = WatchSyncService()
 
     private static let summaryKey = "summary"
+    private static let savedActionKey = "savedWatchAction"
 
     private override init() {
         super.init()
@@ -40,7 +41,12 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     #if os(watchOS)
     func send(_ payload: WatchLogPayload) {
         guard WCSession.isSupported() else { return }
-        WCSession.default.transferUserInfo(payload.dictionary)
+        let session = WCSession.default
+        guard session.activationState == .activated else { return }
+        guard !session.outstandingUserInfoTransfers.contains(where: {
+            WatchLogPayload(userInfo: $0.userInfo)?.id == payload.id
+        }) else { return }
+        session.transferUserInfo(payload.dictionary)
     }
     #endif
 
@@ -63,6 +69,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         }
         #if os(watchOS)
         applyContext(session.receivedApplicationContext)
+        Task { @MainActor in WatchStore.shared.retryPending() }
         #else
         Task { @MainActor in self.push(summary: EventStore.shared.summary) }
         #endif
@@ -74,17 +81,23 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
 
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
         #if os(iOS)
-        guard let payload = WatchLogPayload(userInfo: userInfo) else { return }
-        Task { @MainActor in EventStore.shared.apply(payload) }
+        guard var payload = WatchLogPayload(userInfo: userInfo) else { return }
+        // Accept the temporary top-level envelope used by pre-release builds,
+        // while new transfers carry the profile ID in the Codable payload.
+        if payload.childID == nil,
+           let childID = (userInfo["childID"] as? String).flatMap(UUID.init) {
+            payload.childID = childID
+        }
+        Task { @MainActor in
+            guard EventStore.shared.apply(payload, forChildID: payload.childID) else { return }
+            WCSession.default.transferUserInfo([Self.savedActionKey: payload.id.uuidString])
+        }
+        #else
+        guard let rawID = userInfo[Self.savedActionKey] as? String,
+              let id = UUID(uuidString: rawID) else { return }
+        Task { @MainActor in WatchStore.shared.markDelivered(id) }
         #endif
     }
-
-    #if os(watchOS)
-    func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
-        guard error == nil, let payload = WatchLogPayload(userInfo: userInfoTransfer.userInfo) else { return }
-        Task { @MainActor in WatchStore.shared.markDelivered(payload.id) }
-    }
-    #endif
 
     #if os(iOS)
     func sessionDidBecomeInactive(_ session: WCSession) {}

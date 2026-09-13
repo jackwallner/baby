@@ -1,23 +1,24 @@
-# Baby Tracker (working name)
+# Baby Tracker
 
 An iPhone and Apple Watch baby tracker for the first months: one tap to log a
 feed, a wet or dirty diaper, or sleep, and one glance to answer "when did she
 last eat, and which side".
 
-Not built yet: there is no app code in this repository. It holds the release
-scripts, store and site setup, market research, and reference code from other
-fleet apps (`research/donor-code/`). Start with `CLAUDE.md`.
+Native SwiftUI apps for iPhone and Apple Watch, with widgets, Live Activities,
+and iCloud sharing. Start with `CLAUDE.md` for project conventions and
+`.claude/rules/release-verification.md` for verified release evidence.
 
 ## What makes it different
 
-- The first-week tally sheet from the hospital, as the home screen for weeks one
-  and two, with typical ranges and "call your pediatrician if" wording.
+- One stable home screen for the last feed, quick logging, and today's totals.
+- First Weeks in More, with a clearly scoped breastfeeding diaper reference,
+  source links, and guidance to contact a pediatrician when concerned.
 - Logging without opening the app: lock screen widget, Watch complication,
   Action Button, Live Activity.
-- Partner sync through iCloud sharing, no accounts.
+- Partner sync through iCloud sharing, without a separate Baby account.
 - No ads, no AI, and the four buttons never move.
 - Capture is free forever. An optional purchase sells reporting: the
-  pediatrician PDF, trends, export.
+  pediatrician PDF, trends, export, and additional baby profiles.
 
 ## Build
 

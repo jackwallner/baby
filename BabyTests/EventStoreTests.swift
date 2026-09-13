@@ -2,6 +2,21 @@ import CoreData
 import XCTest
 @testable import Baby
 
+private enum InjectedSaveError: Error {
+    case failure
+}
+
+private final class SaveController {
+    var callCount = 0
+    var failureOnCall: Int?
+
+    func save(_ context: NSManagedObjectContext) throws {
+        callCount += 1
+        if callCount == failureOnCall { throw InjectedSaveError.failure }
+        try context.save()
+    }
+}
+
 @MainActor
 final class EventStoreTests: XCTestCase {
     private var persistence: Persistence!
@@ -10,6 +25,7 @@ final class EventStoreTests: XCTestCase {
     override func setUp() async throws {
         persistence = Persistence(cloudKit: false, inMemory: true)
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.activeChildID)
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.appliedWatchActions)
         store = EventStore(persistence: persistence)
         store.createChild(name: "Nora", birthDate: Calendar.current.date(byAdding: .day, value: -2, to: .now))
     }
@@ -79,6 +95,175 @@ final class EventStoreTests: XCTestCase {
         XCTAssertEqual(store.events.filter { $0.eventKind == .sleep }.count, 1)
         store.apply(WatchLogPayload(action: .stopSleep, kind: .sleep))
         XCTAssertNil(store.runningSleep)
+    }
+
+    func testWatchPayloadStaysWithTheProfileItCameFrom() throws {
+        let first = try XCTUnwrap(store.child)
+        store.createChild(name: "Other baby", birthDate: nil)
+        let second = try XCTUnwrap(store.child)
+        store.setActive(second)
+
+        let payload = WatchLogPayload(action: .log, kind: .wet, at: .now, childID: first.id)
+        store.apply(payload)
+
+        XCTAssertEqual(store.child?.id, second.id)
+        XCTAssertTrue(store.events.isEmpty, "a queued tap for another profile must not appear in the active profile")
+        XCTAssertEqual(persistence.events(for: first, in: persistence.viewContext).count, 1)
+    }
+
+    func testFailedConfiguredLogRollsBackWithoutLeavingAnEvent() {
+        let controller = SaveController()
+        let persistence = Persistence(
+            cloudKit: false,
+            inMemory: true,
+            saveOperation: { try controller.save($0) }
+        )
+        let store = EventStore(persistence: persistence)
+        store.createChild(name: "Nora", birthDate: nil)
+        controller.failureOnCall = 2
+
+        let event = store.log(.dirty, at: .now) { $0.note = "should not persist" }
+
+        XCTAssertNil(event)
+        XCTAssertTrue(store.events.isEmpty, "a failed atomic log must not leave a blank or partial row")
+    }
+
+    func testWatchActionIsAcknowledgedOnlyAfterSuccessfulSave() {
+        let controller = SaveController()
+        let persistence = Persistence(cloudKit: false, inMemory: true, saveOperation: { try controller.save($0) })
+        let store = EventStore(persistence: persistence)
+        store.createChild(name: "Nora", birthDate: nil)
+        controller.failureOnCall = controller.callCount + 1
+        let payload = WatchLogPayload(action: .log, kind: .wet)
+
+        XCTAssertFalse(store.apply(payload))
+        XCTAssertTrue(store.events.isEmpty)
+        controller.failureOnCall = nil
+        XCTAssertTrue(store.apply(payload))
+        XCTAssertTrue(store.apply(payload))
+        XCTAssertEqual(store.events.count, 1)
+    }
+
+    func testRedeliveredWatchWakeDoesNotEndANewerSleep() throws {
+        let firstStart = Date.now.addingTimeInterval(-120)
+        store.startTimed(.sleep, at: firstStart)
+        let wake = WatchLogPayload(action: .stopSleep, kind: .sleep, at: firstStart.addingTimeInterval(30))
+        XCTAssertTrue(store.apply(wake))
+        let second = try XCTUnwrap(store.startTimed(.sleep, at: firstStart.addingTimeInterval(60)))
+        XCTAssertTrue(store.apply(wake))
+        XCTAssertTrue(second.isRunning)
+        // Even if the bounded receipt cache no longer contains the old stop,
+        // its timestamp must not close a more recent timer.
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.appliedWatchActions)
+        XCTAssertTrue(store.apply(wake))
+        XCTAssertTrue(second.isRunning)
+    }
+
+    func testFailedTimerReplacementRestoresTheExistingTimer() throws {
+        let controller = SaveController()
+        let persistence = Persistence(
+            cloudKit: false,
+            inMemory: true,
+            saveOperation: { try controller.save($0) }
+        )
+        let store = EventStore(persistence: persistence)
+        store.createChild(name: "Nora", birthDate: nil)
+        let oldStart = Date.now.addingTimeInterval(-600)
+        store.startTimed(.sleep, at: oldStart)
+        controller.failureOnCall = 3
+
+        let replacement = store.startTimed(.sleep, at: .now)
+
+        XCTAssertNil(replacement)
+        XCTAssertEqual(store.events.count, 1)
+        XCTAssertEqual(try XCTUnwrap(store.runningSleep?.startedAt), oldStart)
+    }
+
+    func testFailedEditSaveRestoresThePersistedEvent() throws {
+        let controller = SaveController()
+        let persistence = Persistence(
+            cloudKit: false,
+            inMemory: true,
+            saveOperation: { try controller.save($0) }
+        )
+        let store = EventStore(persistence: persistence)
+        store.createChild(name: "Nora", birthDate: nil)
+        let event = try XCTUnwrap(store.log(.wet))
+        event.note = "not saved"
+        controller.failureOnCall = 3
+
+        XCTAssertFalse(store.save())
+        XCTAssertNil(store.events.first?.note)
+    }
+
+    func testFailedDeleteKeepsTheEventForRetry() throws {
+        let controller = SaveController()
+        let persistence = Persistence(
+            cloudKit: false,
+            inMemory: true,
+            saveOperation: { try controller.save($0) }
+        )
+        let store = EventStore(persistence: persistence)
+        store.createChild(name: "Nora", birthDate: nil)
+        _ = store.log(.wet)
+        let event = try XCTUnwrap(store.events.first)
+        controller.failureOnCall = 3
+
+        XCTAssertFalse(store.delete(event))
+        XCTAssertEqual(store.events.count, 1, "a failed delete must leave the row available for retry")
+    }
+
+    func testFailedUndoKeepsUndoAvailableForRetry() throws {
+        let controller = SaveController()
+        let persistence = Persistence(
+            cloudKit: false,
+            inMemory: true,
+            saveOperation: { try controller.save($0) }
+        )
+        let store = EventStore(persistence: persistence)
+        XCTAssertTrue(store.createChild(name: "Nora", birthDate: nil))
+        _ = store.log(.wet)
+        controller.failureOnCall = 3
+
+        XCTAssertFalse(store.undoLast())
+        XCTAssertNotNil(store.lastLogged, "a failed undo must remain available for retry")
+        XCTAssertEqual(store.events.count, 1)
+
+        controller.failureOnCall = nil
+        XCTAssertTrue(store.undoLast())
+        XCTAssertNil(store.lastLogged)
+        XCTAssertTrue(store.events.isEmpty)
+    }
+
+    func testFailedChildCreationDoesNotSelectARolledBackProfile() {
+        let controller = SaveController()
+        controller.failureOnCall = 1
+        let persistence = Persistence(
+            cloudKit: false,
+            inMemory: true,
+            saveOperation: { try controller.save($0) }
+        )
+        let store = EventStore(persistence: persistence)
+
+        XCTAssertFalse(store.createChild(name: "Nora", birthDate: nil))
+        XCTAssertNil(store.child)
+        XCTAssertTrue(store.children.isEmpty)
+    }
+
+    func testFailedChildUpdateReportsFailureAndRestoresTheName() throws {
+        let controller = SaveController()
+        let persistence = Persistence(
+            cloudKit: false,
+            inMemory: true,
+            saveOperation: { try controller.save($0) }
+        )
+        let store = EventStore(persistence: persistence)
+        XCTAssertTrue(store.createChild(name: "Nora", birthDate: nil))
+        let child = try XCTUnwrap(store.child)
+        controller.failureOnCall = 2
+
+        XCTAssertFalse(store.update(child: child, name: "Changed", birthDate: nil))
+        XCTAssertEqual(store.child?.displayName, "Nora")
     }
 
     func testUndoOfBackdatedWakeReopensSleep() {

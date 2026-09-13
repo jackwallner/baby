@@ -99,11 +99,16 @@ final class EventStore: ObservableObject {
 
     // MARK: - Children
 
-    func createChild(name: String?, birthDate: Date?) {
+    @discardableResult
+    func createChild(name: String?, birthDate: Date?) -> Bool {
         let child = Child.make(in: context, name: name, birthDate: birthDate)
         context.assign(child, to: persistence.privateStore)
-        persistence.save(context)
+        guard persistence.save(context) else {
+            reload()
+            return false
+        }
         setActive(child)
+        return true
     }
 
     func setActive(_ child: Child) {
@@ -111,11 +116,16 @@ final class EventStore: ObservableObject {
         reload()
     }
 
-    func update(child: Child, name: String?, birthDate: Date?) {
+    @discardableResult
+    func update(child: Child, name: String?, birthDate: Date?) -> Bool {
         child.name = name
         child.birthDate = birthDate
-        persistence.save(context)
+        guard persistence.save(context) else {
+            reload()
+            return false
+        }
         reload()
+        return true
     }
 
     /// Acceptance can finish before CloudKit imports the baby. Persist the
@@ -141,11 +151,20 @@ final class EventStore: ObservableObject {
 
     /// One tap. Feeds get a side; a nil side takes the suggested one.
     @discardableResult
-    func log(_ kind: EventKind, side: FeedSide? = nil, at date: Date = .now) -> LogEvent? {
+    func log(
+        _ kind: EventKind,
+        side: FeedSide? = nil,
+        at date: Date = .now,
+        configure: ((LogEvent) -> Void)? = nil
+    ) -> LogEvent? {
         guard let child else { return nil }
         let resolvedSide = kind == .feed ? (side ?? summary.suggestedSide) : nil
         let event = persistence.insert(kind: kind, at: date, side: resolvedSide, ended: kind == .feed ? date : nil, for: child, in: context)
-        persistence.save(context)
+        configure?(event)
+        guard persistence.save(context) else {
+            reload()
+            return nil
+        }
         rememberForUndo(event)
         reload()
         return event
@@ -154,11 +173,23 @@ final class EventStore: ObservableObject {
     /// Starts a timed feed or sleep. A running one of the same kind ends first,
     /// so two taps never leave two open rows.
     @discardableResult
-    func startTimed(_ kind: EventKind, side: FeedSide? = nil, at date: Date = .now) -> LogEvent? {
+    func startTimed(
+        _ kind: EventKind,
+        side: FeedSide? = nil,
+        at date: Date = .now,
+        configure: ((LogEvent) -> Void)? = nil
+    ) -> LogEvent? {
         guard kind.canRun, let child else { return nil }
-        stopRunning(kind, at: date, remember: false)
+        if let running = events.first(where: { $0.eventKind == kind && $0.isRunning }) {
+            running.endedAt = max(date, running.start)
+            running.updatedAt = .now
+        }
         let event = persistence.insert(kind: kind, at: date, side: kind == .feed ? (side ?? summary.suggestedSide) : nil, ended: nil, for: child, in: context)
-        persistence.save(context)
+        configure?(event)
+        guard persistence.save(context) else {
+            reload()
+            return nil
+        }
         rememberForUndo(event)
         reload()
         return event
@@ -170,7 +201,10 @@ final class EventStore: ObservableObject {
         guard let running = events.first(where: { $0.eventKind == kind && $0.isRunning }) else { return false }
         running.endedAt = max(date, running.start)
         running.updatedAt = .now
-        persistence.save(context)
+        guard persistence.save(context) else {
+            reload()
+            return false
+        }
         if remember { rememberForUndo(running, reopensTimer: true) }
         reload()
         return true
@@ -185,19 +219,26 @@ final class EventStore: ObservableObject {
         }
     }
 
-    func delete(_ event: LogEvent) {
+    @discardableResult
+    func delete(_ event: LogEvent) -> Bool {
         context.delete(event)
-        persistence.save(context)
+        guard persistence.save(context) else {
+            reload()
+            return false
+        }
         if lastLogged?.objectID == event.objectID { lastLogged = nil }
         reload()
+        return true
     }
 
-    func save() {
+    @discardableResult
+    func save() -> Bool {
         for event in events where context.updatedObjects.contains(event) {
             event.updatedAt = .now
         }
-        persistence.save(context)
+        let saved = persistence.save(context)
         reload()
+        return saved
     }
 
     // MARK: - Undo
@@ -212,23 +253,27 @@ final class EventStore: ObservableObject {
         }
     }
 
-    func undoLast() {
+    @discardableResult
+    func undoLast() -> Bool {
         guard let lastLogged, let event = try? context.existingObject(with: lastLogged.objectID) as? LogEvent else {
             self.lastLogged = nil
-            return
+            return false
         }
         // Undoing a "stop" reopens the row; undoing a log removes it.
         if lastLogged.reopensTimer {
             event.endedAt = nil
             event.updatedAt = .now
-            persistence.save(context)
         } else {
             context.delete(event)
-            persistence.save(context)
+        }
+        guard persistence.save(context) else {
+            reload()
+            return false
         }
         self.lastLogged = nil
         undoTask?.cancel()
         reload()
+        return true
     }
 
     func dismissUndo() {
@@ -240,28 +285,60 @@ final class EventStore: ObservableObject {
 
     /// Applies a log made on the wrist. Idempotent on the event id so a
     /// redelivered transfer never doubles a diaper.
-    func apply(_ payload: WatchLogPayload) {
-        guard let child else { return }
-        if let existing = events.first(where: { $0.id == payload.id }) {
+    @discardableResult
+    func apply(_ payload: WatchLogPayload) -> Bool {
+        apply(payload, forChildID: nil)
+    }
+
+    /// Applies a Watch action to the profile that was active when it was
+    /// created. Older payloads have no profile ID and continue to use the
+    /// current profile. A payload that names a missing profile is dropped
+    /// rather than silently written to a different baby's log.
+    @discardableResult
+    func apply(_ payload: WatchLogPayload, forChildID childID: UUID?) -> Bool {
+        var applied = AppGroup.defaults.stringArray(forKey: AppGroup.Key.appliedWatchActions) ?? []
+        if applied.contains(payload.id.uuidString) { return true }
+        let targetID = childID ?? payload.childID
+        let target: Child?
+        if let targetID {
+            target = persistence.allChildren(in: context).first { $0.id == targetID }
+        } else {
+            target = child
+        }
+        guard let target else {
+            logger.error("Watch payload \(payload.id) ignored because its baby profile is unavailable")
+            return false
+        }
+        let targetEvents = persistence.events(for: target, in: context)
+        if let existing = targetEvents.first(where: { $0.id == payload.id }) {
             logger.info("Watch payload \(payload.id) already applied to \(existing.objectID)")
-            return
+            return true
         }
         switch payload.action {
         case .log:
-            let event = persistence.insert(kind: payload.kind, at: payload.at, side: payload.side, ended: payload.kind == .feed ? payload.at : nil, for: child, in: context)
+            let event = persistence.insert(kind: payload.kind, at: payload.at, side: payload.side, ended: payload.kind == .feed ? payload.at : nil, for: target, in: context)
             event.id = payload.id
         case .startSleep:
-            if runningSleep == nil {
-                let event = persistence.insert(kind: .sleep, at: payload.at, side: nil, ended: nil, for: child, in: context)
+            if targetEvents.first(where: { $0.eventKind == .sleep && $0.isRunning }) == nil {
+                let event = persistence.insert(kind: .sleep, at: payload.at, side: nil, ended: nil, for: target, in: context)
                 event.id = payload.id
             }
         case .stopSleep:
-            if let running = runningSleep {
+            if let running = targetEvents.first(where: { $0.eventKind == .sleep && $0.isRunning }),
+               payload.at >= running.start {
                 running.endedAt = max(payload.at, running.start)
                 running.updatedAt = .now
             }
         }
-        persistence.save(context)
+        guard persistence.save(context) else {
+            reload()
+            return false
+        }
+        // A transport receipt does not prove a save. Remember successfully
+        // applied actions, including timer stops that have no event of their own.
+        applied.append(payload.id.uuidString)
+        AppGroup.defaults.set(Array(applied.suffix(NowSummary.knownEventLimit)), forKey: AppGroup.Key.appliedWatchActions)
         reload()
+        return true
     }
 }

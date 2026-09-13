@@ -16,6 +16,7 @@ struct EventEditorView: View {
     @State private var stool: StoolColor?
     @State private var note: String
     @State private var isTimed: Bool
+    @State private var saveError: String?
 
     init(request: EditorRequest) {
         self.request = request
@@ -82,8 +83,12 @@ struct EventEditorView: View {
                 if !isNew {
                     Section {
                         Button("Delete", role: .destructive) {
-                            if let existing = request.existing { events.delete(existing) }
-                            dismiss()
+                            guard let existing = request.existing else { return }
+                            if events.delete(existing) {
+                                dismiss()
+                            } else {
+                                saveError = "Your log was not deleted. Please try again."
+                            }
                         }
                     }
                 }
@@ -105,6 +110,17 @@ struct EventEditorView: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .alert(
+            "Couldn't save changes",
+            isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(saveError ?? "Your changes were not saved. Please try again.")
+        }
     }
 
     private var title: String {
@@ -118,30 +134,43 @@ struct EventEditorView: View {
     }
 
     private func save() {
-        let event: LogEvent?
         if let existing = request.existing {
-            event = existing
-        } else if isTimed, kind.canRun {
-            event = events.startTimed(kind, side: kind == .feed ? side : nil, at: startedAt)
-        } else {
-            event = events.log(kind, side: kind == .feed ? side : nil, at: startedAt)
-        }
-        guard let event else {
+            applyEdits(to: existing)
+            guard events.save() else {
+                saveError = "Your changes were not saved. Please try again."
+                return
+            }
+            Haptics.logged()
             dismiss()
             return
         }
+
+        let configure: (LogEvent) -> Void = { [self] event in
+            applyEdits(to: event)
+        }
+        let event = if isTimed, kind.canRun {
+            events.startTimed(kind, side: kind == .feed ? side : nil, at: startedAt, configure: configure)
+        } else {
+            events.log(kind, side: kind == .feed ? side : nil, at: startedAt, configure: configure)
+        }
+        guard event != nil else {
+            saveError = "Your log was not saved. Please try again."
+            return
+        }
+        Haptics.logged()
+        dismiss()
+    }
+
+    private func applyEdits(to event: LogEvent) {
         event.startedAt = startedAt
         if kind == .feed { event.feedSide = side }
-        if kind == .feed || kind == .weight { event.amount = amount } 
+        if kind == .feed || kind == .weight { event.amount = amount }
         if kind == .dirty { event.stool = stool }
-        if !event.isRunning, kind.canRun {
-            event.endedAt = startedAt.addingTimeInterval(Double(durationMinutes) * 60)
+        if kind.canRun {
+            event.endedAt = isTimed ? nil : startedAt.addingTimeInterval(Double(durationMinutes) * 60)
         }
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
         event.note = trimmed.isEmpty ? nil : trimmed
         event.updatedAt = .now
-        events.save()
-        Haptics.logged()
-        dismiss()
     }
 }

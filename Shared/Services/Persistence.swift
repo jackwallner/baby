@@ -18,6 +18,9 @@ final class Persistence: @unchecked Sendable {
     let privateStore: NSPersistentStore
     let sharedStore: NSPersistentStore
     let cloudKitEnabled: Bool
+    /// Nil in production. Tests can inject a throwing operation to exercise
+    /// rollback paths without changing the persistent model or store files.
+    private let saveOperation: ((NSManagedObjectContext) throws -> Void)?
 
     private static let logger = Logger(subsystem: AppGroup.subsystem, category: "Persistence")
 
@@ -27,8 +30,13 @@ final class Persistence: @unchecked Sendable {
         Bundle.main.bundleIdentifier == AppGroup.bundleID && !ProcessInfo.processInfo.arguments.contains("-NoCloudKit")
     }
 
-    init(cloudKit: Bool, inMemory: Bool = false) {
+    init(
+        cloudKit: Bool,
+        inMemory: Bool = false,
+        saveOperation: ((NSManagedObjectContext) throws -> Void)? = nil
+    ) {
         cloudKitEnabled = cloudKit && !inMemory
+        self.saveOperation = saveOperation
         container = NSPersistentCloudKitContainer(name: "Baby", managedObjectModel: BabyModel.model)
 
         let directory = AppGroup.containerURL.appendingPathComponent("BabyData", isDirectory: true)
@@ -140,13 +148,20 @@ final class Persistence: @unchecked Sendable {
         return event
     }
 
-    func save(_ context: NSManagedObjectContext) {
-        guard context.hasChanges else { return }
+    @discardableResult
+    func save(_ context: NSManagedObjectContext) -> Bool {
+        guard context.hasChanges else { return true }
         do {
-            try context.save()
+            if let saveOperation {
+                try saveOperation(context)
+            } else {
+                try context.save()
+            }
+            return true
         } catch {
             Self.logger.error("Save failed: \(String(describing: error), privacy: .public)")
             context.rollback()
+            return false
         }
     }
 }

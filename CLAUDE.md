@@ -51,8 +51,9 @@ Key files: `Shared/Services/Persistence.swift`, `EventStore.swift`,
 
 `Shared/Utilities/AppTheme.swift` holds every spacing, radius and colour, and
 `python3 scripts/design-audit.py` fails any view that types its own. Four-point
-spacing scale, one 20pt margin, one continuous 20pt radius, colour that means
-only "which of the four kinds this is". Run the audit before a release.
+spacing scale, one 20pt margin, one continuous 20pt radius, outlined care
+graphics and firm card edges. Kind colors distinguish the four logging actions;
+peach marks primary actions. Dark mode softens the outlines. Run the audit before a release.
 Motion respects Reduce Motion; accessibility text sizes use stacked layouts.
 
 ## Access model
@@ -100,9 +101,10 @@ charts, CSV export, and more than one baby. Nothing else may move behind it.
   and More > Pediatrician summary with no purchase and no
   data. The summary preview renders a worked example stamped
   "EXAMPLE, NOT YOUR BABY'S DATA" until something is logged.
-- **1.4.1 and 1.1.6:** diaper and feed counts are "typical range" and "call your
-  pediatrician if", sourced to the American Academy of Pediatrics, never normal,
-  abnormal or a verdict. The disclaimer is in onboarding, First Weeks, Summary
+- **1.4.1 and 1.1.6:** First Weeks labels its diaper/feed table as a breastfeeding
+  reference for the first two weeks, sourced to NHS Healthier Together. It never
+  assesses logged counts against a target. AAP sources support newborn feeding
+  and age-qualified fever advice. The disclaimer is in onboarding, First Weeks, Summary
   and Settings. Declared not a regulated medical device.
 - **3.1.2:** every paywall state, including loading and failure,
   renders the billed amount, the renewal disclosure, Restore,
@@ -128,6 +130,7 @@ and a fresh Development-to-Production deploy before the build that ships it.
 ## Focused rules
 
 - `.claude/rules/interface.md`: simplicity decisions and verification expectations.
+- `.claude/rules/graphic-style.md`: graphic vocabulary, responsive layouts, and guidance scope.
 - `.claude/rules/release-verification.md`: build 5 test and screenshot evidence.
 
 ---

@@ -3,6 +3,7 @@ import SwiftUI
 /// The wrist: the last feed and diaper, then six taps. Nothing to scroll for
 /// on a 3am check, everything reachable with one thumb.
 struct WatchNowView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var store: WatchStore
     @State private var now = Date.now
 
@@ -10,14 +11,14 @@ struct WatchNowView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: AppTheme.tightSpacing) {
+            VStack(spacing: AppTheme.hairSpacing) {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(store.summary.feedLine(now: now))
                         .font(.headline)
                         .foregroundStyle(AppTheme.ink)
                         .lineLimit(2)
                         .minimumScaleFactor(0.8)
-                    Text(store.summary.diaperLine(now: now))
+                    Text(diaperLine)
                         .font(.caption2)
                         .foregroundStyle(AppTheme.ink2)
                         .lineLimit(2)
@@ -55,8 +56,15 @@ struct WatchNowView: View {
             }
         }
         .navigationTitle(store.summary.childName)
+        .toolbarTitleDisplayMode(.inline)
         .onReceive(clock) { now = $0 }
-        .animation(.default, value: store.lastAction)
+        .animation(reduceMotion ? nil : .default, value: store.lastAction)
+    }
+
+    private var diaperLine: String {
+        guard let date = store.summary.lastDiaperAt else { return "No diaper logged yet" }
+        let kind = store.summary.lastDiaperKind.map { " · \($0.label)" } ?? ""
+        return "Diaper \(Format.ago(date, now: now))\(kind)"
     }
 
     private func logButton(_ label: String, kind: EventKind, action: @escaping () -> Void) -> some View {
@@ -64,14 +72,21 @@ struct WatchNowView: View {
             WKInterfaceDevice.current().play(.click)
             action()
         } label: {
-            Text(label)
-                .font(.headline)
-                .foregroundStyle(AppTheme.ink)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
+            HStack(spacing: AppTheme.hairSpacing) {
+                if kind != .feed {
+                    Image(systemName: kind == .sleep && store.summary.isSleeping ? "sun.max" : kind.symbolName)
+                        .font(.caption.weight(.bold))
+                        .accessibilityHidden(true)
+                }
+                Text(label).font(.headline)
+            }
+            .foregroundStyle(AppTheme.ink)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
+            .contentShape(AppTheme.buttonShape)
         }
         .buttonStyle(.plain)
         .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
-        .overlay(AppTheme.buttonShape.stroke(AppTheme.color(for: kind).opacity(0.5), lineWidth: 1))
+        .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
     }
 }

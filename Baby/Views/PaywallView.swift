@@ -151,18 +151,20 @@ struct BabyPaywallView: View {
             Image(systemName: focus?.symbolName ?? "doc.text.fill")
                 .font(.title)
                 .foregroundStyle(AppTheme.accent)
+                .frame(width: AppTheme.welcomeIconSize, height: AppTheme.welcomeIconSize)
+                .background(AppTheme.card, in: AppTheme.cardShape)
+                .graphicBorder()
+                .accessibilityHidden(true)
             Text(headline)
                 .font(.title2.bold())
                 .foregroundStyle(AppTheme.ink)
                 .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
             Text(subhead)
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .multilineTextAlignment(.center)
-                .lineLimit(3)
-                .minimumScaleFactor(0.85)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -177,8 +179,6 @@ struct BabyPaywallView: View {
                     Text(feature.pitchLine)
                         .font(.subheadline)
                         .foregroundStyle(AppTheme.ink)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.85)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)
                 }
@@ -320,7 +320,7 @@ struct BabyPaywallView: View {
                     await store.restore()
                     isRestoring = false
                     if !store.isPro {
-                        restoreMessage = "No active Baby+ purchase was found for this Apple ID."
+                        restoreMessage = store.errorMessage ?? "No active Baby+ purchase was found for this Apple ID."
                     }
                 }
             } label: {
@@ -455,6 +455,7 @@ enum PlusFeature: String, CaseIterable, Identifiable {
 }
 
 private struct PlanCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let package: Package
     let isSelected: Bool
     let trialLabel: String?
@@ -464,7 +465,7 @@ private struct PlanCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: AppTheme.spacing) {
+            (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
                 ZStack {
                     Circle()
                         .stroke(isSelected ? AppTheme.accent : AppTheme.ink3, lineWidth: 2)
@@ -492,7 +493,7 @@ private struct PlanCard: View {
                     }
                 }
 
-                Spacer(minLength: AppTheme.tightSpacing)
+                if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: AppTheme.tightSpacing) }
 
                 Text(package.babyPriceLabel)
                     .font(.subheadline.weight(.semibold).monospacedDigit())
@@ -501,11 +502,8 @@ private struct PlanCard: View {
             .padding(.horizontal, AppTheme.spacing)
             .padding(.vertical, AppTheme.tightSpacing)
             .frame(minHeight: 56)
-            .background(AppTheme.card, in: AppTheme.cardShape)
-            .overlay(
-                AppTheme.cardShape
-                    .stroke(isSelected ? AppTheme.accent : AppTheme.ink3.opacity(0.3), lineWidth: isSelected ? 2 : 1)
-            )
+            .background(isSelected ? AppTheme.actionFill.opacity(0.20) : AppTheme.card, in: AppTheme.cardShape)
+            .graphicBorder()
         }
         .pressableCard()
         .accessibilityElement(children: .combine)
@@ -525,8 +523,8 @@ private struct PlanCard: View {
     private func badge(_ text: String) -> some View {
         Text(text)
             .font(.caption2.weight(.bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(AppTheme.buttonInk)
             .padding(.horizontal, AppTheme.hairSpacing)
-            .background(AppTheme.accent, in: Capsule())
+            .background(AppTheme.actionFill, in: Capsule())
     }
 }

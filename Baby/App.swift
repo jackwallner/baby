@@ -13,6 +13,15 @@ struct BabyApp: App {
 
     init() {
         WatchSyncService.shared.start()
+
+        #if DEBUG
+        if RevenueCatProbe.isEnabled && RevenueCatProbe.wantsPurchase {
+            // A probe launch must not inherit a prior run's local conversion
+            // record. The restore launch deliberately leaves this record in
+            // place so it can prove that restore did not create a conversion.
+            ConversionDiagnostics.reset()
+        }
+        #endif
         ConversionDiagnostics.recordAppOpen()
         #if DEBUG
         if RevenueCatProbe.isEnabled {
@@ -20,6 +29,8 @@ struct BabyApp: App {
             StoreService.shared.trackPaywallImpression(id: RevenueCatProbe.impressionID)
             if RevenueCatProbe.wantsPurchase {
                 Task { await StoreService.shared.runProbePurchase() }
+            } else if RevenueCatProbe.wantsRestore {
+                Task { await StoreService.shared.runProbeRestore() }
             }
         }
         #endif
@@ -117,20 +128,29 @@ private struct RootView: View {
     @EnvironmentObject private var events: EventStore
 
     var body: some View {
-        if Self.paywallSnapshot {
-            BabyPaywallView(displayCloseButton: false)
-        } else if let startTab = Self.startTab {
-            BabyHomeView(initialScreen: startTab)
-        } else if !settings.hasCompletedSetup && !hasSharedChild && !ScreenshotConfig.isEnabled {
-            BabyOnboardingView()
-        } else if events.child == nil && !ScreenshotConfig.isEnabled {
-            // Setup finished but the baby is gone (a stopped share, a restore
-            // from a backup): ask for the baby again rather than logging into
-            // nothing.
-            BabyOnboardingView()
-        } else {
-            BabyHomeView(initialScreen: Self.screenshotTab ?? 0)
+        Group {
+            if Self.paywallSnapshot {
+                BabyPaywallView(displayCloseButton: false)
+            } else if let startTab = Self.startTab {
+                BabyHomeView(initialScreen: startTab)
+            } else if !settings.hasCompletedSetup && !hasSharedChild && !ScreenshotConfig.isEnabled {
+                BabyOnboardingView()
+            } else if events.child == nil && !ScreenshotConfig.isEnabled {
+                // Setup finished but the baby is gone (a stopped share, a restore
+                // from a backup): ask for the baby again rather than logging into
+                // nothing.
+                BabyOnboardingView()
+            } else {
+                BabyHomeView(initialScreen: Self.screenshotTab ?? 0)
+            }
         }
+        #if DEBUG
+        .overlay(alignment: .top) {
+            if RevenueCatProbe.isEnabled {
+                RevenueCatProbeStatusView()
+            }
+        }
+        #endif
     }
 
     private var hasSharedChild: Bool {
@@ -165,6 +185,23 @@ private struct RootView: View {
         #endif
     }
 }
+
+#if DEBUG
+private struct RevenueCatProbeStatusView: View {
+    @EnvironmentObject private var store: StoreService
+
+    var body: some View {
+        Text(store.probeStatus.accessibleDescription)
+            .font(.system(size: 1))
+            .foregroundStyle(.clear)
+            .frame(width: 1, height: 1)
+            .accessibilityElement(children: .ignore)
+            .accessibilityIdentifier("rcProbe.status")
+            .accessibilityLabel(store.probeStatus.accessibleDescription)
+            .allowsHitTesting(false)
+    }
+}
+#endif
 
 /// One home screen. The alternate entry points are for existing capture flows.
 struct BabyHomeView: View {

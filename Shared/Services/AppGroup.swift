@@ -28,6 +28,7 @@ enum AppGroup {
         static let nowSummary = "nowSummary"
         /// Watch-only: log events that have not yet reached the phone.
         static let pendingWatchEvents = "pendingWatchEvents"
+        static let appliedWatchActions = "appliedWatchActions"
         /// Widget and complication kinds, for `reloadTimelines(ofKind:)`.
         static let feedingPreference = "feedingPreference"
     }

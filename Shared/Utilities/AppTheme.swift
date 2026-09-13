@@ -7,10 +7,9 @@ import UIKit
 /// fails any view that types its own spacing, radius or colour, so changing the
 /// app's rhythm is one edit here.
 ///
-/// What the app is trying to look like: a calm surface a tired parent can read
-/// in a dark room with one hand, that never looks assembled. System font only,
-/// a four-point spacing scale, one radius with a continuous curve, and colour
-/// that means one thing: which of the four kinds an entry is.
+/// Warm paper, outlined care graphics and clear labels for a tired parent.
+/// Firm card edges soften at night. A four-point spacing scale and shared
+/// continuous corners keep the graphic style consistent across surfaces.
 enum AppTheme {
     // MARK: Spacing (multiples of four)
 
@@ -23,7 +22,14 @@ enum AppTheme {
     static let cardRadius: CGFloat = 20
     static let buttonRadius: CGFloat = 20
     /// The four log buttons: tall enough to hit while holding a baby.
-    static let logButtonHeight: CGFloat = 72
+    static let logButtonHeight: CGFloat = 88
+    static let maxLogButtonHeight: CGFloat = 124
+    static let outlineWidth: CGFloat = 2
+    static let shadowOffset: CGFloat = 3
+    static let graphicSize: CGFloat = 44
+    static let wideLayout: CGFloat = 700
+    static let contentWidth: CGFloat = 1000
+    static let homeSummaryAllowance: CGFloat = 360
     static let ctaHeight: CGFloat = 52
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72
@@ -46,13 +52,16 @@ enum AppTheme {
     static let cardElevated = Color(white: 0.18)
     static let ink = Color.white
     static let ink2 = Color(white: 0.72)
-    static let ink3 = Color(white: 0.5)
+    static let ink3 = Color(white: 0.60)
     static let feed = Color(red: 0.95, green: 0.68, blue: 0.30)
     static let wet = Color(red: 0.45, green: 0.68, blue: 0.95)
     static let dirty = Color(red: 0.72, green: 0.58, blue: 0.40)
     static let sleep = Color(red: 0.62, green: 0.60, blue: 0.95)
     static let accent = Color(red: 0.95, green: 0.55, blue: 0.42)
     static let notice = Color(red: 0.95, green: 0.68, blue: 0.30)
+    static let outline = Color(white: 0.62)
+    static let actionFill = Color(red: 0.95, green: 0.68, blue: 0.57)
+    static let buttonInk = Color(white: 0.10)
     #else
     /// Warm off-white by day, near-black at night.
     static let paper = Color(light: .init(0.97, 0.96, 0.94), dark: .init(0.07, 0.065, 0.06))
@@ -60,15 +69,18 @@ enum AppTheme {
     static let cardElevated = Color(light: .init(0.94, 0.93, 0.91), dark: .init(0.18, 0.17, 0.16))
     static let ink = Color(light: .init(0.11, 0.10, 0.09), dark: .init(0.95, 0.94, 0.92))
     static let ink2 = Color(light: .init(0.42, 0.40, 0.38), dark: .init(0.68, 0.66, 0.63))
-    static let ink3 = Color(light: .init(0.62, 0.60, 0.58), dark: .init(0.48, 0.46, 0.44))
+    static let ink3 = Color(light: .init(0.43, 0.41, 0.39), dark: .init(0.62, 0.60, 0.58))
     /// Kind colours. Amber, blue, brown, indigo: distinct at a glance and at 3am.
     static let feed = Color(light: .init(0.58, 0.35, 0.10), dark: .init(0.95, 0.68, 0.30))
-    static let wet = Color(light: .init(0.20, 0.47, 0.82), dark: .init(0.45, 0.68, 0.95))
+    static let wet = Color(light: .init(0.18, 0.43, 0.76), dark: .init(0.45, 0.68, 0.95))
     static let dirty = Color(light: .init(0.52, 0.38, 0.22), dark: .init(0.72, 0.58, 0.40))
     static let sleep = Color(light: .init(0.36, 0.34, 0.78), dark: .init(0.62, 0.60, 0.95))
     /// Primary actions that are not one of the four kinds: onboarding, paywall.
-    static let accent = Color(light: .init(0.78, 0.36, 0.25), dark: .init(0.95, 0.55, 0.42))
-    static let notice = Color(light: .init(0.72, 0.45, 0.08), dark: .init(0.95, 0.68, 0.30))
+    static let accent = Color(light: .init(0.70, 0.30, 0.20), dark: .init(0.95, 0.55, 0.42))
+    static let notice = Color(light: .init(0.60, 0.36, 0.06), dark: .init(0.95, 0.68, 0.30))
+    static let outline = Color(light: .init(0.14, 0.12, 0.11), dark: .init(0.52, 0.49, 0.46))
+    static let actionFill = Color(light: .init(1, 0.72, 0.60), dark: .init(0.92, 0.63, 0.51))
+    static let buttonInk = Color(white: 0.10)
     #endif
 
     static func color(for kind: EventKind) -> Color {
@@ -84,7 +96,83 @@ enum AppTheme {
     /// The soft fill behind a kind's button: the kind colour at low opacity so
     /// the label stays ink-on-paper and the buttons read as one family.
     static func fill(for kind: EventKind) -> Color {
-        color(for: kind).opacity(0.16)
+        color(for: kind).opacity(0.20)
+    }
+}
+
+/// Small, flat care illustrations. Labels carry meaning alongside the artwork.
+struct CareGraphic: View {
+    let kind: EventKind
+    var side: FeedSide? = nil
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(AppTheme.card)
+                .overlay(Circle().strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
+            if kind == .feed, side != .bottle {
+                Image(systemName: "heart.fill")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(AppTheme.feed)
+            } else {
+                CareGlyph(kind: kind)
+                    .fill(AppTheme.fill(for: kind))
+                    .overlay(CareGlyph(kind: kind).stroke(AppTheme.outline, style: StrokeStyle(lineWidth: AppTheme.outlineWidth, lineCap: .round, lineJoin: .round)))
+                    .padding(AppTheme.tightSpacing)
+            }
+        }
+        .frame(width: AppTheme.graphicSize, height: AppTheme.graphicSize)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct CareGlyph: Shape {
+    let kind: EventKind
+
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        func point(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+            CGPoint(x: rect.minX + x * rect.width, y: rect.minY + y * rect.height)
+        }
+        switch kind {
+        case .feed:
+            p.move(to: point(0.39, 0.20))
+            p.addLine(to: point(0.39, 0.10))
+            p.addQuadCurve(to: point(0.61, 0.10), control: point(0.50, -0.04))
+            p.addLine(to: point(0.61, 0.20))
+            p.addLine(to: point(0.72, 0.28))
+            p.addLine(to: point(0.72, 0.85))
+            p.addQuadCurve(to: point(0.28, 0.85), control: point(0.50, 1.02))
+            p.addLine(to: point(0.28, 0.28))
+            p.closeSubpath()
+            p.move(to: point(0.28, 0.35)); p.addLine(to: point(0.72, 0.35))
+            p.move(to: point(0.29, 0.55)); p.addLine(to: point(0.47, 0.55))
+            p.move(to: point(0.29, 0.70)); p.addLine(to: point(0.43, 0.70))
+        case .wet:
+            p.move(to: point(0.50, 0.04))
+            p.addCurve(to: point(0.50, 0.95), control1: point(0.28, 0.38), control2: point(-0.13, 0.85))
+            p.addCurve(to: point(0.50, 0.04), control1: point(1.13, 0.85), control2: point(0.72, 0.38))
+            p.closeSubpath()
+        case .dirty:
+            p.move(to: point(0.08, 0.23))
+            p.addLine(to: point(0.92, 0.23))
+            p.addQuadCurve(to: point(0.70, 0.86), control: point(0.92, 0.62))
+            p.addLine(to: point(0.30, 0.86))
+            p.addQuadCurve(to: point(0.08, 0.23), control: point(0.08, 0.62))
+            p.closeSubpath()
+            p.move(to: point(0.09, 0.40)); p.addLine(to: point(0.91, 0.40))
+            p.move(to: point(0.12, 0.56)); p.addQuadCurve(to: point(0.34, 0.85), control: point(0.37, 0.56))
+            p.move(to: point(0.88, 0.56)); p.addQuadCurve(to: point(0.66, 0.85), control: point(0.63, 0.56))
+        case .sleep:
+            p.move(to: point(0.67, 0.07))
+            p.addCurve(to: point(0.87, 0.78), control1: point(-0.22, -0.06), control2: point(0.04, 1.31))
+            p.addCurve(to: point(0.67, 0.07), control1: point(0.30, 0.91), control2: point(0.23, 0.26))
+            p.closeSubpath()
+        case .weight:
+            p.addRoundedRect(in: rect.insetBy(dx: rect.width * 0.12, dy: rect.height * 0.15), cornerSize: CGSize(width: rect.width * 0.15, height: rect.height * 0.15))
+            p.move(to: point(0.50, 0.48)); p.addLine(to: point(0.65, 0.30))
+        }
+        return p
     }
 }
 

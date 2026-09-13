@@ -11,10 +11,20 @@ struct CardBackground: ViewModifier {
             .padding(AppTheme.looseSpacing)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(elevated ? AppTheme.cardElevated : AppTheme.card, in: AppTheme.cardShape)
+            .graphicBorder()
     }
 }
 
 extension View {
+    func graphicBorder() -> some View {
+        background {
+            AppTheme.cardShape
+                .fill(AppTheme.card)
+                .shadow(color: AppTheme.outline, radius: 0, x: AppTheme.shadowOffset, y: AppTheme.shadowOffset)
+        }
+            .overlay(AppTheme.cardShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
+    }
+
     func card(elevated: Bool = false) -> some View {
         modifier(CardBackground(elevated: elevated))
     }
@@ -44,11 +54,12 @@ struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(.white)
+            .foregroundStyle(AppTheme.buttonInk)
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppTheme.spacing)
             .frame(minHeight: AppTheme.ctaHeight)
-            .background(AppTheme.accent, in: AppTheme.buttonShape)
+            .background(AppTheme.actionFill, in: AppTheme.buttonShape)
+            .graphicBorder()
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
             .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: configuration.isPressed)
     }
@@ -68,11 +79,12 @@ struct SectionLabel: View {
 
 /// The bottom toast after a tap: what was logged, and Undo.
 struct UndoToast: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let logged: EventStore.LoggedEvent
     let undo: () -> Void
 
     var body: some View {
-        HStack(spacing: AppTheme.spacing) {
+        (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.hairSpacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(AppTheme.color(for: logged.kind))
                 .accessibilityHidden(true)
@@ -80,7 +92,7 @@ struct UndoToast: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(AppTheme.ink)
                 .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: AppTheme.tightSpacing)
+            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: AppTheme.tightSpacing) }
             Button("Undo", action: undo)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppTheme.accent)
@@ -89,7 +101,7 @@ struct UndoToast: View {
         .padding(.horizontal, AppTheme.looseSpacing)
         .padding(.vertical, AppTheme.hairSpacing)
         .background(AppTheme.cardElevated, in: AppTheme.cardShape)
-        .shadow(color: .black.opacity(0.12), radius: AppTheme.spacing, y: AppTheme.hairSpacing)
+        .graphicBorder()
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("undoToast")
     }
@@ -112,12 +124,7 @@ struct KindIcon: View {
     let kind: EventKind
 
     var body: some View {
-        Image(systemName: kind.symbolName)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(AppTheme.color(for: kind))
-            .frame(width: AppTheme.iconSize, height: AppTheme.iconSize)
-            .background(AppTheme.fill(for: kind), in: Circle())
-            .accessibilityHidden(true)
+        CareGraphic(kind: kind)
     }
 }
 

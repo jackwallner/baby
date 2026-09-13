@@ -153,6 +153,13 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     @Published private(set) var introEligibility: [String: Bool] = [:]
     @Published private(set) var introEligibilityResolved = false
 
+    #if DEBUG
+    /// Observable, non-sensitive state for the Test Store purchase probe.
+    /// Keeping this DEBUG-only prevents the probe contract from becoming part
+    /// of the release app's UI or purchase surface.
+    @Published private(set) var probeStatus = RevenueCatProbeStatus()
+    #endif
+
     private let logger = Logger(subsystem: AppGroup.subsystem, category: "Store")
     private let defaults = UserDefaults(suiteName: AppGroup.id) ?? .standard
     private var isConfigured = false
@@ -184,6 +191,15 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
             // one App Review rejects.
             Task { await loadStoreKitTestingProducts() }
             #endif
+            return
+        }
+        #endif
+
+        #if DEBUG
+        if RevenueCatProbe.isEnabled {
+            // The probe owns its offering and customer-info calls. Avoid a
+            // second background load from App/RootView racing the proof state.
+            configureIfNeeded()
             return
         }
         #endif
@@ -231,19 +247,140 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
 
     #if DEBUG
     /// The probe's Test Store purchase: load the offering, buy the first
-    /// package, let `purchase` record the conversion.
+    /// package, and verify the resulting entitlement and local funnel record.
     ///
     /// This lives in the service rather than in the App entry point because
     /// `loadOffering` is private, and the probe has to go through the same load
-    /// the paywall uses rather than a parallel one. Logged rather than
-    /// asserted: when the Test Store sheet never appears, the package count
-    /// separates "nothing came back" from "purchase threw".
+    /// the paywall uses. The status is exposed through the DEBUG probe overlay
+    /// so the UI test can wait for a real result instead of sleeping.
     func runProbePurchase() async {
+        probeStatus = RevenueCatProbeStatus()
+        guard isConfigured else {
+            updateProbeStatus { status in
+                status.phase = .failed
+                status.failureReason = "not_configured"
+            }
+            return
+        }
+        updateProbeStatus { status in
+            status.phase = .loadingPackages
+        }
         await loadOffering(forceRefresh: true)
-        NSLog("RCPROBE packages=%d", packages.count)
-        guard let package = packages.first else { return }
+        updateProbeStatus { status in
+            status.phase = .waitingForPurchase
+            status.packageCount = packages.count
+        }
+        guard let package = packages.first else {
+            updateProbeStatus { status in
+                status.phase = .failed
+                status.failureReason = "no_packages"
+            }
+            return
+        }
+
         let state = await purchase(package)
-        NSLog("RCPROBE purchase outcome=%@", String(describing: state))
+        let customerInfo = await probeCustomerInfo()
+        let babyEntitlementActive = customerInfo?.entitlements.active[RevenueCatConfig.proEntitlement] != nil
+        let conversionAttributesPresent = Self.probeConversionSignature() != nil
+        let purchaseOutcome = state?.probeLabel ?? "no_result"
+        let succeeded = purchaseOutcome == "purchased"
+            && babyEntitlementActive
+            && conversionAttributesPresent
+
+        updateProbeStatus { status in
+            status.phase = succeeded ? .purchaseSucceeded : .failed
+            status.purchaseOutcome = purchaseOutcome
+            status.babyEntitlementActive = babyEntitlementActive
+            status.conversionAttributesPresent = conversionAttributesPresent
+            if !succeeded {
+                if purchaseOutcome != "purchased" {
+                    status.failureReason = "purchase_\(purchaseOutcome)"
+                } else if !babyEntitlementActive {
+                    status.failureReason = "baby_entitlement_inactive"
+                } else {
+                    status.failureReason = "conversion_attributes_missing"
+                }
+            }
+        }
+    }
+
+    /// Restores the same explicit Test Store app user used by the purchase
+    /// launch. The conversion signature is captured before the restore and
+    /// compared afterward so a restore cannot silently count as a new sale.
+    func runProbeRestore() async {
+        probeStatus = RevenueCatProbeStatus()
+        guard isConfigured else {
+            updateProbeStatus { status in
+                status.phase = .failed
+                status.failureReason = "not_configured"
+            }
+            return
+        }
+        let before = Self.probeConversionSignature()
+        updateProbeStatus { status in
+            status.phase = .restoring
+            status.conversionAttributesPresent = before != nil
+        }
+
+        errorMessage = nil
+        await restore()
+        let restoreSucceeded = errorMessage == nil
+        let customerInfo = await probeCustomerInfo()
+        let babyEntitlementActive = customerInfo?.entitlements.active[RevenueCatConfig.proEntitlement] != nil
+        let after = Self.probeConversionSignature()
+        let conversionCheck: String
+        if before == nil {
+            conversionCheck = "missing_before"
+        } else if before == after {
+            conversionCheck = "unchanged"
+        } else {
+            conversionCheck = "changed"
+        }
+        let succeeded = restoreSucceeded
+            && babyEntitlementActive
+            && conversionCheck == "unchanged"
+
+        updateProbeStatus { status in
+            status.phase = succeeded ? .restoreSucceeded : .failed
+            status.restoreOutcome = succeeded ? "restored" : "not_restored"
+            status.restoreBabyEntitlementActive = babyEntitlementActive
+            status.conversionAttributesPresent = after != nil
+            status.conversionAfterRestore = conversionCheck
+            if !succeeded {
+                if !babyEntitlementActive {
+                    status.failureReason = "baby_entitlement_inactive_after_restore"
+                } else {
+                    status.failureReason = "conversion_\(conversionCheck)"
+                }
+            }
+        }
+    }
+
+    private static let probeConversionKeys = [
+        "converted_surface",
+        "converted_plan",
+        "converted_with_trial",
+        "converted_offering",
+        "pitch_views_at_convert",
+    ]
+
+    private static func probeConversionSignature() -> String? {
+        let attributes = ConversionDiagnostics.subscriberAttributes
+        guard probeConversionKeys.allSatisfy({ attributes[$0] != nil }) else { return nil }
+        return probeConversionKeys.sorted().compactMap { key in
+            guard let value = attributes[key] else { return nil }
+            return "\(key)=\(value)"
+        }.joined(separator: "|")
+    }
+
+    private func probeCustomerInfo() async -> CustomerInfo? {
+        try? await Purchases.shared.customerInfo(fetchPolicy: .fetchCurrent)
+    }
+
+    private func updateProbeStatus(_ update: (inout RevenueCatProbeStatus) -> Void) {
+        var next = probeStatus
+        update(&next)
+        probeStatus = next
     }
     #endif
 
@@ -528,6 +665,55 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
 }
 
 #if DEBUG
+enum RevenueCatProbePhase: String {
+    case idle
+    case loadingPackages = "loading_packages"
+    case waitingForPurchase = "waiting_for_purchase"
+    case purchaseSucceeded = "purchase_succeeded"
+    case restoring
+    case restoreSucceeded = "restore_succeeded"
+    case failed
+}
+
+struct RevenueCatProbeStatus: Equatable {
+    var phase: RevenueCatProbePhase = .idle
+    var packageCount = 0
+    var purchaseOutcome = "not_started"
+    var babyEntitlementActive = false
+    var conversionAttributesPresent = false
+    var restoreOutcome = "not_started"
+    var restoreBabyEntitlementActive = false
+    var conversionAfterRestore = "not_checked"
+    var failureReason: String?
+
+    var accessibleDescription: String {
+        var description = [
+            "phase=\(phase.rawValue)",
+            "packages=\(packageCount)",
+            "purchase=\(purchaseOutcome)",
+            "baby_entitlement=\(babyEntitlementActive ? "active" : "inactive")",
+            "conversion_attributes=\(conversionAttributesPresent ? "present" : "missing")",
+            "restore=\(restoreOutcome)",
+            "restore_baby_entitlement=\(restoreBabyEntitlementActive ? "active" : "inactive")",
+            "conversion_after_restore=\(conversionAfterRestore)",
+        ].joined(separator: " ")
+        if let failureReason {
+            description += " failure=\(failureReason)"
+        }
+        return description
+    }
+}
+
+extension PurchaseState {
+    var probeLabel: String {
+        switch self {
+        case .purchased: "purchased"
+        case .cancelled: "cancelled"
+        case .pending: "pending"
+        }
+    }
+}
+
 /// Simulator-only proof path for the fleet-wide funnel attributes.
 ///
 /// Under the normal rules the attributes cannot be verified on a simulator: the
@@ -540,13 +726,20 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
 /// build or an ordinary simulator run.
 enum RevenueCatProbe {
     static var isEnabled: Bool {
+        #if targetEnvironment(simulator)
         ProcessInfo.processInfo.arguments.contains("-rcfunnelprobe")
+        #else
+        false
+        #endif
     }
 
     /// RevenueCat Test Store app `appf48b1dd074`. Read from the environment so
     /// the probe can run without the key living in a public repo.
     static var testStoreKey: String {
-        ProcessInfo.processInfo.environment["RC_TEST_STORE_KEY"] ?? ""
+        let environment = ProcessInfo.processInfo.environment
+        return environment["RC_TEST_STORE_KEY"]
+            ?? environment["TEST_RUNNER_RC_TEST_STORE_KEY"]
+            ?? ""
     }
 
     static var appUserID: String {
@@ -561,6 +754,12 @@ enum RevenueCatProbe {
     /// half of the funnel record is exercised and not just the impression half.
     static var wantsPurchase: Bool {
         ProcessInfo.processInfo.arguments.contains("-rcfunnelprobepurchase")
+    }
+
+    /// Drives a Test Store restore after a purchase launch has persisted the
+    /// same explicit app user and its conversion record.
+    static var wantsRestore: Bool {
+        ProcessInfo.processInfo.arguments.contains("-rcfunnelproberestore")
     }
 }
 #endif

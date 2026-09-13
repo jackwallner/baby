@@ -3,11 +3,9 @@ import Foundation
 /// The hospital tally sheet, as numbers: how many wet and dirty diapers and
 /// feeds are typical on each day of life, and the lines that mean "call".
 ///
-/// Everything here is general guidance for healthy full-term newborns, drawn
-/// from the American Academy of Pediatrics' parent guidance on
-/// healthychildren.org and the discharge sheets hospitals hand out. It is
-/// worded as a typical range and a reason to call, never as normal or abnormal,
-/// and never as a judgement about a particular baby (App Review 1.4.1).
+/// The diaper reference is the NHS Healthier Together breastfeeding guide.
+/// It is educational context for the first two weeks, not a personalized
+/// target or assessment. Fever advice comes from the AAP.
 enum Guidance {
     struct DayRange: Equatable, Sendable {
         let day: Int
@@ -26,7 +24,11 @@ enum Guidance {
         var summary: String { "\(wetText) · \(dirtyText) · \(feedsText)" }
     }
 
-    static let sourceLine = "General guidance from the American Academy of Pediatrics (healthychildren.org) for healthy full-term newborns. Your pediatrician's advice comes first."
+    static let sourceLine = "Diaper reference: NHS Healthier Together breastfeeding guidance. Fever and newborn care: American Academy of Pediatrics. Your pediatrician's advice comes first."
+    static let referenceScope = "A breastfeeding reference for the first two weeks, not a target for every baby. Formula or mixed feeding can have different patterns. Follow your pediatrician's feeding plan. Counts include only what you log."
+    static let diaperSource = URL(string: "https://www.swlondon-healthiertogether.nhs.uk/new-baby/keeping-your-child-safe-2-1/breastfeeding-your-baby")!
+    static let feverSource = URL(string: "https://www.healthychildren.org/English/health-issues/conditions/fever/Pages/Fever-and-Your-Baby.aspx")!
+    static let feedingSource = URL(string: "https://www.healthychildren.org/English/ages-stages/baby/feeding-nutrition/Pages/how-often-and-how-much-should-your-baby-eat.aspx")!
 
     static let disclaimer = "Baby Tracker is a log, not medical advice. It does not diagnose, treat or assess your baby. Typical ranges are general guidance; call your pediatrician with any concern."
 
@@ -36,11 +38,11 @@ enum Guidance {
         let d = max(1, day)
         switch d {
         case 1: return DayRange(day: 1, wetMin: 1, dirtyMin: 1, stoolNote: "black and tarry (meconium)", feedsMin: 8, feedsMax: 12)
-        case 2: return DayRange(day: 2, wetMin: 2, dirtyMin: 2, stoolNote: "black to dark green", feedsMin: 8, feedsMax: 12)
-        case 3: return DayRange(day: 3, wetMin: 3, dirtyMin: 3, stoolNote: "green, turning yellow", feedsMin: 8, feedsMax: 12)
-        case 4: return DayRange(day: 4, wetMin: 4, dirtyMin: 3, stoolNote: "yellow and seedy", feedsMin: 8, feedsMax: 12)
-        case 5: return DayRange(day: 5, wetMin: 5, dirtyMin: 3, stoolNote: "yellow and seedy", feedsMin: 8, feedsMax: 12)
-        default: return DayRange(day: d, wetMin: 6, dirtyMin: 3, stoolNote: "yellow; formula-fed babies often pass fewer, firmer stools", feedsMin: 8, feedsMax: 12)
+        case 2: return DayRange(day: 2, wetMin: 2, dirtyMin: 1, stoolNote: "black to dark green", feedsMin: 8, feedsMax: 12)
+        case 3: return DayRange(day: 3, wetMin: 3, dirtyMin: 2, stoolNote: "brown, green or yellow", feedsMin: 8, feedsMax: 12)
+        case 4: return DayRange(day: 4, wetMin: 4, dirtyMin: 2, stoolNote: "brown, green or yellow", feedsMin: 8, feedsMax: 12)
+        case 5: return DayRange(day: 5, wetMin: 5, dirtyMin: 2, stoolNote: "yellow and loose", feedsMin: 8, feedsMax: 12)
+        default: return DayRange(day: d, wetMin: 6, dirtyMin: 2, stoolNote: "yellow and loose", feedsMin: 8, feedsMax: 12)
         }
     }
 
@@ -49,23 +51,11 @@ enum Guidance {
 
     /// Reasons to call, as the discharge sheet words them.
     static let callIf: [String] = [
-        "Fewer wet diapers than the day of life in the first five days, or fewer than 6 a day after day five.",
-        "No dirty diaper in 24 hours during the first week.",
-        "Fewer than 8 feeds in 24 hours, or a baby too sleepy to wake for feeds.",
-        "Brick-dust or reddish stains in the diaper after day four.",
-        "A temperature of 100.4°F (38°C) or higher: call right away.",
+        "Your baby has fewer wet diapers than usual, feeds poorly, or you are worried about feeding or weight gain.",
+        "Your newborn has not passed the first dark stool within 48 hours of birth.",
+        "Your baby is difficult to wake for feeds: seek medical advice right away.",
+        "Pink or brick-red diaper staining continues, or you notice blood in the urine or stool.",
+        "At 3 months or younger, a rectal temperature of 100.4°F (38°C) or higher needs an immediate call, even if your baby seems well.",
     ]
 
-    /// One neutral line comparing today's count with the typical range.
-    /// Deliberately never says "low", "abnormal" or "dehydrated".
-    static func comparison(wet: Int, dirty: Int, day: Int, dayComplete: Bool) -> String? {
-        let range = range(forDayOfLife: day)
-        guard dayComplete else { return nil }
-        var below: [String] = []
-        if wet < range.wetMin { below.append("wet") }
-        if dirty < range.dirtyMin { below.append("dirty") }
-        guard !below.isEmpty else { return nil }
-        let which = below.joined(separator: " and ")
-        return "Below the typical \(which) range for day \(day). Call your pediatrician if you are concerned."
-    }
 }

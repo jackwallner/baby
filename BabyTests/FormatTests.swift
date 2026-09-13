@@ -36,4 +36,107 @@ final class FormatTests: XCTestCase {
         let sleep = merged.applying(WatchLogPayload(action: .startSleep, kind: .sleep))
         XCTAssertTrue(sleep.isSleeping)
     }
+
+    func testWatchHoldsASleepStopUntilItsStartIsConfirmed() {
+        let start = WatchLogPayload(action: .startSleep, kind: .sleep)
+        let wet = WatchLogPayload(action: .log, kind: .wet)
+        let stop = WatchLogPayload(action: .stopSleep, kind: .sleep)
+        XCTAssertEqual(WatchLogPayload.sendable(from: [start, wet, stop]), [start, wet])
+        XCTAssertEqual(WatchLogPayload.sendable(from: [wet, stop]), [wet, stop])
+    }
+
+    func testWatchReplayUsesEventIDsAndCurrentDayInsteadOfGenerationTime() {
+        let now = Date.now
+        var phone = NowSummary()
+        phone.generatedAt = now
+        phone.todayWet = 2
+        let tap = WatchLogPayload(
+            action: .log,
+            kind: .wet,
+            at: now.addingTimeInterval(-60)
+        )
+
+        let merged = phone.applyingPending([tap], now: now)
+        XCTAssertEqual(merged.todayWet, 3)
+        XCTAssertTrue(merged.knownEventIDs?.contains(tap.id) == true)
+
+        let acknowledged = merged.applyingPending([tap], now: now)
+        XCTAssertEqual(acknowledged.todayWet, 3, "an acknowledged transfer must never be replayed twice")
+    }
+
+    func testWatchReplayResetsYesterdayTotalsAtMidnight() {
+        let calendar = Calendar.current
+        let now = Date.now
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: now)!
+        var phone = NowSummary()
+        phone.generatedAt = yesterday
+        phone.todayWet = 4
+        let tap = WatchLogPayload(action: .log, kind: .wet, at: now)
+
+        let merged = phone.applyingPending([tap], calendar: calendar, now: now)
+
+        XCTAssertEqual(merged.todayWet, 1, "a new day must not inherit yesterday's totals")
+        XCTAssertEqual(merged.generatedAt, now)
+    }
+
+    func testWatchPayloadDecodesWithoutAProfileIDAndRoundTripsItWhenPresent() throws {
+        let payload = WatchLogPayload(action: .log, kind: .wet, childID: UUID())
+        let data = try JSONEncoder().encode(payload)
+        var object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        object.removeValue(forKey: "childID")
+        let oldData = try JSONSerialization.data(withJSONObject: object)
+        let oldPayload = try JSONDecoder().decode(WatchLogPayload.self, from: oldData)
+        XCTAssertNil(oldPayload.childID)
+
+        let currentPayload = try XCTUnwrap(WatchLogPayload(userInfo: payload.dictionary))
+        XCTAssertEqual(currentPayload.childID, payload.childID)
+    }
+
+    func testWatchReplayIgnoresATapForAnotherBaby() {
+        let first = UUID()
+        let second = UUID()
+        var phone = NowSummary()
+        phone.childID = first
+        phone.todayWet = 2
+        let tap = WatchLogPayload(action: .log, kind: .wet, childID: second)
+
+        let merged = phone.applyingPending([tap])
+
+        XCTAssertEqual(merged.todayWet, 2)
+        XCTAssertFalse(merged.knownEventIDs?.contains(tap.id) == true)
+    }
+
+    func testWatchReplayAcknowledgementsStayBounded() {
+        let now = Date.now
+        var summary = NowSummary()
+        summary.generatedAt = now
+
+        for _ in 0...NowSummary.knownEventLimit {
+            summary = summary.applying(WatchLogPayload(action: .log, kind: .wet), now: now)
+        }
+
+        XCTAssertEqual(summary.knownEventIDs?.count, NowSummary.knownEventLimit)
+    }
+
+    func testOlderWatchActionsDoNotReplaceNewerSummaryState() {
+        let now = Date.now
+        var summary = NowSummary()
+        summary.generatedAt = now
+        summary.lastFeedAt = now
+        summary.lastFeedSide = .right
+        summary.lastDiaperAt = now
+        summary.lastDiaperKind = .wet
+        summary.runningSleepStart = now
+
+        let oldFeed = WatchLogPayload(action: .log, kind: .feed, side: .left, at: now.addingTimeInterval(-60))
+        let oldDiaper = WatchLogPayload(action: .log, kind: .dirty, at: now.addingTimeInterval(-60))
+        let oldStop = WatchLogPayload(action: .stopSleep, kind: .sleep, at: now.addingTimeInterval(-60))
+        let merged = summary.applyingPending([oldFeed, oldDiaper, oldStop], now: now)
+
+        XCTAssertEqual(merged.lastFeedAt, summary.lastFeedAt)
+        XCTAssertEqual(merged.lastFeedSide, .right)
+        XCTAssertEqual(merged.lastDiaperAt, summary.lastDiaperAt)
+        XCTAssertEqual(merged.lastDiaperKind, .wet)
+        XCTAssertTrue(merged.isSleeping, "an older stop must not end a newer running sleep")
+    }
 }

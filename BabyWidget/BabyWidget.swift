@@ -205,6 +205,7 @@ struct BabyLogWidgetView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
+            .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
         }
         .buttonStyle(.plain)
     }

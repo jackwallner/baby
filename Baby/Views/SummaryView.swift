@@ -55,10 +55,11 @@ struct SummaryView: View {
 
     private var sinceBinding: Binding<Date> {
         Binding(get: { since }, set: { value in
-            chosenSince = value
             guard let child = events.child else { return }
             child.lastVisitAt = value
-            events.save()
+            if events.save() {
+                chosenSince = value
+            }
         })
     }
 
