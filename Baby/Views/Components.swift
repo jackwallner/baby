@@ -77,6 +77,24 @@ struct PrimaryButtonStyle: ButtonStyle {
     }
 }
 
+/// A second action beside a primary one: card fill, accent label, same edge.
+struct SecondaryButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .foregroundStyle(AppTheme.accent)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, AppTheme.spacing)
+            .frame(minHeight: AppTheme.ctaHeight)
+            .background(AppTheme.card, in: AppTheme.buttonShape)
+            .graphicBorder()
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
+            .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: configuration.isPressed)
+    }
+}
+
 /// Section label above a card: small caps, secondary ink.
 struct SectionLabel: View {
     let text: String
@@ -123,9 +141,10 @@ struct UndoToast: View {
         case .feed: "Logged feed"
         case .wet: "Logged wet diaper"
         case .dirty: "Logged dirty diaper"
-        case .sleep: "Sleep"
+        case .sleep: logged.reopensTimer ? "Sleep ended" : "Sleep started"
         case .weight: "Logged weight"
         }
+        if logged.kind == .sleep { return base }
         if let detail = logged.detail, !detail.isEmpty { return "\(base) · \(detail)" }
         return base
     }

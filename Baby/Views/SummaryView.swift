@@ -140,6 +140,7 @@ struct SummaryView: View {
                         Image(uiImage: preview)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
+                            .colorMultiply(AppTheme.codePaper)
                     } else {
                         Rectangle()
                             .fill(AppTheme.cardElevated)

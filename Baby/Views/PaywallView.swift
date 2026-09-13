@@ -195,7 +195,7 @@ struct BabyPaywallView: View {
     }
 
     private var subhead: String {
-        "Logging, the first-weeks tally, widgets, the Watch app and partner sharing stay free. Baby+ is the reporting on top."
+        "Logging, the first-weeks tally, widgets, the Watch app and logging together stay free. Baby+ is the reporting on top."
     }
 
     private func benefitRow(_ feature: PlusFeature, unlocked: Bool) -> some View {

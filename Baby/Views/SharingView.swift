@@ -253,8 +253,8 @@ private struct InviteView: View {
                         .foregroundStyle(AppTheme.ink)
                         .fixedSize(horizontal: false, vertical: true)
                     codeCard
-                    JoinSteps(child: child)
                     joinedCard
+                    JoinSteps(child: child)
                     AccessNote(isOwner: isOwner)
                 }
                 .frame(maxWidth: AppTheme.contentWidth, alignment: .leading)
@@ -291,11 +291,11 @@ private struct InviteView: View {
                     .scaledToFit()
                     .frame(width: AppTheme.inviteCodeSize, height: AppTheme.inviteCodeSize)
                     .padding(AppTheme.spacing)
-                    .background(Color.white, in: AppTheme.cardShape)
+                    .background(AppTheme.codePaper, in: AppTheme.cardShape)
                     .accessibilityLabel("Invite code")
                     .accessibilityIdentifier("sharing.code")
             }
-            Text("Scan with the other iPhone's Camera")
+            Text("On the other iPhone, choose Join a shared log and scan this code")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppTheme.ink)
                 .multilineTextAlignment(.center)
@@ -364,7 +364,7 @@ struct JoinSteps: View {
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             step(1, "They install Baby Tracker", "On their own iPhone. It's free.")
-            step(2, "They scan your code", "With their Camera app, or by opening the link you send.")
+            step(2, "They scan your code", "In Baby Tracker, choose Join a shared log. The Camera app or the link you send works too.")
             step(3, "You both log", "Feeds, diapers and sleep from either phone land in \(child.map { "\($0.displayName)'s" } ?? "the same") log.")
         }
         .card()

@@ -95,6 +95,9 @@ enum AppTheme {
     static let shadow = Color(light: .init(0.14, 0.12, 0.11), dark: nil, night: nil)
     static let actionFill = Color(light: .init(1, 0.72, 0.60), dark: .init(0.92, 0.63, 0.51), night: .init(0.70, 0.43, 0.30))
     static let buttonInk = Color(light: .init(0.10, 0.10, 0.10), dark: .init(0.10, 0.10, 0.10), night: .init(0.07, 0.045, 0.03))
+    /// Behind the invite QR code and the report preview: white by day, a dimmer
+    /// warm paper at night, still far lighter than the black code modules.
+    static let codePaper = Color(light: .init(1, 1, 1), dark: .init(0.90, 0.89, 0.87), night: .init(0.74, 0.66, 0.56))
     #endif
 
     static func color(for kind: EventKind) -> Color {

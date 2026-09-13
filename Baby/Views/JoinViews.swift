@@ -78,7 +78,7 @@ struct JoinLogForm: View {
                 } label: {
                     Label("Open scanner", systemImage: "camera.fill")
                 }
-                .buttonStyle(PrimaryButtonStyle())
+                .buttonStyle(SecondaryButtonStyle())
                 .accessibilityIdentifier("join.scan.open")
             } else {
                 Text("Point this iPhone's Camera app at the code and tap the Baby Tracker banner.")
@@ -286,7 +286,10 @@ struct InviteScanner: UIViewControllerRepresentable {
     let found: (String) -> Void
 
     @MainActor static var isAvailable: Bool {
-        DataScannerViewController.isSupported && DataScannerViewController.isAvailable
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-PreviewScannerButton") { return true }
+        #endif
+        return DataScannerViewController.isSupported && DataScannerViewController.isAvailable
     }
 
     func makeUIViewController(context: Context) -> DataScannerViewController {
