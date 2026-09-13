@@ -199,6 +199,17 @@ struct SchemaMain {
         var seenZones: Set<CKRecordZone.ID> = []
         report("BABY_WATCH_STARTED minutes=\(Int(minutes))")
         while Date.now < deadline {
+            do {
+                try await watchPass()
+            } catch {
+                // A dropped connection must not end a watch that runs for hours.
+                report("BABY_WATCH_RETRYING: \((error as? CKError)?.code.rawValue ?? -1)")
+            }
+            try await Task.sleep(for: .seconds(8))
+        }
+        report("BABY_WATCH_FINISHED")
+
+        func watchPass() async throws {
             let zones = try await database.allRecordZones()
                 .filter { $0.zoneID.zoneName.hasPrefix("com.apple.coredata.cloudkit.share.") }
             for zone in zones {
@@ -249,9 +260,7 @@ struct SchemaMain {
                     report("BABY_WATCH_ENTRY_DELETED zone=\(short)")
                 }
             }
-            try await Task.sleep(for: .seconds(8))
         }
-        report("BABY_WATCH_FINISHED")
     }
 
     private static func argumentValue(after flag: String) -> String? {
