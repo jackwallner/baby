@@ -11,7 +11,7 @@ Dirty / Sleep controls, and quiet daily totals. History is one tap away through
 the top-left clock. More is the top-right ellipsis.
 
 Everything outside logging lives in More: First Weeks, Pediatrician summary,
-partner sharing, stain helper, baby settings, and Baby+. No tab bar, automatic
+logging together, appearance, stain helper, baby settings, and Baby+. No tab bar, automatic
 review prompts, promotional cards, or purchase screen during onboarding.
 Onboarding is one optional name/birth-date screen with Start tracking.
 
@@ -38,8 +38,12 @@ locking something that shipped free.
   taps the phone has not confirmed, so the wrist never shows a stale answer.
 - `SummaryReport` derives the daily rows, the CSV and the PDF numbers; it is
   pure, so the page, the charts and the export cannot disagree.
-- Sharing is `CKShare` on the baby's record zone through `UICloudSharingController`.
-  No accounts, no server.
+- Logging together is one `CKShare` on the baby's record zone, opened as a
+  read/write invite link (`publicPermission = .readWrite`). The owner shows a
+  QR code or sends the link; the other phone scans it with Camera, taps the
+  link, or pastes it into Join. Every participant writes events into the same
+  zone. Apple's `UICloudSharingController` is only for removing people and
+  stopping or leaving. No accounts, no server.
 
 Key files: `Shared/Services/Persistence.swift`, `EventStore.swift`,
 `NowSummary.swift`, `SummaryReport.swift`, `SharingService.swift`,
@@ -53,14 +57,17 @@ Key files: `Shared/Services/Persistence.swift`, `EventStore.swift`,
 `python3 scripts/design-audit.py` fails any view that types its own. Four-point
 spacing scale, one 20pt margin, one continuous 20pt radius, outlined care
 graphics and firm card edges. Kind colors distinguish the four logging actions;
-peach marks primary actions. Dark mode softens the outlines. Run the audit before a release.
+peach marks primary actions. Appearance is System, Light, Dark or Night light.
+Only light has the offset ink shadow; dark themes use a hairline `edge` and
+tonal surfaces. Night light is a trait (`NightLightTrait`) bridged into SwiftUI,
+so every `Color(light:dark:night:)` re-resolves live. Run the audit before a release.
 Motion respects Reduce Motion; accessibility text sizes use stacked layouts.
 
 ## Access model
 
 Free forever: logging, the first-weeks tally, full history, both widgets, the
-Watch app and complication, the Live Activity, partner sharing, the stain
-helper.
+Watch app and complication, the Live Activity, logging together, the stain
+helper, every appearance.
 
 Baby+ (`PlusFeature`): sharing or exporting the pediatrician PDF, the trends
 charts, CSV export, and more than one baby. Nothing else may move behind it.

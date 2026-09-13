@@ -8,8 +8,10 @@ import UIKit
 /// app's rhythm is one edit here.
 ///
 /// Warm paper, outlined care graphics and clear labels for a tired parent.
-/// Firm card edges soften at night. A four-point spacing scale and shared
-/// continuous corners keep the graphic style consistent across surfaces.
+/// Three palettes: light (firm outlines and an offset ink shadow), dark (the
+/// shadow is dropped, because a shadow lighter than the page reads as a glow,
+/// and surfaces separate by tone behind a hairline), and Night light (dark's
+/// shape with dim, warm, low-blue colours for feeds in a dark room).
 enum AppTheme {
     // MARK: Spacing (multiples of four)
 
@@ -25,6 +27,8 @@ enum AppTheme {
     static let logButtonHeight: CGFloat = 88
     static let maxLogButtonHeight: CGFloat = 124
     static let outlineWidth: CGFloat = 2
+    /// Card edges in dark themes: tone does the separating, the line only hints.
+    static let hairlineWidth: CGFloat = 1
     static let shadowOffset: CGFloat = 3
     static let graphicSize: CGFloat = 44
     static let wideLayout: CGFloat = 700
@@ -33,6 +37,7 @@ enum AppTheme {
     static let ctaHeight: CGFloat = 52
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72
+    static let inviteCodeSize: CGFloat = 200
 
     static let feedbackAnimation = Animation.spring(response: 0.32, dampingFraction: 0.82)
 
@@ -60,27 +65,36 @@ enum AppTheme {
     static let accent = Color(red: 0.95, green: 0.55, blue: 0.42)
     static let notice = Color(red: 0.95, green: 0.68, blue: 0.30)
     static let outline = Color(white: 0.62)
+    static let edge = Color(white: 0.30)
+    static let shadow = Color.clear
     static let actionFill = Color(red: 0.95, green: 0.68, blue: 0.57)
     static let buttonInk = Color(white: 0.10)
     #else
-    /// Warm off-white by day, near-black at night.
-    static let paper = Color(light: .init(0.97, 0.96, 0.94), dark: .init(0.07, 0.065, 0.06))
-    static let card = Color(light: .init(1, 1, 1), dark: .init(0.12, 0.115, 0.105))
-    static let cardElevated = Color(light: .init(0.94, 0.93, 0.91), dark: .init(0.18, 0.17, 0.16))
-    static let ink = Color(light: .init(0.11, 0.10, 0.09), dark: .init(0.95, 0.94, 0.92))
-    static let ink2 = Color(light: .init(0.42, 0.40, 0.38), dark: .init(0.68, 0.66, 0.63))
-    static let ink3 = Color(light: .init(0.43, 0.41, 0.39), dark: .init(0.62, 0.60, 0.58))
+    /// Warm off-white by day, near-black at night, dim umber for Night light.
+    static let paper = Color(light: .init(0.97, 0.96, 0.94), dark: .init(0.07, 0.065, 0.06), night: .init(0.045, 0.032, 0.022))
+    static let card = Color(light: .init(1, 1, 1), dark: .init(0.125, 0.12, 0.11), night: .init(0.095, 0.068, 0.048))
+    static let cardElevated = Color(light: .init(0.94, 0.93, 0.91), dark: .init(0.17, 0.162, 0.15), night: .init(0.13, 0.095, 0.068))
+    static let inkUIColor = UIColor(light: .init(0.11, 0.10, 0.09), dark: .init(0.95, 0.94, 0.92), night: .init(0.86, 0.68, 0.52))
+    static let ink = Color(uiColor: inkUIColor)
+    static let ink2 = Color(light: .init(0.42, 0.40, 0.38), dark: .init(0.68, 0.66, 0.63), night: .init(0.64, 0.49, 0.37))
+    static let ink3 = Color(light: .init(0.43, 0.41, 0.39), dark: .init(0.62, 0.60, 0.58), night: .init(0.56, 0.43, 0.33))
     /// Kind colours. Amber, blue, brown, indigo: distinct at a glance and at 3am.
-    static let feed = Color(light: .init(0.58, 0.35, 0.10), dark: .init(0.95, 0.68, 0.30))
-    static let wet = Color(light: .init(0.18, 0.43, 0.76), dark: .init(0.45, 0.68, 0.95))
-    static let dirty = Color(light: .init(0.52, 0.38, 0.22), dark: .init(0.72, 0.58, 0.40))
-    static let sleep = Color(light: .init(0.36, 0.34, 0.78), dark: .init(0.62, 0.60, 0.95))
+    /// Night light swaps blue and indigo for warm-shifted slate and mauve.
+    static let feed = Color(light: .init(0.58, 0.35, 0.10), dark: .init(0.95, 0.68, 0.30), night: .init(0.84, 0.56, 0.26))
+    static let wet = Color(light: .init(0.18, 0.43, 0.76), dark: .init(0.45, 0.68, 0.95), night: .init(0.46, 0.60, 0.58))
+    static let dirty = Color(light: .init(0.52, 0.38, 0.22), dark: .init(0.72, 0.58, 0.40), night: .init(0.62, 0.56, 0.36))
+    static let sleep = Color(light: .init(0.36, 0.34, 0.78), dark: .init(0.62, 0.60, 0.95), night: .init(0.64, 0.50, 0.58))
     /// Primary actions that are not one of the four kinds: onboarding, paywall.
-    static let accent = Color(light: .init(0.70, 0.30, 0.20), dark: .init(0.95, 0.55, 0.42))
-    static let notice = Color(light: .init(0.60, 0.36, 0.06), dark: .init(0.95, 0.68, 0.30))
-    static let outline = Color(light: .init(0.14, 0.12, 0.11), dark: .init(0.52, 0.49, 0.46))
-    static let actionFill = Color(light: .init(1, 0.72, 0.60), dark: .init(0.92, 0.63, 0.51))
-    static let buttonInk = Color(white: 0.10)
+    static let accent = Color(light: .init(0.70, 0.30, 0.20), dark: .init(0.95, 0.55, 0.42), night: .init(0.84, 0.48, 0.34))
+    static let notice = Color(light: .init(0.60, 0.36, 0.06), dark: .init(0.95, 0.68, 0.30), night: .init(0.84, 0.56, 0.26))
+    /// Strokes inside care graphics and icon rings.
+    static let outline = Color(light: .init(0.14, 0.12, 0.11), dark: .init(0.56, 0.53, 0.50), night: .init(0.52, 0.40, 0.30))
+    /// The border around cards and buttons. Ink by day, a quiet hairline at night.
+    static let edge = Color(light: .init(0.14, 0.12, 0.11), dark: .init(0.25, 0.235, 0.22), night: .init(0.20, 0.145, 0.10))
+    /// The offset "physical edge" shadow. Only light has one.
+    static let shadow = Color(light: .init(0.14, 0.12, 0.11), dark: nil, night: nil)
+    static let actionFill = Color(light: .init(1, 0.72, 0.60), dark: .init(0.92, 0.63, 0.51), night: .init(0.70, 0.43, 0.30))
+    static let buttonInk = Color(light: .init(0.10, 0.10, 0.10), dark: .init(0.10, 0.10, 0.10), night: .init(0.07, 0.045, 0.03))
     #endif
 
     static func color(for kind: EventKind) -> Color {
@@ -177,6 +191,32 @@ private struct CareGlyph: Shape {
 }
 
 #if !os(watchOS)
+/// Night light rides the trait system, so a dynamic colour re-resolves the
+/// moment it flips, in SwiftUI and in the UIKit bars and sheets alike.
+struct NightLightTrait: UITraitDefinition {
+    static let defaultValue = false
+    static let affectsColorAppearance = true
+}
+
+struct NightLightKey: UITraitBridgedEnvironmentKey {
+    static let defaultValue = false
+
+    static func read(from traitCollection: UITraitCollection) -> Bool {
+        traitCollection[NightLightTrait.self]
+    }
+
+    static func write(to mutableTraits: inout UIMutableTraits, value: Bool) {
+        mutableTraits[NightLightTrait.self] = value
+    }
+}
+
+extension EnvironmentValues {
+    var nightLight: Bool {
+        get { self[NightLightKey.self] }
+        set { self[NightLightKey.self] = newValue }
+    }
+}
+
 extension Color {
     struct RGB {
         let red: Double
@@ -190,11 +230,26 @@ extension Color {
         }
     }
 
-    init(light: RGB, dark: RGB) {
-        self.init(uiColor: UIColor { traits in
-            let value = traits.userInterfaceStyle == .dark ? dark : light
+    /// A nil value is transparent. Night falls back to dark when not given.
+    init(light: RGB, dark: RGB?, night: RGB? = nil) {
+        self.init(uiColor: UIColor(light: light, dark: dark, night: night))
+    }
+}
+
+extension UIColor {
+    convenience init(light: Color.RGB, dark: Color.RGB?, night: Color.RGB? = nil) {
+        self.init { traits in
+            let value: Color.RGB?
+            if traits.userInterfaceStyle != .dark {
+                value = light
+            } else if traits[NightLightTrait.self] {
+                value = night ?? dark
+            } else {
+                value = dark
+            }
+            guard let value else { return .clear }
             return UIColor(red: value.red, green: value.green, blue: value.blue, alpha: 1)
-        })
+        }
     }
 }
 

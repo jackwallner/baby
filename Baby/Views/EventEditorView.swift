@@ -37,62 +37,67 @@ struct EventEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    DatePicker("Time", selection: $startedAt, in: ...Date.now.addingTimeInterval(60))
-                }
-                if kind == .feed {
-                    Section("Feed") {
-                        Picker("Side", selection: $side) {
-                            ForEach(FeedSide.allCases, id: \.self) { Text($0.label).tag($0) }
-                        }
-                        .pickerStyle(.segmented)
-                        if side == .bottle {
-                            Stepper("Amount: \(Int(amount)) ml", value: $amount, in: 0...400, step: 10)
-                        }
-                        if isNew {
-                            Toggle("Start a timer", isOn: $isTimed)
-                        }
-                        if !isTimed {
-                            Stepper("Length: \(durationMinutes) min", value: $durationMinutes, in: 0...180, step: 1)
-                        }
-                    }
-                }
-                if kind == .dirty {
-                    Section("Color") {
-                        Picker("Color", selection: $stool) {
-                            Text("Not noted").tag(StoolColor?.none)
-                            ForEach(StoolColor.allCases, id: \.self) { Text($0.label).tag(StoolColor?.some($0)) }
-                        }
-                        .pickerStyle(.menu)
-                    }
-                }
-                if kind == .sleep, !isTimed {
-                    Section("Sleep") {
-                        Stepper("Length: \(Format.compactDuration(Double(durationMinutes) * 60))", value: $durationMinutes, in: 0...1440, step: 5)
-                    }
-                }
-                if kind == .weight {
-                    Section("Weight") {
-                        Stepper("\(Format.grams(amount))", value: $amount, in: 500...15000, step: 10)
-                    }
-                }
-                Section("Note") {
-                    TextField("Optional", text: $note, axis: .vertical)
-                        .lineLimit(1...3)
-                }
-                if !isNew {
+                Group {
                     Section {
-                        Button("Delete", role: .destructive) {
-                            guard let existing = request.existing else { return }
-                            if events.delete(existing) {
-                                dismiss()
-                            } else {
-                                saveError = "Your log was not deleted. Please try again."
+                        DatePicker("Time", selection: $startedAt, in: ...Date.now.addingTimeInterval(60))
+                    }
+                    if kind == .feed {
+                        Section("Feed") {
+                            Picker("Side", selection: $side) {
+                                ForEach(FeedSide.allCases, id: \.self) { Text($0.label).tag($0) }
+                            }
+                            .pickerStyle(.segmented)
+                            if side == .bottle {
+                                Stepper("Amount: \(Int(amount)) ml", value: $amount, in: 0...400, step: 10)
+                            }
+                            if isNew {
+                                Toggle("Start a timer", isOn: $isTimed)
+                            }
+                            if !isTimed {
+                                Stepper("Length: \(durationMinutes) min", value: $durationMinutes, in: 0...180, step: 1)
                             }
                         }
                     }
+                    if kind == .dirty {
+                        Section("Color") {
+                            Picker("Color", selection: $stool) {
+                                Text("Not noted").tag(StoolColor?.none)
+                                ForEach(StoolColor.allCases, id: \.self) { Text($0.label).tag(StoolColor?.some($0)) }
+                            }
+                            .pickerStyle(.menu)
+                        }
+                    }
+                    if kind == .sleep, !isTimed {
+                        Section("Sleep") {
+                            Stepper("Length: \(Format.compactDuration(Double(durationMinutes) * 60))", value: $durationMinutes, in: 0...1440, step: 5)
+                        }
+                    }
+                    if kind == .weight {
+                        Section("Weight") {
+                            Stepper("\(Format.grams(amount))", value: $amount, in: 500...15000, step: 10)
+                        }
+                    }
+                    Section("Note") {
+                        TextField("Optional", text: $note, axis: .vertical)
+                            .lineLimit(1...3)
+                    }
+                    if !isNew {
+                        Section {
+                            Button("Delete", role: .destructive) {
+                                guard let existing = request.existing else { return }
+                                if events.delete(existing) {
+                                    dismiss()
+                                } else {
+                                    saveError = "Your log was not deleted. Please try again."
+                                }
+                            }
+                            .foregroundStyle(.red)
+                        }
+                    }
                 }
+                .listRowBackground(AppTheme.card)
             }
+            .foregroundStyle(AppTheme.ink)
             .scrollContentBackground(.hidden)
             .background(AppTheme.paper)
             .tint(AppTheme.accent)

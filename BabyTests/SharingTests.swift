@@ -99,4 +99,36 @@ final class SharingTests: XCTestCase {
         XCTAssertEqual(persistence.allChildren(in: persistence.viewContext).count, 1)
         XCTAssertEqual(persistence.events(for: child, in: persistence.viewContext).count, 1)
     }
+
+    func testInviteLinkIsFoundInsideAPastedMessage() {
+        let message = "Join Nora's log in Baby Tracker https://www.icloud.com/share/0abcDEF123#Nora_s_log thanks"
+        XCTAssertEqual(SharingService.inviteURL(in: message)?.absoluteString, "https://www.icloud.com/share/0abcDEF123#Nora_s_log")
+        XCTAssertNotNil(SharingService.inviteURL(in: "icloud.com/share/0abc"))
+    }
+
+    func testNonInviteLinksAreRejected() {
+        XCTAssertNil(SharingService.inviteURL(in: "https://example.com/share/0abc"))
+        XCTAssertNil(SharingService.inviteURL(in: "https://www.icloud.com/photos/0abc"))
+        XCTAssertNil(SharingService.inviteURL(in: "nothing here"))
+    }
+
+    func testNewOwnerShareIsOpenedAsAnEditableInviteLink() {
+        let share = CKShare(recordZoneID: CKRecordZone.ID(zoneName: "TestBaby"))
+        XCTAssertTrue(SharingService.needsOpenInvite(share), "A private share would reject a partner whose Apple ID differs from the invited address")
+        share.publicPermission = .readWrite
+        XCTAssertFalse(SharingService.needsOpenInvite(share))
+    }
+
+    func testPastingSomethingElseFailsBeforeTouchingICloud() async {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let sharing = SharingService(persistence: persistence, events: EventStore(persistence: persistence))
+        do {
+            try await sharing.join(pasted: "https://example.com/not-an-invite")
+            XCTFail("A non-invite link must not be accepted")
+        } catch let error as SharingService.JoinError {
+            XCTAssertEqual(error, .notAnInvite)
+        } catch {
+            XCTFail("Unexpected error \(error)")
+        }
+    }
 }

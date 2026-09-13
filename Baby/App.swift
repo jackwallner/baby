@@ -13,6 +13,10 @@ struct BabyApp: App {
 
     init() {
         WatchSyncService.shared.start()
+        // Bar titles are UIKit; give them the theme ink so Night light has no
+        // stray pure-white title.
+        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: AppTheme.inkUIColor]
+        UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: AppTheme.inkUIColor]
 
         #if DEBUG
         if RevenueCatProbe.isEnabled && RevenueCatProbe.wantsPurchase {
@@ -44,6 +48,9 @@ struct BabyApp: App {
                 .environmentObject(events)
                 .environmentObject(sharing)
                 .preferredColorScheme(settings.appearance.colorScheme)
+                .environment(\.nightLight, settings.appearance.isNightLight)
+                .onAppear { NightLight.apply(settings.appearance.isNightLight) }
+                .onChange(of: settings.appearance) { _, appearance in NightLight.apply(appearance.isNightLight) }
                 .alert("Couldn't join this baby's log", isPresented: Binding(
                     get: { sharing.invitationError != nil },
                     set: { if !$0 { sharing.invitationError = nil } }
@@ -81,6 +88,7 @@ struct BabyApp: App {
                 }
                 .onChange(of: scenePhase) { _, phase in
                     guard phase == .active else { return }
+                    NightLight.apply(settings.appearance.isNightLight)
                     events.reload()
                     Task { await sharing.refresh(for: events.child) }
                 }
@@ -90,6 +98,25 @@ struct BabyApp: App {
                     }
                     Task { await sharing.refresh(for: child) }
                 }
+        }
+    }
+}
+
+/// Sheets are presented from the window, not from the SwiftUI view that set
+/// the environment, so the trait is also set on every window. Presented
+/// controllers inherit it and SwiftUI reads it back through the bridge.
+@MainActor
+enum NightLight {
+    static func apply(_ isOn: Bool) {
+        for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
+            for window in scene.windows {
+                let isSet = window.traitOverrides.contains(NightLightTrait.self)
+                if isOn, !isSet {
+                    window.traitOverrides[NightLightTrait.self] = true
+                } else if !isOn, isSet {
+                    window.traitOverrides.remove(NightLightTrait.self)
+                }
+            }
         }
     }
 }

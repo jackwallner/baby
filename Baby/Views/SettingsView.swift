@@ -9,6 +9,7 @@ struct SettingsView: View {
     @EnvironmentObject private var sharing: SharingService
     @State private var showPaywall = false
     @State private var showSharing = false
+    @State private var showJoin = false
     @State private var showStainHelper = false
     @State private var name = ""
     @State private var hasBirthDate = false
@@ -17,13 +18,18 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            toolsSection
-            babySection
-            babiesSection
-            sharingSection
-            plusSection
-            aboutSection
+            Group {
+                toolsSection
+                babySection
+                babiesSection
+                sharingSection
+                appearanceSection
+                plusSection
+                aboutSection
+            }
+            .listRowBackground(AppTheme.card)
         }
+        .foregroundStyle(AppTheme.ink)
         .scrollContentBackground(.hidden)
         .background(AppTheme.paper)
         .tint(AppTheme.accent)
@@ -40,6 +46,7 @@ struct SettingsView: View {
         .sheet(isPresented: $showSharing) {
             if let child = events.child { SharingSheet(child: child) }
         }
+        .sheet(isPresented: $showJoin) { JoinSharedLogView() }
         .sheet(isPresented: $showStainHelper) { StainHelperView() }
         .alert("Couldn't save changes", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
@@ -122,6 +129,7 @@ struct SettingsView: View {
                     }
                 }
                 Button("Add a baby") { addBaby() }
+                .foregroundStyle(AppTheme.accent)
             } header: {
                 Text("Babies")
             } footer: {
@@ -130,6 +138,7 @@ struct SettingsView: View {
         } else {
             Section("Babies") {
                 Button("Add another baby with Baby+") { showPaywall = true }
+                .foregroundStyle(AppTheme.accent)
             }
         }
     }
@@ -150,26 +159,58 @@ struct SettingsView: View {
 
     private var sharingSection: some View {
         Section {
-            if sharing.share != nil {
-                let names = sharing.participantNames
-                LabeledContent("Shared with", value: names.isEmpty ? "Invite pending" : names.joined(separator: ", "))
+            if sharing.share != nil, !sharing.isOwner {
+                LabeledContent("Started by", value: sharing.ownerName ?? "Someone else")
                 Button {
                     showSharing = true
                 } label: {
-                    Label(sharing.isOwner ? "Manage sharing" : "Leave shared log", systemImage: sharing.isOwner ? "person.2.fill" : "rectangle.portrait.and.arrow.right")
+                    Label("People and leaving", systemImage: "person.2.fill")
                 }
+                .foregroundStyle(AppTheme.accent)
+                .accessibilityIdentifier("settings.partner.share")
             } else {
+                if sharing.share != nil {
+                    let names = sharing.participantNames
+                    LabeledContent("Logging with", value: names.isEmpty ? "No one yet" : names.joined(separator: ", "))
+                }
                 Button {
                     showSharing = true
                 } label: {
-                    Label("Share with your partner", systemImage: "person.badge.plus")
+                    Label("Invite someone", systemImage: "qrcode")
                 }
+                .foregroundStyle(AppTheme.accent)
                 .accessibilityIdentifier("settings.partner.share")
             }
+            Button {
+                showJoin = true
+            } label: {
+                Label("Join someone else's log", systemImage: "camera.viewfinder")
+            }
+            .foregroundStyle(AppTheme.accent)
+            .accessibilityIdentifier("settings.partner.join")
         } header: {
-            Text("Partner")
+            Text("Log together")
         } footer: {
-            Text("One log for both parents, shared privately through iCloud. Review access and sync details before inviting.")
+            Text("Parents, grandparents and nannies each log from their own iPhone into the same baby's log, privately through iCloud.")
+        }
+    }
+
+    private var appearanceSection: some View {
+        Section {
+            Picker("Appearance", selection: $settings.appearance) {
+                ForEach(AppAppearance.allCases, id: \.rawValue) { appearance in
+                    Text(appearance.label)
+                        .foregroundStyle(AppTheme.ink)
+                        .tag(appearance)
+                        .accessibilityIdentifier("appearance.\(appearance.rawValue)")
+                }
+            }
+            .pickerStyle(.inline)
+            .labelsHidden()
+        } header: {
+            Text("Appearance")
+        } footer: {
+            Text("Night light uses dim, warm colors that are easier on the eyes during feeds in a dark room.")
         }
     }
 
@@ -178,10 +219,13 @@ struct SettingsView: View {
             LabeledContent("Status", value: store.isPro ? "Active" : "Free")
             if store.isPro {
                 Link("Manage subscription", destination: BabyLinks.manageSubscriptions)
+                .foregroundStyle(AppTheme.accent)
             } else {
                 Button("See Baby+") { showPaywall = true }
+                .foregroundStyle(AppTheme.accent)
             }
             Button("Restore purchases") { Task { await store.restore() } }
+            .foregroundStyle(AppTheme.accent)
             #if DEBUG
             Toggle("Local Pro override (debug)", isOn: Binding(
                 get: { store.isPro },
@@ -193,15 +237,14 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         Section("About") {
-            Picker("Appearance", selection: $settings.appearance) {
-                ForEach(AppAppearance.allCases, id: \.rawValue) { appearance in
-                    Text(appearance.label).tag(appearance)
-                }
-            }
             Link("Rate Baby Tracker", destination: AppStoreReviewLinks.writeReviewURL)
+                .foregroundStyle(AppTheme.accent)
             Link("Support", destination: BabyLinks.support)
+                .foregroundStyle(AppTheme.accent)
             Link("Privacy policy", destination: BabyLinks.privacyPolicy)
+                .foregroundStyle(AppTheme.accent)
             Link("Terms of use", destination: BabyLinks.standardEULA)
+                .foregroundStyle(AppTheme.accent)
             LabeledContent("Version", value: Bundle.main.appVersionLabel)
             Text(Guidance.disclaimer)
                 .font(.caption)

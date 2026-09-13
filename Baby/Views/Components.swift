@@ -15,14 +15,26 @@ struct CardBackground: ViewModifier {
     }
 }
 
+/// The physical card edge. Light gets an ink outline and a hard offset shadow.
+/// Dark themes drop the shadow (a shadow lighter than the page reads as a
+/// glow) and keep a hairline, so surfaces separate by tone.
+struct GraphicBorder: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                AppTheme.cardShape
+                    .fill(AppTheme.card)
+                    .shadow(color: AppTheme.shadow, radius: 0, x: AppTheme.shadowOffset, y: AppTheme.shadowOffset)
+            }
+            .overlay(AppTheme.cardShape.strokeBorder(AppTheme.edge, lineWidth: colorScheme == .dark ? AppTheme.hairlineWidth : AppTheme.outlineWidth))
+    }
+}
+
 extension View {
     func graphicBorder() -> some View {
-        background {
-            AppTheme.cardShape
-                .fill(AppTheme.card)
-                .shadow(color: AppTheme.outline, radius: 0, x: AppTheme.shadowOffset, y: AppTheme.shadowOffset)
-        }
-            .overlay(AppTheme.cardShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
+        modifier(GraphicBorder())
     }
 
     func card(elevated: Bool = false) -> some View {

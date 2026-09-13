@@ -8,6 +8,7 @@ struct BabyOnboardingView: View {
     @State private var hasBirthDate = false
     @State private var birthDate = Date.now
     @State private var showSaveError = false
+    @State private var showJoin = false
     @FocusState private var isEditingName: Bool
 
     var body: some View {
@@ -45,6 +46,7 @@ struct BabyOnboardingView: View {
         .padding(AppTheme.margin)
         .background(AppTheme.paper)
         .tint(AppTheme.accent)
+        .sheet(isPresented: $showJoin) { JoinSharedLogView() }
         .alert("Couldn't save setup", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -91,21 +93,26 @@ struct BabyOnboardingView: View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             SharedLogGraphic()
             VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-                Text("Keep one shared log")
+                Text("Log together")
                     .font(.headline)
                     .foregroundStyle(AppTheme.ink)
-                Text("You can both add feeds, diapers and sleep to this same log.")
+                Text("Everyone caring for the baby logs from their own iPhone into one shared log. Starting it? Invite others anytime from More.")
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.ink2)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            Label("Invite your partner anytime in More", systemImage: "person.badge.plus")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(AppTheme.accent)
-                .fixedSize(horizontal: false, vertical: true)
+            Button {
+                showJoin = true
+            } label: {
+                Label("Someone already started? Join their log", systemImage: "camera.viewfinder")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.accent)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(minHeight: 44, alignment: .leading)
+            }
+            .accessibilityIdentifier("onboarding.join")
         }
         .card(elevated: true)
-        .accessibilityIdentifier("onboarding.partner")
     }
 
     private var babyDetails: some View {

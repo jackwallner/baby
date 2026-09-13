@@ -3,8 +3,14 @@ import CoreData
 import Foundation
 import os
 
-/// Partner sharing through iCloud: one `CKShare` on the baby's record zone,
+/// Logging together through iCloud: one `CKShare` on the baby's record zone,
 /// so every event under that baby follows it. No accounts, no server of ours.
+///
+/// The share is opened as a read/write invite link. Whoever holds the link
+/// (scanned from the owner's screen, or sent in Messages) joins with the same
+/// rights as the owner to add, edit and delete entries. A private, contact-only
+/// invite fails whenever the partner's Apple ID is not the address it was sent
+/// to, which is the usual reason a second parent "can't get in".
 @MainActor
 final class SharingService: ObservableObject {
     static let shared = SharingService(persistence: .shared, events: .shared)
@@ -56,6 +62,81 @@ final class SharingService: ObservableObject {
         newShare[CKShare.SystemFieldKey.title] = "\(child.displayName)'s log" as CKRecordValue
         share = newShare
         return newShare
+    }
+
+    /// The owner's share with its invite link switched on. A participant gets
+    /// the share as it is; only the owner may change who can join.
+    func inviteShare(child: Child) async throws -> CKShare {
+        let current = try await shareForPresentation(child: child)
+        guard Self.needsOpenInvite(current) else { return current }
+        current.publicPermission = .readWrite
+        let result = try await ckContainer.privateCloudDatabase.modifyRecords(saving: [current], deleting: [], savePolicy: .changedKeys)
+        guard let saved = try result.saveResults[current.recordID]?.get() as? CKShare else {
+            throw CKError(.internalError)
+        }
+        try await persist(saved, for: child)
+        return saved
+    }
+
+    nonisolated static func needsOpenInvite(_ share: CKShare) -> Bool {
+        let isOwner = share.currentUserParticipant.map { $0.role == .owner } ?? true
+        return isOwner && share.publicPermission != .readWrite
+    }
+
+    /// The link the invite QR code and "Send link" carry.
+    var inviteURL: URL? {
+        guard let share, share.publicPermission != .none else { return nil }
+        return share.url
+    }
+
+    /// Pulls an iCloud share link out of whatever was pasted: a bare link, or
+    /// a whole message with the link inside it.
+    nonisolated static func inviteURL(in text: String) -> URL? {
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        let range = NSRange(text.startIndex..., in: text)
+        let links = detector?.matches(in: text, range: range).compactMap(\.url) ?? []
+        return links.first { url in
+            guard let host = url.host?.lowercased() else { return false }
+            return (host == "icloud.com" || host.hasSuffix(".icloud.com")) && url.path.hasPrefix("/share/")
+        }
+    }
+
+    enum JoinError: Error, Equatable {
+        case notAnInvite
+        case iCloudUnavailable
+        case ownInvite
+        case unavailable
+
+        var message: String {
+            switch self {
+            case .notAnInvite: "That isn't a Baby Tracker invite link. Copy the whole link your partner sent and try again."
+            case .iCloudUnavailable: "Sign in to iCloud on this iPhone (Settings > your name), then try again."
+            case .ownInvite: "This is your own invite. Show the code or send the link to the person joining."
+            case .unavailable: "That invite couldn't be opened. Check your connection, or ask for a new link if sharing was stopped."
+            }
+        }
+    }
+
+    /// Joining from inside the app with a pasted link. Opening the link or
+    /// scanning the code with the Camera lands in `accept(_:)` instead.
+    func join(pasted text: String) async throws {
+        guard let url = Self.inviteURL(in: text) else { throw JoinError.notAnInvite }
+        guard (try? await ckContainer.accountStatus()) == .available else { throw JoinError.iCloudUnavailable }
+        let metadata: CKShare.Metadata
+        do {
+            metadata = try await ckContainer.shareMetadata(for: url)
+        } catch {
+            logger.error("shareMetadata failed: \(String(describing: error), privacy: .public)")
+            throw JoinError.unavailable
+        }
+        guard metadata.participantRole != .owner else { throw JoinError.ownInvite }
+        do {
+            _ = try await persistence.container.acceptShareInvitations(from: [metadata], into: persistence.sharedStore)
+        } catch {
+            logger.error("acceptShareInvitations failed: \(String(describing: error), privacy: .public)")
+            throw JoinError.unavailable
+        }
+        finishAcceptingInvitation(in: metadata.share.recordID.zoneID, error: nil)
     }
 
     /// A fresh install can reach this screen before Core Data has finished its
@@ -115,16 +196,23 @@ final class SharingService: ObservableObject {
         events.adoptSharedChildIfNeeded(in: zoneID)
     }
 
-    /// People on the share other than the owner, for the Settings row.
+    /// People who joined, other than the owner, for the Settings row.
     var participantNames: [String] {
         guard let share else { return [] }
         return share.participants
-            .filter { $0.role != .owner }
-            .compactMap { participant in
-                let name = participant.userIdentity.nameComponents.map { PersonNameComponentsFormatter().string(from: $0) } ?? ""
-                if !name.isEmpty { return name }
-                return participant.userIdentity.lookupInfo?.emailAddress ?? participant.userIdentity.lookupInfo?.phoneNumber
-            }
+            .filter { $0.role != .owner && $0.acceptanceStatus == .accepted }
+            .compactMap(Self.displayName)
+    }
+
+    /// The person who started a log this account joined.
+    var ownerName: String? {
+        share.flatMap { Self.displayName($0.owner) }
+    }
+
+    private static func displayName(_ participant: CKShare.Participant) -> String? {
+        let name = participant.userIdentity.nameComponents.map { PersonNameComponentsFormatter.localizedString(from: $0, style: .short) } ?? ""
+        if !name.isEmpty { return name }
+        return participant.userIdentity.lookupInfo?.emailAddress ?? participant.userIdentity.lookupInfo?.phoneNumber
     }
 
     var isOwner: Bool {

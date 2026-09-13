@@ -24,6 +24,8 @@ Use vertical layouts when the side-by-side version no longer fits.
 
 Verification: LoggingUITests covers direct logging, long-press cancellation,
 Undo, sleep/wake, one-screen onboarding, and free access to the tucked-away
-tools. SharingTests protects the owner's log and separates invitation failures
+tools. SharingInterfaceUITests covers the invite explanation, the invite code
+and link, joining from onboarding and More, and the four appearance options.
+SharingTests protects the owner's log and separates invitation failures
 from an intentional stop-sharing action. Real cross-account iCloud sync still
 requires two signed-in devices and a deployed production schema.
