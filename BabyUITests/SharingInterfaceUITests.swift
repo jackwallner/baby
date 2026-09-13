@@ -3,7 +3,7 @@ import XCTest
 final class SharingInterfaceUITests: XCTestCase {
     private func launch(_ extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
-        app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit"] + extra
+        app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit", "-Appearance", "system"] + extra
         app.launch()
         XCTAssertTrue(app.buttons["more"].waitForExistence(timeout: 15))
         return app
@@ -76,16 +76,45 @@ final class SharingInterfaceUITests: XCTestCase {
         attach(app, "join-error")
     }
 
-    func testOnboardingOffersJoiningAnExistingLog() {
+    func testOnboardingOffersStartingOrJoiningALog() {
         let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
-        app.launchArguments = ["-NoCloudKit", "-hasCompletedSetup", "NO"]
+        app.launchArguments = ["-NoCloudKit", "-hasCompletedSetup", "NO", "-Appearance", "system"]
         app.launch()
-        let join = app.buttons["onboarding.join"]
-        XCTAssertTrue(join.waitForExistence(timeout: 10))
-        attach(app, "onboarding-join-entry")
+        let start = app.buttons["onboarding.path.start"]
+        let join = app.buttons["onboarding.path.join"]
+        XCTAssertTrue(start.waitForExistence(timeout: 10))
+        XCTAssertTrue(join.exists, "Joining must be a first-class choice on the setup screen")
+        XCTAssertTrue(start.isSelected)
+        XCTAssertTrue(app.buttons["onboarding.primary"].exists)
+        attach(app, "onboarding-start")
+
         join.tap()
-        XCTAssertTrue(app.staticTexts["Join a shared log"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Easiest: scan their code"].exists)
+        XCTAssertTrue(join.isSelected)
+        XCTAssertTrue(app.staticTexts["Scan their code"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["join.submit"].exists)
+        XCTAssertFalse(app.buttons["join.submit"].isEnabled)
+        XCTAssertFalse(app.buttons["onboarding.primary"].exists, "Join mode must not also offer to create a separate baby")
+        XCTAssertFalse(app.textFields["onboarding.name"].exists)
+        attach(app, "onboarding-join")
+
+        let field = app.textFields["join.link"].exists ? app.textFields["join.link"] : app.textViews["join.link"]
+        field.tap()
+        field.typeText("not a link")
+        app.buttons["join.submit"].tap()
+        XCTAssertTrue(app.staticTexts["join.error"].waitForExistence(timeout: 5) || app.otherElements["join.error"].exists)
+
+        start.tap()
+        XCTAssertTrue(app.buttons["onboarding.primary"].waitForExistence(timeout: 5))
+    }
+
+    func testOpeningAnInviteBeforeSetupWaitsForTheBaby() {
+        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
+        app.launchArguments = ["-NoCloudKit", "-hasCompletedSetup", "NO", "-Appearance", "system", "-PreviewJoining", "-FastJoinTimeout"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Joining the shared log"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["onboarding.primary"].exists, "No setup screen while an invitation's baby is on its way")
+        XCTAssertTrue(app.buttons["joining.giveUp"].waitForExistence(timeout: 5), "A way out appears if joining takes long")
+        attach(app, "joining-wait")
     }
 
     func testAppearanceOffersSystemLightDarkAndNightLight() {
@@ -97,17 +126,15 @@ final class SharingInterfaceUITests: XCTestCase {
             XCTAssertTrue(app.buttons[label].exists, "Missing appearance option \(label)")
         }
         night.tap()
+        XCTAssertTrue(night.isSelected)
         attach(app, "appearance-night-light")
-        let invite = app.buttons["settings.partner.share"]
-        for _ in 0..<6 where !invite.isHittable {
-            app.swipeDown()
-        }
-        attach(app, "more-night-light")
-        invite.tap()
-        XCTAssertTrue(app.staticTexts["Log together"].waitForExistence(timeout: 5))
-        attach(app, "sharing-night-light")
-        app.buttons["sharing.close"].tap()
-        scrollTo(app.buttons["System"], in: app)
+        let join = app.buttons["settings.partner.join"]
+        XCTAssertTrue(join.isHittable)
+        join.tap()
+        XCTAssertTrue(app.staticTexts["Join a shared log"].waitForExistence(timeout: 5))
+        attach(app, "join-night-light")
+        app.buttons["join.close"].tap()
+        XCTAssertTrue(app.buttons["System"].waitForExistence(timeout: 5))
         app.buttons["System"].tap()
     }
 }

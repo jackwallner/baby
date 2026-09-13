@@ -1,6 +1,7 @@
 import AppKit
 import CloudKit
 import CoreData
+import CoreImage
 import Foundation
 
 /// A setup tool, never part of the iPhone app. It uses the real model and
@@ -35,6 +36,10 @@ struct SchemaMain {
             // in the two-store setup check as a third identifier.
             if CommandLine.arguments.contains("--verify-shared-store") {
                 try await verifyTwoStoreSetup()
+                exit(EXIT_SUCCESS)
+            }
+            if CommandLine.arguments.contains("--watch-shares") {
+                try await watchShares(in: cloud)
                 exit(EXIT_SUCCESS)
             }
             if CommandLine.arguments.contains("--purge-share-zones") {
@@ -80,9 +85,10 @@ struct SchemaMain {
         }
     }
 
-    /// Exercises the owner half of partner sharing against the real account:
-    /// a `CKShare` on the baby's zone, an invitation URL, and the stop-sharing
-    /// purge. The accept half needs a second iCloud account and a device.
+    /// Exercises the owner half of logging together against the real account:
+    /// a `CKShare` on the baby's zone opened by the app's own `ShareInvite`,
+    /// the link resolving back to that baby, the QR code decoding to the link,
+    /// and the stop-sharing purge. Accepting needs a second iCloud account.
     private static func verifyShare(using source: NSPersistentCloudKitContainer, cloud: CKContainer) async throws {
         let child = Child.make(in: source.viewContext, name: "Temporary share verification", birthDate: nil)
         let fixtureID = child.id!
@@ -96,33 +102,75 @@ struct SchemaMain {
         try await waitUntil(timeout: 600) { source.recordID(for: child.objectID) != nil }
         report("BABY_SHARE_STORE_READY")
 
-        let (_, share, _) = try await source.share([child], to: nil)
-        share[CKShare.SystemFieldKey.title] = "\(child.displayName)'s log" as CKRecordValue
         guard let store = child.objectID.persistentStore else { throw SchemaError.shareHasNoStore }
-        let saved = try await source.persistUpdatedShare(share, in: store)
-
-        guard let url = saved.url else { throw SchemaError.shareHasNoURL }
-        report("BABY_SHARE_URL: \(url.host ?? "none")")
-
-        let zoneID = saved.recordID.zoneID
-        guard zoneID.zoneName != "com.apple.coredata.cloudkit.zone" else {
-            throw SchemaError.shareNotInItsOwnZone
-        }
-        report("BABY_SHARE_ZONE: \(zoneID.zoneName)")
+        var zoneID: CKRecordZone.ID?
 
         do {
+            // The app's exact invite routine: share the baby and open the link.
+            let saved = try await ShareInvite.prepare(for: [child], title: "\(child.displayName)'s log", container: source, database: cloud.privateCloudDatabase)
+            zoneID = saved.recordID.zoneID
+            guard saved.recordID.zoneID.zoneName != "com.apple.coredata.cloudkit.zone" else {
+                throw SchemaError.shareNotInItsOwnZone
+            }
+            report("BABY_SHARE_ZONE: \(saved.recordID.zoneID.zoneName)")
+            guard let url = saved.url else { throw SchemaError.shareHasNoURL }
+            report("BABY_SHARE_URL_HOST: \(url.host ?? "none")")
+
+            let cached = try source.fetchShares(in: store).first { $0.recordID == saved.recordID }
+            guard cached?.publicPermission == .readWrite else { throw SchemaError.inviteNotOpen("Core Data cache") }
+            report("BABY_SHARE_CORE_DATA_CACHE_IS_OPEN")
+
             let record = try await cloud.privateCloudDatabase.record(for: saved.recordID)
-            guard let cloudShare = record as? CKShare else { throw SchemaError.shareNotInCloud }
-            let owners = cloudShare.participants.filter { $0.role == .owner }
-            guard owners.count == 1, cloudShare.participants.count == 1 else {
+            guard let cloudShare = record as? CKShare,
+                  cloudShare.participants.filter({ $0.role == .owner }).count == 1 else {
                 throw SchemaError.shareNotInCloud
             }
-            report("BABY_SHARE_RECORD_VERIFIED_IN_CLOUD")
-            guard cloudShare.publicPermission == .none else { throw SchemaError.sharePubliclyReadable }
-            report("BABY_SHARE_IS_INVITE_ONLY")
-        } catch let error as CKError where error.code == .unknownItem {
-            throw SchemaError.shareNotInCloud
+            guard cloudShare.publicPermission == .readWrite else { throw SchemaError.inviteNotOpen("iCloud record") }
+            report("BABY_SHARE_CLOUD_RECORD_IS_READ_WRITE_LINK")
+
+            // What the second phone does first with a scanned or pasted link.
+            let metadata = try await cloud.shareMetadata(for: url)
+            guard metadata.share.recordID == saved.recordID,
+                  metadata.share.publicPermission == .readWrite,
+                  metadata.participantRole == .owner else {
+                throw SchemaError.inviteNotOpen("share metadata")
+            }
+            report("BABY_SHARE_LINK_RESOLVES_TO_THIS_BABY")
+
+            let pasted = "Join \(child.displayName)'s log in Baby Tracker so we can both log feeds, diapers and sleep. \(url.absoluteString)"
+            guard ShareInvite.url(in: pasted) == url else { throw SchemaError.inviteNotOpen("pasted message parse") }
+            report("BABY_SHARE_PASTED_MESSAGE_PARSES")
+
+            guard let code = ShareInvite.qrCode(for: url),
+                  let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]),
+                  let decoded = detector.features(in: CIImage(cgImage: code)).compactMap({ ($0 as? CIQRCodeFeature)?.messageString }).first,
+                  let decodedURL = URL(string: decoded),
+                  ShareInvite.url(in: decoded) == decodedURL,
+                  decodedURL == url else {
+                throw SchemaError.inviteNotOpen("QR round trip")
+            }
+            report("BABY_SHARE_QR_CODE_DECODES_TO_LINK")
+
+            // Stopping from Apple's sheet deletes the share record on the
+            // server and nothing else. Inviting again must still work.
+            _ = try await cloud.privateCloudDatabase.deleteRecord(withID: saved.recordID)
+            report("BABY_SHARE_STOPPED_ON_SERVER")
+            let again = try await ShareInvite.prepare(for: [child], title: "\(child.displayName)'s log", container: source, database: cloud.privateCloudDatabase)
+            guard let againRecord = try await cloud.privateCloudDatabase.record(for: again.recordID) as? CKShare,
+                  againRecord.publicPermission == .readWrite,
+                  let againURL = againRecord.url else {
+                throw SchemaError.inviteNotOpen("re-invite after stop")
+            }
+            let againMetadata = try await cloud.shareMetadata(for: againURL)
+            guard againMetadata.share.publicPermission == .readWrite else { throw SchemaError.inviteNotOpen("re-invite metadata") }
+            zoneID = again.recordID.zoneID
+            report("BABY_SHARE_REINVITE_AFTER_STOP_WORKS same_zone=\(again.recordID.zoneID == saved.recordID.zoneID) new_link=\(againURL != url)")
+        } catch {
+            if let zoneID { _ = try? await source.purgeObjectsAndRecordsInZone(with: zoneID, in: store) }
+            throw error
         }
+        guard let zoneID else { throw SchemaError.shareHasNoStore }
+        let saved = try source.fetchShares(in: store).first { $0.recordID.zoneID == zoneID } ?? CKShare(recordZoneID: zoneID)
 
         _ = try await source.purgeObjectsAndRecordsInZone(with: zoneID, in: store)
         try await waitUntil {
@@ -134,6 +182,82 @@ struct SchemaMain {
             }
         }
         report("BABY_SHARE_STOPPED_AND_ZONE_PURGED")
+    }
+
+    /// Watches the signed-in account's shared babies from the server's side
+    /// while two real phones run the app: who joined each log, and every entry
+    /// written into it, labelled by whether the owner or someone else wrote it.
+    /// Read-only. A partner's entry showing up here is proof it crossed from
+    /// their iCloud account into the owner's log.
+    private static func watchShares(in cloud: CKContainer) async throws {
+        let minutes = argumentValue(after: "--watch-shares").flatMap(Double.init) ?? 60
+        let deadline = Date.now.addingTimeInterval(minutes * 60)
+        let database = cloud.privateCloudDatabase
+        var tokens: [CKRecordZone.ID: CKServerChangeToken] = [:]
+        var seenEntries: Set<CKRecord.ID> = []
+        var seenPeople: Set<String> = []
+        var seenZones: Set<CKRecordZone.ID> = []
+        report("BABY_WATCH_STARTED minutes=\(Int(minutes))")
+        while Date.now < deadline {
+            let zones = try await database.allRecordZones()
+                .filter { $0.zoneID.zoneName.hasPrefix("com.apple.coredata.cloudkit.share.") }
+            for zone in zones {
+                let zoneID = zone.zoneID
+                let short = String(zoneID.zoneName.suffix(8))
+                if !seenZones.contains(zoneID) {
+                    seenZones.insert(zoneID)
+                    report("BABY_WATCH_SHARED_LOG zone=\(short)")
+                }
+                let shareID = CKRecord.ID(recordName: CKRecordNameZoneWideShare, zoneID: zoneID)
+                let shareResult: CKShare?
+                do {
+                    shareResult = try await database.record(for: shareID) as? CKShare
+                } catch {
+                    shareResult = nil
+                    let line = "zone=\(short) no-share-record: \((error as? CKError)?.code.rawValue ?? -1)"
+                    if seenPeople.insert(line).inserted { report("BABY_WATCH_SHARE \(line)") }
+                }
+                if let share = shareResult {
+                    let summary = "zone=\(short) link=\(share.publicPermission == .readWrite ? "read-write" : share.publicPermission == .none ? "invite-only" : "read-only") others=\(share.participants.filter { $0.role != .owner }.count)"
+                    if seenPeople.insert(summary).inserted { report("BABY_WATCH_SHARE \(summary)") }
+                    for participant in share.participants where participant.role != .owner {
+                        let name = participant.userIdentity.nameComponents
+                            .map { PersonNameComponentsFormatter.localizedString(from: $0, style: .short) } ?? "unnamed"
+                        let status = switch participant.acceptanceStatus {
+                        case .accepted: "accepted"
+                        case .pending: "pending"
+                        case .removed: "removed"
+                        default: "unknown"
+                        }
+                        let line = "zone=\(short) person=\(name) status=\(status) link=\(share.publicPermission == .readWrite ? "read-write" : "\(share.publicPermission.rawValue)")"
+                        if seenPeople.insert(line).inserted { report("BABY_WATCH_PARTICIPANT \(line)") }
+                    }
+                }
+                let changes = try await database.recordZoneChanges(inZoneWith: zoneID, since: tokens[zoneID])
+                tokens[zoneID] = changes.changeToken
+                for (recordID, result) in changes.modificationResultsByID {
+                    guard let record = try? result.get().record, record.recordType == "CD_LogEvent" else { continue }
+                    let creator = record.creatorUserRecordID?.recordName ?? "?"
+                    let editor = record.lastModifiedUserRecordID?.recordName ?? "?"
+                    let by = creator == CKCurrentUserDefaultName ? "owner" : "someone-else"
+                    let editedBy = editor == CKCurrentUserDefaultName ? "owner" : "someone-else"
+                    let kind = record["CD_kind"] as? String ?? "?"
+                    let verb = seenEntries.insert(recordID).inserted ? "ENTRY" : "ENTRY_EDITED"
+                    report("BABY_WATCH_\(verb) zone=\(short) kind=\(kind) created_by=\(by) last_edit_by=\(editedBy) at=\(ISO8601DateFormatter().string(from: record.modificationDate ?? .now))")
+                }
+                for deletion in changes.deletions where deletion.recordType == "CD_LogEvent" {
+                    report("BABY_WATCH_ENTRY_DELETED zone=\(short)")
+                }
+            }
+            try await Task.sleep(for: .seconds(8))
+        }
+        report("BABY_WATCH_FINISHED")
+    }
+
+    private static func argumentValue(after flag: String) -> String? {
+        let arguments = CommandLine.arguments
+        guard let index = arguments.firstIndex(of: flag), index + 1 < arguments.count else { return nil }
+        return arguments[index + 1]
     }
 
     /// Removes the share zones a failed verification can leave behind. Core
@@ -311,7 +435,7 @@ struct SchemaMain {
         case shareHasNoURL
         case shareNotInCloud
         case shareNotInItsOwnZone
-        case sharePubliclyReadable
+        case inviteNotOpen(String)
         case storeScopesWrong
         case storeSetupFailed(String, Error)
     }

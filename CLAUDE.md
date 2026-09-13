@@ -13,7 +13,9 @@ the top-left clock. More is the top-right ellipsis.
 Everything outside logging lives in More: First Weeks, Pediatrician summary,
 logging together, appearance, stain helper, baby settings, and Baby+. No tab bar, automatic
 review prompts, promotional cards, or purchase screen during onboarding.
-Onboarding is one optional name/birth-date screen with Start tracking.
+Onboarding is one screen with two paths: Start a new log (optional name and
+birth date) or Join a shared log (scan or paste an invite). An invitation
+opened before setup shows a joining screen instead of onboarding.
 
 Never: ads, AI panels or predictions, moving or renaming the four buttons, or
 locking something that shipped free.
@@ -40,10 +42,14 @@ locking something that shipped free.
   pure, so the page, the charts and the export cannot disagree.
 - Logging together is one `CKShare` on the baby's record zone, opened as a
   read/write invite link (`publicPermission = .readWrite`). The owner shows a
-  QR code or sends the link; the other phone scans it with Camera, taps the
-  link, or pastes it into Join. Every participant writes events into the same
-  zone. Apple's `UICloudSharingController` is only for removing people and
-  stopping or leaving. No accounts, no server.
+  QR code or sends the link; the other phone scans it in the app (VisionKit),
+  with Camera, taps the link, or pastes it. Every participant writes events
+  into the same zone. `Shared/Services/ShareInvite.swift` holds the invite
+  routine and is compiled into `scripts/cloudkit-schema` too, whose
+  `--verify-share` proves it on Production and `--watch-shares` observes a
+  real two-phone test (see `docs/two-parent-acceptance.md`). Apple's
+  `UICloudSharingController` is only for removing people and stopping or
+  leaving. No accounts, no server.
 
 Key files: `Shared/Services/Persistence.swift`, `EventStore.swift`,
 `NowSummary.swift`, `SummaryReport.swift`, `SharingService.swift`,

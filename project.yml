@@ -90,6 +90,7 @@ targets:
       - path: Baby/Views/HistoryView.swift
       - path: Baby/Views/SettingsView.swift
       - path: Baby/Views/SharingView.swift
+      - path: Baby/Views/JoinViews.swift
       - path: Baby/Views/OnboardingView.swift
       - path: Baby/Views/PaywallView.swift
       - path: Baby/Views/SummaryView.swift
@@ -109,6 +110,7 @@ targets:
       - path: Shared/Services/WatchSyncService.swift
       - path: Shared/Services/LiveActivityService.swift
       - path: Shared/Services/SharingService.swift
+      - path: Shared/Services/ShareInvite.swift
       - path: Shared/Models/BabyActivityAttributes.swift
       - path: Shared/Utilities/AppIntents.swift
       - path: Shared/Utilities/AppStoreReviewLinks.swift

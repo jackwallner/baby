@@ -164,7 +164,7 @@ struct SettingsView: View {
                 Button {
                     showSharing = true
                 } label: {
-                    Label("People and leaving", systemImage: "person.2.fill")
+                    Label(sharing.inviteURL == nil ? "People and leaving" : "Invite someone or leave", systemImage: "person.2.fill")
                 }
                 .foregroundStyle(AppTheme.accent)
                 .accessibilityIdentifier("settings.partner.share")

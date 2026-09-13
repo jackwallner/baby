@@ -10,13 +10,13 @@ WITHOUT OPENING THE APP
 Lock screen and home screen widgets that log with one tap. An Apple Watch app and a complication that shows how long since the last feed. A Live Activity on the lock screen while a feed or a sleep is running. Siri and the Action button.
 
 BOTH PARENTS, NO ACCOUNTS
-Share the log with your partner through iCloud. You both tap the same four buttons and see the same list, so "did you already change her?" answers itself. There is no account to create, and no server of ours in the middle: the records live on your devices and in your own iCloud.
+Log together: your partner, a grandparent or a nanny scans a code from your phone and joins the same log from their own iPhone. You all tap the same four buttons and see the same list, so "did you already change her?" answers itself. There is no account to create, and no server of ours in the middle: the records live on your devices and in your own iCloud.
 
 THE STAIN HELPER
 Tell it once what you have at home, and a blowout, spit-up, breast milk or formula stain gets the steps in order, skipping anything you do not own.
 
 FREE, AND STAYING FREE
-Logging, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, partner sharing and the stain helper. Nothing you have already logged is ever locked later.
+Logging, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, logging together and the stain helper. Nothing you have already logged is ever locked later.
 
 BABY+, OPTIONAL
 - The pediatrician summary: a one-page PDF since the last visit, with daily feeds, wet and dirty counts, sleep totals, the longest stretch and weights

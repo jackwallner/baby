@@ -23,6 +23,11 @@ final class EventStore: ObservableObject {
     @Published private(set) var revision = 0
     /// The last thing logged from a button, offered for undo for a short while.
     @Published private(set) var lastLogged: LoggedEvent?
+    /// An invitation was accepted and its baby has not imported yet.
+    @Published private(set) var isAwaitingSharedBaby = false
+    /// The baby from an accepted invitation, once it arrives. The app uses it
+    /// once to offer folding a separate log into the shared one.
+    @Published var arrivedSharedChild: Child?
 
     struct LoggedEvent: Equatable {
         let objectID: NSManagedObjectID
@@ -61,6 +66,7 @@ final class EventStore: ObservableObject {
     func reload() {
         children = persistence.allChildren(in: context)
         finishPendingShareImport()
+        isAwaitingSharedBaby = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone) != nil
         child = persistence.activeChild(in: context)
         if let child {
             events = persistence.events(for: child, in: context)
@@ -145,6 +151,45 @@ final class EventStore: ObservableObject {
         // a parent's other profiles just because they have no entries yet.
         AppGroup.defaults.set(id.uuidString, forKey: AppGroup.Key.activeChildID)
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.pendingSharedZone)
+        arrivedSharedChild = shared
+    }
+
+    /// The person gave up waiting for an invitation's baby. Nothing is deleted;
+    /// if the baby turns up later it simply appears in the list.
+    func stopWaitingForSharedBaby() {
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.pendingSharedZone)
+        reload()
+    }
+
+    /// Logs on this phone that are not part of `target`: a parent who started
+    /// logging on their own before joining.
+    func separateLogs(besides target: Child) -> [Child] {
+        children.filter { !persistence.isShared($0) && $0.objectID != target.objectID && $0.eventCount > 0 }
+    }
+
+    /// Copies every entry of `source` into `target` (objects cannot change
+    /// store, so each is recreated in the target's store), then removes the
+    /// emptied profile. Returns how many entries moved, or nil if nothing saved.
+    @discardableResult
+    func moveEvents(from source: Child, into target: Child) -> Int? {
+        guard source.objectID != target.objectID, let store = target.objectID.persistentStore else { return nil }
+        let entries = persistence.events(for: source, in: context)
+        for entry in entries {
+            let copy = LogEvent(context: context)
+            for name in entry.entity.attributesByName.keys {
+                copy.setValue(entry.value(forKey: name), forKey: name)
+            }
+            copy.child = target
+            context.assign(copy, to: store)
+        }
+        context.delete(source)
+        guard persistence.save(context) else {
+            reload()
+            return nil
+        }
+        AppGroup.defaults.set(target.id?.uuidString, forKey: AppGroup.Key.activeChildID)
+        reload()
+        return entries.count
     }
 
     // MARK: - Logging

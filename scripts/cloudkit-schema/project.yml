@@ -15,6 +15,7 @@ targets:
       - SchemaMain.swift
       - ../../Shared/Models/BabyModel.swift
       - ../../Shared/Utilities/DateHelpers.swift
+      - ../../Shared/Services/ShareInvite.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby

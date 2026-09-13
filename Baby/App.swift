@@ -153,6 +153,7 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
 private struct RootView: View {
     @EnvironmentObject private var settings: BabySettings
     @EnvironmentObject private var events: EventStore
+    @EnvironmentObject private var sharing: SharingService
 
     var body: some View {
         Group {
@@ -160,6 +161,8 @@ private struct RootView: View {
                 BabyPaywallView(displayCloseButton: false)
             } else if let startTab = Self.startTab {
                 BabyHomeView(initialScreen: startTab)
+            } else if isJoiningFirstLog {
+                JoiningSharedLogView()
             } else if !settings.hasCompletedSetup && !hasSharedChild && !ScreenshotConfig.isEnabled {
                 BabyOnboardingView()
             } else if events.child == nil && !ScreenshotConfig.isEnabled {
@@ -170,6 +173,25 @@ private struct RootView: View {
             } else {
                 BabyHomeView(initialScreen: Self.screenshotTab ?? 0)
             }
+        }
+        .alert(
+            "Bring your entries into the shared log?",
+            isPresented: Binding(
+                get: { separateLogCount > 0 },
+                set: { if !$0 { events.arrivedSharedChild = nil } }
+            )
+        ) {
+            Button("Move \(Format.count(separateLogCount, "entry", "entries"))") {
+                if let shared = events.arrivedSharedChild {
+                    for separate in events.separateLogs(besides: shared) {
+                        events.moveEvents(from: separate, into: shared)
+                    }
+                }
+                events.arrivedSharedChild = nil
+            }
+            Button("Keep them separate", role: .cancel) { events.arrivedSharedChild = nil }
+        } message: {
+            Text("You logged on this phone before joining \(events.arrivedSharedChild?.displayName ?? "the shared")'s log. Moving them lets everyone see them, and removes your separate copy.")
         }
         #if DEBUG
         .overlay(alignment: .top) {
@@ -182,6 +204,21 @@ private struct RootView: View {
 
     private var hasSharedChild: Bool {
         events.child.map { events.persistence.isShared($0) } ?? false
+    }
+
+    /// Someone opened an invite before setting anything up: wait for that
+    /// baby instead of offering onboarding, which would make a duplicate.
+    private var isJoiningFirstLog: Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-PreviewJoining") { return true }
+        #endif
+        guard !hasSharedChild, sharing.isAcceptingInvitation || events.isAwaitingSharedBaby else { return false }
+        return !settings.hasCompletedSetup || events.child == nil
+    }
+
+    private var separateLogCount: Int {
+        guard let shared = events.arrivedSharedChild else { return 0 }
+        return events.separateLogs(besides: shared).reduce(0) { $0 + $1.eventCount }
     }
 
     static var startTab: Int? {

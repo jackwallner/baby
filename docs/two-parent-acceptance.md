@@ -1,49 +1,65 @@
 # Two-parent acceptance test
 
-The owner-side checks below are verified automatically. Invitation acceptance
-still needs two people, because CloudKit will not let one account accept its
-own invitation. Jack confirmed on September 12 that this test has not run yet.
+Accepting an invitation needs two different iCloud accounts, because CloudKit
+will not let one account join its own log. Everything else about logging
+together is verified automatically.
 
-Verified without a second account (`scripts/cloudkit-schema`, Production):
+## Verified without a second account
 
-- The schema has `CD_Child`, `CD_LogEvent` and `cloudkit.share`.
-- A record exports, imports into a fresh store, and deletes cleanly.
-- A real `CKShare` is created on the baby's own zone, is invite-only, carries an
-  `icloud.com` invitation URL, and stops cleanly.
-- The app's two-store layout, private and shared scope both, completes CloudKit
-  setup against Production. The invited parent's baby arrives in the shared
-  store, so this is the half a single-store check would miss.
+`scripts/cloudkit-schema --verify-share`, Production, 2026-09-13, using the
+app's own `Shared/Services/ShareInvite.swift`:
 
-Not verified without a second account: accepting the invitation.
+- A baby is shared into its own zone and the invite link is saved to iCloud as
+  read/write (server record, Core Data's cache, and the share metadata a
+  second phone resolves from the link all agree).
+- A whole invite message pasted into Join parses back to the exact link.
+- The QR code decodes back to the exact link.
+- Stopping sharing from Apple's sheet (share record deleted on the server) and
+  inviting again produces a new working read/write link on the same log.
+- Stopping purges cleanly.
+
+App tests (in-memory two-store stack): every logging path on a joined baby
+(tap, editor, timer start and stop, Watch relay) writes into the shared store;
+the joining screen lasts until the invited baby arrives and can be abandoned
+without deleting anything; entries logged before joining move into the shared
+baby with every field intact; a non-invite link is rejected before iCloud is
+touched. UI tests cover onboarding's Start/Join choice, the joining screen,
+the invite code and link, and the Join sheet.
+
+## Watching a real two-phone test from the Mac
+
+The owner's iCloud is the Mac's account, so the Mac can see the owner's side
+of the server while two phones run the app. Read-only:
+
+```sh
+open -W --stdout /tmp/baby-watch.log --stderr /tmp/baby-watch-err.log \
+  build/NativeCloudSchema/Build/Products/Release/BabyCloudSchema.app \
+  --args --watch-shares 120
+```
+
+`BABY_WATCH_SHARE ... link=read-write` means the invite is open.
+`BABY_WATCH_PARTICIPANT ... status=accepted` means the other phone joined.
+`BABY_WATCH_ENTRY ... created_by=someone-else` is an entry the other phone
+wrote, proven to have crossed into the owner's log.
 
 ## What to run
 
-Both phones on the latest release-candidate TestFlight build, signed into
-**different** iCloud accounts, both with iCloud Drive on. Record the build
-number and results before calling sharing release-ready.
+Both phones on the same TestFlight build, signed into different iCloud
+accounts. Phone A is signed into the same Apple Account as the Mac.
 
-1. **Owner invites.** On phone A, log one feed. More > Share with your partner.
-   Read the shared-log explanation, tap Invite partner, and send the Apple
-   invitation link to phone B.
-2. **Cold-start accept.** Force-quit Baby Tracker on phone B first, then open
-   the link. This is the path that was broken before build 7: the app has to
-   handle the invitation from a launch, not just while running.
-3. **Both sides log.** Add a wet diaper on B and a sleep on A. Confirm both
-   appear on the other phone. Keep both phones online and record any delay
-   or error. Edit an entry on B and confirm the change reaches A.
-4. **The invited parent keeps their own babies.** If phone B already had a baby,
-   confirm it is still there and still has its events. Joining must never
-   replace or delete an existing log.
-5. **History agrees.** Open History on both. Same events, same times.
-6. **Offline recovery.** Take B offline, add a feed, then reconnect. Confirm
-   the entry reaches A exactly once and the two histories agree.
-7. **Leaving is safe.** On phone B, leave the share. Phone B loses the shared
-   baby and keeps its own. Phone A still has the complete log, including the
-   events phone B added.
-8. **Stopping is safe.** On phone A, stop sharing. Phone A keeps every event.
-
-## If step 2 fails
-
-Check that phone B is on build 7 or later. The cold-start path arrives through
-`SceneDelegate.scene(_:willConnectTo:options:)`, which earlier builds did not
-implement, so the invitation was silently dropped.
+1. **Owner invites.** Phone A: More, Invite someone, Create invite. A QR code
+   appears.
+2. **New phone joins from onboarding.** Phone B: fresh install, choose Join a
+   shared log, Open scanner, scan phone A's code. Expect "Joining the shared
+   log", then phone A's baby and history. No second baby is created.
+3. **Camera route.** Repeat with a third account or after leaving: scan with
+   the Camera app with Baby Tracker force-quit (cold start).
+4. **Both sides log.** Wet diaper on B, sleep on A. Each appears on the other
+   phone. The watcher shows B's entry as `created_by=someone-else`.
+5. **Owner sees who joined.** Phone A: More, Log together shows phone B's name.
+6. **Logged before joining.** On a phone that already logged its own baby,
+   join; accept "Move entries". The entries appear on both phones.
+7. **Offline.** B offline, log a feed, reconnect. It reaches A exactly once.
+8. **Leaving and stopping.** B leaves: B loses the shared baby, A keeps every
+   entry including B's. A stops sharing: A keeps everything; inviting again
+   works.

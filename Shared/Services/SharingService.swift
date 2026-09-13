@@ -18,6 +18,8 @@ final class SharingService: ObservableObject {
     @Published private(set) var share: CKShare?
     @Published private(set) var iCloudAvailable = false
     @Published var invitationError: String?
+    /// True while iCloud is accepting an invitation, before the baby imports.
+    @Published private(set) var isAcceptingInvitation = false
 
     private let persistence: Persistence
     private let events: EventStore
@@ -67,38 +69,23 @@ final class SharingService: ObservableObject {
     /// The owner's share with its invite link switched on. A participant gets
     /// the share as it is; only the owner may change who can join.
     func inviteShare(child: Child) async throws -> CKShare {
-        let current = try await shareForPresentation(child: child)
-        guard Self.needsOpenInvite(current) else { return current }
-        current.publicPermission = .readWrite
-        let result = try await ckContainer.privateCloudDatabase.modifyRecords(saving: [current], deleting: [], savePolicy: .changedKeys)
-        guard let saved = try result.saveResults[current.recordID]?.get() as? CKShare else {
-            throw CKError(.internalError)
-        }
-        try await persist(saved, for: child)
-        return saved
+        guard !persistence.isShared(child) else { return try await shareForPresentation(child: child) }
+        await waitForFirstExport(of: child)
+        let opened = try await ShareInvite.prepare(
+            for: [child],
+            title: "\(child.displayName)'s log",
+            container: persistence.container,
+            database: ckContainer.privateCloudDatabase
+        )
+        share = opened
+        return opened
     }
 
-    nonisolated static func needsOpenInvite(_ share: CKShare) -> Bool {
-        let isOwner = share.currentUserParticipant.map { $0.role == .owner } ?? true
-        return isOwner && share.publicPermission != .readWrite
-    }
-
-    /// The link the invite QR code and "Send link" carry.
+    /// The link the invite QR code and "Send link" carry. Anyone already in the
+    /// log can pass it on while the link is open.
     var inviteURL: URL? {
-        guard let share, share.publicPermission != .none else { return nil }
+        guard let share, share.publicPermission == .readWrite else { return nil }
         return share.url
-    }
-
-    /// Pulls an iCloud share link out of whatever was pasted: a bare link, or
-    /// a whole message with the link inside it.
-    nonisolated static func inviteURL(in text: String) -> URL? {
-        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
-        let range = NSRange(text.startIndex..., in: text)
-        let links = detector?.matches(in: text, range: range).compactMap(\.url) ?? []
-        return links.first { url in
-            guard let host = url.host?.lowercased() else { return false }
-            return (host == "icloud.com" || host.hasSuffix(".icloud.com")) && url.path.hasPrefix("/share/")
-        }
     }
 
     enum JoinError: Error, Equatable {
@@ -120,7 +107,7 @@ final class SharingService: ObservableObject {
     /// Joining from inside the app with a pasted link. Opening the link or
     /// scanning the code with the Camera lands in `accept(_:)` instead.
     func join(pasted text: String) async throws {
-        guard let url = Self.inviteURL(in: text) else { throw JoinError.notAnInvite }
+        guard let url = ShareInvite.url(in: text) else { throw JoinError.notAnInvite }
         guard (try? await ckContainer.accountStatus()) == .available else { throw JoinError.iCloudUnavailable }
         let metadata: CKShare.Metadata
         do {
@@ -130,9 +117,11 @@ final class SharingService: ObservableObject {
             throw JoinError.unavailable
         }
         guard metadata.participantRole != .owner else { throw JoinError.ownInvite }
+        isAcceptingInvitation = true
         do {
             _ = try await persistence.container.acceptShareInvitations(from: [metadata], into: persistence.sharedStore)
         } catch {
+            isAcceptingInvitation = false
             logger.error("acceptShareInvitations failed: \(String(describing: error), privacy: .public)")
             throw JoinError.unavailable
         }
@@ -174,10 +163,15 @@ final class SharingService: ObservableObject {
         events.reload()
     }
 
-    /// An invite link was opened. Accept it into the shared store; the store
-    /// then sees a new baby on its next remote-change notification.
+    /// An invite link was opened or a code was scanned with the Camera. Accept
+    /// it into the shared store; the baby follows on a remote-change import.
     func accept(_ metadata: CKShare.Metadata) {
+        guard metadata.participantRole != .owner else {
+            invitationError = JoinError.ownInvite.message
+            return
+        }
         invitationError = nil
+        isAcceptingInvitation = true
         let zoneID = metadata.share.recordID.zoneID
         persistence.container.acceptShareInvitations(from: [metadata], into: persistence.sharedStore) { _, error in
             Task { @MainActor in
@@ -187,6 +181,7 @@ final class SharingService: ObservableObject {
     }
 
     func finishAcceptingInvitation(in zoneID: CKRecordZone.ID, error: Error?) {
+        isAcceptingInvitation = false
         if let error {
             logger.error("acceptShareInvitations failed: \(String(describing: error), privacy: .public)")
             invitationError = "Check your internet connection and that iCloud is signed in, then open the invitation again. Your existing log is safe."

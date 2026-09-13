@@ -25,10 +25,10 @@ struct SharingSheet: View {
                     preparingView
                 } else if let errorMessage {
                     errorView(message: errorMessage)
-                } else if let share, !sharing.isOwner {
+                } else if let url = openInviteURL ?? Self.previewInviteURL {
+                    InviteView(child: child, url: url, joined: sharing.participantNames, isOwner: sharing.isOwner, manage: { showManage = true })
+                } else if share != nil, !sharing.isOwner {
                     ParticipantView(child: child, ownerName: sharing.ownerName, manage: { showManage = true })
-                } else if let url = share?.url ?? Self.previewInviteURL {
-                    InviteView(child: child, url: url, joined: sharing.participantNames, manage: { showManage = true })
                 } else {
                     explanationView
                 }
@@ -59,6 +59,12 @@ struct SharingSheet: View {
             guard preparationID != nil else { return }
             await prepareShare()
         }
+    }
+
+    /// A participant can pass the invite on too, as long as the owner's link is open.
+    private var openInviteURL: URL? {
+        guard let share, share.publicPermission == .readWrite else { return nil }
+        return share.url
     }
 
     #if DEBUG
@@ -235,6 +241,7 @@ private struct InviteView: View {
     let child: Child
     let url: URL
     let joined: [String]
+    var isOwner = true
     let manage: () -> Void
 
     var body: some View {
@@ -248,7 +255,7 @@ private struct InviteView: View {
                     codeCard
                     JoinSteps(child: child)
                     joinedCard
-                    AccessNote()
+                    AccessNote(isOwner: isOwner)
                 }
                 .frame(maxWidth: AppTheme.contentWidth, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -265,7 +272,7 @@ private struct InviteView: View {
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityIdentifier("sharing.sendLink")
-                Button("Manage people", action: manage)
+                Button(isOwner ? "Manage people" : "People and leaving", action: manage)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(AppTheme.accent)
                     .frame(minHeight: 44)
@@ -277,8 +284,8 @@ private struct InviteView: View {
 
     private var codeCard: some View {
         VStack(spacing: AppTheme.spacing) {
-            if let image = InviteCode.image(for: url) {
-                Image(uiImage: image)
+            if let image = ShareInvite.qrCode(for: url) {
+                Image(image, scale: 1, label: Text("Invite code"))
                     .interpolation(.none)
                     .resizable()
                     .scaledToFit()
@@ -393,7 +400,7 @@ private struct AccessNote: View {
         Label {
             Text(isOwner
                  ? "Anyone with your code or link can join and edit this log, so share it only with people you trust. Remove someone or stop sharing in Manage people. Both phones need iCloud; an offline phone catches up when it reconnects."
-                 : "You can add, edit and delete entries. An offline phone catches up when it reconnects.")
+                 : "Everyone in this log can add, edit and delete entries, and anyone with the code or link can join. An offline phone catches up when it reconnects.")
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -403,154 +410,6 @@ private struct AccessNote: View {
                 .foregroundStyle(AppTheme.ink2)
         }
         .accessibilityIdentifier("sharing.access")
-    }
-}
-
-enum InviteCode {
-    static func image(for url: URL) -> UIImage? {
-        let filter = CIFilter.qrCodeGenerator()
-        filter.message = Data(url.absoluteString.utf8)
-        filter.correctionLevel = "M"
-        guard let output = filter.outputImage?.transformed(by: CGAffineTransform(scaleX: 10, y: 10)),
-              let cgImage = CIContext().createCGImage(output, from: output.extent) else { return nil }
-        return UIImage(cgImage: cgImage)
-    }
-}
-
-/// Joining from the second phone when the Camera route isn't handy: paste
-/// the link. Scanning or tapping the link skips this screen entirely.
-struct JoinSharedLogView: View {
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var sharing: SharingService
-    @EnvironmentObject private var events: EventStore
-    @State private var link = ""
-    @State private var phase = Phase.idle
-
-    enum Phase: Equatable {
-        case idle
-        case joining
-        case joined
-        case failed(String)
-    }
-
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: AppTheme.spacing) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-                        Text("Join a shared log")
-                            .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                            .foregroundStyle(AppTheme.ink)
-                        Text("Use this when someone else already started the log. You'll both log into the same baby.")
-                            .font(.body)
-                            .foregroundStyle(AppTheme.ink2)
-                            .fixedSize(horizontal: false, vertical: true)
-                        scanCard
-                        pasteCard
-                    }
-                    .frame(maxWidth: AppTheme.contentWidth, alignment: .leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .scrollBounceBehavior(.basedOnSize)
-                .scrollDismissesKeyboard(.interactively)
-
-                statusView
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Button {
-                    Task { await join() }
-                } label: {
-                    if phase == .joining {
-                        ProgressView().tint(AppTheme.buttonInk)
-                    } else {
-                        Text("Join log")
-                    }
-                }
-                .buttonStyle(PrimaryButtonStyle())
-                .disabled(link.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || phase == .joining || phase == .joined)
-                .accessibilityIdentifier("join.submit")
-            }
-            .padding(AppTheme.margin)
-            .background(AppTheme.paper)
-            .tint(AppTheme.accent)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
-                        .accessibilityIdentifier("join.close")
-                }
-            }
-        }
-        .onChange(of: events.child?.objectID) { _, _ in
-            if phase == .joined, let child = events.child, sharing.isSharedChild(child) { dismiss() }
-        }
-    }
-
-    private var scanCard: some View {
-        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            Label("Easiest: scan their code", systemImage: "camera.viewfinder")
-                .font(.headline)
-                .foregroundStyle(AppTheme.ink)
-            Text("On their phone: More, then Invite someone. Point this iPhone's Camera app at the code and tap the banner. Baby Tracker opens and joins.")
-                .font(.subheadline)
-                .foregroundStyle(AppTheme.ink2)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .card()
-        .accessibilityIdentifier("join.scan")
-    }
-
-    private var pasteCard: some View {
-        VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            Label("Or paste the link they sent", systemImage: "link")
-                .font(.headline)
-                .foregroundStyle(AppTheme.ink)
-            TextField("icloud.com/share/…", text: $link, axis: .vertical)
-                .lineLimit(1...3)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .keyboardType(.URL)
-                .frame(minHeight: 44)
-                .accessibilityIdentifier("join.link")
-            PasteButton(payloadType: String.self) { strings in
-                if let pasted = strings.first { link = pasted }
-            }
-            .buttonBorderShape(.capsule)
-        }
-        .card(elevated: true)
-    }
-
-    @ViewBuilder
-    private var statusView: some View {
-        switch phase {
-        case .idle, .joining:
-            EmptyView()
-        case .joined:
-            Label("You're in. The log is on its way to this phone.", systemImage: "checkmark.circle.fill")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(AppTheme.ink)
-                .accessibilityIdentifier("join.joined")
-        case .failed(let message):
-            Label(message, systemImage: "exclamationmark.triangle.fill")
-                .font(.subheadline)
-                .foregroundStyle(AppTheme.notice)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("join.error")
-        }
-    }
-
-    private func join() async {
-        phase = .joining
-        do {
-            try await sharing.join(pasted: link)
-            phase = .joined
-            Haptics.logged()
-        } catch let error as SharingService.JoinError {
-            phase = .failed(error.message)
-            Haptics.failed()
-        } catch {
-            phase = .failed(SharingService.JoinError.unavailable.message)
-            Haptics.failed()
-        }
     }
 }
 

@@ -1,14 +1,21 @@
 import SwiftUI
 
-/// One optional setup screen, then straight into logging.
+/// One setup screen with two ways in: start a new log (optional name and
+/// birth date), or join a log someone else started. Then straight into logging.
 struct BabyOnboardingView: View {
+    enum Path: String {
+        case start
+        case join
+    }
+
     @EnvironmentObject private var settings: BabySettings
     @EnvironmentObject private var events: EventStore
+    @StateObject private var joinModel = JoinLogModel()
+    @State private var path = Path.start
     @State private var name = ""
     @State private var hasBirthDate = false
     @State private var birthDate = Date.now
     @State private var showSaveError = false
-    @State private var showJoin = false
     @FocusState private var isEditingName: Bool
 
     var body: some View {
@@ -16,11 +23,16 @@ struct BabyOnboardingView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
                     welcomeHeader
-                    partnerExplainer
-                    babyDetails
-                    Text("Both are optional. You can change them anytime in More.")
-                        .font(.footnote)
-                        .foregroundStyle(AppTheme.ink2)
+                    pathChoice
+                    if path == .start {
+                        babyDetails
+                        Text("Both are optional. Invite your partner or anyone else helping from More once you're in.")
+                            .font(.footnote)
+                            .foregroundStyle(AppTheme.ink2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        JoinLogForm(model: joinModel)
+                    }
                     Text(Guidance.disclaimer)
                         .font(.caption)
                         .foregroundStyle(AppTheme.ink2)
@@ -34,9 +46,13 @@ struct BabyOnboardingView: View {
             .scrollDismissesKeyboard(.interactively)
 
             VStack(spacing: AppTheme.tightSpacing) {
-                Button("Start tracking") { finish() }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .accessibilityIdentifier("onboarding.primary")
+                if path == .start {
+                    Button("Start tracking") { finish() }
+                        .buttonStyle(PrimaryButtonStyle())
+                        .accessibilityIdentifier("onboarding.primary")
+                } else {
+                    JoinButton(model: joinModel)
+                }
                 Link("Privacy Policy", destination: BabyLinks.privacyPolicy)
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
@@ -46,7 +62,6 @@ struct BabyOnboardingView: View {
         .padding(AppTheme.margin)
         .background(AppTheme.paper)
         .tint(AppTheme.accent)
-        .sheet(isPresented: $showJoin) { JoinSharedLogView() }
         .alert("Couldn't save setup", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -89,30 +104,52 @@ struct BabyOnboardingView: View {
         }
     }
 
-    private var partnerExplainer: some View {
+    private var pathChoice: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            SharedLogGraphic()
-            VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-                Text("Log together")
-                    .font(.headline)
-                    .foregroundStyle(AppTheme.ink)
-                Text("Everyone caring for the baby logs from their own iPhone into one shared log. Starting it? Invite others anytime from More.")
-                    .font(.subheadline)
-                    .foregroundStyle(AppTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Button {
-                showJoin = true
-            } label: {
-                Label("Someone already started? Join their log", systemImage: "camera.viewfinder")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.accent)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(minHeight: 44, alignment: .leading)
-            }
-            .accessibilityIdentifier("onboarding.join")
+            pathOption(.start, title: "Start a new log", detail: "You're the first to log for this baby.", symbol: "plus")
+            pathOption(.join, title: "Join a shared log", detail: "Your partner or someone else already started. Scan their code.", symbol: "person.2.fill")
         }
-        .card(elevated: true)
+        .accessibilityElement(children: .contain)
+    }
+
+    private func pathOption(_ option: Path, title: String, detail: String, symbol: String) -> some View {
+        let isSelected = path == option
+        return Button {
+            Haptics.selected()
+            path = option
+        } label: {
+            HStack(alignment: .center, spacing: AppTheme.spacing) {
+                Image(systemName: symbol)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(isSelected ? AppTheme.buttonInk : AppTheme.accent)
+                    .frame(width: AppTheme.iconSize, height: AppTheme.iconSize)
+                    .background(isSelected ? AppTheme.actionFill : AppTheme.cardElevated, in: Circle())
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(AppTheme.ink)
+                    Text(detail)
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.ink2)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isSelected ? AppTheme.accent : AppTheme.ink3)
+                    .accessibilityHidden(true)
+            }
+            .padding(AppTheme.spacing)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(AppTheme.card, in: AppTheme.cardShape)
+            .overlay(AppTheme.cardShape.strokeBorder(isSelected ? AppTheme.accent : AppTheme.edge, lineWidth: isSelected ? AppTheme.outlineWidth : AppTheme.hairlineWidth))
+            .contentShape(AppTheme.cardShape)
+        }
+        .pressableCard()
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("onboarding.path.\(option.rawValue)")
     }
 
     private var babyDetails: some View {
