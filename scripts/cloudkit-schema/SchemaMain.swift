@@ -51,6 +51,10 @@ struct SchemaMain {
                 try await listChildren(in: container)
                 exit(EXIT_SUCCESS)
             }
+            if CommandLine.arguments.contains("--host-partner-test") {
+                try await hostPartnerTest(using: container, cloud: cloud)
+                exit(EXIT_SUCCESS)
+            }
             if CommandLine.arguments.contains("--verify-share") {
                 try await verifyShare(using: container, cloud: cloud)
                 report("BABY_SHARE_VERIFIED_AND_FIXTURE_REMOVED")
@@ -267,6 +271,83 @@ struct SchemaMain {
         let arguments = CommandLine.arguments
         guard let index = arguments.firstIndex(of: flag), index + 1 < arguments.count else { return nil }
         return arguments[index + 1]
+    }
+
+    /// The owner's phone in a two-account test, played by this Mac's iCloud
+    /// account: it starts a clearly named baby, logs two entries, opens an
+    /// invite with the app's own `ShareInvite`, and prints the link. Then it
+    /// waits for another account to join, reports every entry that account
+    /// writes, answers the first one with an owner entry the other device must
+    /// show, and removes the fixture at the end.
+    private static func hostPartnerTest(using source: NSPersistentCloudKitContainer, cloud: CKContainer) async throws {
+        let minutes = argumentValue(after: "--host-partner-test").flatMap(Double.init) ?? 30
+        let name = "Two-device check"
+        let child = Child.make(in: source.viewContext, name: name, birthDate: Calendar.current.date(byAdding: .day, value: -3, to: .now))
+        let hostFeed = LogEvent.make(in: source.viewContext, child: child, kind: .feed, at: .now.addingTimeInterval(-3600))
+        hostFeed.side = "left"
+        hostFeed.endedAt = hostFeed.startedAt
+        _ = LogEvent.make(in: source.viewContext, child: child, kind: .wet, at: .now.addingTimeInterval(-1800))
+        try source.viewContext.save()
+        guard let store = child.objectID.persistentStore else { throw SchemaError.shareHasNoStore }
+        report("BABY_HOST_FIXTURE_SAVED")
+        try await waitUntil(timeout: 600) { source.recordID(for: child.objectID) != nil }
+        report("BABY_HOST_STORE_READY")
+
+        let share = try await ShareInvite.prepare(for: [child], title: "\(name)'s log", container: source, database: cloud.privateCloudDatabase)
+        let zoneID = share.recordID.zoneID
+        guard let url = share.url else { throw SchemaError.shareHasNoURL }
+        report("BABY_HOST_INVITE_URL: \(url.absoluteString)")
+
+        var outcome = "timed out"
+        defer { report("BABY_HOST_RESULT: \(outcome)") }
+        do {
+            let deadline = Date.now.addingTimeInterval(minutes * 60)
+            var token: CKServerChangeToken?
+            var joined = false
+            var partnerEntries = 0
+            var answered = false
+            var seen: Set<CKRecord.ID> = []
+            while Date.now < deadline {
+                do {
+                    if !joined, let live = try await cloud.privateCloudDatabase.record(for: share.recordID) as? CKShare,
+                       live.participants.contains(where: { $0.role != .owner && $0.acceptanceStatus == .accepted }) {
+                        joined = true
+                        report("BABY_HOST_PARTNER_JOINED")
+                    }
+                    let changes = try await cloud.privateCloudDatabase.recordZoneChanges(inZoneWith: zoneID, since: token)
+                    token = changes.changeToken
+                    for (recordID, result) in changes.modificationResultsByID {
+                        guard let record = try? result.get().record, record.recordType == "CD_LogEvent",
+                              record.creatorUserRecordID?.recordName != CKCurrentUserDefaultName,
+                              seen.insert(recordID).inserted else { continue }
+                        partnerEntries += 1
+                        report("BABY_HOST_PARTNER_ENTRY kind=\(record["CD_kind"] as? String ?? "?")")
+                    }
+                    for deletion in changes.deletions where deletion.recordType == "CD_LogEvent" {
+                        report("BABY_HOST_ENTRY_DELETED")
+                    }
+                } catch {
+                    report("BABY_HOST_RETRYING: \((error as? CKError)?.code.rawValue ?? -1)")
+                }
+                if partnerEntries > 0, !answered {
+                    answered = true
+                    let reply = LogEvent.make(in: source.viewContext, child: child, kind: .sleep, at: .now.addingTimeInterval(-600))
+                    reply.endedAt = .now.addingTimeInterval(-60)
+                    try source.viewContext.save()
+                    try await waitUntil(timeout: 300) { source.recordID(for: reply.objectID) != nil }
+                    report("BABY_HOST_OWNER_ENTRY_EXPORTED kind=sleep")
+                }
+                if partnerEntries >= 2 {
+                    outcome = "partner joined and wrote \(partnerEntries) entries"
+                    break
+                }
+                try await Task.sleep(for: .seconds(5))
+            }
+        }
+        if !CommandLine.arguments.contains("--keep-fixture") {
+            _ = try? await source.purgeObjectsAndRecordsInZone(with: zoneID, in: store)
+            report("BABY_HOST_FIXTURE_REMOVED")
+        }
     }
 
     /// Removes the share zones a failed verification can leave behind. Core
