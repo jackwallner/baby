@@ -42,6 +42,26 @@ open -W --stdout /tmp/baby-watch.log --stderr /tmp/baby-watch-err.log \
 `BABY_WATCH_ENTRY ... created_by=someone-else` is an entry the other phone
 wrote, proven to have crossed into the owner's log.
 
+## Mac as the owner, a simulator as the joining phone
+
+For a run without a second person: sign one simulator into a different
+iCloud account, then run the Mac as owner in Development and hand its link to
+`TwoDeviceParticipantUITests`:
+
+```sh
+open -n -W --stdout /tmp/baby-host.log --stderr /tmp/baby-host-err.log \
+  build/NativeCloudSchema/Build/Products/Debug/BabyCloudSchema.app \
+  --args --host-partner-test 30
+# copy BABY_HOST_INVITE_URL from /tmp/baby-host.log, then:
+TEST_RUNNER_BABY_INVITE_URL='<link>' xcodebuild test -project Baby.xcodeproj \
+  -scheme BabyUITests -destination "id=<signed-in simulator>" \
+  -only-testing:BabyUITests/TwoDeviceParticipantUITests
+```
+
+The simulator joins through onboarding, sees the Mac's entries, logs two of
+its own (the Mac reports them as `BABY_HOST_PARTNER_ENTRY`), and waits for the
+Mac's reply entry. The fixture is removed at the end.
+
 ## What to run
 
 Both phones on the same TestFlight build, signed into different iCloud
