@@ -42,8 +42,13 @@ final class LiveActivityService {
             }
             return
         }
+        // Name and side are fixed attributes, so a rename or a side change
+        // needs a fresh activity rather than a silent stale one.
         let matching = existing.first {
-            $0.attributes.kind == wanted.kind.rawValue && $0.content.state.startedAt == wanted.start
+            $0.attributes.kind == wanted.kind.rawValue
+                && $0.content.state.startedAt == wanted.start
+                && $0.attributes.side == wanted.side?.rawValue
+                && $0.attributes.childName == summary.childName
         }
         if matching != nil {
             for activity in existing where activity.id != matching?.id {

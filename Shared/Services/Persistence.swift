@@ -135,6 +135,15 @@ final class Persistence: @unchecked Sendable {
         return (try? context.fetch(request)) ?? []
     }
 
+    /// Running feeds or sleeps for one child, however many entries are newer.
+    /// Outside-app actions use this so an old timer is never out of reach.
+    func runningEvents(_ kind: EventKind, for child: Child, in context: NSManagedObjectContext) -> [LogEvent] {
+        let request = NSFetchRequest<LogEvent>(entityName: "LogEvent")
+        request.predicate = NSPredicate(format: "child == %@ AND kind == %@ AND endedAt == nil", child, kind.rawValue)
+        request.sortDescriptors = [NSSortDescriptor(key: "startedAt", ascending: false)]
+        return (try? context.fetch(request)) ?? []
+    }
+
     /// Inserts one event next to its child, in whichever store the child lives
     /// in. Used by the app, the widgets, the Watch relay and Siri alike.
     @discardableResult

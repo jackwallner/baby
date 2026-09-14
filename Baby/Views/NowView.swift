@@ -3,12 +3,11 @@ import SwiftUI
 /// The whole everyday app: the last feed, four log controls and today's totals.
 /// History is one tap away. Everything else lives in More.
 struct NowView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var events: EventStore
     @State private var editor: EditorRequest?
     @State private var showSettings = false
-    @State private var showUndoError = false
     @State private var now = Date.now
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -56,25 +55,12 @@ struct NowView: View {
                     .accessibilityIdentifier("more")
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if let logged = events.lastLogged {
-                UndoToast(logged: logged, undo: { showUndoError = !events.undoLast() })
-                    .padding(.horizontal, AppTheme.margin)
-                    .padding(.bottom, AppTheme.tightSpacing)
-                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
-            }
-        }
-        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.lastLogged)
+        .undoToast()
         .sheet(item: $editor) { request in
             EventEditorView(request: request)
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack { SettingsView() }
-        }
-        .alert("Couldn't undo this entry", isPresented: $showUndoError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("The entry is unchanged. Please try again or edit it in History.")
         }
         .onReceive(clock) { date in
             if !Calendar.current.isDate(now, inSameDayAs: date) { events.reload() }
@@ -82,6 +68,10 @@ struct NowView: View {
         }
         .onChange(of: events.events.count) { _, _ in
             now = .now
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Back from a long nap: the elapsed time must be right on first sight.
+            if phase == .active { now = .now }
         }
     }
 

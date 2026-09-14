@@ -46,8 +46,12 @@ final class SharingService: ObservableObject {
             let shares = try persistence.container.fetchShares(matching: [child.objectID])
             share = shares[child.objectID]
         } catch {
+            // A transient failure must not make a shared log look unshared.
+            // Keep the last known share if it belongs to this baby.
             logger.error("fetchShares failed: \(String(describing: error), privacy: .public)")
-            share = nil
+            if share?.recordID.zoneID != persistence.container.recordID(for: child.objectID)?.zoneID {
+                share = nil
+            }
         }
     }
 
@@ -136,8 +140,9 @@ final class SharingService: ObservableObject {
     /// `scripts/cloudkit-schema` `--verify-share`.
     private func waitForFirstExport(of child: Child) async {
         guard persistence.cloudKitEnabled else { return }
-        let deadline = Date.now.addingTimeInterval(20)
-        while Date.now < deadline {
+        // First setup on a fresh install can take about two minutes.
+        let deadline = Date.now.addingTimeInterval(150)
+        while Date.now < deadline, !Task.isCancelled {
             if persistence.container.recordID(for: child.objectID) != nil { return }
             try? await Task.sleep(for: .milliseconds(500))
         }

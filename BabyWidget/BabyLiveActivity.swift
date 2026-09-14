@@ -18,6 +18,8 @@ struct BabyLiveActivity: Widget {
                             .foregroundStyle(color(context))
                         Text(title(context))
                             .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
@@ -53,9 +55,13 @@ struct BabyLiveActivity: Widget {
                 Text(title(context))
                     .font(.headline)
                     .foregroundStyle(AppTheme.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Text("\(context.attributes.childName) · since \(Format.time(context.state.startedAt))")
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
             }
             Spacer(minLength: AppTheme.tightSpacing)
             elapsed(context)

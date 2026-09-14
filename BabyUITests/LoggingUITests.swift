@@ -31,6 +31,23 @@ final class LoggingUITests: XCTestCase {
         }
     }
 
+    func testDeletingFromHistoryCanBeUndone() {
+        let app = launch()
+        app.buttons["History"].tap()
+        // The first cell is the day header with the day's totals; the entries follow it.
+        let totals = app.cells.element(boundBy: 0).staticTexts.element(boundBy: 1)
+        let entry = app.cells.element(boundBy: 1)
+        XCTAssertTrue(entry.waitForExistence(timeout: 5))
+        let originalTotals = totals.label
+        entry.swipeLeft()
+        // A long swipe deletes at once; a short one reveals the button.
+        if app.buttons["Delete"].waitForExistence(timeout: 2) { app.buttons["Delete"].tap() }
+        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 3))
+        XCTAssertNotEqual(totals.label, originalTotals)
+        app.buttons["Undo"].tap()
+        XCTAssertEqual(totals.label, originalTotals)
+    }
+
     func testHoldingAButtonDoesNotLogUntilSaved() {
         let app = launch()
         let originalTally = tally(app)

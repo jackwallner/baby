@@ -152,7 +152,7 @@ struct BabyLogWidgetView: View {
         switch family {
         case .accessoryRectangular:
             HStack(spacing: AppTheme.hairSpacing) {
-                logButton("Feed", kind: .feed, choice: .feed)
+                logButton("Feed \(s.suggestedSide.shortLabel)", kind: .feed, choice: .feed(s.suggestedSide))
                 logButton("Wet", kind: .wet, choice: .wet)
                 logButton("Dirty", kind: .dirty, choice: .dirty)
             }
@@ -181,7 +181,7 @@ struct BabyLogWidgetView: View {
     private var grid: some View {
         VStack(spacing: AppTheme.tightSpacing) {
             HStack(spacing: AppTheme.tightSpacing) {
-                logButton("Feed \(s.suggestedSide.shortLabel)", kind: .feed, choice: .feed)
+                logButton("Feed \(s.suggestedSide.shortLabel)", kind: .feed, choice: .feed(s.suggestedSide))
                 logButton("Wet", kind: .wet, choice: .wet)
             }
             HStack(spacing: AppTheme.tightSpacing) {

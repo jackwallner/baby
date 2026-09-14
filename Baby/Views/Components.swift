@@ -107,7 +107,36 @@ struct SectionLabel: View {
     }
 }
 
-/// The bottom toast after a tap: what was logged, and Undo.
+extension View {
+    /// The Undo toast along the bottom edge, on every screen that can log or delete.
+    func undoToast() -> some View { modifier(UndoToastInset()) }
+}
+
+private struct UndoToastInset: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @EnvironmentObject private var events: EventStore
+    @State private var showUndoError = false
+
+    func body(content: Content) -> some View {
+        content
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if let logged = events.lastLogged {
+                    UndoToast(logged: logged, undo: { showUndoError = !events.undoLast() })
+                        .padding(.horizontal, AppTheme.margin)
+                        .padding(.bottom, AppTheme.tightSpacing)
+                        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.lastLogged)
+            .alert("Couldn't undo this entry", isPresented: $showUndoError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("The entry is unchanged. Please try again or edit it in History.")
+            }
+    }
+}
+
+/// The bottom toast after a tap or a delete: what happened, and Undo.
 struct UndoToast: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let logged: EventStore.LoggedEvent
@@ -137,6 +166,17 @@ struct UndoToast: View {
     }
 
     private var title: String {
+        if logged.deleted != nil {
+            let base: String = switch logged.kind {
+            case .feed: "Deleted feed"
+            case .wet: "Deleted wet diaper"
+            case .dirty: "Deleted dirty diaper"
+            case .sleep: "Deleted sleep"
+            case .weight: "Deleted weight"
+            }
+            guard let detail = logged.detail, !detail.isEmpty else { return base }
+            return "\(base) · \(detail)"
+        }
         let base: String = switch logged.kind {
         case .feed: "Logged feed"
         case .wet: "Logged wet diaper"

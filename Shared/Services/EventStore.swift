@@ -35,6 +35,16 @@ final class EventStore: ObservableObject {
         let detail: String?
         let at: Date
         var reopensTimer = false
+        /// Timers this action ended on the way, reopened again by Undo.
+        var closedTimers: [NSManagedObjectID] = []
+        /// Set when the action was a delete; Undo puts the entry back.
+        var deleted: DeletedEvent?
+    }
+
+    /// Everything needed to put a deleted entry back as it was.
+    struct DeletedEvent: Equatable {
+        let childID: NSManagedObjectID
+        let values: [String: AnyHashable]
     }
 
     let persistence: Persistence
@@ -204,13 +214,16 @@ final class EventStore: ObservableObject {
     ) -> LogEvent? {
         guard let child else { return nil }
         let resolvedSide = kind == .feed ? (side ?? summary.suggestedSide) : nil
+        // A completed feed logged during a running one means the running feed
+        // is over, otherwise Now would keep saying "Feeding" for the older row.
+        let closed = kind == .feed ? closeRunning(.feed, at: date) : []
         let event = persistence.insert(kind: kind, at: date, side: resolvedSide, ended: kind == .feed ? date : nil, for: child, in: context)
         configure?(event)
         guard persistence.save(context) else {
             reload()
             return nil
         }
-        rememberForUndo(event)
+        rememberForUndo(event, closedTimers: closed)
         reload()
         return event
     }
@@ -225,17 +238,14 @@ final class EventStore: ObservableObject {
         configure: ((LogEvent) -> Void)? = nil
     ) -> LogEvent? {
         guard kind.canRun, let child else { return nil }
-        if let running = events.first(where: { $0.eventKind == kind && $0.isRunning }) {
-            running.endedAt = max(date, running.start)
-            running.updatedAt = .now
-        }
+        let closed = closeRunning(kind, at: date, onlyStartedBefore: false)
         let event = persistence.insert(kind: kind, at: date, side: kind == .feed ? (side ?? summary.suggestedSide) : nil, ended: nil, for: child, in: context)
         configure?(event)
         guard persistence.save(context) else {
             reload()
             return nil
         }
-        rememberForUndo(event)
+        rememberForUndo(event, closedTimers: closed)
         reload()
         return event
     }
@@ -264,14 +274,38 @@ final class EventStore: ObservableObject {
         }
     }
 
+    /// Ends running rows of `kind` in the context without saving, and returns
+    /// them so Undo can reopen them. A backdated entry from before a timer
+    /// started leaves that timer alone.
+    private func closeRunning(_ kind: EventKind, at date: Date, onlyStartedBefore: Bool = true) -> [NSManagedObjectID] {
+        let running = events.filter { $0.eventKind == kind && $0.isRunning && (!onlyStartedBefore || $0.start <= date) }
+        for event in running {
+            event.endedAt = max(date, event.start)
+            event.updatedAt = .now
+        }
+        return running.map(\.objectID)
+    }
+
+    /// Deletes an entry and offers Undo, so a stray swipe never loses a feed.
     @discardableResult
     func delete(_ event: LogEvent) -> Bool {
+        let childID = event.child?.objectID
+        let values = event.entity.attributesByName.keys.reduce(into: [String: AnyHashable]()) { values, name in
+            if let value = event.value(forKey: name) as? AnyHashable { values[name] = value }
+        }
+        let kind = event.eventKind
+        let detail = event.detailText
+        let objectID = event.objectID
         context.delete(event)
         guard persistence.save(context) else {
             reload()
             return false
         }
-        if lastLogged?.objectID == event.objectID { lastLogged = nil }
+        if let childID {
+            remember(LoggedEvent(objectID: objectID, kind: kind, detail: detail, at: .now, deleted: DeletedEvent(childID: childID, values: values)))
+        } else if lastLogged?.objectID == objectID {
+            dismissUndo()
+        }
         reload()
         return true
     }
@@ -288,8 +322,12 @@ final class EventStore: ObservableObject {
 
     // MARK: - Undo
 
-    private func rememberForUndo(_ event: LogEvent, reopensTimer: Bool = false) {
-        lastLogged = LoggedEvent(objectID: event.objectID, kind: event.eventKind, detail: event.detailText, at: .now, reopensTimer: reopensTimer)
+    private func rememberForUndo(_ event: LogEvent, reopensTimer: Bool = false, closedTimers: [NSManagedObjectID] = []) {
+        remember(LoggedEvent(objectID: event.objectID, kind: event.eventKind, detail: event.detailText, at: .now, reopensTimer: reopensTimer, closedTimers: closedTimers))
+    }
+
+    private func remember(_ logged: LoggedEvent) {
+        lastLogged = logged
         undoTask?.cancel()
         undoTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(Self.undoWindow))
@@ -300,16 +338,30 @@ final class EventStore: ObservableObject {
 
     @discardableResult
     func undoLast() -> Bool {
-        guard let lastLogged, let event = try? context.existingObject(with: lastLogged.objectID) as? LogEvent else {
-            self.lastLogged = nil
-            return false
-        }
-        // Undoing a "stop" reopens the row; undoing a log removes it.
-        if lastLogged.reopensTimer {
-            event.endedAt = nil
-            event.updatedAt = .now
+        guard let lastLogged else { return false }
+        if let deleted = lastLogged.deleted {
+            guard restore(deleted) else {
+                self.lastLogged = nil
+                return false
+            }
         } else {
-            context.delete(event)
+            guard let event = try? context.existingObject(with: lastLogged.objectID) as? LogEvent else {
+                self.lastLogged = nil
+                return false
+            }
+            // Undoing a "stop" reopens the row; undoing a log removes it and
+            // reopens any timer the log ended.
+            if lastLogged.reopensTimer {
+                event.endedAt = nil
+                event.updatedAt = .now
+            } else {
+                context.delete(event)
+                for id in lastLogged.closedTimers {
+                    guard let closed = try? context.existingObject(with: id) as? LogEvent else { continue }
+                    closed.endedAt = nil
+                    closed.updatedAt = .now
+                }
+            }
         }
         guard persistence.save(context) else {
             reload()
@@ -318,6 +370,20 @@ final class EventStore: ObservableObject {
         self.lastLogged = nil
         undoTask?.cancel()
         reload()
+        return true
+    }
+
+    /// Recreates a deleted entry in its baby's store, with its original id.
+    private func restore(_ deleted: DeletedEvent) -> Bool {
+        guard let child = try? context.existingObject(with: deleted.childID) as? Child,
+              let store = child.objectID.persistentStore else { return false }
+        let event = LogEvent(context: context)
+        for (name, value) in deleted.values {
+            event.setValue(value, forKey: name)
+        }
+        event.child = child
+        event.updatedAt = .now
+        context.assign(event, to: store)
         return true
     }
 
@@ -361,6 +427,12 @@ final class EventStore: ObservableObject {
         }
         switch payload.action {
         case .log:
+            if payload.kind == .feed {
+                for running in targetEvents where running.eventKind == .feed && running.isRunning && running.start <= payload.at {
+                    running.endedAt = payload.at
+                    running.updatedAt = .now
+                }
+            }
             let event = persistence.insert(kind: payload.kind, at: payload.at, side: payload.side, ended: payload.kind == .feed ? payload.at : nil, for: target, in: context)
             event.id = payload.id
         case .startSleep:

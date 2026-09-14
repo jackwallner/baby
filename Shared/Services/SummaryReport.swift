@@ -95,6 +95,14 @@ struct SummaryReport: Equatable, Sendable {
     ) -> SummaryReport {
         let firstDay = calendar.startOfDay(for: min(start, end))
         let lastDay = calendar.startOfDay(for: max(start, end))
+        // Months of history should not be rescanned for every day of a short
+        // range. Keep entries that touch the range, including a sleep that
+        // started the night before it.
+        let rangeEnd = calendar.date(byAdding: .day, value: 1, to: lastDay) ?? lastDay
+        let events = events.filter { event in
+            let finish = event.endedAt ?? (event.isRunning ? now : event.start)
+            return event.start < rangeEnd && max(finish, event.start) >= firstDay
+        }
         var days: [Day] = []
         var cursor = firstDay
         while cursor <= lastDay {

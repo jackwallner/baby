@@ -45,6 +45,11 @@ struct LogEventIntent: AppIntent {
             case .bottle: .bottle
             default: summary.suggestedSide
             }
+            // A completed feed ends any feed timer still running, as in the app.
+            for running in persistence.runningEvents(.feed, for: child, in: context) {
+                running.endedAt = max(now, running.start)
+                running.updatedAt = now
+            }
             persistence.insert(kind: .feed, at: now, side: side, ended: now, for: child, in: context)
             guard persistence.save(context) else {
                 return .result(dialog: "I couldn't save that feed. Please try again.")
@@ -60,7 +65,7 @@ struct LogEventIntent: AppIntent {
             WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: "Logged a \(kind.label.lowercased()) diaper.")
         case .sleep:
-            let running = persistence.events(for: child, in: context, limit: 50).first { $0.eventKind == .sleep && $0.isRunning }
+            let running = persistence.runningEvents(.sleep, for: child, in: context).first
             if let running {
                 running.endedAt = now
                 running.updatedAt = now
@@ -88,6 +93,16 @@ enum LogChoice: String, AppEnum {
     case wet
     case dirty
     case sleep
+
+    /// The explicit choice for a side, so a button labelled "Feed L" saves
+    /// Left even if its timeline is a few minutes old.
+    static func feed(_ side: FeedSide) -> LogChoice {
+        switch side {
+        case .left: .feedLeft
+        case .right: .feedRight
+        case .bottle: .bottle
+        }
+    }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Log")
     static let caseDisplayRepresentations: [LogChoice: DisplayRepresentation] = [
@@ -158,7 +173,7 @@ struct StopRunningIntent: LiveActivityIntent {
         guard let child = persistence.activeChild(in: context),
               let eventKind = EventKind(rawValue: kind) else { return .result() }
         let now = Date.now
-        for event in persistence.events(for: child, in: context, limit: 50) where event.eventKind == eventKind && event.isRunning {
+        for event in persistence.runningEvents(eventKind, for: child, in: context) {
             event.endedAt = now
             event.updatedAt = now
         }

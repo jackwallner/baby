@@ -389,7 +389,8 @@ struct JoinSteps: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Step \(number). \(title). \(detail)")
     }
 }
 

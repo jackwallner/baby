@@ -331,10 +331,16 @@ struct BabyPaywallView: View {
             }
             .disabled(isRestoring || store.isLoading)
 
-            HStack(spacing: AppTheme.tightSpacing) {
-                Link("Terms of Use", destination: BabyLinks.standardEULA)
-                Text("·")
-                Link("Privacy Policy", destination: BabyLinks.privacyPolicy)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: AppTheme.tightSpacing) {
+                    Link("Terms of Use", destination: BabyLinks.standardEULA)
+                    Text("·").accessibilityHidden(true)
+                    Link("Privacy Policy", destination: BabyLinks.privacyPolicy)
+                }
+                VStack(spacing: AppTheme.hairSpacing) {
+                    Link("Terms of Use", destination: BabyLinks.standardEULA)
+                    Link("Privacy Policy", destination: BabyLinks.privacyPolicy)
+                }
             }
             .font(.caption.weight(.semibold))
             .foregroundStyle(AppTheme.ink2)

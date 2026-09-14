@@ -84,6 +84,65 @@ final class EventStoreTests: XCTestCase {
         XCTAssertNotNil(store.runningSleep, "undoing the wake reopens the sleep")
     }
 
+    func testOneTapFeedEndsARunningFeedAndUndoReopensIt() throws {
+        let start = Date.now.addingTimeInterval(-900)
+        store.startTimed(.feed, side: .left, at: start)
+        store.log(.feed, side: .right)
+        XCTAssertNil(store.runningFeed, "a completed feed ends the older timer")
+        XCTAssertFalse(store.summary.isFeeding)
+        XCTAssertEqual(store.summary.lastFeedSide, .right)
+
+        store.undoLast()
+        XCTAssertEqual(store.events.count, 1)
+        XCTAssertEqual(store.runningFeed?.startedAt, start, "undo puts the timer back as it was")
+    }
+
+    func testBackdatedFeedLeavesALaterTimerRunning() {
+        store.startTimed(.feed, side: .left, at: Date.now.addingTimeInterval(-300))
+        store.log(.feed, side: .right, at: Date.now.addingTimeInterval(-3600))
+        XCTAssertNotNil(store.runningFeed)
+    }
+
+    func testUndoOfAReplacementTimerReopensThePreviousOne() {
+        let start = Date.now.addingTimeInterval(-1200)
+        store.startTimed(.sleep, at: start)
+        store.startTimed(.sleep)
+        store.undoLast()
+        XCTAssertEqual(store.events.count, 1)
+        XCTAssertEqual(store.runningSleep?.startedAt, start)
+    }
+
+    func testDeleteOffersUndoThatRestoresTheEntry() throws {
+        let sleepStart = Date.now.addingTimeInterval(-1800)
+        store.startTimed(.sleep, at: sleepStart)
+        let feed = try XCTUnwrap(store.log(.feed, side: .bottle) { $0.amount = 90; $0.note = "fussy" })
+        let id = feed.id
+
+        XCTAssertTrue(store.delete(feed))
+        XCTAssertEqual(store.lastLogged?.deleted != nil, true)
+        XCTAssertTrue(store.undoLast())
+        let restored = try XCTUnwrap(store.events.first { $0.id == id })
+        XCTAssertEqual(restored.feedSide, .bottle)
+        XCTAssertEqual(restored.amount, 90)
+        XCTAssertEqual(restored.note, "fussy")
+        XCTAssertEqual(store.summary.lastFeedSide, .bottle)
+
+        let sleep = try XCTUnwrap(store.runningSleep)
+        XCTAssertTrue(store.delete(sleep))
+        XCTAssertNil(store.runningSleep)
+        XCTAssertTrue(store.undoLast())
+        XCTAssertEqual(store.runningSleep?.startedAt, sleepStart, "a deleted running sleep comes back running")
+    }
+
+    func testRunningLookupReachesPastManyNewerEntries() throws {
+        let child = try XCTUnwrap(store.child)
+        store.startTimed(.sleep, at: Date.now.addingTimeInterval(-86_400))
+        for minute in 0..<75 {
+            store.log(.wet, at: Date.now.addingTimeInterval(Double(-minute * 60)))
+        }
+        XCTAssertEqual(persistence.runningEvents(.sleep, for: child, in: persistence.viewContext).count, 1)
+    }
+
     func testWatchPayloadsApplyOnceEvenWhenRedelivered() {
         let payload = WatchLogPayload(action: .log, kind: .dirty, at: .now)
         store.apply(payload)

@@ -211,7 +211,7 @@ struct SummaryView: View {
 
     private var charts: some View {
         VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-            chart(title: "Feeds a day") {
+            chart(title: "Feeds a day", summary: trendSummary(\.feeds, unit: "feeds")) {
                 ForEach(report.days) { day in
                     BarMark(
                         x: .value("Day", day.date, unit: .day),
@@ -220,7 +220,7 @@ struct SummaryView: View {
                     .foregroundStyle(AppTheme.feed)
                 }
             }
-            chart(title: "Diapers a day") {
+            chart(title: "Diapers a day", summary: "\(trendSummary(\.wet, unit: "wet")). \(trendSummary(\.dirty, unit: "dirty"))") {
                 ForEach(report.days) { day in
                     BarMark(x: .value("Day", day.date, unit: .day), y: .value("Wet", day.wet))
                         .foregroundStyle(AppTheme.wet)
@@ -228,7 +228,7 @@ struct SummaryView: View {
                         .foregroundStyle(AppTheme.dirty)
                 }
             }
-            chart(title: "Longest sleep stretch") {
+            chart(title: "Longest sleep stretch", summary: sleepSummary) {
                 ForEach(report.days) { day in
                     LineMark(
                         x: .value("Day", day.date, unit: .day),
@@ -246,7 +246,19 @@ struct SummaryView: View {
         }
     }
 
-    private func chart<Content: ChartContent>(title: String, @ChartContentBuilder content: () -> Content) -> some View {
+    /// What a chart says, for VoiceOver: the daily average and the latest day.
+    private func trendSummary(_ value: KeyPath<SummaryReport.Day, Int>, unit: String) -> String {
+        guard let latest = report.days.last, !report.days.isEmpty else { return "No days yet" }
+        let average = Double(report.days.map { $0[keyPath: value] }.reduce(0, +)) / Double(report.days.count)
+        return "Average \(average.formatted(.number.precision(.fractionLength(0...1)))) \(unit) a day, \(latest[keyPath: value]) on the latest day"
+    }
+
+    private var sleepSummary: String {
+        guard let latest = report.days.last, let longest = report.days.map(\.longestSleepSeconds).max() else { return "No days yet" }
+        return "Longest \(Format.compactDuration(longest)) in this range, \(Format.compactDuration(latest.longestSleepSeconds)) on the latest day"
+    }
+
+    private func chart<Content: ChartContent>(title: String, summary: String, @ChartContentBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
             Text(title)
                 .font(.subheadline.weight(.semibold))
@@ -260,6 +272,9 @@ struct SummaryView: View {
                 .chartYAxis { AxisMarks(position: .leading) }
                 .frame(height: 120)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(summary)
     }
 
     private var exportCard: some View {

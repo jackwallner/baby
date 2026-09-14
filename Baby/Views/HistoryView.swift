@@ -32,6 +32,7 @@ struct HistoryView: View {
                 .accessibilityLabel("Add an entry")
             }
         }
+        .undoToast()
         .sheet(item: $editor) { request in
             EventEditorView(request: request)
         }
@@ -110,7 +111,7 @@ struct HistoryView: View {
                     Text(note)
                         .font(.caption)
                         .foregroundStyle(AppTheme.ink3)
-                        .lineLimit(1)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: AppTheme.tightSpacing) }
