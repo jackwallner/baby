@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// The four buttons. They never move, never rename, and never gain a fifth:
-/// a stable layout is the feature. A tap logs now; a long press opens the
+/// The four buttons. They never move and never gain a fifth: a stable layout
+/// is the feature. The diaper pair reads Pee and Poop, or Wet and Dirty when
+/// the parent picks those words in More. A tap logs now; a long press opens the
 /// editor with that kind pre-filled.
 struct LogButtons: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -16,8 +17,8 @@ struct LogButtons: View {
         VStack(spacing: AppTheme.spacing) {
             feedRow
             (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: AppTheme.spacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
-                kindButton(.wet, label: "Wet") { events.log(.wet) != nil }
-                kindButton(.dirty, label: "Dirty") { events.log(.dirty) != nil }
+                kindButton(.wet, label: EventKind.wet.label) { events.log(.wet) != nil }
+                kindButton(.dirty, label: EventKind.dirty.label) { events.log(.dirty) != nil }
             }
             kindButton(.sleep, label: events.runningSleep == nil ? "Sleep" : "Wake", symbol: events.runningSleep == nil ? "moon.fill" : "sun.max.fill") {
                 if events.runningSleep != nil {

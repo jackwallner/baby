@@ -50,7 +50,7 @@ final class TwoDeviceParticipantUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Two-device check"].exists || app.staticTexts["Two-device check"].exists, "Home is not showing the owner's baby")
 
         app.buttons["History"].tap()
-        XCTAssertTrue(eventually(app, timeout: 120) { app.staticTexts["Feed"].exists && app.staticTexts["Wet"].exists }, "The owner's entries did not import")
+        XCTAssertTrue(eventually(app, timeout: 120) { app.staticTexts["Feed"].exists && app.staticTexts["Pee"].exists }, "The owner's entries did not import")
         attach(app, "3-owner-history")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 

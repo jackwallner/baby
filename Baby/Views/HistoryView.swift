@@ -40,8 +40,8 @@ struct HistoryView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button("Feed") { editor = EditorRequest(kind: .feed) }
-                    Button("Wet diaper") { editor = EditorRequest(kind: .wet) }
-                    Button("Dirty diaper") { editor = EditorRequest(kind: .dirty) }
+                    Button("\(EventKind.wet.label) diaper") { editor = EditorRequest(kind: .wet) }
+                    Button("\(EventKind.dirty.label) diaper") { editor = EditorRequest(kind: .dirty) }
                     Button("Sleep") { editor = EditorRequest(kind: .sleep) }
                     Button("Weight") { editor = EditorRequest(kind: .weight) }
                 } label: {
@@ -158,7 +158,7 @@ struct HistoryView: View {
 
     private func dayHeader(_ day: Date) -> some View {
         let tally = events.tally(on: day)
-        var parts = ["\(tally.wet) wet", "\(tally.dirty) dirty", Format.count(tally.feeds, "feed")]
+        var parts = ["\(tally.wet) \(EventKind.wet.label.lowercased())", "\(tally.dirty) \(EventKind.dirty.label.lowercased())", Format.count(tally.feeds, "feed")]
         if tally.sleepSeconds >= 60 { parts.append("\(Format.compactDuration(tally.sleepSeconds)) sleep") }
         return VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
             Text(Format.dayTitle(day))

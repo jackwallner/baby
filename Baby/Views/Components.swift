@@ -203,8 +203,7 @@ struct UndoToast: View {
         if logged.deleted != nil {
             let base: String = switch logged.kind {
             case .feed: "Deleted feed"
-            case .wet: "Deleted wet"
-            case .dirty: "Deleted dirty"
+            case .wet, .dirty: "Deleted \(logged.kind.label.lowercased())"
             case .sleep: "Deleted sleep"
             case .weight: "Deleted weight"
             }
@@ -213,8 +212,7 @@ struct UndoToast: View {
         }
         let base: String = switch logged.kind {
         case .feed: "Logged feed"
-        case .wet: "Logged wet"
-        case .dirty: "Logged dirty"
+        case .wet, .dirty: "Logged \(logged.kind.label.lowercased())"
         case .sleep: logged.reopensTimer ? "Sleep ended" : "Sleep started"
         case .weight: "Logged weight"
         }

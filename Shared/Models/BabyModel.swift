@@ -11,16 +11,6 @@ enum EventKind: String, CaseIterable, Codable, Sendable {
     /// Reporting-only kinds. Logged from the editor, never from the four buttons.
     case weight
 
-    var label: String {
-        switch self {
-        case .feed: "Feed"
-        case .wet: "Wet"
-        case .dirty: "Dirty"
-        case .sleep: "Sleep"
-        case .weight: "Weight"
-        }
-    }
-
     var symbolName: String {
         switch self {
         case .feed: "fork.knife"

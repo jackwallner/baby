@@ -57,7 +57,7 @@ final class LoggingUITests: XCTestCase {
         app.buttons["History"].tap()
         app.buttons["Calendar"].tap()
         XCTAssertTrue(app.buttons["Previous month"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Wet'")).firstMatch.exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Pee'")).firstMatch.exists)
         XCTAssertTrue(app.staticTexts["Today"].exists)
         app.buttons["List"].tap()
         XCTAssertFalse(app.buttons["Previous month"].exists)

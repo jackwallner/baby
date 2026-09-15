@@ -135,7 +135,7 @@ struct SummaryReport: Equatable, Sendable {
             .filter { $0.start >= firstDay && $0.start < (calendar.date(byAdding: .day, value: 1, to: lastDay) ?? lastDay) }
             .compactMap { event -> (date: Date, text: String)? in
                 guard let note = event.note?.trimmingCharacters(in: .whitespacesAndNewlines), !note.isEmpty else { return nil }
-                return (date: event.start, text: "\(event.eventKind.label): \(note)")
+                return (date: event.start, text: "\(event.eventKind.label(words: .wetDirty)): \(note)")
             }
             .sorted { $0.date < $1.date }
         return SummaryReport(

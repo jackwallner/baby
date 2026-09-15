@@ -12,7 +12,7 @@ private struct IntentSaveError: LocalizedError {
 /// straight into the shared store, and lets the app export it later.
 struct LogEventIntent: AppIntent {
     static let title: LocalizedStringResource = "Log a feed or diaper"
-    static let description = IntentDescription("Logs a feed, wet diaper or dirty diaper right now.")
+    static let description = IntentDescription("Logs a feed, a pee or poop diaper, or sleep right now.")
     static let openAppWhenRun = false
 
     @Parameter(title: "What", default: .wet)
@@ -110,26 +110,26 @@ enum LogChoice: String, AppEnum {
         .feedLeft: "Feed, left",
         .feedRight: "Feed, right",
         .bottle: "Bottle",
-        .wet: "Wet diaper",
-        .dirty: "Dirty diaper",
+        .wet: DisplayRepresentation(title: "Pee diaper", synonyms: ["Wet diaper"]),
+        .dirty: DisplayRepresentation(title: "Poop diaper", synonyms: ["Dirty diaper"]),
         .sleep: "Sleep (start or end)",
     ]
 }
 
-/// "Hey Siri, log a wet diaper in Baby Tracker." Also what the Action button
+/// "Hey Siri, log a pee diaper in Baby Tracker." Also what the Action button
 /// picks from.
 struct BabyShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: LogEventIntent(what: .wet),
-            phrases: ["Log a wet diaper in \(.applicationName)"],
-            shortTitle: "Wet diaper",
+            phrases: ["Log a pee diaper in \(.applicationName)", "Log a wet diaper in \(.applicationName)"],
+            shortTitle: "Pee diaper",
             systemImageName: "drop.fill"
         )
         AppShortcut(
             intent: LogEventIntent(what: .dirty),
-            phrases: ["Log a dirty diaper in \(.applicationName)"],
-            shortTitle: "Dirty diaper",
+            phrases: ["Log a poop diaper in \(.applicationName)", "Log a dirty diaper in \(.applicationName)"],
+            shortTitle: "Poop diaper",
             systemImageName: "drop.triangle.fill"
         )
         AppShortcut(

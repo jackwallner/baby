@@ -6,18 +6,20 @@ answer "when did she last eat, and which side". XcodeGen project and scheme:
 
 ## Product
 
-The everyday app is one screen: last feed and side, last diaper, Feed / Wet /
-Dirty / Sleep controls, and quiet daily totals. History is one tap away through
+The everyday app is one screen: last feed and side, last diaper, Feed / Pee /
+Poop / Sleep controls, and quiet daily totals. The diaper pair can read Wet /
+Dirty instead (More > Diaper buttons, `DiaperWords`); reports for a doctor
+always say wet and dirty. History is one tap away through
 the top-left clock. More is the top-right ellipsis.
 
 Everything outside logging lives in More: First Weeks, Pediatrician summary,
-logging together, appearance, stain helper, baby settings, and Baby+. No tab bar, automatic
+logging together, appearance, diaper words, stain helper, baby settings, and Baby+. No tab bar, automatic
 review prompts, promotional cards, or purchase screen during onboarding.
 Onboarding is one screen with two paths: Start a new log (optional name and
 birth date) or Join a shared log (scan or paste an invite). An invitation
 opened before setup shows a joining screen instead of onboarding.
 
-Never: ads, AI panels or predictions, moving or renaming the four buttons, or
+Never: ads, AI panels or predictions, moving the four buttons or renaming them beyond that setting, or
 locking something that shipped free.
 
 ## Architecture

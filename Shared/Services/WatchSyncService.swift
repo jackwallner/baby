@@ -12,6 +12,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     static let shared = WatchSyncService()
 
     private static let summaryKey = "summary"
+    private static let diaperWordsKey = "diaperWords"
     private static let savedActionKey = "savedWatchAction"
 
     private override init() {
@@ -31,7 +32,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         guard session.activationState == .activated, session.isPaired,
               let data = try? JSONEncoder().encode(summary) else { return }
         do {
-            try session.updateApplicationContext([Self.summaryKey: data])
+            try session.updateApplicationContext([Self.summaryKey: data, Self.diaperWordsKey: DiaperWords.current.rawValue])
         } catch {
             watchSyncLogger.error("Summary push failed: \(String(describing: error), privacy: .public)")
         }
@@ -52,6 +53,9 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
 
     private func applyContext(_ context: [String: Any]) {
         #if os(watchOS)
+        if let words = context[Self.diaperWordsKey] as? String {
+            AppGroup.defaults.set(words, forKey: AppGroup.Key.diaperWords)
+        }
         guard let data = context[Self.summaryKey] as? Data,
               let summary = try? JSONDecoder().decode(NowSummary.self, from: data) else { return }
         Task { @MainActor in WatchStore.shared.receive(summary) }

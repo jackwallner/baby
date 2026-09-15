@@ -45,6 +45,15 @@ final class BabySettings: ObservableObject {
         didSet { defaults.set(appearance.rawValue, forKey: AppGroup.Key.appearance) }
     }
 
+    /// Pee and Poop, or Wet and Dirty. Every surface re-reads it on change.
+    @Published var diaperWords: DiaperWords {
+        didSet {
+            guard diaperWords != oldValue else { return }
+            defaults.set(diaperWords.rawValue, forKey: AppGroup.Key.diaperWords)
+            EventStore.shared.republishLabels()
+        }
+    }
+
     /// The Now-screen invite card can be put away; Settings keeps the entry.
     @Published var hasDismissedShareCard: Bool {
         didSet { defaults.set(hasDismissedShareCard, forKey: "hasDismissedShareCard") }
@@ -53,6 +62,7 @@ final class BabySettings: ObservableObject {
     private init() {
         hasCompletedSetup = defaults.bool(forKey: AppGroup.Key.hasCompletedSetup)
         appearance = AppAppearance(rawValue: defaults.string(forKey: AppGroup.Key.appearance) ?? "") ?? .system
+        diaperWords = .current
         #if DEBUG
         // `-Appearance night` pins a palette for captures and UI tests.
         let arguments = ProcessInfo.processInfo.arguments

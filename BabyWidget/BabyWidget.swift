@@ -88,8 +88,8 @@ struct BabyNowWidgetView: View {
                     if let day = s.dayOfLife {
                         Text("Day \(day)").font(.caption.weight(.semibold)).foregroundStyle(AppTheme.ink2)
                     }
-                    Text("\(s.todayWet)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.wet) + Text(" wet").font(.caption).foregroundStyle(AppTheme.ink2)
-                    Text("\(s.todayDirty)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.dirty) + Text(" dirty").font(.caption).foregroundStyle(AppTheme.ink2)
+                    Text("\(s.todayWet)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.wet) + Text(" \(EventKind.wet.label.lowercased())").font(.caption).foregroundStyle(AppTheme.ink2)
+                    Text("\(s.todayDirty)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.dirty) + Text(" \(EventKind.dirty.label.lowercased())").font(.caption).foregroundStyle(AppTheme.ink2)
                     Text("\(s.todayFeeds)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.feed) + Text(" feeds").font(.caption).foregroundStyle(AppTheme.ink2)
                 }
                 .monospacedDigit()
@@ -153,8 +153,8 @@ struct BabyLogWidgetView: View {
         case .accessoryRectangular:
             HStack(spacing: AppTheme.hairSpacing) {
                 logButton("Feed \(s.suggestedSide.shortLabel)", kind: .feed, choice: .feed(s.suggestedSide))
-                logButton("Wet", kind: .wet, choice: .wet)
-                logButton("Dirty", kind: .dirty, choice: .dirty)
+                logButton(EventKind.wet.label, kind: .wet, choice: .wet)
+                logButton(EventKind.dirty.label, kind: .dirty, choice: .dirty)
             }
         case .systemMedium:
             HStack(spacing: AppTheme.spacing) {
@@ -182,10 +182,10 @@ struct BabyLogWidgetView: View {
         VStack(spacing: AppTheme.tightSpacing) {
             HStack(spacing: AppTheme.tightSpacing) {
                 logButton("Feed \(s.suggestedSide.shortLabel)", kind: .feed, choice: .feed(s.suggestedSide))
-                logButton("Wet", kind: .wet, choice: .wet)
+                logButton(EventKind.wet.label, kind: .wet, choice: .wet)
             }
             HStack(spacing: AppTheme.tightSpacing) {
-                logButton("Dirty", kind: .dirty, choice: .dirty)
+                logButton(EventKind.dirty.label, kind: .dirty, choice: .dirty)
                 logButton(s.isSleeping ? "Wake" : "Sleep", kind: .sleep, choice: .sleep)
             }
         }
@@ -218,7 +218,7 @@ struct BabyLogWidget: Widget {
                 .containerBackground(AppTheme.card, for: .widget)
         }
         .configurationDisplayName("One-tap log")
-        .description("Log a feed, a wet or dirty diaper, or sleep without opening the app.")
+        .description("Log a feed, a pee or poop diaper, or sleep without opening the app.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }

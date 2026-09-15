@@ -47,7 +47,7 @@ struct NowSummary: Codable, Equatable, Sendable {
         return "Fed \(Format.ago(lastFeedAt, now: now))\(side)"
     }
 
-    /// "Last diaper 48m ago · Wet".
+    /// "Last diaper 48m ago · Pee".
     func diaperLine(now: Date = .now) -> String {
         guard let lastDiaperAt else { return "No diaper logged yet" }
         let kind = lastDiaperKind.map { " · \($0.label)" } ?? ""
@@ -60,9 +60,9 @@ struct NowSummary: Codable, Equatable, Sendable {
         return "Asleep \(Format.compactDuration(now.timeIntervalSince(runningSleepStart)))"
     }
 
-    /// "3 wet · 2 dirty · 7 feeds".
+    /// "3 pee · 2 poop · 7 feeds".
     var todayLine: String {
-        "\(todayWet) wet · \(todayDirty) dirty · \(Format.count(todayFeeds, "feed"))"
+        "\(todayWet) \(EventKind.wet.label.lowercased()) · \(todayDirty) \(EventKind.dirty.label.lowercased()) · \(Format.count(todayFeeds, "feed"))"
     }
 
     // MARK: - Building

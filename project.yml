@@ -66,6 +66,7 @@ targetTemplates:
   SharedCore:
     sources:
       - path: Shared/Models/BabyModel.swift
+      - path: Shared/Models/DiaperWords.swift
       - path: Shared/Services/Persistence.swift
       - path: Shared/Services/NowSummary.swift
       - path: Shared/Services/SummaryReport.swift
@@ -160,6 +161,7 @@ targets:
       - path: BabyWatch/PrivacyInfo.xcprivacy
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
+      - path: Shared/Models/DiaperWords.swift
       - path: Shared/Services/NowSummary.swift
       - path: Shared/Services/SummaryReport.swift
       - path: Shared/Services/SampleReport.swift
@@ -188,6 +190,7 @@ targets:
       - path: BabyWatchWidget/PrivacyInfo.xcprivacy
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
+      - path: Shared/Models/DiaperWords.swift
       - path: Shared/Services/NowSummary.swift
       - path: Shared/Services/SummaryReport.swift
       - path: Shared/Services/SampleReport.swift

@@ -12,6 +12,7 @@ final class FormatTests: XCTestCase {
     }
 
     func testNowSummaryLinesMatchTheBrief() {
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.diaperWords)
         var summary = NowSummary()
         let now = Date.now
         summary.lastFeedAt = now.addingTimeInterval(-(2 * 3600 + 14 * 60))
@@ -19,9 +20,23 @@ final class FormatTests: XCTestCase {
         summary.lastDiaperAt = now.addingTimeInterval(-48 * 60)
         summary.lastDiaperKind = .wet
         XCTAssertEqual(summary.feedLine(now: now), "Fed 2h 14m ago · Left")
-        XCTAssertEqual(summary.diaperLine(now: now), "Last diaper 48m ago · Wet")
+        XCTAssertEqual(summary.diaperLine(now: now), "Last diaper 48m ago · Pee")
+        summary.todayWet = 3
+        summary.todayDirty = 2
+        XCTAssertEqual(summary.todayLine, "3 pee · 2 poop · 0 feeds")
         XCTAssertNil(summary.sleepLine(now: now))
         XCTAssertEqual(NowSummary.empty.feedLine(now: now), "No feed logged yet")
+    }
+
+    func testDiaperWordsSettingRenamesOnlyTheDiaperKinds() {
+        defer { AppGroup.defaults.removeObject(forKey: AppGroup.Key.diaperWords) }
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.diaperWords)
+        XCTAssertEqual(DiaperWords.current, .peePoop)
+        XCTAssertEqual([EventKind.wet.label, EventKind.dirty.label], ["Pee", "Poop"])
+        AppGroup.defaults.set(DiaperWords.wetDirty.rawValue, forKey: AppGroup.Key.diaperWords)
+        XCTAssertEqual([EventKind.wet.label, EventKind.dirty.label], ["Wet", "Dirty"])
+        XCTAssertEqual(EventKind.feed.label, "Feed")
+        XCTAssertEqual(EventKind.sleep.label(words: .peePoop), "Sleep")
     }
 
     func testWatchStoreReplaysAPendingTapOverAnOlderPhoneSummary() {

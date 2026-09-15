@@ -89,6 +89,12 @@ final class EventStore: ObservableObject {
         publish()
     }
 
+    /// The diaper words changed: redraw this process and every other surface.
+    func republishLabels() {
+        objectWillChange.send()
+        publish()
+    }
+
     /// Pushes the fresh summary to every other surface.
     private func publish() {
         WidgetCenter.shared.reloadAllTimelines()

@@ -24,6 +24,7 @@ enum AppGroup {
         static let activeChildID = "activeChildID"
         static let pendingSharedZone = "pendingSharedZone"
         static let appearance = "appearance"
+        static let diaperWords = "diaperWords"
         /// The Watch's copy of the phone's summary, and the phone's last push.
         static let nowSummary = "nowSummary"
         /// Watch-only: log events that have not yet reached the phone.

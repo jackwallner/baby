@@ -37,8 +37,8 @@ struct WatchNowView: View {
                     }
                 }
                 HStack(spacing: AppTheme.hairSpacing) {
-                    logButton("Wet", kind: .wet) { store.log(.wet) }
-                    logButton("Dirty", kind: .dirty) { store.log(.dirty) }
+                    logButton(EventKind.wet.label, kind: .wet) { store.log(.wet) }
+                    logButton(EventKind.dirty.label, kind: .dirty) { store.log(.dirty) }
                 }
                 logButton(store.summary.isSleeping ? "Wake" : "Sleep", kind: .sleep) { store.toggleSleep() }
 

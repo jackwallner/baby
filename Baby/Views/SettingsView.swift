@@ -24,6 +24,7 @@ struct SettingsView: View {
                 babiesSection
                 sharingSection
                 appearanceSection
+                diaperWordsSection
                 plusSection
                 aboutSection
             }
@@ -204,6 +205,21 @@ struct SettingsView: View {
             Text("Appearance")
         } footer: {
             Text("Night light uses dim, warm colors that are easier on the eyes during feeds in a dark room.")
+        }
+    }
+
+    private var diaperWordsSection: some View {
+        Section("Diaper buttons") {
+            Picker("Diaper buttons", selection: $settings.diaperWords) {
+                ForEach(DiaperWords.allCases, id: \.rawValue) { words in
+                    Text(words.label)
+                        .foregroundStyle(AppTheme.ink)
+                        .tag(words)
+                        .accessibilityIdentifier("diaperWords.\(words.rawValue)")
+                }
+            }
+            .pickerStyle(.inline)
+            .labelsHidden()
         }
     }
 

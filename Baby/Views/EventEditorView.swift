@@ -135,8 +135,7 @@ struct EventEditorView: View {
     private var title: String {
         switch kind {
         case .feed: isNew ? "Log a feed" : "Feed"
-        case .wet: isNew ? "Log a wet diaper" : "Wet diaper"
-        case .dirty: isNew ? "Log a dirty diaper" : "Dirty diaper"
+        case .wet, .dirty: isNew ? "Log a \(kind.label.lowercased()) diaper" : "\(kind.label) diaper"
         case .sleep: isNew ? "Log sleep" : "Sleep"
         case .weight: isNew ? "Log a weight" : "Weight"
         }
