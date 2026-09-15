@@ -122,7 +122,7 @@ struct BabyPaywallView: View {
                 Text("Baby+ is active")
                     .font(.title.bold())
                     .foregroundStyle(AppTheme.ink)
-                Text("The pediatrician summary, trends, export and more than one baby are unlocked on every device signed in to this Apple ID.")
+                Text("The pediatrician summary, trends and export are unlocked on every device signed in to this Apple ID.")
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.ink2)
                     .multilineTextAlignment(.center)
@@ -403,14 +403,14 @@ struct BabyPaywallView: View {
     }
 }
 
-/// The Baby+ feature list, driven off one enum so the paywall bullets and the
+/// The Baby+ feature list: reporting to share with a doctor, nothing else.
+/// Driven off one enum so the paywall bullets and the
 /// locked rows in the app cannot drift apart. Nothing here may be something
 /// that ships free.
 enum PlusFeature: String, CaseIterable, Identifiable {
     case pediatricianSummary
     case trends
     case export
-    case multipleBabies
 
     var id: String { rawValue }
 
@@ -419,7 +419,6 @@ enum PlusFeature: String, CaseIterable, Identifiable {
         case .pediatricianSummary: "Pediatrician summary"
         case .trends: "Trends"
         case .export: "CSV export"
-        case .multipleBabies: "More than one baby"
         }
     }
 
@@ -428,7 +427,6 @@ enum PlusFeature: String, CaseIterable, Identifiable {
         case .pediatricianSummary: "A one-page PDF since the last visit: feeds, wet and dirty counts, sleep, weights. Hand it over or AirDrop it in the exam room."
         case .trends: "Feeds per day, longest sleep stretch and diaper counts over the weeks."
         case .export: "Every entry as a spreadsheet, for your records or a specialist."
-        case .multipleBabies: "Twins, or the next one, each with their own log."
         }
     }
 
@@ -437,7 +435,6 @@ enum PlusFeature: String, CaseIterable, Identifiable {
         case .pediatricianSummary: "doc.text.fill"
         case .trends: "chart.bar.fill"
         case .export: "square.and.arrow.up.fill"
-        case .multipleBabies: "person.2.fill"
         }
     }
 
@@ -446,7 +443,6 @@ enum PlusFeature: String, CaseIterable, Identifiable {
         case .pediatricianSummary: "A one-page summary since the last visit"
         case .trends: "Feeds, sleep and diapers over the weeks"
         case .export: "Export every entry as a spreadsheet"
-        case .multipleBabies: "Twins, or the next baby"
         }
     }
 
@@ -455,7 +451,6 @@ enum PlusFeature: String, CaseIterable, Identifiable {
         case .pediatricianSummary: "Walk into the pediatrician\nwith a clean summary"
         case .trends: "See the weeks,\nnot just today"
         case .export: "Take the whole log\nwith you"
-        case .multipleBabies: "One log per baby"
         }
     }
 }

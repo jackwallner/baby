@@ -165,7 +165,11 @@ struct BabyOnboardingView: View {
             Divider()
             Toggle("Add birth date", isOn: $hasBirthDate)
             if hasBirthDate {
-                DatePicker("Birth date", selection: $birthDate, in: ...Date.now, displayedComponents: .date)
+                LabeledContent("Birth date") {
+                    DatePicker("Birth date", selection: $birthDate, in: ...Date.now, displayedComponents: .date)
+                        .labelsHidden()
+                        .themedDatePicker()
+                }
             }
         }
         .card()

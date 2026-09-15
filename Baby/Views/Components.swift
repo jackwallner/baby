@@ -37,6 +37,18 @@ extension View {
         modifier(GraphicBorder())
     }
 
+    /// A list or form row on the theme: card fill and a warm separator.
+    func themedRow() -> some View {
+        listRowBackground(AppTheme.card)
+            .listRowSeparatorTint(AppTheme.separator)
+    }
+
+    /// The compact date picker draws a cool grey capsule with white text that
+    /// no UIKit appearance reaches. Night light multiplies it into warm ink.
+    func themedDatePicker() -> some View {
+        modifier(NightLightMultiply())
+    }
+
     func card(elevated: Bool = false) -> some View {
         modifier(CardBackground(elevated: elevated))
     }
@@ -44,6 +56,14 @@ extension View {
     /// A card or row that answers back under the finger.
     func pressableCard() -> some View {
         buttonStyle(PressableCardStyle())
+    }
+}
+
+private struct NightLightMultiply: ViewModifier {
+    @Environment(\.nightLight) private var nightLight
+
+    func body(content: Content) -> some View {
+        content.colorMultiply(nightLight ? AppTheme.ink : .white)
     }
 }
 
@@ -108,23 +128,28 @@ struct SectionLabel: View {
 }
 
 extension View {
-    /// The Undo toast along the bottom edge, on every screen that can log or delete.
-    func undoToast() -> some View { modifier(UndoToastInset()) }
+    /// The Undo toast pinned to the top, in the navigation bar between History
+    /// and More, so it covers only the title: never the log controls and never
+    /// the bar buttons. Applied once around the navigation stack.
+    func undoToast() -> some View { modifier(UndoToastOverlay()) }
 }
 
-private struct UndoToastInset: ViewModifier {
+private struct UndoToastOverlay: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var events: EventStore
     @State private var showUndoError = false
 
     func body(content: Content) -> some View {
         content
-            .safeAreaInset(edge: .bottom, spacing: 0) {
+            .overlay(alignment: .top) {
                 if let logged = events.lastLogged {
                     UndoToast(logged: logged, undo: { showUndoError = !events.undoLast() })
-                        .padding(.horizontal, AppTheme.margin)
-                        .padding(.bottom, AppTheme.tightSpacing)
-                        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+                        .frame(maxWidth: AppTheme.toastWidth)
+                        .padding(.horizontal, AppTheme.toastSideInset)
+                        .gesture(DragGesture(minimumDistance: AppTheme.tightSpacing).onEnded { value in
+                            if value.translation.height < 0 { events.dismissUndo() }
+                        })
+                        .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
                 }
             }
             .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.lastLogged)
@@ -136,41 +161,50 @@ private struct UndoToastInset: ViewModifier {
     }
 }
 
-/// The bottom toast after a tap or a delete: what happened, and Undo.
+/// The top toast after a tap or a delete: what happened, and Undo.
 struct UndoToast: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let logged: EventStore.LoggedEvent
     let undo: () -> Void
 
     var body: some View {
-        (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.hairSpacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
+        (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.hairSpacing)) : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))) {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(AppTheme.color(for: logged.kind))
                 .accessibilityHidden(true)
-            Text(title)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(AppTheme.ink)
-                .fixedSize(horizontal: false, vertical: true)
-            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: AppTheme.tightSpacing) }
+            if dynamicTypeSize.isAccessibilitySize {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppTheme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppTheme.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+            }
             Button("Undo", action: undo)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppTheme.accent)
                 .frame(minHeight: 44)
         }
-        .padding(.horizontal, AppTheme.looseSpacing)
-        .padding(.vertical, AppTheme.hairSpacing)
+        .padding(.leading, AppTheme.spacing)
+        .padding(.trailing, AppTheme.spacing)
         .background(AppTheme.cardElevated, in: AppTheme.cardShape)
         .graphicBorder()
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("undoToast")
     }
 
+    /// Short, in the buttons' own words: the toast sits between two bar buttons.
     private var title: String {
         if logged.deleted != nil {
             let base: String = switch logged.kind {
             case .feed: "Deleted feed"
-            case .wet: "Deleted wet diaper"
-            case .dirty: "Deleted dirty diaper"
+            case .wet: "Deleted wet"
+            case .dirty: "Deleted dirty"
             case .sleep: "Deleted sleep"
             case .weight: "Deleted weight"
             }
@@ -179,8 +213,8 @@ struct UndoToast: View {
         }
         let base: String = switch logged.kind {
         case .feed: "Logged feed"
-        case .wet: "Logged wet diaper"
-        case .dirty: "Logged dirty diaper"
+        case .wet: "Logged wet"
+        case .dirty: "Logged dirty"
         case .sleep: logged.reopensTimer ? "Sleep ended" : "Sleep started"
         case .weight: "Logged weight"
         }

@@ -103,8 +103,12 @@ struct SummaryView: View {
     private var sinceCard: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             SectionLabel(text: "Since the last visit")
-            DatePicker("First day", selection: sinceBinding, in: ...Date.now, displayedComponents: .date)
-                .datePickerStyle(.compact)
+            LabeledContent("First day") {
+                DatePicker("First day", selection: sinceBinding, in: ...Date.now, displayedComponents: .date)
+                    .labelsHidden()
+                    .themedDatePicker()
+            }
+            .foregroundStyle(AppTheme.ink)
             Button("Today was the visit") {
                 sinceBinding.wrappedValue = Calendar.current.startOfDay(for: .now)
                 Haptics.selected()

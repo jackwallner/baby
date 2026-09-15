@@ -13,7 +13,11 @@ away so it cannot interfere with tracking. The home screen has no feature
 discovery or monetization. It answers the last-feed question and offers the
 same logging controls in the same order.
 
-History belongs one tap from home. Reports, first-weeks guidance, sharing,
+History belongs one tap from home, as a List or a month Calendar (dots
+per kind, tap a day for its entries). The calendar grid is plain stacks: a
+LazyVGrid inside a List cell crashed UICollectionView self-sizing. The Undo
+toast is pinned to the top over the navigation bar (swipe up to dismiss), so
+it never lands mid-screen over the log controls. Reports, first-weeks guidance, sharing,
 stain help and Baby+ live in More. Do not restore a four-tab layout or an
 onboarding paywall. Name and birth date are optional; never guess a birth date
 for someone who did not choose one.

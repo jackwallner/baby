@@ -73,10 +73,11 @@ Motion respects Reduce Motion; accessibility text sizes use stacked layouts.
 
 Free forever: logging, the first-weeks tally, full history, both widgets, the
 Watch app and complication, the Live Activity, logging together, the stain
-helper, every appearance.
+helper, every appearance, more than one baby.
 
-Baby+ (`PlusFeature`): sharing or exporting the pediatrician PDF, the trends
-charts, CSV export, and more than one baby. Nothing else may move behind it.
+Baby+ (`PlusFeature`) is reporting to share with a doctor: sharing or exporting
+the pediatrician PDF, the trends charts, and CSV export. Nothing else may move
+behind it. More than one baby is free.
 
 ## Identifiers
 

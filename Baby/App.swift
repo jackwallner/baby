@@ -17,6 +17,21 @@ struct BabyApp: App {
         // stray pure-white title.
         UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: AppTheme.inkUIColor]
         UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: AppTheme.inkUIColor]
+        UINavigationBar.appearance().tintColor = AppTheme.accentUIColor
+        if let chevron = UIImage(systemName: "chevron.backward")?.withTintColor(AppTheme.accentUIColor, renderingMode: .alwaysOriginal) {
+            UINavigationBar.appearance().backIndicatorImage = chevron
+            UINavigationBar.appearance().backIndicatorTransitionMaskImage = chevron
+        }
+        // UIKit controls default to cool greys and pure white, which break
+        // Night light's warm palette. Every colour here is dynamic.
+        UISwitch.appearance().onTintColor = AppTheme.accentUIColor
+        UISwitch.appearance().thumbTintColor = AppTheme.thumbUIColor
+        let segments = UISegmentedControl.appearance()
+        segments.backgroundColor = AppTheme.cardUIColor
+        segments.selectedSegmentTintColor = AppTheme.actionFillUIColor
+        segments.setTitleTextAttributes([.foregroundColor: AppTheme.inkUIColor], for: .normal)
+        segments.setTitleTextAttributes([.foregroundColor: AppTheme.buttonInkUIColor], for: .selected)
+        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).tintColor = AppTheme.accentUIColor
 
         #if DEBUG
         if RevenueCatProbe.isEnabled && RevenueCatProbe.wantsPurchase {
@@ -110,6 +125,7 @@ enum NightLight {
     static func apply(_ isOn: Bool) {
         for case let scene as UIWindowScene in UIApplication.shared.connectedScenes {
             for window in scene.windows {
+                window.tintColor = AppTheme.accentUIColor
                 let isSet = window.traitOverrides.contains(NightLightTrait.self)
                 if isOn, !isSet {
                     window.traitOverrides[NightLightTrait.self] = true
@@ -280,6 +296,7 @@ struct BabyHomeView: View {
             default: NowView()
             }
         }
+        .undoToast()
         .tint(AppTheme.accent)
     }
 }

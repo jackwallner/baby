@@ -55,7 +55,6 @@ struct NowView: View {
                     .accessibilityIdentifier("more")
             }
         }
-        .undoToast()
         .sheet(item: $editor) { request in
             EventEditorView(request: request)
         }

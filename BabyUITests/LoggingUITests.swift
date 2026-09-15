@@ -34,9 +34,12 @@ final class LoggingUITests: XCTestCase {
     func testDeletingFromHistoryCanBeUndone() {
         let app = launch()
         app.buttons["History"].tap()
-        // The first cell is the day header with the day's totals; the entries follow it.
-        let totals = app.cells.element(boundBy: 0).staticTexts.element(boundBy: 1)
-        let entry = app.cells.element(boundBy: 1)
+        // The layout is remembered between launches.
+        app.buttons["List"].tap()
+        // Cell 0 is the List / Calendar picker, then the day header with the
+        // day's totals; the entries follow it.
+        let totals = app.cells.element(boundBy: 1).staticTexts.element(boundBy: 1)
+        let entry = app.cells.element(boundBy: 2)
         XCTAssertTrue(entry.waitForExistence(timeout: 5))
         let originalTotals = totals.label
         entry.swipeLeft()
@@ -46,6 +49,18 @@ final class LoggingUITests: XCTestCase {
         XCTAssertNotEqual(totals.label, originalTotals)
         app.buttons["Undo"].tap()
         XCTAssertEqual(totals.label, originalTotals)
+    }
+
+    func testHistoryCalendarShowsTheSelectedDay() {
+        let app = launch()
+        app.buttons["log.wet"].tap()
+        app.buttons["History"].tap()
+        app.buttons["Calendar"].tap()
+        XCTAssertTrue(app.buttons["Previous month"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Wet'")).firstMatch.exists)
+        XCTAssertTrue(app.staticTexts["Today"].exists)
+        app.buttons["List"].tap()
+        XCTAssertFalse(app.buttons["Previous month"].exists)
     }
 
     func testHoldingAButtonDoesNotLogUntilSaved() {

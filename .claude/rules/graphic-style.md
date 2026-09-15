@@ -22,6 +22,14 @@ hairline; `outline` stays brighter for strokes inside care graphics. Night
 light is dim warm umber with no pure white and no saturated blue (wet is
 slate, sleep is mauve); keep the four kinds distinguishable in it.
 
+2026-09-14: Night light glitches were UIKit controls drawing system cool
+grey and pure white. `BabyApp.init` themes switches, segmented controls, the
+back chevron and bar buttons with dynamic `AppTheme` UIColors; list and form
+rows use `.themedRow()` (card fill plus warm `separator`); compact date
+pickers use `.themedDatePicker()` inside a `LabeledContent`, which multiplies
+the capsule into warm ink only in Night light. New UIKit-backed controls need
+the same treatment.
+
 CareGraphic provides a small consistent vocabulary beside visible labels.
 SharedLogGraphic explains two people contributing to one log. Neither graphic
 is a control on its own. No decorative marketing panels belong on Now.

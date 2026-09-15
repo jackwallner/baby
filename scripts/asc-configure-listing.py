@@ -33,7 +33,7 @@ FREE, AND STAYING FREE
 Logging, the first-weeks tally, full history, both widgets, the Apple Watch app and complication, the Live Activity, partner sharing, and the stain helper.
 
 BABY+ (com.jackwallner.baby.monthly, com.jackwallner.baby.yearly, com.jackwallner.baby.pro.lifetime)
-Sharing or exporting the PDF file, the trends charts, CSV export, and more than one baby. Nothing that ships free is locked later.
+Sharing or exporting the PDF file, the trends charts, and CSV export. More than one baby is free. Nothing that ships free is locked later.
 
 PARTNER SHARING
 CloudKit CKShare between the two parents' own iCloud accounts (private and shared databases). There is no server of ours and no account to create. It needs an iCloud account on the device; without one, logging is unaffected and the rest of the app works.

@@ -27,7 +27,7 @@ struct SettingsView: View {
                 plusSection
                 aboutSection
             }
-            .listRowBackground(AppTheme.card)
+            .themedRow()
         }
         .foregroundStyle(AppTheme.ink)
         .scrollContentBackground(.hidden)
@@ -93,7 +93,11 @@ struct SettingsView: View {
             TextField("Name", text: $name)
             Toggle("Born", isOn: $hasBirthDate)
             if hasBirthDate {
-                DatePicker("Birth date", selection: $birthDate, in: ...Date.now, displayedComponents: .date)
+                LabeledContent("Birth date") {
+                    DatePicker("Birth date", selection: $birthDate, in: ...Date.now, displayedComponents: .date)
+                        .labelsHidden()
+                        .themedDatePicker()
+                }
             }
             if let day = events.child?.dayOfLife() {
                 LabeledContent("Day of life", value: "\(day)")
@@ -101,13 +105,11 @@ struct SettingsView: View {
         }
     }
 
-    /// More than one baby is Baby+ (twins, or the next one). The list itself
-    /// is always visible: someone who stops paying keeps every baby they made
-    /// and can still switch between them.
-    @ViewBuilder
+    /// Twins, or the next one. Free: a second baby is a fact about the
+    /// family, not a reporting feature, so it never sits behind Baby+.
     private var babiesSection: some View {
-        if events.children.count > 1 || store.isPro {
-            Section {
+        Section {
+            if events.children.count > 1 {
                 ForEach(events.children, id: \.objectID) { child in
                     Button {
                         events.setActive(child)
@@ -118,7 +120,7 @@ struct SettingsView: View {
                             if sharing.isSharedChild(child) {
                                 Image(systemName: "person.2.fill")
                                     .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(AppTheme.ink2)
                             }
                             Spacer()
                             if child.objectID == events.child?.objectID {
@@ -128,26 +130,17 @@ struct SettingsView: View {
                         }
                     }
                 }
-                Button("Add a baby") { addBaby() }
-                .foregroundStyle(AppTheme.accent)
-            } header: {
-                Text("Babies")
-            } footer: {
-                Text("Each baby keeps its own log, its own first-weeks tally and its own summary.")
             }
-        } else {
-            Section("Babies") {
-                Button("Add another baby with Baby+") { showPaywall = true }
-                .foregroundStyle(AppTheme.accent)
-            }
+            Button("Add a baby") { addBaby() }
+            .foregroundStyle(AppTheme.accent)
+        } header: {
+            Text("Babies")
+        } footer: {
+            Text("Each baby keeps its own log, its own first-weeks tally and its own summary.")
         }
     }
 
     private func addBaby() {
-        guard store.isPro else {
-            showPaywall = true
-            return
-        }
         guard events.createChild(name: nil, birthDate: nil) else {
             showSaveError = true
             return
@@ -248,7 +241,7 @@ struct SettingsView: View {
             LabeledContent("Version", value: Bundle.main.appVersionLabel)
             Text(Guidance.disclaimer)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppTheme.ink2)
         }
     }
 }

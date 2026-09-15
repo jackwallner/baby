@@ -39,7 +39,11 @@ struct EventEditorView: View {
             Form {
                 Group {
                     Section {
-                        DatePicker("Time", selection: $startedAt, in: ...Date.now.addingTimeInterval(60))
+                        LabeledContent("Time") {
+                            DatePicker("Time", selection: $startedAt, in: ...Date.now.addingTimeInterval(60))
+                                .labelsHidden()
+                                .themedDatePicker()
+                        }
                     }
                     if kind == .feed {
                         Section("Feed") {
@@ -95,7 +99,7 @@ struct EventEditorView: View {
                         }
                     }
                 }
-                .listRowBackground(AppTheme.card)
+                .themedRow()
             }
             .foregroundStyle(AppTheme.ink)
             .scrollContentBackground(.hidden)

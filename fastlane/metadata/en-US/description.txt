@@ -16,13 +16,12 @@ THE STAIN HELPER
 Tell it once what you have at home, and a blowout, spit-up, breast milk or formula stain gets the steps in order, skipping anything you do not own.
 
 FREE, AND STAYING FREE
-Logging, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, logging together and the stain helper. Nothing you have already logged is ever locked later.
+Logging, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, logging together, the stain helper and more than one baby. Nothing you have already logged is ever locked later.
 
 BABY+, OPTIONAL
 - The pediatrician summary: a one-page PDF since the last visit, with daily feeds, wet and dirty counts, sleep totals, the longest stretch and weights
 - Trends: feeds a day, diaper counts, and the longest sleep stretch over the weeks
 - CSV export of every entry
-- More than one baby, for twins or the next one
 
 Baby+ is available as a monthly or yearly subscription, or as a one-time lifetime purchase that never renews. New subscribers get a one-week free trial. Payment is charged to your Apple Account when the trial ends unless you cancel at least 24 hours before then. Subscriptions renew automatically for the same period and price unless cancelled at least 24 hours before the end of the current period. Manage or cancel your subscription in Settings, under your Apple Account, then Subscriptions. Prices are shown in the app before you buy and vary by region.
 

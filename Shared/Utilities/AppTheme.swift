@@ -38,6 +38,10 @@ enum AppTheme {
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72
     static let inviteCodeSize: CGFloat = 200
+    static let toastWidth: CGFloat = 520
+    /// Clears the 44pt History and More buttons and their 16pt bar inset.
+    static let toastSideInset: CGFloat = 68
+    static let dotSize: CGFloat = 5
 
     static let feedbackAnimation = Animation.spring(response: 0.32, dampingFraction: 0.82)
 
@@ -72,8 +76,10 @@ enum AppTheme {
     #else
     /// Warm off-white by day, near-black at night, dim umber for Night light.
     static let paper = Color(light: .init(0.97, 0.96, 0.94), dark: .init(0.07, 0.065, 0.06), night: .init(0.045, 0.032, 0.022))
-    static let card = Color(light: .init(1, 1, 1), dark: .init(0.125, 0.12, 0.11), night: .init(0.095, 0.068, 0.048))
-    static let cardElevated = Color(light: .init(0.94, 0.93, 0.91), dark: .init(0.17, 0.162, 0.15), night: .init(0.13, 0.095, 0.068))
+    static let cardUIColor = UIColor(light: .init(1, 1, 1), dark: .init(0.125, 0.12, 0.11), night: .init(0.095, 0.068, 0.048))
+    static let card = Color(uiColor: cardUIColor)
+    static let cardElevatedUIColor = UIColor(light: .init(0.94, 0.93, 0.91), dark: .init(0.17, 0.162, 0.15), night: .init(0.13, 0.095, 0.068))
+    static let cardElevated = Color(uiColor: cardElevatedUIColor)
     static let inkUIColor = UIColor(light: .init(0.11, 0.10, 0.09), dark: .init(0.95, 0.94, 0.92), night: .init(0.86, 0.68, 0.52))
     static let ink = Color(uiColor: inkUIColor)
     static let ink2 = Color(light: .init(0.42, 0.40, 0.38), dark: .init(0.68, 0.66, 0.63), night: .init(0.64, 0.49, 0.37))
@@ -85,16 +91,23 @@ enum AppTheme {
     static let dirty = Color(light: .init(0.52, 0.38, 0.22), dark: .init(0.72, 0.58, 0.40), night: .init(0.62, 0.56, 0.36))
     static let sleep = Color(light: .init(0.36, 0.34, 0.78), dark: .init(0.62, 0.60, 0.95), night: .init(0.64, 0.50, 0.58))
     /// Primary actions that are not one of the four kinds: onboarding, paywall.
-    static let accent = Color(light: .init(0.70, 0.30, 0.20), dark: .init(0.95, 0.55, 0.42), night: .init(0.84, 0.48, 0.34))
+    static let accentUIColor = UIColor(light: .init(0.70, 0.30, 0.20), dark: .init(0.95, 0.55, 0.42), night: .init(0.84, 0.48, 0.34))
+    static let accent = Color(uiColor: accentUIColor)
     static let notice = Color(light: .init(0.60, 0.36, 0.06), dark: .init(0.95, 0.68, 0.30), night: .init(0.84, 0.56, 0.26))
     /// Strokes inside care graphics and icon rings.
     static let outline = Color(light: .init(0.14, 0.12, 0.11), dark: .init(0.56, 0.53, 0.50), night: .init(0.52, 0.40, 0.30))
     /// The border around cards and buttons. Ink by day, a quiet hairline at night.
     static let edge = Color(light: .init(0.14, 0.12, 0.11), dark: .init(0.25, 0.235, 0.22), night: .init(0.20, 0.145, 0.10))
+    /// Row separators in lists and forms: the system grey is too cool for Night light.
+    static let separator = Color(light: .init(0.85, 0.83, 0.80), dark: .init(0.22, 0.21, 0.20), night: .init(0.17, 0.125, 0.09))
+    /// Switch thumbs. White by day and in dark; warm ink in Night light, where white glares.
+    static let thumbUIColor = UIColor(light: .init(1, 1, 1), dark: .init(1, 1, 1), night: .init(0.80, 0.64, 0.50))
     /// The offset "physical edge" shadow. Only light has one.
     static let shadow = Color(light: .init(0.14, 0.12, 0.11), dark: nil, night: nil)
-    static let actionFill = Color(light: .init(1, 0.72, 0.60), dark: .init(0.92, 0.63, 0.51), night: .init(0.70, 0.43, 0.30))
-    static let buttonInk = Color(light: .init(0.10, 0.10, 0.10), dark: .init(0.10, 0.10, 0.10), night: .init(0.07, 0.045, 0.03))
+    static let actionFillUIColor = UIColor(light: .init(1, 0.72, 0.60), dark: .init(0.92, 0.63, 0.51), night: .init(0.70, 0.43, 0.30))
+    static let actionFill = Color(uiColor: actionFillUIColor)
+    static let buttonInkUIColor = UIColor(light: .init(0.10, 0.10, 0.10), dark: .init(0.10, 0.10, 0.10), night: .init(0.07, 0.045, 0.03))
+    static let buttonInk = Color(uiColor: buttonInkUIColor)
     /// Behind the invite QR code and the report preview: white by day, a dimmer
     /// warm paper at night, still far lighter than the black code modules.
     static let codePaper = Color(light: .init(1, 1, 1), dark: .init(0.90, 0.89, 0.87), night: .init(0.74, 0.66, 0.56))
