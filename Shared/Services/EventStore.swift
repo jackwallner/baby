@@ -69,6 +69,15 @@ final class EventStore: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor in self?.reload() }
         })
+        // The log was shut when the process started (a push woke the app on a
+        // phone that had not been unlocked yet) and is open now.
+        observers.append(center.addObserver(
+            forName: Persistence.storesDidReopen,
+            object: persistence,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.reload() }
+        })
     }
 
     // MARK: - Reading
