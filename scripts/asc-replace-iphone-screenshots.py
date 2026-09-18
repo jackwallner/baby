@@ -7,7 +7,10 @@ set that still reports as present. This deletes the existing images in the
 iPhone set and uploads the named files in the order given, and touches no
 other display type, so the Apple Watch set survives untouched.
 
-    python3 scripts/asc-replace-iphone-screenshots.py [--dry-run]
+    python3 scripts/asc-replace-iphone-screenshots.py [--dry-run] [--watch]
+
+`--watch` replaces the Apple Watch set the same way and leaves the iPhone set
+alone.
 
 The files come from `fastlane/screenshots/en-US`, ordered by the numeric
 prefix fastlane uses. Every other storefront falls back to en-US, which is the
@@ -25,7 +28,7 @@ import asc_lib as A  # noqa: E402
 
 BUNDLE_ID = "com.jackwallner.baby"
 SHOTS = Path(__file__).resolve().parent.parent / "fastlane" / "screenshots" / "en-US"
-DISPLAY_TYPE = "APP_IPHONE_67"
+DISPLAY_TYPES = {"iphone": "APP_IPHONE_67", "watch": "APP_WATCH_SERIES_10"}
 
 
 def upload_one(client: A.ASCClient, set_id: str, path: Path) -> str:
@@ -56,10 +59,12 @@ def upload_one(client: A.ASCClient, set_id: str, path: Path) -> str:
 
 def main() -> int:
     dry_run = "--dry-run" in sys.argv
-    files = sorted(SHOTS.glob("*_APP_IPHONE_*.png"),
+    device = "watch" if "--watch" in sys.argv else "iphone"
+    display_type = DISPLAY_TYPES[device]
+    files = sorted(SHOTS.glob(f"*_{display_type.rsplit('_', 1)[0]}_*.png"),
                    key=lambda p: int(p.name.split("_", 1)[0]))
     if not files:
-        raise SystemExit(f"error: no iPhone screenshots in {SHOTS}")
+        raise SystemExit(f"error: no {device} screenshots in {SHOTS}")
 
     client = A.ASCClient.from_credentials()
     app = A.find_app(client, BUNDLE_ID)
@@ -70,11 +75,11 @@ def main() -> int:
 
     sets = A.list_all(client, f"/appStoreVersionLocalizations/{en_us['id']}/appScreenshotSets")
     target = next((s for s in sets
-                   if s["attributes"]["screenshotDisplayType"] == DISPLAY_TYPE), None)
+                   if s["attributes"]["screenshotDisplayType"] == display_type), None)
     if target is None:
         target = client.post("/appScreenshotSets", {"data": {
             "type": "appScreenshotSets",
-            "attributes": {"screenshotDisplayType": DISPLAY_TYPE},
+            "attributes": {"screenshotDisplayType": display_type},
             "relationships": {"appStoreVersionLocalization": {
                 "data": {"type": "appStoreVersionLocalizations", "id": en_us["id"]}}},
         }})["data"]

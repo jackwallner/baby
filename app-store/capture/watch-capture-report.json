@@ -1,10 +1,10 @@
 {
   "status": "ok",
-  "flow": "watch-native-log-feed-and-wet",
-  "captured_at_local_date": "2026-09-11",
-  "app_source_commit": "66bf7148038098e1e489040c61aa42ff0b3cbd09",
+  "flow": "watch-native-log-feed-and-pee",
+  "captured_at_local_date": "2026-09-18",
+  "app_source_commit": "5c1b697ecc11dc164bca2b34f72da41cb4a9d27e",
   "bundle_id": "com.jackwallner.baby.watch",
-  "binary": "build/PolishDerived/Build/Products/Debug-watchsimulator/BabyWatch.app",
+  "binary": "build/ReadyDerived/Build/Products/Debug-watchsimulator/BabyWatch.app",
   "lease": "baby-watch",
   "lease_checked_in": true,
   "device": {
@@ -15,17 +15,20 @@
   },
   "steps": [
     "Install and launch the actual Watch target on the leased simulator",
-    "Inspect accessibility controls and tap L, then Wet",
+    "Inspect accessibility controls and tap L, then Pee",
     "Verify the last-feed and last-diaper labels reflect both taps",
     "Capture the actual framebuffer using simctl io screenshot"
   ],
   "source": "watch-now.png",
-  "source_sha256": "36c95b35e5b1679fbbcc81d2ecaa4a33a4f2fe5a7553346ec00bc8d4b4e6c652",
-  "dimensions": [416, 496],
+  "source_sha256": "deb4ece4bf5764fa463288ea1abb5ec5f6c8bfcb00c643bf8c1859a00be3328c",
+  "dimensions": [
+    416,
+    496
+  ],
   "submission": "../../fastlane/screenshots/en-US/7_APP_WATCH_SERIES_10_now.png",
-  "submission_sha256": "d94a49e3cb2c9fef7b23dfaef9f77bedba752e457383c1d9b4f6b2fe4188bf8f",
+  "submission_sha256": "f41c8c7b2c891cb2e5802034ebf35c23696c485b9857e70ef83498c2656efcea",
   "conversion": "RGBA to RGB only; source alpha is uniformly 255; RGB pixels unchanged",
   "synthetic_presentation": false,
-  "independent_review": "Luna 5.6 Max, no blocking findings",
+  "independent_review": "Not requested for this refresh; primary visual inspection only",
   "limitations": "This verifies native Watch logging and visual evidence, not physical-device WatchConnectivity delivery"
 }

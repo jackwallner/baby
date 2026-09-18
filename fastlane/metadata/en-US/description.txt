@@ -1,16 +1,16 @@
-One tap logs a feed, a wet or dirty diaper, or sleep. One glance answers the 3am question: when did she last eat, and which side.
-
-THE FIRST WEEKS
-The tally sheet the hospital sends home, as a screen. Today's wet and dirty counts sit next to the typical range for your baby's day of life, with the "call your pediatrician if" lines under the table. Typical ranges are general guidance for healthy full-term newborns, drawn from the American Academy of Pediatrics' parent guidance. They are not a verdict about your baby.
+Ultra simple baby tracking. One tap logs a feed, a pee or poop diaper, or sleep. One glance answers the 3am question: when did she last eat, and which side.
 
 FOUR BUTTONS THAT NEVER MOVE
-Feed (left, right, bottle), Wet, Dirty, Sleep. One tap logs it now. A long press fixes the time, the side, the bottle amount or the stool colour. Undo sits in a toast for a few seconds. No confirmation sheets, ever.
+Feed (left, right, bottle), Pee, Poop, Sleep. Prefer Wet and Dirty? One setting renames them. One tap logs it now. A long press fixes the time, the side, the bottle amount or the stool colour. Undo sits in a toast for a few seconds. No confirmation sheets, ever.
 
 WITHOUT OPENING THE APP
 Lock screen and home screen widgets that log with one tap. An Apple Watch app and a complication that shows how long since the last feed. A Live Activity on the lock screen while a feed or a sleep is running. Siri and the Action button.
 
 BOTH PARENTS, NO ACCOUNTS
 Log together: your partner, a grandparent or a nanny scans a code from your phone and joins the same log from their own iPhone. You all tap the same four buttons and see the same list, so "did you already change her?" answers itself. There is no account to create, and no server of ours in the middle: the records live on your devices and in your own iCloud.
+
+THE FIRST WEEKS
+The tally sheet the hospital sends home, as a screen: your logged diapers by day of life, beside a breastfeeding reference for the first two weeks from NHS Healthier Together, with the "call your pediatrician if" lines under the table. The reference is general guidance, not a target or a verdict about your baby.
 
 THE STAIN HELPER
 Tell it once what you have at home, and a blowout, spit-up, breast milk or formula stain gets the steps in order, skipping anything you do not own.

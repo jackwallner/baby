@@ -25,7 +25,7 @@
         2622
       ],
       "mode": "RGBA",
-      "sha256": "93ace27c4b080f3033b7c43d688d49febe041ffd971314a6173d6fa70f21a07c"
+      "sha256": "ccbd658836219ee7c8782b6db65fb99bc16be37a0623a7abcf60b0c916e401d1"
     },
     {
       "name": "02_log.png",
@@ -35,7 +35,7 @@
         2622
       ],
       "mode": "RGBA",
-      "sha256": "953cbe9a4a956622a14eeff00c919eed64c8ba6057d91462607b90dd33eda30d"
+      "sha256": "4698288b92ca7a75da478f3e06b9e221ce9cc73bbdccccd474f5d609257e3773"
     },
     {
       "name": "03_first_weeks.png",
@@ -45,7 +45,7 @@
         2622
       ],
       "mode": "RGBA",
-      "sha256": "a47a572bbfca274bd238b5ab4d9aa380573d96e32421b5cf4b417545c6db87c0"
+      "sha256": "8e229b468576341e3a4ce7dfcd3f6324cb28e6f2c9b9ed231f3e81ef1366179a"
     },
     {
       "name": "04_summary.png",
@@ -55,7 +55,7 @@
         2622
       ],
       "mode": "RGBA",
-      "sha256": "c9cfefd67c0c11fc9155acc1cf7f46bdf48c5495fbaa618d718da9776e6ac878"
+      "sha256": "5a7bfd360c322feb8115f69208657ea8a4a03a035fe9c6b92d75d82d33fca2f7"
     },
     {
       "name": "05_history.png",
@@ -65,7 +65,7 @@
         2622
       ],
       "mode": "RGBA",
-      "sha256": "17bbe95ce139a08789be49f14f37578935be9c841266ba1d88c9165655f75200"
+      "sha256": "7a7284ed6c73085d7e14f26a03cb66ec5d3346dd8aea2a2032fce3d991f0b6f9"
     },
     {
       "name": "06_sleep.png",
@@ -75,7 +75,7 @@
         2622
       ],
       "mode": "RGBA",
-      "sha256": "8078021ef26ba5c5014cce34753fbaf18400525bf7226f0e34988b71097dac15"
+      "sha256": "ab7b308aa5e58a6919c0a97d16e0ca9b382538373125339cff45042367136564"
     }
   ],
   "flows": [
@@ -118,7 +118,7 @@
   ],
   "app_repo": {
     "path": "~/baby",
-    "git_commit": "66bf7148038098e1e489040c61aa42ff0b3cbd09"
+    "git_commit": "5c1b697ecc11dc164bca2b34f72da41cb4a9d27e"
   },
   "device": {
     "udid": "2C7A80C1-1228-411A-B9AD-A7DEED683F79",
