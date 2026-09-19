@@ -13,7 +13,8 @@ paths:
 Build 17 (app source `ae99b20`: pediatrician PDF feed gaps, lb/oz units,
 weight wheels) is attached to the draft App Store version 1.0.
 `scripts/asc-readiness.py` reports no gaps. Screenshots below were captured
-from `5c1b697`; build 17 changes no screen they show.
+from `5c1b697`; in build 17 only the small PDF thumbnail on the summary
+screenshot differs (name as title, a gap column).
 
 ## App tests
 
