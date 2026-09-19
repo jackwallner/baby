@@ -160,7 +160,7 @@ struct SummaryView: View {
 
             Text(isExample
                  ? "This is what you hand over at the visit. Log a few feeds and diapers and it fills in with your own."
-                 : "One page since \(since.formatted(.dateTime.month(.abbreviated).day())): feeds, wet and dirty counts, sleep, and weights.")
+                 : "One page since \(since.formatted(.dateTime.month(.abbreviated).day())): feeds and the longest gap between them, wet and dirty counts, sleep, weights and notes.")
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .fixedSize(horizontal: false, vertical: true)

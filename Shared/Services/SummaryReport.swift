@@ -15,6 +15,10 @@ struct SummaryReport: Equatable, Sendable {
         var sleepSeconds: TimeInterval
         /// The longest single sleep, which is the number parents are asked for.
         var longestSleepSeconds: TimeInterval
+        /// The longest wait between two logged feeds, measured start to start
+        /// and credited to the day the later feed began. Zero when the day has
+        /// no gap to measure. At a newborn visit this is asked before sleep.
+        var longestFeedGapSeconds: TimeInterval = 0
         var weightGrams: Double?
         var stoolColors: [StoolColor]
 
@@ -60,6 +64,7 @@ struct SummaryReport: Equatable, Sendable {
     }
 
     var longestSleepSeconds: TimeInterval { days.map(\.longestSleepSeconds).max() ?? 0 }
+    var longestFeedGapSeconds: TimeInterval { days.map(\.longestFeedGapSeconds).max() ?? 0 }
 
     var firstWeight: Double? { days.compactMap(\.weightGrams).first }
     var latestWeight: Double? { days.compactMap(\.weightGrams).last }
@@ -99,10 +104,18 @@ struct SummaryReport: Equatable, Sendable {
         // range. Keep entries that touch the range, including a sleep that
         // started the night before it.
         let rangeEnd = calendar.date(byAdding: .day, value: 1, to: lastDay) ?? lastDay
+        // Read before the range filter, so the first day's first gap reaches
+        // back to the feed before it.
+        let lookback = calendar.date(byAdding: .day, value: -1, to: firstDay) ?? firstDay
+        let feedStarts = events
+            .filter { $0.eventKind == .feed && $0.start >= lookback && $0.start < rangeEnd }
+            .map(\.start)
+            .sorted()
         let events = events.filter { event in
             let finish = event.endedAt ?? (event.isRunning ? now : event.start)
             return event.start < rangeEnd && max(finish, event.start) >= firstDay
         }
+        let feedGaps = zip(feedStarts.dropFirst(), feedStarts).map { (at: $0, seconds: $0.timeIntervalSince($1)) }
         var days: [Day] = []
         var cursor = firstDay
         while cursor <= lastDay {
@@ -125,6 +138,7 @@ struct SummaryReport: Equatable, Sendable {
                 bottleMillilitres: tally.bottleMillilitres,
                 sleepSeconds: tally.sleepSeconds,
                 longestSleepSeconds: longest,
+                longestFeedGapSeconds: feedGaps.filter { $0.at >= cursor && $0.at < dayEnd }.map(\.seconds).max() ?? 0,
                 weightGrams: inDay.filter { $0.eventKind == .weight && $0.amount > 0 }.map(\.amount).last,
                 stoolColors: inDay.compactMap { $0.eventKind == .dirty ? $0.stool : nil }
             ))

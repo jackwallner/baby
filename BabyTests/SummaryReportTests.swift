@@ -72,6 +72,28 @@ final class SummaryReportTests: XCTestCase {
         XCTAssertEqual(report.weightChangeGrams, 210)
     }
 
+    func testLongestFeedGapReachesBackToTheFeedBeforeTheRange() {
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: .now))!
+        store.log(.feed, at: yesterday.addingTimeInterval(-2 * 3600)) // 10pm the night before the range
+        store.log(.feed, at: yesterday.addingTimeInterval(2 * 3600))
+        store.log(.feed, at: yesterday.addingTimeInterval(5 * 3600))
+        let report = report(daysBack: 1)
+        XCTAssertEqual(report.days[0].longestFeedGapSeconds, 4 * 3600, accuracy: 1)
+        XCTAssertEqual(report.days[1].longestFeedGapSeconds, 0, "no feed today, so no gap to credit to it")
+        XCTAssertEqual(report.longestFeedGapSeconds, 4 * 3600, accuracy: 1)
+    }
+
+    func testAmountsReadInThePediatriciansUnits() {
+        XCTAssertEqual(Format.grams(3390, imperial: false), "3.39 kg")
+        XCTAssertEqual(Format.grams(3390, imperial: true), "7 lb 7.5 oz")
+        XCTAssertEqual(Format.grams(3629, imperial: true), "8 lb 0 oz")
+        XCTAssertEqual(Format.gramsChange(210, imperial: false), "+210 g")
+        XCTAssertEqual(Format.gramsChange(-210, imperial: true), "−7.5 oz")
+        XCTAssertEqual(Format.millilitres(60, imperial: false), "60 ml")
+        XCTAssertEqual(Format.millilitres(60, imperial: true), "2 oz")
+        XCTAssertEqual(Format.millilitres(75, imperial: true), "2.5 oz")
+    }
+
     func testCSVEscapesNotesAndKeepsOneRowPerEvent() {
         let event = store.log(.dirty)
         event?.note = "green, \"seedy\""

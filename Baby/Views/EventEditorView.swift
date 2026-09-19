@@ -34,6 +34,15 @@ struct EventEditorView: View {
 
     private var isNew: Bool { request.existing == nil }
 
+    /// A new weigh-in starts at the last one, so the wheels are a nudge away
+    /// from the scale's reading rather than a long spin from zero.
+    private var startingWeight: Double {
+        events.events
+            .filter { $0.eventKind == .weight && $0.amount > 0 }
+            .max { $0.start < $1.start }?
+            .amount ?? 3400
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -52,7 +61,8 @@ struct EventEditorView: View {
                             }
                             .pickerStyle(.segmented)
                             if side == .bottle {
-                                Stepper("Amount: \(Int(amount)) ml", value: $amount, in: 0...400, step: 10)
+                                Stepper("Amount: \(Format.millilitres(amount))", value: $amount, in: 0...400,
+                                        step: Format.usesImperial ? Format.millilitresPerOunce / 2 : 10)
                             }
                             if isNew {
                                 Toggle("Start a timer", isOn: $isTimed)
@@ -78,7 +88,7 @@ struct EventEditorView: View {
                     }
                     if kind == .weight {
                         Section("Weight") {
-                            Stepper("\(Format.grams(amount))", value: $amount, in: 500...15000, step: 10)
+                            WeightPicker(grams: $amount)
                         }
                     }
                     Section("Note") {
@@ -116,6 +126,9 @@ struct EventEditorView: View {
                         .fontWeight(.semibold)
                 }
             }
+        }
+        .onAppear {
+            if kind == .weight, amount <= 0 { amount = startingWeight }
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
@@ -180,5 +193,60 @@ struct EventEditorView: View {
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
         event.note = trimmed.isEmpty ? nil : trimmed
         event.updatedAt = .now
+    }
+}
+
+/// Two wheels, in the units the scale at the pediatrician's office reads:
+/// pounds and half ounces in the US, kilograms and ten grams elsewhere.
+/// The log keeps grams either way.
+private struct WeightPicker: View {
+    @Binding var grams: Double
+
+    var body: some View {
+        HStack(spacing: 0) {
+            if Format.usesImperial {
+                wheel("Pounds", selection: pounds, values: Array(1...30)) { "\($0) lb" }
+                wheel("Ounces", selection: halfOunces, values: Array(0...31)) {
+                    "\((Double($0) / 2).formatted(.number.precision(.fractionLength(0...1)))) oz"
+                }
+            } else {
+                wheel("Kilograms", selection: kilograms, values: Array(0...20)) { "\($0) kg" }
+                wheel("Grams", selection: tensOfGrams, values: Array(0...99)) { "\($0 * 10) g" }
+            }
+        }
+        .frame(height: 150)
+    }
+
+    private func wheel(_ label: String, selection: Binding<Int>, values: [Int], text: @escaping (Int) -> String) -> some View {
+        Picker(label, selection: selection) {
+            ForEach(values, id: \.self) { Text(text($0)).tag($0) }
+        }
+        .pickerStyle(.wheel)
+        .labelsHidden()
+        .frame(maxWidth: .infinity)
+    }
+
+    private var totalHalfOunces: Int { Int((grams / Format.gramsPerOunce * 2).rounded()) }
+
+    private var pounds: Binding<Int> {
+        Binding(get: { totalHalfOunces / 32 }, set: { setHalfOunces($0 * 32 + totalHalfOunces % 32) })
+    }
+
+    private var halfOunces: Binding<Int> {
+        Binding(get: { totalHalfOunces % 32 }, set: { setHalfOunces(totalHalfOunces / 32 * 32 + $0) })
+    }
+
+    private func setHalfOunces(_ value: Int) {
+        grams = Double(value) / 2 * Format.gramsPerOunce
+    }
+
+    private var totalTens: Int { Int((grams / 10).rounded()) }
+
+    private var kilograms: Binding<Int> {
+        Binding(get: { totalTens / 100 }, set: { grams = Double($0 * 100 + totalTens % 100) * 10 })
+    }
+
+    private var tensOfGrams: Binding<Int> {
+        Binding(get: { totalTens % 100 }, set: { grams = Double(totalTens / 100 * 100 + $0) * 10 })
     }
 }

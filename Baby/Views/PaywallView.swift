@@ -424,7 +424,7 @@ enum PlusFeature: String, CaseIterable, Identifiable {
 
     var detail: String {
         switch self {
-        case .pediatricianSummary: "A one-page PDF since the last visit: feeds, wet and dirty counts, sleep, weights. Hand it over or AirDrop it in the exam room."
+        case .pediatricianSummary: "A one-page PDF since the last visit: feeds and the longest gap between them, wet and dirty counts, sleep, weights. Hand it over or AirDrop it in the exam room."
         case .trends: "Feeds per day, longest sleep stretch and diaper counts over the weeks."
         case .export: "Every entry as a spreadsheet, for your records or a specialist."
         }

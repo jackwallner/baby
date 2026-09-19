@@ -17,6 +17,7 @@ enum SampleReport {
         let dirty = [3, 4, 3, 3, 4, 3, 3, 2]
         let sleep = [14.5, 15.0, 14.0, 15.5, 14.8, 15.2, 14.6, 9.0]
         let longest = [3.1, 3.5, 2.9, 4.0, 3.4, 4.4, 3.2, 2.8]
+        let feedGaps = [3.4, 3.1, 3.6, 3.2, 2.9, 3.3, 3.5, 3.0]
         let weights: [Double?] = [3180, nil, nil, 3260, nil, nil, nil, 3390]
         var days: [SummaryReport.Day] = []
         for index in 0..<8 {
@@ -30,6 +31,7 @@ enum SampleReport {
                 bottleMillilitres: index % 3 == 0 ? 60 : 0,
                 sleepSeconds: sleep[index] * 3600,
                 longestSleepSeconds: longest[index] * 3600,
+                longestFeedGapSeconds: feedGaps[index] * 3600,
                 weightGrams: weights[index],
                 stoolColors: index < 2 ? [.green] : [.yellow]
             ))
@@ -40,7 +42,10 @@ enum SampleReport {
             start: start,
             end: today,
             days: days,
-            notes: [(date: start, text: "Feed: latch felt better on the left")]
+            notes: [
+                (date: start, text: "Feed: latch felt better on the left"),
+                (date: calendar.date(byAdding: .day, value: 3, to: start) ?? start, text: "Weight: weighed at the lactation clinic"),
+            ]
         )
     }
 }

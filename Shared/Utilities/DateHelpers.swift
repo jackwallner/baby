@@ -70,13 +70,33 @@ enum Format {
         return date.formatted(.dateTime.month(.abbreviated).day().year())
     }
 
-    static func millilitres(_ value: Double) -> String {
-        "\(Int(value.rounded())) ml"
+    /// Amounts are stored metric and shown the way the parent's pediatrician
+    /// talks: ounces and pounds in the US, millilitres and kilograms elsewhere.
+    static var usesImperial: Bool { Locale.current.measurementSystem == .us }
+
+    static let millilitresPerOunce = 29.5735
+    static let gramsPerOunce = 28.3495
+
+    static func millilitres(_ value: Double, imperial: Bool = usesImperial) -> String {
+        guard imperial else { return "\(Int(value.rounded())) ml" }
+        let ounces = (value / millilitresPerOunce * 2).rounded() / 2
+        return "\(ounces.formatted(.number.precision(.fractionLength(0...1)))) oz"
     }
 
-    static func grams(_ value: Double) -> String {
-        let kg = value / 1000
-        return String(format: "%.2f kg", kg)
+    static func grams(_ value: Double, imperial: Bool = usesImperial) -> String {
+        guard imperial else { return String(format: "%.2f kg", value / 1000) }
+        let totalOunces = (value / gramsPerOunce * 2).rounded() / 2
+        let pounds = Int(totalOunces / 16)
+        let ounces = totalOunces - Double(pounds) * 16
+        return "\(pounds) lb \(ounces.formatted(.number.precision(.fractionLength(0...1)))) oz"
+    }
+
+    /// A signed weight change, in the same units as `grams`.
+    static func gramsChange(_ value: Double, imperial: Bool = usesImperial) -> String {
+        let sign = value > 0 ? "+" : "−"
+        guard imperial else { return "\(sign)\(Int(abs(value).rounded())) g" }
+        let ounces = (abs(value) / gramsPerOunce * 2).rounded() / 2
+        return "\(sign)\(ounces.formatted(.number.precision(.fractionLength(0...1)))) oz"
     }
 
     static func count(_ n: Int, _ singular: String, _ plural: String? = nil) -> String {

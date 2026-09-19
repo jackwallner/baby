@@ -19,7 +19,7 @@ FREE, AND STAYING FREE
 Logging, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, logging together, the stain helper and more than one baby. Nothing you have already logged is ever locked later.
 
 BABY+, OPTIONAL
-- The pediatrician summary: a one-page PDF since the last visit, with daily feeds, wet and dirty counts, sleep totals, the longest stretch and weights
+- The pediatrician summary: a one-page PDF since the last visit to share or print, with daily feeds and the longest gap between them, wet and dirty counts, sleep, weights in pounds and ounces or kilograms, and your notes
 - Trends: feeds a day, diaper counts, and the longest sleep stretch over the weeks
 - CSV export of every entry
 
