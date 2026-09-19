@@ -44,17 +44,17 @@ enum PDFReport {
     private static let gutter: CGFloat = 6
 
     private static let columns: [Column] = [
-        Column(title: "DATE", width: 52, alignment: .left) {
+        Column(title: "DATE", width: 46, alignment: .left) {
             $0.date.formatted(.dateTime.month(.abbreviated).day())
         },
         Column(title: "DAY", width: 24, alignment: .right) { $0.dayOfLife.map(String.init) ?? "" },
         Column(title: "FEEDS", width: 38, alignment: .right) { String($0.feeds) },
-        Column(title: "GAP", width: 46, alignment: .right) {
+        Column(title: "GAP", width: 52, alignment: .right) {
             $0.longestFeedGapSeconds >= 60 ? Format.compactDuration($0.longestFeedGapSeconds) : ""
         },
         Column(title: "WET", width: 32, alignment: .right) { String($0.wet) },
         Column(title: "DIRTY", width: 38, alignment: .right) { String($0.dirty) },
-        Column(title: "BOTTLE", width: 46, alignment: .right) {
+        Column(title: "BOTTLE", width: 44, alignment: .right) {
             $0.bottleMillilitres > 0 ? Format.millilitres($0.bottleMillilitres) : ""
         },
         Column(title: "SLEEP", width: 56, alignment: .right) {
@@ -63,7 +63,7 @@ enum PDFReport {
         Column(title: "LONGEST", width: 50, alignment: .right) {
             $0.longestSleepSeconds >= 60 ? Format.compactDuration($0.longestSleepSeconds) : ""
         },
-        Column(title: "STOOL", width: 72, alignment: .left) {
+        Column(title: "STOOL", width: 74, alignment: .left) {
             let colors = Array(Set($0.stoolColors.map(\.label))).sorted()
             return colors.joined(separator: ", ")
         },
@@ -115,23 +115,29 @@ enum PDFReport {
 
     /// First page as an image, for the on-screen preview. The preview is free;
     /// the file itself is what Baby+ unlocks.
-    static func firstPageImage(_ data: Data, width: CGFloat, scale: CGFloat = 2) -> UIImage? {
+    static func firstPageImage(_ data: Data, width: CGFloat, scale: CGFloat = 2, crop: CGRect? = nil) -> UIImage? {
         guard let provider = CGDataProvider(data: data as CFData),
               let document = CGPDFDocument(provider),
               let page = document.page(at: 1) else { return nil }
         let bounds = page.getBoxRect(.mediaBox)
-        let ratio = width / bounds.width
-        let size = CGSize(width: width, height: bounds.height * ratio)
+        // `crop` is in page points from the top left, so a pitch can show the
+        // part of the page a parent reads first at a size they can read.
+        let visible = crop ?? CGRect(origin: .zero, size: bounds.size)
+        let ratio = width / visible.width
+        let size = CGSize(width: width, height: visible.height * ratio)
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = scale
         return UIGraphicsImageRenderer(size: size, format: format).image { context in
             UIColor.white.setFill()
             context.fill(CGRect(origin: .zero, size: size))
-            context.cgContext.translateBy(x: 0, y: size.height)
+            context.cgContext.translateBy(x: -visible.minX * ratio, y: (bounds.height - visible.minY) * ratio)
             context.cgContext.scaleBy(x: ratio, y: -ratio)
             context.cgContext.drawPDFPage(page)
         }
     }
+
+    /// The name, the averages and the first rows: what the paywall shows.
+    static let headlineCrop = CGRect(x: 36, y: 36, width: 540, height: 250)
 
     // MARK: - Pieces
 

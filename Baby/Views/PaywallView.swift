@@ -10,6 +10,7 @@ import SwiftUI
 struct BabyPaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: StoreService
+    @EnvironmentObject private var events: EventStore
 
     var displayCloseButton: Bool = true
     var paywallImpressionID: String = "baby_paywall"
@@ -18,6 +19,8 @@ struct BabyPaywallView: View {
     @State private var selected: Package?
     @State private var isRestoring = false
     @State private var restoreMessage: String?
+    /// The first page of this baby's own report, or the labelled example.
+    @State private var pagePreview: UIImage?
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -45,6 +48,7 @@ struct BabyPaywallView: View {
                 .accessibilityLabel("Close")
             }
         }
+        .task { await renderPagePreview() }
         .task {
             store.trackPaywallImpression(id: paywallImpressionID, oncePerSession: !displayCloseButton)
             if store.packages.isEmpty { store.start(forceRefresh: false) }
@@ -148,13 +152,7 @@ struct BabyPaywallView: View {
 
     private var hero: some View {
         VStack(spacing: AppTheme.tightSpacing) {
-            Image(systemName: focus?.symbolName ?? "doc.text.fill")
-                .font(.title)
-                .foregroundStyle(AppTheme.accent)
-                .frame(width: AppTheme.welcomeIconSize, height: AppTheme.welcomeIconSize)
-                .background(AppTheme.card, in: AppTheme.cardShape)
-                .graphicBorder()
-                .accessibilityHidden(true)
+            heroArt
             Text(headline)
                 .font(.title2.bold())
                 .foregroundStyle(AppTheme.ink)
@@ -195,7 +193,47 @@ struct BabyPaywallView: View {
     }
 
     private var subhead: String {
-        "Logging, the first-weeks tally, widgets, the Watch app and logging together stay free. Baby+ is the reporting on top."
+        "Logging and everything else stay free. Baby+ is the reporting you share with your doctor."
+    }
+
+    /// The report itself is the pitch: the first page of this baby's summary,
+    /// or the stamped example before anything is logged. Trends and export
+    /// keep their symbol.
+    @ViewBuilder
+    private var heroArt: some View {
+        if focus == nil || focus == .pediatricianSummary {
+            Group {
+                if let pagePreview {
+                    Image(uiImage: pagePreview)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .colorMultiply(AppTheme.codePaper)
+                } else {
+                    Rectangle().fill(AppTheme.card)
+                        .aspectRatio(PDFReport.headlineCrop.width / PDFReport.headlineCrop.height, contentMode: .fit)
+                }
+            }
+            .frame(maxHeight: AppTheme.paywallPageHeight)
+            .clipShape(AppTheme.cardShape)
+            .overlay(AppTheme.cardShape.stroke(AppTheme.ink3.opacity(0.3), lineWidth: AppTheme.hairlineWidth))
+            .accessibilityLabel(events.events.isEmpty ? "An example pediatrician summary page" : "Your baby's pediatrician summary page")
+        } else {
+            Image(systemName: focus?.symbolName ?? "doc.text.fill")
+                .font(.title)
+                .foregroundStyle(AppTheme.accent)
+                .frame(width: AppTheme.welcomeIconSize, height: AppTheme.welcomeIconSize)
+                .background(AppTheme.card, in: AppTheme.cardShape)
+                .graphicBorder()
+                .accessibilityHidden(true)
+        }
+    }
+
+    private func renderPagePreview() async {
+        let report = events.visitReport()
+        let isExample = events.events.isEmpty
+        pagePreview = await Task.detached(priority: .userInitiated) {
+            PDFReport.firstPageImage(PDFReport.render(report, isExample: isExample), width: 360, crop: PDFReport.headlineCrop)
+        }.value
     }
 
     private func benefitRow(_ feature: PlusFeature, unlocked: Bool) -> some View {
@@ -242,10 +280,12 @@ struct BabyPaywallView: View {
                         .font(.title3.bold())
                         .foregroundStyle(AppTheme.ink)
                         .accessibilityIdentifier("paywall.billedAmount")
-                    Text(ConversionCopy.billedNote(
-                        trialLabel: selected.babyIntroOfferLabel,
-                        eligibleForTrial: store.isEligibleForIntroOffer(selected)
-                    ))
+                    Text(selected.babyPackageKind == .lifetime
+                         ? "One payment · Never renews"
+                         : ConversionCopy.billedNote(
+                            trialLabel: selected.babyIntroOfferLabel,
+                            eligibleForTrial: store.isEligibleForIntroOffer(selected)
+                         ))
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
                 }
@@ -440,9 +480,9 @@ enum PlusFeature: String, CaseIterable, Identifiable {
 
     var pitchLine: String {
         switch self {
-        case .pediatricianSummary: "A one-page summary since the last visit"
-        case .trends: "Feeds, sleep and diapers over the weeks"
-        case .export: "Export every entry as a spreadsheet"
+        case .pediatricianSummary: "One page for every visit, to AirDrop or print"
+        case .trends: "Feeds, diapers and sleep week over week"
+        case .export: "Every entry as a spreadsheet"
         }
     }
 

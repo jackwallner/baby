@@ -1,4 +1,5 @@
 import Charts
+import PDFKit
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
@@ -26,7 +27,7 @@ struct SummaryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-                sinceCard
+                visitCard
                 previewCard
                 trendsCard
                 exportCard
@@ -63,26 +64,13 @@ struct SummaryView: View {
         })
     }
 
-    private var defaultSince: Date {
-        if let stored = events.child?.lastVisitAt { return stored }
-        if let birth = events.child?.birthDate, birth > Date.now.addingTimeInterval(-14 * 86_400) { return birth }
-        return Calendar.current.date(byAdding: .day, value: -13, to: .now) ?? .now
-    }
+    private var defaultSince: Date { events.defaultVisitStart }
 
     private var reportKey: String {
         "\(events.revision)-\(DateHelpers.dayKey(for: since))-\(events.child?.id?.uuidString ?? "")"
     }
 
-    private var report: SummaryReport {
-        guard hasData, let child = events.child else { return SampleReport.make() }
-        return SummaryReport.make(
-            childName: child.displayName,
-            birthDate: child.birthDate,
-            events: events.events,
-            from: since,
-            to: .now
-        )
-    }
+    private var report: SummaryReport { events.visitReport(since: since) }
 
     private func rebuild() async {
         let snapshot = report
@@ -100,41 +88,76 @@ struct SummaryView: View {
 
     // MARK: - Cards
 
-    private var sinceCard: some View {
+    /// The whole job of this page in one card: pick where the report starts,
+    /// then hand it over. Everything below it is the preview and the extras.
+    private var visitCard: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            SectionLabel(text: "Since the last visit")
-            LabeledContent("First day") {
-                DatePicker("First day", selection: sinceBinding, in: ...Date.now, displayedComponents: .date)
+            SectionLabel(text: "For the next visit")
+            LabeledContent("From") {
+                DatePicker("From", selection: sinceBinding, in: ...Date.now, displayedComponents: .date)
                     .labelsHidden()
                     .themedDatePicker()
             }
             .foregroundStyle(AppTheme.ink)
-            Button("Today was the visit") {
-                sinceBinding.wrappedValue = Calendar.current.startOfDay(for: .now)
-                Haptics.selected()
-            }
-            .font(.subheadline.weight(.semibold))
-            .buttonStyle(.bordered)
-            .tint(AppTheme.accent)
-            .frame(minHeight: 44)
-            Text("Choose a start date. Bring a simple record of feeds, diapers and sleep to your next visit.")
+            Text(rangeLine)
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .fixedSize(horizontal: false, vertical: true)
+            shareButton
+            if hasData, Calendar.current.startOfDay(for: since) < Calendar.current.startOfDay(for: .now) {
+                Button("Visit done? Start the next summary from today") {
+                    sinceBinding.wrappedValue = Calendar.current.startOfDay(for: .now)
+                    Haptics.selected()
+                }
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(AppTheme.accent)
+                .frame(minHeight: 44)
+            }
         }
         .card()
+        .accessibilityIdentifier("summaryCard")
+    }
+
+    private var rangeLine: String {
+        if isExample {
+            return "Log a few feeds and diapers and the page fills in with your own. Until then the preview is an example."
+        }
+        let days = report.dayCount
+        return "\(since.formatted(.dateTime.month(.abbreviated).day())) to today, \(Format.count(days, "day")). One page to AirDrop, print or send to the office."
+    }
+
+    @ViewBuilder
+    private var shareButton: some View {
+        if store.isPro, let pdfData, !isExample {
+            ShareLink(item: PDFFile(data: pdfData, name: report.childName, date: .now), preview: SharePreview("\(report.childName) summary")) {
+                Label("Share PDF", systemImage: "square.and.arrow.up")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+        } else if store.isPro {
+            Button {} label: {
+                Text("Log a feed to make your own").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(true)
+        } else {
+            Button {
+                paywallFocus = .pediatricianSummary
+            } label: {
+                Text("Get the PDF with Baby+").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+        }
     }
 
     private var previewCard: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             HStack {
-                SectionLabel(text: isExample ? "Example summary" : "Your summary")
+                SectionLabel(text: isExample ? "Example page" : "Preview")
                 Spacer()
-                if isExample {
-                    Text("Made-up numbers")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(AppTheme.ink2)
-                }
+                Text(isExample ? "Made-up numbers" : "Tap to see every page")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink2)
             }
             Button {
                 showFullPreview = true
@@ -157,32 +180,8 @@ struct SummaryView: View {
                 .accessibilityLabel("Preview of the pediatrician summary")
             }
             .pressableCard()
-
-            Text(isExample
-                 ? "This is what you hand over at the visit. Log a few feeds and diapers and it fills in with your own."
-                 : "One page since \(since.formatted(.dateTime.month(.abbreviated).day())): feeds and the longest gap between them, wet and dirty counts, sleep, weights and notes.")
-                .font(.footnote)
-                .foregroundStyle(AppTheme.ink2)
-                .fixedSize(horizontal: false, vertical: true)
-
-            if store.isPro, let pdfData, !isExample {
-                ShareLink(item: PDFFile(data: pdfData, name: report.childName), preview: SharePreview("\(report.childName) summary")) {
-                    Text("Share PDF").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(PrimaryButtonStyle())
-            } else {
-                Button {
-                    paywallFocus = .pediatricianSummary
-                } label: {
-                    Text(isExample && store.isPro ? "Log a feed to make your own" : "Get the PDF with Baby+")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(PrimaryButtonStyle())
-                .disabled(isExample && store.isPro)
-            }
         }
         .card()
-        .accessibilityIdentifier("summaryCard")
     }
 
     private var trendsCard: some View {
@@ -224,7 +223,7 @@ struct SummaryView: View {
                     .foregroundStyle(AppTheme.feed)
                 }
             }
-            chart(title: "Diapers a day", summary: "\(trendSummary(\.wet, unit: "wet")). \(trendSummary(\.dirty, unit: "dirty"))") {
+            chart(title: "Diapers a day", legend: [(EventKind.wet.label, AppTheme.wet), (EventKind.dirty.label, AppTheme.dirty)], summary: "\(trendSummary(\.wet, unit: "wet")). \(trendSummary(\.dirty, unit: "dirty"))") {
                 ForEach(report.days) { day in
                     BarMark(x: .value("Day", day.date, unit: .day), y: .value("Wet", day.wet))
                         .foregroundStyle(AppTheme.wet)
@@ -232,16 +231,18 @@ struct SummaryView: View {
                         .foregroundStyle(AppTheme.dirty)
                 }
             }
-            chart(title: "Longest sleep stretch", summary: sleepSummary) {
-                ForEach(report.days) { day in
+            chart(title: "Longest sleep stretch, hours", summary: sleepSummary) {
+                // A day with no sleep logged is a gap in the line, not a zero.
+                ForEach(report.days.filter { $0.longestSleepSeconds >= 60 }) { day in
+                    // Midday, so each point sits over its day like the bars do.
                     LineMark(
-                        x: .value("Day", day.date, unit: .day),
+                        x: .value("Day", day.date.addingTimeInterval(12 * 3600)),
                         y: .value("Hours", day.longestSleepSeconds / 3600)
                     )
                     .foregroundStyle(AppTheme.sleep)
                     .interpolationMethod(.monotone)
                     PointMark(
-                        x: .value("Day", day.date, unit: .day),
+                        x: .value("Day", day.date.addingTimeInterval(12 * 3600)),
                         y: .value("Hours", day.longestSleepSeconds / 3600)
                     )
                     .foregroundStyle(AppTheme.sleep)
@@ -262,12 +263,29 @@ struct SummaryView: View {
         return "Longest \(Format.compactDuration(longest)) in this range, \(Format.compactDuration(latest.longestSleepSeconds)) on the latest day"
     }
 
-    private func chart<Content: ChartContent>(title: String, summary: String, @ChartContentBuilder content: () -> Content) -> some View {
+    private func chart<Content: ChartContent>(
+        title: String,
+        legend: [(String, Color)] = [],
+        summary: String,
+        @ChartContentBuilder content: () -> Content
+    ) -> some View {
         VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(AppTheme.ink)
+            HStack(spacing: AppTheme.spacing) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink)
+                Spacer(minLength: 0)
+                ForEach(legend, id: \.0) { name, color in
+                    HStack(spacing: AppTheme.hairSpacing) {
+                        Circle().fill(color).frame(width: AppTheme.dotSize * 2, height: AppTheme.dotSize * 2)
+                        Text(name)
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.ink2)
+                    }
+                }
+            }
             Chart(content: content)
+                .chartXScale(domain: report.start...(Calendar.current.date(byAdding: .day, value: 1, to: report.end) ?? report.end))
                 .chartXAxis {
                     AxisMarks(values: .stride(by: .day, count: max(1, report.dayCount / 5))) { value in
                         AxisValueLabel(format: .dateTime.month(.abbreviated).day())
@@ -307,12 +325,11 @@ struct SummaryView: View {
 
     private var fullPreview: some View {
         NavigationStack {
-            ScrollView([.vertical, .horizontal]) {
-                if let preview {
-                    Image(uiImage: preview)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(minWidth: 320)
+            Group {
+                if let pdfData {
+                    PDFPages(data: pdfData)
+                } else {
+                    ProgressView()
                 }
             }
             .background(AppTheme.paper)
@@ -322,7 +339,35 @@ struct SummaryView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { showFullPreview = false }
                 }
+                if store.isPro, let pdfData, !isExample {
+                    ToolbarItem(placement: .topBarLeading) {
+                        ShareLink(item: PDFFile(data: pdfData, name: report.childName, date: .now), preview: SharePreview("\(report.childName) summary")) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .accessibilityLabel("Share PDF")
+                    }
+                }
             }
+        }
+    }
+}
+
+/// Every page of the report, zoomable, the way it will print.
+private struct PDFPages: UIViewRepresentable {
+    let data: Data
+
+    func makeUIView(context: Context) -> PDFView {
+        let view = PDFView()
+        view.autoScales = true
+        view.displayMode = .singlePageContinuous
+        view.backgroundColor = .clear
+        view.document = PDFDocument(data: data)
+        return view
+    }
+
+    func updateUIView(_ view: PDFView, context: Context) {
+        if view.document?.dataRepresentation() != data {
+            view.document = PDFDocument(data: data)
         }
     }
 }
@@ -332,10 +377,11 @@ struct SummaryView: View {
 private struct PDFFile: Transferable {
     let data: Data
     let name: String
+    let date: Date
 
     static var transferRepresentation: some TransferRepresentation {
         DataRepresentation(exportedContentType: .pdf) { file in file.data }
-            .suggestedFileName { "\($0.name) summary.pdf" }
+            .suggestedFileName { "\($0.name) summary \($0.date.formatted(.iso8601.year().month().day())).pdf" }
     }
 }
 
@@ -348,5 +394,28 @@ private struct CSVFile: Transferable {
             Data(file.text.utf8)
         }
         .suggestedFileName { "\($0.name) log.csv" }
+    }
+}
+
+extension EventStore {
+    /// Where the next summary starts: the day of the last visit, else birth
+    /// for a baby under two weeks, else two weeks ago.
+    var defaultVisitStart: Date {
+        if let stored = child?.lastVisitAt { return stored }
+        if let birth = child?.birthDate, birth > Date.now.addingTimeInterval(-14 * 86_400) { return birth }
+        return Calendar.current.date(byAdding: .day, value: -13, to: .now) ?? .now
+    }
+
+    /// The report the summary page and the paywall both show. With nothing
+    /// logged it is the labelled example.
+    func visitReport(since: Date? = nil) -> SummaryReport {
+        guard !events.isEmpty, let child else { return SampleReport.make() }
+        return SummaryReport.make(
+            childName: child.displayName,
+            birthDate: child.birthDate,
+            events: events,
+            from: since ?? defaultVisitStart,
+            to: .now
+        )
     }
 }

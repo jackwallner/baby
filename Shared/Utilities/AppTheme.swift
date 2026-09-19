@@ -37,6 +37,7 @@ enum AppTheme {
     static let ctaHeight: CGFloat = 52
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72
+    static let paywallPageHeight: CGFloat = 128
     static let inviteCodeSize: CGFloat = 200
     static let toastWidth: CGFloat = 520
     /// Clears the 44pt History and More buttons and their 16pt bar inset.
