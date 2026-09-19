@@ -1,0 +1,26 @@
+Babylogg så enkelt det går. Ett tryck loggar en amning, en blöt eller bajsblöja eller sömn. En blick svarar på frågan klockan 3 på natten: när åt bebisen senast, och på vilken sida?
+
+FYRA KNAPPAR SOM ALDRIG FLYTTAR SIG
+Amning (vänster, höger, flaska), kiss, bajs, sömn. Ett tryck loggar nu. Ett långt tryck ställer in tid, sida, flaskmängd eller avföringens färg. Ångra ligger överst i några sekunder.
+
+UTAN ATT ÖPPNA APPEN
+Widgetar för låsskärm och hemskärm som loggar med ett tryck, en Apple Watch-app med komplikation, en live-aktivitet under amning eller sömn, och Siri.
+
+BÅDA FÖRÄLDRARNA, INGA KONTON
+Din partner, en mor- eller farförälder eller en barnvakt skannar en kod från din telefon och delar loggen på sin egen iPhone. Inget konto och ingen server hos oss: uppgifterna finns på era enheter och i er egen iCloud.
+
+DE FÖRSTA VECKORNA
+Dina loggade blöjor per levnadsdag bredvid en amningsreferens för de två första veckorna (NHS Healthier Together), med när du ska ringa vården. En riktlinje, inte ett mål.
+
+GRATIS, OCH SÅ FÖRBLIR DET
+Loggning, tabellen för de första veckorna, hela historiken, widgetar, Apple Watch-appen, live-aktiviteten, gemensam logg, fläckhjälpen och mer än en bebis.
+
+BABY+, VALFRITT
+En sammanfattning på en sida till läkaren sedan förra besöket, att dela eller skriva ut, trender över veckorna och CSV-export av alla poster.
+
+Baby+ finns som månads- eller årsprenumeration eller som ett engångsköp för alltid som inte förnyas. Nya prenumeranter får en veckas gratis provperiod. Betalningen dras från ditt Apple-konto när provperioden slutar, om du inte säger upp minst 24 timmar innan. Prenumerationer förnyas automatiskt för samma period och pris om de inte sägs upp minst 24 timmar före slutet av den aktuella perioden. Hantera eller säg upp i Inställningar under ditt Apple-konto och sedan Prenumerationer. Priserna visas i appen före köp och varierar mellan regioner.
+
+Inga annonser. Ingen AI. Baby Tracker är en logg, inte medicinsk rådgivning. Den ställer inga diagnoser, behandlar inte, bedömer inte din bebis och är ingen medicinteknisk produkt. Ring vården vid oro. Själva appen är på engelska.
+
+Användarvillkor (Apples standard-EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Integritetspolicy: https://jackwallner.github.io/baby/privacy-policy.html

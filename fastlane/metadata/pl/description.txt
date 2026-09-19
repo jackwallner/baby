@@ -1,0 +1,26 @@
+Najprostsze śledzenie niemowlaka. Jedno dotknięcie zapisuje karmienie, mokrą lub brudną pieluszkę albo sen. Jedno spojrzenie odpowiada na pytanie o 3 w nocy: kiedy dziecko ostatnio jadło i z której piersi?
+
+CZTERY PRZYCISKI, KTÓRE SIĘ NIE PRZESUWAJĄ
+Karmienie (lewa, prawa, butelka), siku, kupa, sen. Jedno dotknięcie zapisuje teraz. Długie przytrzymanie ustawia godzinę, stronę, ilość z butelki lub kolor stolca. Cofnij jest na górze przez kilka sekund.
+
+BEZ OTWIERANIA APLIKACJI
+Widżety na ekran blokady i ekran początkowy, które zapisują jednym dotknięciem, aplikacja na Apple Watch z komplikacją, aktywność na żywo podczas karmienia lub snu, oraz Siri.
+
+OBOJE RODZICE, BEZ KONT
+Partner, dziadek lub niania skanuje kod z Twojego telefonu i dołącza do tego samego dziennika na własnym iPhonie. Bez konta i bez naszego serwera: dane są na Waszych urządzeniach i w Waszym iCloud.
+
+PIERWSZE TYGODNIE
+Zapisane pieluszki według dnia życia obok wzorca karmienia piersią na pierwsze dwa tygodnie (NHS Healthier Together), z informacją, kiedy dzwonić do pediatry. Punkt odniesienia, nie cel.
+
+ZA DARMO, I TAK ZOSTANIE
+Zapisywanie, tabela pierwszych tygodni, pełna historia, widżety, aplikacja na Apple Watch, aktywność na żywo, wspólny dziennik, pomocnik do plam i więcej niż jedno dziecko.
+
+BABY+, OPCJONALNIE
+Jednostronicowe podsumowanie dla pediatry od ostatniej wizyty do udostępnienia lub wydruku, trendy z kolejnych tygodni i eksport CSV wszystkich wpisów.
+
+Baby+ jest dostępne jako subskrypcja miesięczna lub roczna albo jako jednorazowy zakup dożywotni, który się nie odnawia. Nowi subskrybenci otrzymują tydzień bezpłatnego okresu próbnego. Płatność jest pobierana z konta Apple po zakończeniu okresu próbnego, chyba że anulujesz co najmniej 24 godziny wcześniej. Subskrypcje odnawiają się automatycznie na ten sam okres i w tej samej cenie, chyba że zostaną anulowane co najmniej 24 godziny przed końcem bieżącego okresu. Zarządzaj lub anuluj w Ustawieniach, w koncie Apple, a następnie Subskrypcje. Ceny są widoczne w aplikacji przed zakupem i różnią się w zależności od regionu.
+
+Bez reklam. Bez AI. Baby Tracker to dziennik, a nie porada medyczna. Nie diagnozuje, nie leczy, nie ocenia dziecka i nie jest wyrobem medycznym. W razie niepokoju zadzwoń do pediatry. Sama aplikacja jest w języku angielskim.
+
+Warunki korzystania (standardowa umowa EULA Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Polityka prywatności: https://jackwallner.github.io/baby/privacy-policy.html

@@ -1,0 +1,26 @@
+En basit bebek takibi. Tek dokunuş bir beslenmeyi, ıslak ya da kakalı bir bezi veya uykuyu kaydeder. Tek bakış gece 3'teki soruyu yanıtlar: bebek en son ne zaman emdi, hangi taraftan?
+
+ASLA YER DEĞİŞTİRMEYEN DÖRT DÜĞME
+Beslenme (sol, sağ, biberon), çiş, kaka, uyku. Tek dokunuş şimdi kaydeder. Uzun basış saati, tarafı, biberon miktarını veya dışkı rengini ayarlar. Geri Al birkaç saniye üstte kalır.
+
+UYGULAMAYI AÇMADAN
+Kilit ekranı ve ana ekran için tek dokunuşla kaydeden widget'lar, komplikasyonlu Apple Watch uygulaması, beslenme veya uyku sürerken canlı etkinlik ve Siri.
+
+İKİ EBEVEYN, HESAP YOK
+Eşiniz, bir büyükanne ya da bakıcı telefonunuzdan bir kodu tarar ve kendi iPhone'unda aynı günlüğe katılır. Hesap yok, bizim sunucumuz yok: kayıtlar cihazlarınızda ve kendi iCloud'unuzda.
+
+İLK HAFTALAR
+Kaydettiğiniz bezler yaşam gününe göre, ilk iki hafta için bir emzirme referansının yanında (NHS Healthier Together), çocuk doktorunu ne zaman arayacağınızla birlikte. Bir ölçü, hedef değil.
+
+ÜCRETSİZ, VE ÖYLE KALACAK
+Kayıt, ilk haftalar tablosu, tüm geçmiş, widget'lar, Apple Watch uygulaması, canlı etkinlik, ortak günlük, leke yardımcısı ve birden fazla bebek.
+
+BABY+, İSTEĞE BAĞLI
+Son muayeneden bu yana çocuk doktoru için tek sayfalık özet, paylaşmak ya da yazdırmak için, haftalık eğilimler ve tüm kayıtların CSV dışa aktarımı.
+
+Baby+ aylık veya yıllık abonelik ya da yenilenmeyen tek seferlik ömür boyu satın alma olarak sunulur. Yeni aboneler bir haftalık ücretsiz deneme alır. Ödeme, en az 24 saat önce iptal etmediğiniz sürece deneme sonunda Apple Hesabınızdan alınır. Abonelikler, mevcut dönemin bitiminden en az 24 saat önce iptal edilmediği sürece aynı süre ve fiyatla otomatik olarak yenilenir. Ayarlar'da Apple Hesabınız altında, ardından Abonelikler'den yönetin veya iptal edin. Fiyatlar satın almadan önce uygulamada gösterilir ve bölgeye göre değişir.
+
+Reklam yok. Yapay zekâ yok. Baby Tracker bir günlüktür, tıbbi tavsiye değildir. Teşhis koymaz, tedavi etmez, bebeğinizi değerlendirmez ve tıbbi cihaz değildir. Her endişede çocuk doktorunuzu arayın. Uygulamanın kendisi İngilizcedir.
+
+Kullanım Koşulları (Apple Standart EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Gizlilik Politikası: https://jackwallner.github.io/baby/privacy-policy.html

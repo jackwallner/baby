@@ -1,0 +1,26 @@
+Cea mai simplă urmărire a bebelușului. O atingere înregistrează o masă, un scutec ud sau murdar sau somnul. O privire răspunde la întrebarea de la 3 noaptea: când a mâncat bebelușul ultima dată și din ce parte?
+
+PATRU BUTOANE CARE NU SE MUTĂ NICIODATĂ
+Masă (stânga, dreapta, biberon), pipi, caca, somn. O atingere înregistrează acum. O apăsare lungă setează ora, partea, cantitatea din biberon sau culoarea scaunului. Anulează stă sus câteva secunde.
+
+FĂRĂ SĂ DESCHIZI APLICAȚIA
+Widgeturi pentru ecranul blocat și ecranul principal care înregistrează cu o atingere, o aplicație Apple Watch cu complicație, o activitate live în timpul mesei sau somnului, și Siri.
+
+AMBII PĂRINȚI, FĂRĂ CONTURI
+Partenerul, un bunic sau bona scanează un cod de pe telefonul tău și se alătură aceluiași jurnal pe propriul iPhone. Fără cont și fără serverul nostru: datele stau pe dispozitivele voastre și în iCloud-ul vostru.
+
+PRIMELE SĂPTĂMÂNI
+Scutecele înregistrate pe zile de viață, lângă o referință de alăptare pentru primele două săptămâni (NHS Healthier Together), cu momentele când să suni medicul. Un reper, nu o țintă.
+
+GRATUIT, ȘI AȘA RĂMÂNE
+Înregistrarea, tabelul primelor săptămâni, tot istoricul, widgeturile, aplicația Apple Watch, activitatea live, jurnalul comun, ajutorul pentru pete și mai mulți bebeluși.
+
+BABY+, OPȚIONAL
+Un rezumat de o pagină pentru pediatru de la ultima vizită, de trimis sau tipărit, tendințe pe săptămâni și export CSV al tuturor înregistrărilor.
+
+Baby+ este disponibil ca abonament lunar sau anual, sau ca achiziție unică pe viață care nu se reînnoiește. Abonații noi primesc o săptămână de probă gratuită. Plata se încasează din contul Apple la finalul perioadei de probă, dacă nu anulezi cu cel puțin 24 de ore înainte. Abonamentele se reînnoiesc automat pentru aceeași perioadă și același preț, dacă nu sunt anulate cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Gestionează sau anulează în Configurări, la contul Apple, apoi Abonamente. Prețurile apar în aplicație înainte de cumpărare și variază în funcție de regiune.
+
+Fără reclame. Fără AI. Baby Tracker este un jurnal, nu un sfat medical. Nu diagnostichează, nu tratează, nu evaluează bebelușul și nu este un dispozitiv medical. Sună medicul pentru orice îngrijorare. Aplicația în sine este în limba engleză.
+
+Termeni de utilizare (EULA standard Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Politica de confidențialitate: https://jackwallner.github.io/baby/privacy-policy.html

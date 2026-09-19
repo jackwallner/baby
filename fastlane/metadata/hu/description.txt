@@ -1,0 +1,26 @@
+A legegyszerűbb babakövetés. Egy koppintás rögzít egy etetést, egy pisis vagy kakis pelenkát vagy az alvást. Egy pillantás megválaszolja a hajnali 3 órás kérdést: mikor evett utoljára a baba, és melyik oldalon?
+
+NÉGY GOMB, AMELY SOSEM MOZDUL
+Etetés (bal, jobb, cumisüveg), pisi, kaki, alvás. Egy koppintás most rögzít. Hosszú nyomás beállítja az időt, az oldalt, az üveg mennyiségét vagy a széklet színét. A Visszavonás néhány másodpercig fent marad.
+
+AZ APP MEGNYITÁSA NÉLKÜL
+Zár- és főképernyős widgetek egykoppintásos rögzítéssel, Apple Watch app komplikációval, élő tevékenység etetés vagy alvás közben, és Siri.
+
+MINDKÉT SZÜLŐ, FIÓK NÉLKÜL
+A párod, egy nagyszülő vagy a bébiszitter beolvas egy kódot a telefonodról, és a saját iPhone-ján csatlakozik ugyanahhoz a naplóhoz. Nincs fiók és nincs saját szerverünk: az adatok az eszközeiteken és a saját iCloudotokban vannak.
+
+AZ ELSŐ HETEK
+A rögzített pelenkák életnaponként, az első két hét szoptatási referenciája mellett (NHS Healthier Together), azzal együtt, mikor hívd az orvost. Tájékoztató, nem célérték.
+
+INGYENES, ÉS AZ IS MARAD
+Rögzítés, az első hetek táblázata, a teljes előzmény, widgetek, az Apple Watch app, az élő tevékenység, közös napló, a folttisztító segéd és több baba.
+
+BABY+, OPCIONÁLIS
+Egyoldalas összefoglaló az orvosnak az előző vizit óta, megosztáshoz vagy nyomtatáshoz, heti trendek és az összes bejegyzés CSV-exportja.
+
+A Baby+ havi vagy éves előfizetésként, illetve meg nem újuló, egyszeri örökös vásárlásként érhető el. Az új előfizetők egyhetes ingyenes próbaidőt kapnak. A díjat a próbaidő végén terheljük Apple-fiókodra, hacsak nem mondod le legalább 24 órával előtte. Az előfizetések automatikusan megújulnak azonos időszakra és áron, hacsak nem mondod le legalább 24 órával az aktuális időszak vége előtt. Kezelés vagy lemondás a Beállításokban, az Apple-fiókodnál, majd Előfizetések. Az árak vásárlás előtt megjelennek az appban, és régiónként eltérnek.
+
+Nincs reklám. Nincs MI. A Baby Tracker napló, nem orvosi tanács. Nem diagnosztizál, nem kezel, nem értékeli a babádat, és nem orvostechnikai eszköz. Bármilyen aggály esetén hívd az orvost. Maga az app angol nyelvű.
+
+Felhasználási feltételek (Apple szabványos EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Adatvédelmi szabályzat: https://jackwallner.github.io/baby/privacy-policy.html

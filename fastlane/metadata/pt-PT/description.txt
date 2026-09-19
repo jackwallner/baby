@@ -1,0 +1,26 @@
+A forma mais simples de acompanhar o bebé. Um toque regista uma mamada, uma fralda de chichi ou cocó, ou o sono. Um olhar responde à pergunta das 3 da manhã: quando mamou o bebé pela última vez, e de que lado?
+
+QUATRO BOTÕES QUE NUNCA MUDAM DE SÍTIO
+Mamada (esquerdo, direito, biberão), chichi, cocó, sono. Um toque regista agora. Um toque longo ajusta a hora, o lado, a quantidade do biberão ou a cor das fezes. Anular fica no topo durante alguns segundos.
+
+SEM ABRIR A APP
+Widgets para o ecrã bloqueado e o ecrã principal que registam com um toque, uma app para Apple Watch com complicação, uma atividade em direto durante uma mamada ou sesta, e a Siri.
+
+OS DOIS PAIS, SEM CONTAS
+O seu companheiro, um avô ou uma ama lê um código do seu telemóvel e junta-se ao mesmo registo no próprio iPhone. Sem contas e sem servidor nosso: os dados ficam nos seus dispositivos e no seu próprio iCloud.
+
+AS PRIMEIRAS SEMANAS
+As fraldas registadas por dia de vida, ao lado de uma referência de amamentação para as duas primeiras semanas (NHS Healthier Together), com quando ligar ao pediatra. Uma referência, não uma meta.
+
+GRÁTIS, E VAI CONTINUAR ASSIM
+O registo, a tabela das primeiras semanas, todo o histórico, os widgets, a app do Apple Watch, a atividade em direto, o registo partilhado, o ajudante de nódoas e mais do que um bebé.
+
+BABY+, OPCIONAL
+Um resumo de uma página para o pediatra desde a última consulta, para partilhar ou imprimir, tendências ao longo das semanas e exportação CSV de todos os registos.
+
+O Baby+ está disponível como assinatura mensal ou anual, ou como compra única vitalícia que não renova. Os novos assinantes têm uma semana de teste gratuito. O pagamento é cobrado na sua Conta Apple no fim do teste, a menos que cancele pelo menos 24 horas antes. As assinaturas renovam automaticamente pelo mesmo período e preço, a menos que sejam canceladas pelo menos 24 horas antes do fim do período atual. Faça a gestão ou cancele em Definições, na sua Conta Apple, e depois Assinaturas. Os preços são apresentados na app antes da compra e variam por região.
+
+Sem anúncios. Sem IA. O Baby Tracker é um registo, não um conselho médico. Não diagnostica, não trata nem avalia o seu bebé, e não é um dispositivo médico. Em caso de dúvida, ligue ao pediatra. A app está em inglês.
+
+Termos de Utilização (EULA padrão da Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de Privacidade: https://jackwallner.github.io/baby/privacy-policy.html

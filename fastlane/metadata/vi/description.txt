@@ -1,0 +1,26 @@
+Cách theo dõi bé đơn giản nhất. Một chạm ghi lại cữ bú, tã tè hoặc tã ị, hay giấc ngủ. Một cái nhìn trả lời câu hỏi lúc 3 giờ sáng: bé bú lần cuối khi nào, và bên nào?
+
+BỐN NÚT KHÔNG BAO GIỜ ĐỔI CHỖ
+Cho bú (trái, phải, bình), tè, ị, ngủ. Một chạm ghi ngay. Nhấn giữ để chỉnh giờ, bên bú, lượng sữa bình hoặc màu phân. Nút Hoàn tác hiện ở trên cùng vài giây.
+
+KHÔNG CẦN MỞ ỨNG DỤNG
+Tiện ích màn hình khóa và màn hình chính ghi bằng một chạm, ứng dụng Apple Watch có tổ hợp, Hoạt động trực tiếp khi đang cho bú hoặc ngủ, và Siri.
+
+CẢ BỐ VÀ MẸ, KHÔNG CẦN TÀI KHOẢN
+Người bạn đời, ông bà hoặc người giữ trẻ quét mã từ điện thoại của bạn và tham gia cùng nhật ký trên iPhone của họ. Không tài khoản, không máy chủ của chúng tôi: dữ liệu nằm trên thiết bị và iCloud của chính bạn.
+
+NHỮNG TUẦN ĐẦU
+Số tã bạn đã ghi theo ngày tuổi, bên cạnh mức tham khảo nuôi con bằng sữa mẹ trong hai tuần đầu (NHS Healthier Together), kèm khi nào cần gọi bác sĩ nhi. Là mức tham khảo, không phải mục tiêu.
+
+MIỄN PHÍ, VÀ SẼ LUÔN NHƯ VẬY
+Ghi chép, bảng những tuần đầu, toàn bộ lịch sử, tiện ích, ứng dụng Apple Watch, Hoạt động trực tiếp, ghi cùng nhau, trợ lý tẩy vết bẩn và nhiều hơn một bé.
+
+BABY+, TÙY CHỌN
+Bản tóm tắt một trang cho bác sĩ nhi từ lần khám trước để chia sẻ hoặc in, xu hướng theo tuần và xuất CSV mọi mục.
+
+Baby+ có dạng gói đăng ký theo tháng hoặc theo năm, hoặc mua một lần trọn đời không gia hạn. Người đăng ký mới được dùng thử miễn phí một tuần. Khoản thanh toán được tính vào Tài khoản Apple khi hết thời gian dùng thử, trừ khi bạn hủy ít nhất 24 giờ trước đó. Gói đăng ký tự động gia hạn với cùng kỳ hạn và giá, trừ khi được hủy ít nhất 24 giờ trước khi kỳ hiện tại kết thúc. Quản lý hoặc hủy trong Cài đặt, mục Tài khoản Apple, rồi Gói đăng ký. Giá hiển thị trong ứng dụng trước khi mua và khác nhau theo khu vực.
+
+Không quảng cáo. Không AI. Baby Tracker là nhật ký, không phải lời khuyên y tế. Ứng dụng không chẩn đoán, không điều trị, không đánh giá bé và không phải thiết bị y tế. Hãy gọi bác sĩ nhi khi có bất kỳ lo lắng nào. Bản thân ứng dụng dùng tiếng Anh.
+
+Điều khoản sử dụng (EULA tiêu chuẩn của Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Chính sách quyền riêng tư: https://jackwallner.github.io/baby/privacy-policy.html

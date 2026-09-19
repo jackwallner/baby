@@ -1,0 +1,26 @@
+Babytracking, zo simpel als het kan. Eén tik legt een voeding, een natte of vieze luier of slaap vast. Eén blik beantwoordt de vraag van 3 uur 's nachts: wanneer heeft de baby voor het laatst gedronken, en aan welke kant?
+
+VIER KNOPPEN DIE NOOIT VERSCHUIVEN
+Voeding (links, rechts, fles), plas, poep, slaap. Eén tik legt het nu vast. Lang drukken stelt de tijd, de kant, de hoeveelheid in de fles of de kleur van de ontlasting in. Ongedaan maken staat een paar seconden bovenaan.
+
+ZONDER DE APP TE OPENEN
+Widgets voor het toegangsscherm en beginscherm die met één tik vastleggen, een Apple Watch-app met complicatie, een live-activiteit tijdens een voeding of slaapje, en Siri.
+
+BEIDE OUDERS, GEEN ACCOUNTS
+Je partner, een opa of oma of de oppas scant een code op je telefoon en doet mee in hetzelfde logboek op de eigen iPhone. Geen account en geen server van ons: de gegevens staan op jullie apparaten en in jullie eigen iCloud.
+
+DE EERSTE WEKEN
+Je genoteerde luiers per levensdag, naast een borstvoedingsreferentie voor de eerste twee weken (NHS Healthier Together), met wanneer je de huisarts of kinderarts belt. Een richtlijn, geen doel.
+
+GRATIS, EN DAT BLIJFT ZO
+Vastleggen, de tabel van de eerste weken, de volledige geschiedenis, widgets, de Apple Watch-app, de live-activiteit, samen loggen, de vlekkenhulp en meer dan één baby.
+
+BABY+, OPTIONEEL
+Een samenvatting van één pagina voor de arts sinds het laatste bezoek, om te delen of af te drukken, trends over de weken en CSV-export van alle invoer.
+
+Baby+ is beschikbaar als maand- of jaarabonnement, of als eenmalige levenslange aankoop die niet verlengt. Nieuwe abonnees krijgen een gratis proefweek. De betaling wordt aan het einde van de proefperiode via je Apple Account afgeschreven, tenzij je minstens 24 uur van tevoren opzegt. Abonnementen worden automatisch verlengd voor dezelfde periode en prijs, tenzij ze minstens 24 uur voor het einde van de huidige periode worden opgezegd. Beheer of zeg op in Instellingen, onder je Apple Account, en dan Abonnementen. Prijzen staan in de app voordat je koopt en verschillen per regio.
+
+Geen advertenties. Geen AI. Baby Tracker is een logboek, geen medisch advies. De app stelt geen diagnose, behandelt niet, beoordeelt je baby niet en is geen medisch hulpmiddel. Bel bij twijfel je huisarts of kinderarts. De app zelf is in het Engels.
+
+Gebruiksvoorwaarden (standaard-EULA van Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacybeleid: https://jackwallner.github.io/baby/privacy-policy.html

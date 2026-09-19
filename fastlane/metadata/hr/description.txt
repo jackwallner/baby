@@ -1,0 +1,26 @@
+Najjednostavnije praćenje bebe. Jedan dodir bilježi hranjenje, mokru ili prljavu pelenu ili spavanje. Jedan pogled odgovara na pitanje u 3 ujutro: kad je beba zadnji put jela i s koje strane?
+
+ČETIRI GUMBA KOJI SE NIKAD NE POMIČU
+Hranjenje (lijevo, desno, bočica), piškenje, kakica, spavanje. Jedan dodir bilježi odmah. Dugi pritisak postavlja vrijeme, stranu, količinu u bočici ili boju stolice. Poništi stoji na vrhu nekoliko sekundi.
+
+BEZ OTVARANJA APLIKACIJE
+Widgeti za zaključani i početni zaslon koji bilježe jednim dodirom, aplikacija za Apple Watch s komplikacijom, aktivnost uživo tijekom hranjenja ili spavanja, i Siri.
+
+OBA RODITELJA, BEZ RAČUNA
+Partner, djed ili baka ili dadilja skenira kod s tvog telefona i pridruži se istom dnevniku na svom iPhoneu. Bez računa i bez našeg poslužitelja: podaci su na vašim uređajima i u vašem iCloudu.
+
+PRVI TJEDNI
+Zabilježene pelene po danu života, uz referencu dojenja za prva dva tjedna (NHS Healthier Together), s time kada nazvati pedijatra. Smjernica, ne cilj.
+
+BESPLATNO, I TAKO OSTAJE
+Bilježenje, tablica prvih tjedana, cijela povijest, widgeti, aplikacija za Apple Watch, aktivnost uživo, zajednički dnevnik, pomoć za mrlje i više od jedne bebe.
+
+BABY+, PO IZBORU
+Sažetak na jednoj stranici za pedijatra od zadnjeg posjeta, za dijeljenje ili ispis, trendovi kroz tjedne i CSV izvoz svih unosa.
+
+Baby+ je dostupan kao mjesečna ili godišnja pretplata, ili kao jednokratna doživotna kupnja koja se ne obnavlja. Novi pretplatnici dobivaju tjedan dana besplatne probe. Plaćanje se naplaćuje s tvog Apple računa na kraju probe, osim ako otkažeš najmanje 24 sata ranije. Pretplate se automatski obnavljaju za isto razdoblje i cijenu, osim ako se otkažu najmanje 24 sata prije kraja trenutačnog razdoblja. Upravljaj ili otkaži u Postavkama, pod Apple računom, zatim Pretplate. Cijene se prikazuju u aplikaciji prije kupnje i razlikuju se po regijama.
+
+Bez oglasa. Bez AI-ja. Baby Tracker je dnevnik, a ne liječnički savjet. Ne postavlja dijagnoze, ne liječi, ne procjenjuje bebu i nije medicinski proizvod. Za svaku brigu nazovi pedijatra. Sama aplikacija je na engleskom.
+
+Uvjeti korištenja (Appleov standardni EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Pravila o privatnosti: https://jackwallner.github.io/baby/privacy-policy.html

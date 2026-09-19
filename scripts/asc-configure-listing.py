@@ -23,6 +23,9 @@ AGE_TEMPLATE_BUNDLE_ID = os.environ.get(
 # which needs a purchase or days of data.
 REVIEW_NOTES = """Baby Tracker is a log for the first months: feeds, pee and poop diapers, and sleep. There is no account of any kind, so no demo account is needed.
 
+WHAT IS DIFFERENT (GUIDELINE 4.3)
+Baby trackers are a crowded category, so this one is deliberately narrow and built for the first weeks: one screen with four controls that never move, no accounts, no ads and no AI. What the category does not offer: (1) First Weeks, the hospital discharge tally sheet as a live table, the parent's logged diapers per day of life beside a sourced, labelled breastfeeding reference; (2) a one-page pediatrician PDF built for the visit, with the longest gap between feeds and weights in the doctor's units; (3) two-parent logging through the parents' own iCloud (CKShare), free, with no account or server; (4) a stain helper for blowouts and spit-up. It is not a template or a reskin. The developer's only other baby app, Baby Docs, is a paperwork planner with no logging of any kind.
+
 WHAT A FRESH INSTALL SHOWS, WITH NO PURCHASE AND NO DATA
 1. One setup screen with two paths. Start a new log asks for an optional name and birth date; tap Start tracking. Join a shared log is only for a second parent holding an invite, and can be ignored. There is no purchase screen during onboarding.
 2. Home: four log controls, Feed (Left, Right, Bottle), Pee, Poop and Sleep. One tap logs at the current time; a long press opens the editor for the time, side, bottle amount or stool colour. Undo appears at the top for a few seconds. History is the top-left clock button. More > Diaper buttons can rename Pee and Poop to Wet and Dirty.

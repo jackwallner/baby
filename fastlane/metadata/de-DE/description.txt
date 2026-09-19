@@ -1,0 +1,26 @@
+Babytracking, so einfach wie möglich. Ein Tipp erfasst eine Mahlzeit, eine nasse oder volle Windel oder Schlaf. Ein Blick beantwortet die Frage um 3 Uhr nachts: Wann hat das Baby zuletzt getrunken, und auf welcher Seite?
+
+VIER TASTEN, DIE SICH NIE VERSCHIEBEN
+Füttern (links, rechts, Fläschchen), Pipi, Kacka, Schlaf. Ein Tipp erfasst es jetzt. Langes Drücken stellt Uhrzeit, Seite, Flaschenmenge oder Stuhlfarbe ein. Rückgängig steht ein paar Sekunden oben bereit.
+
+OHNE DIE APP ZU ÖFFNEN
+Widgets für Sperr- und Home-Bildschirm, die mit einem Tipp erfassen, eine Apple Watch App mit Komplikation, eine Live-Aktivität während Stillen oder Schlaf läuft, und Siri.
+
+BEIDE ELTERN, KEINE KONTEN
+Partner, Großeltern oder Nanny scannen einen Code von deinem iPhone und führen dasselbe Protokoll auf ihrem eigenen iPhone. Kein Konto, kein Server von uns: Die Einträge liegen auf euren Geräten und in eurer eigenen iCloud.
+
+DIE ERSTEN WOCHEN
+Deine erfassten Windeln nach Lebenstag, neben einer Stillreferenz für die ersten zwei Wochen von NHS Healthier Together, mit den Hinweisen, wann du den Kinderarzt anrufen solltest. Eine Orientierung, kein Soll.
+
+KOSTENLOS, UND DAS BLEIBT SO
+Erfassen, die Tabelle der ersten Wochen, der komplette Verlauf, Widgets, die Apple Watch App, die Live-Aktivität, gemeinsames Protokoll, der Fleckenhelfer und mehr als ein Baby.
+
+BABY+, OPTIONAL
+Eine einseitige Zusammenfassung für den Kinderarzt seit dem letzten Termin zum Teilen oder Drucken, Verläufe über die Wochen und CSV-Export aller Einträge.
+
+Baby+ gibt es als Monats- oder Jahresabo oder als einmaligen Lifetime-Kauf ohne Verlängerung. Neue Abonnenten erhalten eine einwöchige Gratis-Testphase. Die Zahlung wird am Ende der Testphase über deinen Apple Account belastet, sofern du nicht mindestens 24 Stunden vorher kündigst. Abos verlängern sich automatisch zum gleichen Zeitraum und Preis, sofern sie nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt werden. Verwalten oder kündigen in den Einstellungen unter deinem Apple Account, dann Abonnements. Preise werden vor dem Kauf in der App angezeigt und variieren je nach Region.
+
+Keine Werbung. Keine KI. Baby Tracker ist ein Protokoll, keine medizinische Beratung. Die App stellt keine Diagnosen, behandelt nicht, bewertet dein Baby nicht und ist kein Medizinprodukt. Bei Sorgen wende dich an deinen Kinderarzt. Die App selbst ist auf Englisch.
+
+Nutzungsbedingungen (Apple Standard-EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Datenschutzerklärung: https://jackwallner.github.io/baby/privacy-policy.html

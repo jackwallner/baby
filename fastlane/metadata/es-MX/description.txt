@@ -1,0 +1,26 @@
+El seguimiento de bebé más sencillo. Un toque registra una toma, un pañal de pipí o de popó, o el sueño. Un vistazo responde la pregunta de las 3 de la mañana: ¿cuándo comió el bebé por última vez, y de qué lado?
+
+CUATRO BOTONES QUE NUNCA SE MUEVEN
+Toma (izquierdo, derecho, biberón), pipí, popó, sueño. Un toque lo registra ahora. Mantén presionado para ajustar la hora, el lado, la cantidad del biberón o el color de las heces. Deshacer aparece arriba unos segundos.
+
+SIN ABRIR LA APP
+Widgets para la pantalla bloqueada y la de inicio que registran con un toque, una app para Apple Watch con complicación, una actividad en vivo mientras corre una toma o una siesta, y Siri.
+
+LOS DOS PAPÁS, SIN CUENTAS
+Tu pareja, un abuelo o una niñera escanea un código de tu teléfono y se une al mismo registro desde su propio iPhone. Sin cuentas ni servidores nuestros: los datos viven en sus dispositivos y en su propio iCloud.
+
+LAS PRIMERAS SEMANAS
+Tus pañales registrados por día de vida, junto a una referencia de lactancia para las dos primeras semanas (NHS Healthier Together), con cuándo llamar al pediatra. Una referencia, no una meta.
+
+GRATIS, Y ASÍ SE QUEDA
+El registro, la tabla de las primeras semanas, todo el historial, los widgets, la app de Apple Watch, la actividad en vivo, el registro compartido, la ayuda para manchas y más de un bebé.
+
+BABY+, OPCIONAL
+Un resumen de una página para el pediatra desde la última consulta, para compartir o imprimir, tendencias semana a semana y exportación CSV de todos los registros.
+
+Baby+ está disponible como suscripción mensual o anual, o como compra única de por vida que no se renueva. Los nuevos suscriptores tienen una semana de prueba gratis. El pago se cobra a tu cuenta de Apple al terminar la prueba a menos que canceles al menos 24 horas antes. Las suscripciones se renuevan automáticamente por el mismo periodo y precio a menos que se cancelen al menos 24 horas antes del final del periodo actual. Administra o cancela en Configuración, en tu cuenta de Apple, y luego Suscripciones. Los precios se muestran en la app antes de comprar y varían según la región.
+
+Sin anuncios. Sin IA. Baby Tracker es un registro, no un consejo médico. No diagnostica, no trata ni evalúa a tu bebé, y no es un dispositivo médico. Ante cualquier duda, llama a tu pediatra. La app está en inglés.
+
+Términos de uso (EULA estándar de Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidad: https://jackwallner.github.io/baby/privacy-policy.html

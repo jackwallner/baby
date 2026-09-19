@@ -133,14 +133,22 @@ def main() -> int:
             print(f"{locale}: SKIPPED: {'; '.join(found)}")
             continue
 
-        info_result = upsert(
-            client, "appInfoLocalizations", info_locs.get(locale),
-            ("appInfo", "appInfos", info["id"]), locale,
-            {"name": read(locale, "name"),
-             "subtitle": read(locale, "subtitle"),
-             "privacyPolicyUrl": read(locale, "privacy_url")},
-            dry_run,
-        )
+        # A name another developer already holds answers 409 for this one
+        # locale; report it and carry on with the rest.
+        try:
+            info_result = upsert(
+                client, "appInfoLocalizations", info_locs.get(locale),
+                ("appInfo", "appInfos", info["id"]), locale,
+                {"name": read(locale, "name"),
+                 "subtitle": read(locale, "subtitle"),
+                 "privacyPolicyUrl": read(locale, "privacy_url")},
+                dry_run,
+            )
+        except RuntimeError as error:
+            skipped.append(locale)
+            detail = str(error).split('"detail" : ')[-1].split("\n")[0]
+            print(f"{locale}: SKIPPED: {detail}")
+            continue
         # Adding a language to the app info also creates that locale's version
         # localization, so the map read before the call above is already stale
         # and a blind create answers 409 DUPLICATE.

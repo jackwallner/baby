@@ -1,0 +1,26 @@
+Ultra simple baby tracking. One tap logs a feed, a pee or poo nappy, or sleep. One glance answers the 3am question: when did the baby last eat, and which side.
+
+FOUR BUTTONS THAT NEVER MOVE
+Feed (left, right, bottle), Pee, Poop, Sleep. Prefer Wet and Dirty? One setting renames them. One tap logs it now. A long press sets the time, the side, the bottle amount or the stool colour. Undo sits at the top for a few seconds. No confirmation sheets, ever.
+
+WITHOUT OPENING THE APP
+Lock screen and home screen widgets that log with one tap, an Apple Watch app and complication, a Live Activity while a feed or sleep is running, and Siri.
+
+BOTH PARENTS, NO ACCOUNTS
+Your partner, a grandparent or a nanny scans a code from your phone and joins the same log on their own iPhone. No account to create and no server of ours: the records live on your devices and in your own iCloud.
+
+THE FIRST WEEKS
+Your logged nappies by day of life, beside a breastfeeding reference for the first two weeks from NHS Healthier Together, with the "call your GP or child health nurse if" lines under the table. A reference, not a target.
+
+FREE, AND STAYING FREE
+Logging, the first-weeks table, full history, widgets, the Apple Watch app, the Live Activity, logging together, the stain helper and more than one baby.
+
+BABY+, OPTIONAL
+A one-page GP or child health nurse summary since the last visit to share or print, trends over the weeks, and CSV export of every entry.
+
+Baby+ is available as a monthly or yearly subscription, or as a one-time lifetime purchase that never renews. New subscribers get a one-week free trial. Payment is charged to your Apple Account when the trial ends unless you cancel at least 24 hours before then. Subscriptions renew automatically for the same period and price unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings, under your Apple Account, then Subscriptions. Prices are shown in the app before you buy and vary by region.
+
+No ads. No AI. Baby Tracker is a log, not medical advice. It does not diagnose, treat or assess your baby, and it is not a medical device. Call your GP or child health nurse with any concern.
+
+Terms of Use (Apple Standard EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy Policy: https://jackwallner.github.io/baby/privacy-policy.html

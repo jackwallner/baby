@@ -1,0 +1,26 @@
+Vauvan seuranta niin yksinkertaisesti kuin mahdollista. Yksi napautus kirjaa syötön, märän tai kakkavaipan tai unen. Yksi vilkaisu vastaa kello 3 yöllä: milloin vauva söi viimeksi, ja kummalta puolelta?
+
+NELJÄ PAINIKETTA, JOTKA EIVÄT KOSKAAN SIIRRY
+Syöttö (vasen, oikea, pullo), pissa, kakka, uni. Yksi napautus kirjaa heti. Pitkä painallus asettaa ajan, puolen, pullon määrän tai ulosteen värin. Kumoa näkyy ylhäällä muutaman sekunnin.
+
+AVAAMATTA APPIA
+Lukitus- ja kotinäytön widgetit, jotka kirjaavat yhdellä napautuksella, Apple Watch -appi ja komplikaatio, live-aktiviteetti syötön tai unen aikana, ja Siri.
+
+MOLEMMAT VANHEMMAT, EI TILEJÄ
+Kumppani, isovanhempi tai hoitaja skannaa koodin puhelimestasi ja liittyy samaan lokiin omalla iPhonellaan. Ei tiliä eikä meidän palvelinta: tiedot ovat laitteillanne ja omassa iCloudissanne.
+
+ENSIMMÄISET VIIKOT
+Kirjatut vaipat elinpäivittäin kahden ensimmäisen viikon imetysviitteen vieressä (NHS Healthier Together), sekä milloin soittaa lääkärille. Suuntaa antava, ei tavoite.
+
+ILMAINEN, JA SELLAISENA PYSYY
+Kirjaus, ensimmäisten viikkojen taulukko, koko historia, widgetit, Apple Watch -appi, live-aktiviteetti, yhteinen loki, tahra-apu ja useampi vauva.
+
+BABY+, VALINNAINEN
+Yhden sivun yhteenveto lääkärille edellisestä käynnistä, jaettavaksi tai tulostettavaksi, viikkojen trendit ja kaikkien merkintöjen CSV-vienti.
+
+Baby+ on saatavilla kuukausi- tai vuositilauksena tai kertaostona, joka ei uusiudu. Uudet tilaajat saavat viikon ilmaisen kokeilun. Maksu veloitetaan Apple-tililtäsi kokeilun päättyessä, ellet peru vähintään 24 tuntia ennen. Tilaukset uusiutuvat automaattisesti samalla jaksolla ja hinnalla, ellei niitä peruta vähintään 24 tuntia ennen nykyisen jakson loppua. Hallitse tai peru kohdassa Asetukset, Apple-tilisi alla, ja sitten Tilaukset. Hinnat näkyvät apissa ennen ostoa ja vaihtelevat alueittain.
+
+Ei mainoksia. Ei tekoälyä. Baby Tracker on loki, ei lääketieteellinen neuvo. Se ei diagnosoi, hoida eikä arvioi vauvaasi, eikä se ole lääkinnällinen laite. Ota huolissasi yhteyttä lääkäriin. Itse appi on englanninkielinen.
+
+Käyttöehdot (Applen vakio-EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Tietosuojakäytäntö: https://jackwallner.github.io/baby/privacy-policy.html

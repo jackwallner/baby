@@ -1,0 +1,26 @@
+Sledování miminka co nejjednodušeji. Jedno klepnutí zapíše krmení, mokrou nebo špinavou plenu nebo spánek. Jeden pohled odpoví na otázku ve 3 ráno: kdy miminko naposledy jedlo a z kterého prsu?
+
+ČTYŘI TLAČÍTKA, KTERÁ SE NIKDY NEPOSUNOU
+Krmení (levé, pravé, láhev), čůrání, kakání, spánek. Jedno klepnutí zapíše hned. Dlouhé podržení nastaví čas, stranu, množství z láhve nebo barvu stolice. Zpět je nahoře několik sekund.
+
+BEZ OTEVŘENÍ APLIKACE
+Widgety na zamčenou a plochu, které zapisují jedním klepnutím, aplikace pro Apple Watch s komplikací, živá aktivita během krmení nebo spánku, a Siri.
+
+OBA RODIČE, ŽÁDNÉ ÚČTY
+Partner, prarodič nebo chůva naskenuje kód z vašeho telefonu a připojí se ke stejnému deníku na svém iPhonu. Žádný účet ani náš server: data zůstávají ve vašich zařízeních a ve vašem iCloudu.
+
+PRVNÍ TÝDNY
+Zapsané pleny podle dne života vedle referenčních hodnot kojení pro první dva týdny (NHS Healthier Together), s tím, kdy volat pediatra. Vodítko, ne cíl.
+
+ZDARMA, A TAK TO ZŮSTANE
+Zápis, tabulka prvních týdnů, celá historie, widgety, aplikace pro Apple Watch, živá aktivita, společný deník, pomocník na skvrny a více než jedno miminko.
+
+BABY+, VOLITELNĚ
+Jednostránkové shrnutí pro pediatra od poslední návštěvy ke sdílení nebo tisku, trendy za týdny a export všech záznamů do CSV.
+
+Baby+ je k dispozici jako měsíční nebo roční předplatné, nebo jako jednorázový doživotní nákup, který se neobnovuje. Noví předplatitelé získají týdenní zkušební období zdarma. Platba se strhne z vašeho účtu Apple na konci zkušebního období, pokud nezrušíte alespoň 24 hodin předem. Předplatné se automaticky obnovuje na stejné období a za stejnou cenu, pokud není zrušeno alespoň 24 hodin před koncem aktuálního období. Spravujte nebo zrušte v Nastavení, pod účtem Apple, a pak Předplatné. Ceny se zobrazí v aplikaci před nákupem a liší se podle regionu.
+
+Bez reklam. Bez AI. Baby Tracker je deník, ne lékařská rada. Nediagnostikuje, neléčí, nehodnotí vaše miminko a není zdravotnický prostředek. Při jakékoli obavě volejte pediatra. Samotná aplikace je v angličtině.
+
+Podmínky použití (standardní EULA Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Zásady ochrany osobních údajů: https://jackwallner.github.io/baby/privacy-policy.html
