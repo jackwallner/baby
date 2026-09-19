@@ -217,6 +217,9 @@ struct UndoToast: View {
         case .weight: "Logged weight"
         }
         if logged.kind == .sleep { return base }
+        // A finished feed ended the running feed timer. Say so, so the timer
+        // vanishing from Now is explained and Undo is known to bring it back.
+        if logged.kind == .feed, !logged.closedTimers.isEmpty { return "\(base), timer ended" }
         if let detail = logged.detail, !detail.isEmpty { return "\(base) · \(detail)" }
         return base
     }

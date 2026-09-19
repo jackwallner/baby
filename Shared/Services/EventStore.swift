@@ -92,6 +92,8 @@ final class EventStore: ObservableObject {
         } else {
             events = []
         }
+        runningSleep = events.first { $0.eventKind == .sleep && $0.isRunning }
+        runningFeed = events.first { $0.eventKind == .feed && $0.isRunning }
         summary = NowSummary.make(child: child, events: events)
         revision += 1
         summary.store()
@@ -111,8 +113,10 @@ final class EventStore: ObservableObject {
         LiveActivityService.shared.sync(summary: summary)
     }
 
-    var runningSleep: LogEvent? { events.first { $0.eventKind == .sleep && $0.isRunning } }
-    var runningFeed: LogEvent? { events.first { $0.eventKind == .feed && $0.isRunning } }
+    /// Found once per reload rather than on every read: the log buttons ask
+    /// on each render, and with nothing running each ask walked every entry.
+    private(set) var runningSleep: LogEvent?
+    private(set) var runningFeed: LogEvent?
 
     func tally(on day: Date, now: Date = .now) -> DayTally {
         DayTally.make(events: events, on: day, now: now)
@@ -327,7 +331,7 @@ final class EventStore: ObservableObject {
 
     @discardableResult
     func save() -> Bool {
-        for event in events where context.updatedObjects.contains(event) {
+        for case let event as LogEvent in context.updatedObjects {
             event.updatedAt = .now
         }
         let saved = persistence.save(context)

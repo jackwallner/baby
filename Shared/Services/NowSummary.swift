@@ -57,7 +57,7 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// "Asleep 1h 05m" while a sleep runs; nil otherwise.
     func sleepLine(now: Date = .now) -> String? {
         guard let runningSleepStart else { return nil }
-        return "Asleep \(Format.compactDuration(now.timeIntervalSince(runningSleepStart)))"
+        return Format.asleep(now.timeIntervalSince(runningSleepStart))
     }
 
     /// "3 pee · 2 poop · 7 feeds".

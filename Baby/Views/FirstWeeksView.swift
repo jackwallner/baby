@@ -6,12 +6,26 @@ import SwiftUI
 struct FirstWeeksView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var now = Date.now
 
     var body: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
                 intro
+                // The table is long; the reasons to call sit under it. A tired
+                // parent looking for them should not have to know to scroll.
+                Button {
+                    withAnimation(reduceMotion ? nil : .default) {
+                        proxy.scrollTo("callCard", anchor: .top)
+                    }
+                } label: {
+                    Label("When to call your pediatrician", systemImage: "arrow.down.circle")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppTheme.accent)
+                        .frame(minHeight: 44)
+                }
                 if let child = events.child, let birth = child.birthDate {
                     table(birthDate: birth)
                 } else {
@@ -34,6 +48,7 @@ struct FirstWeeksView: View {
             .padding(.vertical, AppTheme.spacing)
         }
         .background(AppTheme.paper)
+        }
         .navigationTitle("First Weeks")
         .navigationBarTitleDisplayMode(.large)
         .onAppear { now = .now }
@@ -186,6 +201,7 @@ struct FirstWeeksView: View {
                 .padding(.top, AppTheme.hairSpacing)
         }
         .card()
+        .id("callCard")
         .accessibilityIdentifier("callCard")
     }
 }

@@ -108,7 +108,7 @@ struct LogButtons: View {
                         .foregroundStyle(AppTheme.ink)
                     if kind == .sleep, let start = events.summary.runningSleepStart {
                         TimelineView(.periodic(from: .now, by: 30)) { context in
-                            Text("Asleep \(Format.compactDuration(context.date.timeIntervalSince(start)))")
+                            Text(Format.asleep(context.date.timeIntervalSince(start)))
                                 .font(.caption)
                                 .foregroundStyle(AppTheme.ink2)
                                 .monospacedDigit()

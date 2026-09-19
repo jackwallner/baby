@@ -70,6 +70,11 @@ enum Format {
         return date.formatted(.dateTime.month(.abbreviated).day().year())
     }
 
+    /// "Asleep 1h 5m", or "Asleep just now" in the first minute rather than "0m".
+    static func asleep(_ seconds: TimeInterval) -> String {
+        seconds < 60 ? "Asleep just now" : "Asleep \(compactDuration(seconds))"
+    }
+
     /// Amounts are stored metric and shown the way the parent's pediatrician
     /// talks: ounces and pounds in the US, millilitres and kilograms elsewhere.
     static var usesImperial: Bool { Locale.current.measurementSystem == .us }
