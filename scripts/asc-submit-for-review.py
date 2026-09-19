@@ -109,7 +109,9 @@ def main() -> int:
             )
             print("added the version to the submission")
         except RuntimeError as error:
-            if "DUPLICATE" not in str(error):
+            # A version already in the submission answers DUPLICATE or, once
+            # the products sit beside it, RELATIONSHIP.INVALID.NOT_ALLOWED.
+            if "DUPLICATE" not in str(error) and "NOT_ALLOWED" not in str(error):
                 raise
             print("version was already queued")
 
