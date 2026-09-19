@@ -8,17 +8,19 @@ paths:
   - "fastlane/metadata/**"
 ---
 
-# Build 16 verification, 2026-09-18
+# Build 17 verification, 2026-09-18
 
-App source: `5c1b697`. Build 16 is VALID and attached to the draft App Store
-version 1.0 (it replaced build 8). `scripts/asc-readiness.py` reports no gaps.
+Build 17 (app source `ae99b20`: pediatrician PDF feed gaps, lb/oz units,
+weight wheels) is attached to the draft App Store version 1.0.
+`scripts/asc-readiness.py` reports no gaps. Screenshots below were captured
+from `5c1b697`; build 17 changes no screen they show.
 
 ## App tests
 
 Leased headless simulator `3BA38835-1CCB-4BBA-8045-4F0DD14AED56` (slot 4),
 released afterwards.
 
-- `Baby` scheme: 73 tests, zero failures.
+- `Baby` scheme: 76 tests, zero failures (build 17 source).
 - `BabyUITests/LoggingUITests`: seven tests, zero failures.
 - `python3 scripts/design-audit.py`: zero drift, two existing plain-style
   advisories for the Watch and widget.
@@ -32,6 +34,9 @@ released afterwards.
   `fastlane/metadata/primary_category.txt` at `HEALTH_AND_FITNESS`: fastlane
   `upload_metadata` pushes it, and it read `MEDICAL` until this pass, which
   flipped the live category once.
+- Review notes (`scripts/asc-configure-listing.py --notes-only`) describe
+  Start or Join onboarding, Pee and Poop, the NHS reference, logging together
+  by QR code, and Baby+ as doctor reporting only.
 - Regulated Medical Device: declared not a medical device in any region
   (checked in the ASC web UI).
 - RevenueCat `default` offering is current with monthly, annual and lifetime
@@ -52,8 +57,12 @@ simulator time; watchOS does not support status bar overrides.
 
 ## Two-parent sharing
 
-Verified on two real phones with different Apple IDs (Jack and Elsa),
-2026-09-18: joining and cross-logging worked. Production schema and invite
+Verified on two real phones with different Apple IDs (Jack and Elsa).
+Server-side proof, Production, read with `--watch-shares` from the owner's
+account on 2026-09-18: the share is read/write, Elsa is `accepted`, and four
+entries she logged on 2026-09-17 (feed, feed, dirty, sleep) sit in the
+owner's zone as `created_by=someone-else`. The reverse direction (owner
+entries on Elsa's phone) was reported by Jack, not observed from the Mac. Production schema and invite
 routine were verified separately (`docs/two-parent-acceptance.md`).
 
 No App Review submission was authorized or performed in this pass.
