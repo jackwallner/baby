@@ -8,20 +8,24 @@ paths:
   - "fastlane/metadata/**"
 ---
 
-# Build 17 verification, 2026-09-18
+# Build 19 verification, 2026-09-18
 
-Build 17 (app source `ae99b20`: pediatrician PDF feed gaps, lb/oz units,
-weight wheels) is attached to the draft App Store version 1.0.
-`scripts/asc-readiness.py` reports no gaps. Screenshots below were captured
-from `5c1b697`; in build 17 only the small PDF thumbnail on the summary
-screenshot differs (name as title, a gap column).
+Build 19 is attached to the draft App Store version 1.0 and
+`scripts/asc-readiness.py` reports no gaps. Builds 17 to 19 added PDF feed
+gaps and lb/oz units, weight wheels, the one-card Summary with PDFKit
+preview, a paywall that leads with the baby's own page, trend legends, and
+polish from `laudit913.md` and `~/uadit916.md`. The paywall review
+screenshots were re-rendered and re-uploaded for all three products.
+Store screenshots were captured from `5c1b697`; the summary thumbnail and the
+sleep frame's "Asleep 0m" (now "Asleep just now") are the visible drift.
 
 ## App tests
 
-Leased headless simulator `3BA38835-1CCB-4BBA-8045-4F0DD14AED56` (slot 4),
-released afterwards.
+Leased headless simulators from the pool, released afterwards. Performance
+spot check (simulator, 10,000 entries): tap-to-log 94 ms, full reload 237 ms.
 
-- `Baby` scheme: 76 tests, zero failures (build 17 source).
+- `Baby` scheme: 75 tests, zero failures (build 19 source).
+- `BabyUITests/PaywallScreenshotUITests`: three tests, zero failures.
 - `BabyUITests/LoggingUITests`: seven tests, zero failures.
 - `python3 scripts/design-audit.py`: zero drift, two existing plain-style
   advisories for the Watch and widget.
