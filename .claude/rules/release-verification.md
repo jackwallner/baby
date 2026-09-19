@@ -47,7 +47,24 @@ spot check (simulator, 10,000 entries): tap-to-log 94 ms, full reload 237 ms.
 - RevenueCat `default` offering is current with monthly, annual and lifetime
   packages, each mapped to its App Store product.
 
+## Localization
+
+The listing is localized into all 50 App Store locales (49 plus en-US), from
+`scripts/locale_copy/` via `scripts/build-locale-metadata.py` and
+`scripts/asc-upload-localizations.py --all-locales`. Every locale carries the
+EULA and privacy links, the 24-hour renewal terms, the non-medical disclaimer
+and a note that the app is in English. The app UI itself is English only.
+Greek's first name was taken by another app; the upload script now skips a
+taken name and carries on.
+
 ## Store screenshots
+
+On 2026-09-18 frames 5 (summary) and 6 (sleep) were re-rendered from build
+19's source and uploaded; frames 1 to 4 are still the `5c1b697` captures, so
+`app-store/capture/capture-report.json` describes those and not frames 5-6.
+A late-evening capture put a running sleep on frame 1, which is why the older
+frames were kept.
+
 
 Manifest `app-store/screenshots.json`, direction `simple-care`. The six
 iPhone captures were retaken from `5c1b697` (Pee and Poop, outlined graphics,
