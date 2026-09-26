@@ -88,3 +88,20 @@ entries on Elsa's phone) was reported by Jack, not observed from the Mac. Produc
 routine were verified separately (`docs/two-parent-acceptance.md`).
 
 No App Review submission was authorized or performed in this pass.
+
+# Build 21 verification, 2026-09-26
+
+Build 21 fixes the History delete animation, routes interactive logging through
+the app process and `EventStore`, and merges overlapping sleep entries in daily
+totals and the pediatrician report. The Baby+ paywall keeps the real or labelled
+example PDF preview as its lead pitch. Onboarding remains purchase-free.
+
+- `Baby` scheme: 78 tests, zero failures.
+- `BabyUITests/LoggingUITests/testDeletingFromHistoryCanBeUndone`: passed.
+- `BabyUITests/PaywallScreenshotUITests`: three StoreKit screenshots passed;
+  the report preview and billed plans rendered.
+- `python3 scripts/design-audit.py`: zero drift, two existing style advisories.
+- `./scripts/testflight.sh`: build 21 archive succeeded and upload to App Store
+  Connect succeeded. Apple reported the uploaded package is processing.
+- A live two-account CloudKit run was not repeated. Partner delivery remains
+  asynchronous; see `docs/two-parent-acceptance.md`.
