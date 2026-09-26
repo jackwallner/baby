@@ -1,0 +1,1 @@
+Nowość: dodaj starszy wpis. Zapisuj karmienia, pieluchy, sen i ważenia z poprzednich dni za pomocą linku na dole ekranu głównego, aby pierwsze dni też trafiły do historii.

@@ -1,0 +1,1 @@
+Baru: tambahkan entri lama. Catat menyusui, popok, tidur, dan penimbangan dari hari-hari sebelumnya lewat tautan di bagian bawah layar utama, agar hari-hari pertama juga ada di riwayat.

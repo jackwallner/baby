@@ -1,0 +1,1 @@
+Nuevo: agrega un registro anterior. Registra tomas, pañales, sueño y pesos de días pasados con el enlace en la parte inferior de la pantalla principal, para que los primeros días también estén en tu historial.

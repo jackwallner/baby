@@ -1,0 +1,1 @@
+Újdonság: korábbi bejegyzés hozzáadása. A főképernyő alján lévő hivatkozással rögzítheted a korábbi napok etetéseit, pelenkáit, alvásait és mérlegeléseit, így az első napok is bekerülnek az előzményekbe.

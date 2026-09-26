@@ -1,0 +1,1 @@
+Novetat: afegeix una entrada anterior. Registra preses, bolquers, son i pesades de dies passats amb l'enllaç a la part inferior de la pantalla principal, perquè els primers dies també siguin a l'historial.
