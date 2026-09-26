@@ -21,6 +21,7 @@ struct NowView: View {
                             VStack(spacing: AppTheme.looseSpacing) {
                                 NowStatusCard(now: now)
                                 TodayTotalsView()
+                                OlderEntryLink(editor: $editor)
                             }
                             LoggingControls(height: AppTheme.maxLogButtonHeight, editor: $editor)
                         }
@@ -30,6 +31,7 @@ struct NowView: View {
                             LoggingControls(height: min(AppTheme.maxLogButtonHeight, max(AppTheme.logButtonHeight, (geometry.size.height - AppTheme.homeSummaryAllowance) / 3)), editor: $editor)
                             Spacer(minLength: 0)
                             TodayTotalsView()
+                            OlderEntryLink(editor: $editor)
                         }
                         .frame(minHeight: max(0, geometry.size.height - AppTheme.looseSpacing * 2), alignment: .top)
                     }
@@ -200,6 +202,25 @@ private struct TodayTotalsView: View {
         .accessibilityLabel("Today: \(events.summary.todayLine)")
         .accessibilityIdentifier("todayTotals")
         .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.summary.todayLine)
+    }
+}
+
+/// Backfilling: the feed from before the app was installed, or the diaper
+/// nobody logged overnight. Quiet, and last, so it never competes with a tap.
+private struct OlderEntryLink: View {
+    @Binding var editor: EditorRequest?
+
+    var body: some View {
+        Menu {
+            NewEntryMenuItems(editor: $editor)
+        } label: {
+            Label("Add an older entry", systemImage: "clock.badge.plus")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(AppTheme.accent)
+                .frame(minHeight: 44)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityIdentifier("addOlderEntry")
     }
 }
 

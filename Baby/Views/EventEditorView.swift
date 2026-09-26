@@ -196,6 +196,20 @@ struct EventEditorView: View {
     }
 }
 
+/// The kinds a hand-entered row can be, for History's add button and the
+/// older-entry link on Now. The editor opens at the current time to adjust.
+struct NewEntryMenuItems: View {
+    @Binding var editor: EditorRequest?
+
+    var body: some View {
+        Button("Feed") { editor = EditorRequest(kind: .feed) }
+        Button("\(EventKind.wet.label) diaper") { editor = EditorRequest(kind: .wet) }
+        Button("\(EventKind.dirty.label) diaper") { editor = EditorRequest(kind: .dirty) }
+        Button("Sleep") { editor = EditorRequest(kind: .sleep) }
+        Button("Weight") { editor = EditorRequest(kind: .weight) }
+    }
+}
+
 /// Two wheels, in the units the scale at the pediatrician's office reads:
 /// pounds and half ounces in the US, kilograms and ten grams elsewhere.
 /// The log keeps grams either way.

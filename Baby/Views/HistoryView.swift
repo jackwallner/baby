@@ -39,11 +39,7 @@ struct HistoryView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button("Feed") { editor = EditorRequest(kind: .feed) }
-                    Button("\(EventKind.wet.label) diaper") { editor = EditorRequest(kind: .wet) }
-                    Button("\(EventKind.dirty.label) diaper") { editor = EditorRequest(kind: .dirty) }
-                    Button("Sleep") { editor = EditorRequest(kind: .sleep) }
-                    Button("Weight") { editor = EditorRequest(kind: .weight) }
+                    NewEntryMenuItems(editor: $editor)
                 } label: {
                     Image(systemName: "plus")
                 }

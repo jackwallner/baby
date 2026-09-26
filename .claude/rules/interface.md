@@ -22,12 +22,17 @@ stain help and Baby+ live in More. Do not restore a four-tab layout or an
 onboarding paywall. Name and birth date are optional; never guess a birth date
 for someone who did not choose one.
 
+Backfilling lives at the very bottom of Now as a quiet "Add an older entry"
+menu (Feed, Pee, Poop, Sleep, Weight) that opens the same editor as History's
+plus button; the editor's date picker does the rest. Added 2026-09-26 for
+version 1.1, because parents install on day three and want the first days in.
+
 Animate only meaningful feedback, using the shared spring and respecting
 Reduce Motion. Keep text readable in dark mode and at accessibility sizes.
 Use vertical layouts when the side-by-side version no longer fits.
 
 Verification: LoggingUITests covers direct logging, long-press cancellation,
-Undo, sleep/wake, one-screen onboarding, and free access to the tucked-away
+backfilling yesterday without touching today's totals, Undo, sleep/wake, one-screen onboarding, and free access to the tucked-away
 tools. SharingInterfaceUITests covers the invite explanation, the invite code
 and link, joining from onboarding and More, and the four appearance options.
 SharingTests protects the owner's log and separates invitation failures

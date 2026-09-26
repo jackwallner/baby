@@ -81,6 +81,33 @@ final class LoggingUITests: XCTestCase {
         XCTAssertNotEqual(tally(app), originalTally)
     }
 
+    func testOlderEntryLandsOnItsOwnDayNotToday() {
+        let app = launch()
+        let originalTally = tally(app)
+        app.buttons["addOlderEntry"].tap()
+        app.buttons["Pee diaper"].tap()
+        XCTAssertTrue(app.buttons["Log"].waitForExistence(timeout: 3))
+
+        // The compact picker's first button is the date; its popover is a month grid.
+        app.datePickers.firstMatch.buttons.firstMatch.tap()
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: .now)!
+        if !Calendar.current.isDate(yesterday, equalTo: .now, toGranularity: .month) {
+            app.buttons["Previous Month"].tap()
+        }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.dateFormat = "EEEE, MMMM d"
+        let day = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", formatter.string(from: yesterday))).firstMatch
+        XCTAssertTrue(day.waitForExistence(timeout: 3))
+        day.tap()
+        // Close the month grid by tapping the sheet's title, not above the sheet.
+        app.navigationBars["Log a pee diaper"].staticTexts.firstMatch.tap()
+
+        app.buttons["Log"].tap()
+        XCTAssertTrue(app.buttons["log.wet"].waitForExistence(timeout: 3))
+        XCTAssertEqual(tally(app), originalTally)
+    }
+
     func testSleepWakeAndUndoPreserveTheTimer() {
         let app = launch()
         let sleep = app.buttons["log.sleep"]

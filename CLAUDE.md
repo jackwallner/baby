@@ -10,7 +10,7 @@ The everyday app is one screen: last feed and side, last diaper, Feed / Pee /
 Poop / Sleep controls, and quiet daily totals. The diaper pair can read Wet /
 Dirty instead (More > Diaper buttons, `DiaperWords`); reports for a doctor
 always say wet and dirty. History is one tap away through
-the top-left clock. More is the top-right ellipsis.
+the top-left clock; "Add an older entry" at the bottom backfills. More is the top-right ellipsis.
 
 Everything outside logging lives in More: First Weeks, Pediatrician summary,
 logging together, appearance, diaper words, stain helper, baby settings, and Baby+. No tab bar, automatic
