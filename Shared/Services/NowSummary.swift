@@ -93,7 +93,9 @@ struct NowSummary: Codable, Equatable, Sendable {
                     summary.lastDiaperKind = event.eventKind
                 }
             case .sleep:
-                if event.isRunning, summary.runningSleepStart == nil {
+                // Newest first, so this keeps the earliest open sleep: if both
+                // parents started one, the baby has been asleep since the first.
+                if event.isRunning {
                     summary.runningSleepStart = event.startedAt
                 }
             case .weight:
@@ -223,6 +225,7 @@ struct DayTally: Equatable, Sendable {
         var tally = DayTally()
         let dayStart = calendar.startOfDay(for: day)
         guard let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else { return tally }
+        var sleeps: [(start: Date, end: Date)] = []
         for event in events {
             let start = event.start
             switch event.eventKind {
@@ -238,11 +241,38 @@ struct DayTally: Equatable, Sendable {
                 let end = event.endedAt ?? (event.isRunning ? now : start)
                 let overlapStart = max(start, dayStart)
                 let overlapEnd = min(end, dayEnd)
-                if overlapEnd > overlapStart { tally.sleepSeconds += overlapEnd.timeIntervalSince(overlapStart) }
+                if overlapEnd > overlapStart { sleeps.append((overlapStart, overlapEnd)) }
             default:
                 break
             }
         }
+        tally.sleepSeconds = coveredSeconds(sleeps)
         return tally
+    }
+
+    /// Time covered by the intervals, counting overlaps once. Two parents who
+    /// both logged the same nap before their phones synced still get the
+    /// nap's length, not twice it.
+    static func coveredSeconds(_ intervals: [(start: Date, end: Date)]) -> TimeInterval {
+        coveredIntervals(intervals).reduce(0) { total, interval in
+            total + interval.end.timeIntervalSince(interval.start)
+        }
+    }
+
+    /// Merges simultaneous or back-to-back sleep entries into individual bouts.
+    static func coveredIntervals(_ intervals: [(start: Date, end: Date)]) -> [(start: Date, end: Date)] {
+        var covered: [(start: Date, end: Date)] = []
+        for interval in intervals.sorted(by: { $0.start < $1.start }) {
+            guard let last = covered.last else {
+                covered.append(interval)
+                continue
+            }
+            if interval.start <= last.end {
+                covered[covered.count - 1] = (last.start, max(last.end, interval.end))
+            } else {
+                covered.append(interval)
+            }
+        }
+        return covered
     }
 }

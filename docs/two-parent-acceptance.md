@@ -75,7 +75,9 @@ accounts. Phone A is signed into the same Apple Account as the Mac.
 3. **Camera route.** Repeat with a third account or after leaving: scan with
    the Camera app with Baby Tracker force-quit (cold start).
 4. **Both sides log.** Wet diaper on B, sleep on A. Each appears on the other
-   phone. The watcher shows B's entry as `created_by=someone-else`.
+   phone. The watcher shows B's entry as `created_by=someone-else`. CloudKit
+   delivery is asynchronous and may coalesce notifications, so this test waits
+   for the entries instead of assuming a fixed arrival time.
 5. **Owner sees who joined.** Phone A: More, Log together shows phone B's name.
 6. **Logged before joining.** On a phone that already logged its own baby,
    join; accept "Move entries". The entries appear on both phones.

@@ -139,20 +139,32 @@ private struct UndoToastOverlay: ViewModifier {
     @EnvironmentObject private var events: EventStore
     @State private var showUndoError = false
 
+    /// Undo puts a row back into History, so it animates in like a new one.
+    private func undo() {
+        withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation) {
+            showUndoError = !events.undoLast()
+        }
+    }
+
     func body(content: Content) -> some View {
         content
             .overlay(alignment: .top) {
-                if let logged = events.lastLogged {
-                    UndoToast(logged: logged, undo: { showUndoError = !events.undoLast() })
-                        .frame(maxWidth: AppTheme.toastWidth)
-                        .padding(.horizontal, AppTheme.toastSideInset)
-                        .gesture(DragGesture(minimumDistance: AppTheme.tightSpacing).onEnded { value in
-                            if value.translation.height < 0 { events.dismissUndo() }
-                        })
-                        .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                // The animation belongs to the toast alone. On the whole stack
+                // it springs every list change made in the same transaction,
+                // which fought the row's own swipe-to-delete animation.
+                ZStack(alignment: .top) {
+                    if let logged = events.lastLogged {
+                        UndoToast(logged: logged, undo: undo)
+                            .frame(maxWidth: AppTheme.toastWidth)
+                            .padding(.horizontal, AppTheme.toastSideInset)
+                            .gesture(DragGesture(minimumDistance: AppTheme.tightSpacing).onEnded { value in
+                                if value.translation.height < 0 { events.dismissUndo() }
+                            })
+                            .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                    }
                 }
+                .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.lastLogged)
             }
-            .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.lastLogged)
             .alert("Couldn't undo this entry", isPresented: $showUndoError) {
                 Button("OK", role: .cancel) {}
             } message: {

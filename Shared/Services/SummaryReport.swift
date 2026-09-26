@@ -116,18 +116,21 @@ struct SummaryReport: Equatable, Sendable {
             return event.start < rangeEnd && max(finish, event.start) >= firstDay
         }
         let feedGaps = zip(feedStarts.dropFirst(), feedStarts).map { (at: $0, seconds: $0.timeIntervalSince($1)) }
+        let sleepBouts = DayTally.coveredIntervals(events.compactMap { event -> (start: Date, end: Date)? in
+            guard event.eventKind == .sleep else { return nil }
+            let finish = event.endedAt ?? (event.isRunning ? now : event.start)
+            guard finish > event.start else { return nil }
+            return (event.start, finish)
+        })
         var days: [Day] = []
         var cursor = firstDay
         while cursor <= lastDay {
             let tally = DayTally.make(events: events, on: cursor, now: now, calendar: calendar)
             let dayEnd = calendar.date(byAdding: .day, value: 1, to: cursor) ?? cursor
             let inDay = events.filter { $0.start >= cursor && $0.start < dayEnd }
-            let longest = inDay
-                .filter { $0.eventKind == .sleep }
-                .map { event -> TimeInterval in
-                    let finish = event.endedAt ?? (event.isRunning ? now : event.start)
-                    return max(0, finish.timeIntervalSince(event.start))
-                }
+            let longest = sleepBouts
+                .filter { $0.start >= cursor && $0.start < dayEnd }
+                .map { $0.end.timeIntervalSince($0.start) }
                 .max() ?? 0
             days.append(Day(
                 date: cursor,

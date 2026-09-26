@@ -373,4 +373,52 @@ final class EventStoreTests: XCTestCase {
         XCTAssertEqual(loaded.lastDiaperKind, .dirty)
         XCTAssertEqual(loaded.dayOfLife, 3)
     }
+
+    // MARK: - Two phones, one log
+
+    /// Both parents started the same nap before their phones synced: the
+    /// partner's open row arrives from iCloud next to this phone's.
+    private func partnerSleepArrives(at start: Date) {
+        guard let child = store.child else { return }
+        persistence.insert(kind: .sleep, at: start, for: child, in: store.context)
+        persistence.save(store.context)
+        store.reload()
+    }
+
+    func testOneWakeEndsBothParentsSleepsAndUndoReopensBoth() {
+        let noon = Calendar.current.date(byAdding: .hour, value: 12, to: Calendar.current.startOfDay(for: Date.now.addingTimeInterval(-86_400)))!
+        store.startTimed(.sleep, at: noon)
+        partnerSleepArrives(at: noon.addingTimeInterval(300))
+        XCTAssertEqual(store.summary.runningSleepStart, noon, "asleep since the first parent's start")
+        XCTAssertTrue(store.stopRunning(.sleep, at: noon.addingTimeInterval(3600)))
+        XCTAssertTrue(store.events.allSatisfy { !$0.isRunning }, "one Wake ends every open sleep")
+        XCTAssertNil(store.runningSleep)
+        XCTAssertTrue(store.undoLast())
+        XCTAssertEqual(store.events.filter(\.isRunning).count, 2, "Undo reopens both")
+    }
+
+    func testOverlappingSleepsFromTwoPhonesCountOnce() {
+        let noon = Calendar.current.date(byAdding: .hour, value: 12, to: Calendar.current.startOfDay(for: Date.now.addingTimeInterval(-86_400)))!
+        store.startTimed(.sleep, at: noon)
+        partnerSleepArrives(at: noon.addingTimeInterval(600))
+        let localSleep = store.events.first { $0.start == noon }!
+        let partnerSleep = store.events.first { $0.start == noon.addingTimeInterval(600) }!
+        localSleep.endedAt = noon.addingTimeInterval(3600)
+        partnerSleep.endedAt = noon.addingTimeInterval(4200)
+        persistence.save(store.context)
+        store.reload()
+        XCTAssertEqual(Int(store.tally(on: noon).sleepSeconds / 60), 70, "overlapping entries describe one 70-minute nap")
+        let report = SummaryReport.make(childName: "Nora", birthDate: nil, events: store.events, from: noon, to: noon)
+        XCTAssertEqual(Int(report.days[0].sleepSeconds / 60), 70)
+        XCTAssertEqual(Int(report.days[0].longestSleepSeconds / 60), 70, "the report uses the merged sleep bout")
+    }
+
+    func testSeparateSleepsStillAddUp() {
+        let day = Calendar.current.startOfDay(for: Date.now.addingTimeInterval(-86_400))
+        XCTAssertEqual(DayTally.coveredSeconds([
+            (day.addingTimeInterval(3600), day.addingTimeInterval(7200)),
+            (day.addingTimeInterval(10_800), day.addingTimeInterval(12_600)),
+            (day.addingTimeInterval(3000), day.addingTimeInterval(4000)),
+        ]), 4200 + 1800)
+    }
 }

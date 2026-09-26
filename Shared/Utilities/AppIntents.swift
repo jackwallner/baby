@@ -8,9 +8,11 @@ private struct IntentSaveError: LocalizedError {
 }
 
 /// One-tap logging from the home screen, the lock screen, Siri, Shortcuts and
-/// the Action button. Runs in whichever process hosts the widget, writes
-/// straight into the shared store, and lets the app export it later.
-struct LogEventIntent: AppIntent {
+/// the Action button. A `LiveActivityIntent` runs in the app's own process,
+/// where the CloudKit-mirrored stores live. CloudKit delivers the change to a
+/// partner asynchronously, with no fixed timing. It also starts and ends the
+/// sleep and feed timers the Live Activity shows.
+struct LogEventIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "Log a feed or diaper"
     static let description = IntentDescription("Logs a feed, a pee or poop diaper, or sleep right now.")
     static let openAppWhenRun = false
@@ -30,6 +32,9 @@ struct LogEventIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
+#if BABY_WIDGET
+        // Keep the extension build self-contained. iOS executes the app-target
+        // implementation of a LiveActivityIntent in the app process.
         let persistence = Persistence.shared
         let context = persistence.viewContext
         guard let child = persistence.activeChild(in: context) else {
@@ -65,10 +70,14 @@ struct LogEventIntent: AppIntent {
             WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: "Logged a \(kind.label.lowercased()) diaper.")
         case .sleep:
-            let running = persistence.runningEvents(.sleep, for: child, in: context).first
-            if let running {
-                running.endedAt = now
-                running.updatedAt = now
+            let running = persistence.runningEvents(.sleep, for: child, in: context)
+            if !running.isEmpty {
+                // Every open sleep, including one a partner started before
+                // the two phones synced.
+                for event in running {
+                    event.endedAt = max(now, event.start)
+                    event.updatedAt = now
+                }
                 guard persistence.save(context) else {
                     return .result(dialog: "I couldn't save that wake. Please try again.")
                 }
@@ -82,6 +91,43 @@ struct LogEventIntent: AppIntent {
             WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: "Sleep started.")
         }
+#else
+        let store = EventStore.shared
+        guard store.child != nil else {
+            return .result(dialog: "Open Baby Tracker once to set up your baby first.")
+        }
+        let now = Date.now
+        switch what {
+        case .feed, .feedLeft, .feedRight, .bottle:
+            let side: FeedSide = switch what {
+            case .feedLeft: .left
+            case .feedRight: .right
+            case .bottle: .bottle
+            default: store.summary.suggestedSide
+            }
+            guard store.log(.feed, side: side, at: now) != nil else {
+                return .result(dialog: "I couldn't save that feed. Please try again.")
+            }
+            return .result(dialog: "Logged a feed, \(side.label.lowercased()).")
+        case .wet, .dirty:
+            let eventKind: EventKind = what == .wet ? .wet : .dirty
+            guard store.log(eventKind, at: now) != nil else {
+                return .result(dialog: "I couldn't save that diaper. Please try again.")
+            }
+            return .result(dialog: "Logged a \(eventKind.label.lowercased()) diaper.")
+        case .sleep:
+            if store.runningSleep != nil {
+                guard store.stopRunning(.sleep, at: now, remember: false) else {
+                    return .result(dialog: "I couldn't save that wake. Please try again.")
+                }
+                return .result(dialog: "Sleep ended.")
+            }
+            guard store.startTimed(.sleep, at: now) != nil else {
+                return .result(dialog: "I couldn't save that sleep. Please try again.")
+            }
+            return .result(dialog: "Sleep started.")
+        }
+#endif
     }
 }
 
@@ -168,6 +214,7 @@ struct StopRunningIntent: LiveActivityIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
+#if BABY_WIDGET
         let persistence = Persistence.shared
         let context = persistence.viewContext
         guard let child = persistence.activeChild(in: context),
@@ -179,6 +226,17 @@ struct StopRunningIntent: LiveActivityIntent {
         }
         guard persistence.save(context) else { throw IntentSaveError() }
         WidgetCenter.shared.reloadAllTimelines()
+#else
+        guard let eventKind = EventKind(rawValue: kind) else { return .result() }
+        let store = EventStore.shared
+        let isRunning: Bool = switch eventKind {
+        case .feed: store.runningFeed != nil
+        case .sleep: store.runningSleep != nil
+        default: false
+        }
+        guard isRunning else { return .result() }
+        guard store.stopRunning(eventKind, at: .now, remember: false) else { throw IntentSaveError() }
+#endif
         return .result()
     }
 }

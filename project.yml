@@ -150,6 +150,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby.widget
         INFOPLIST_FILE: BabyWidget/Info.plist
         CODE_SIGN_ENTITLEMENTS: BabyWidget/BabyWidget.entitlements
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) BABY_WIDGET"
 
   BabyWatch:
     type: application

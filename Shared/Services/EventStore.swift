@@ -270,16 +270,21 @@ final class EventStore: ObservableObject {
     }
 
     /// Ends the running feed or sleep. Returns false if nothing was running.
+    /// Two parents who each started the same sleep before their phones synced
+    /// leave two open rows; one Wake ends both, and Undo reopens both.
     @discardableResult
     func stopRunning(_ kind: EventKind, at date: Date = .now, remember: Bool = true) -> Bool {
-        guard let running = events.first(where: { $0.eventKind == kind && $0.isRunning }) else { return false }
-        running.endedAt = max(date, running.start)
-        running.updatedAt = .now
+        let running = events.filter { $0.eventKind == kind && $0.isRunning }
+        guard let newest = running.first else { return false }
+        for event in running {
+            event.endedAt = max(date, event.start)
+            event.updatedAt = .now
+        }
         guard persistence.save(context) else {
             reload()
             return false
         }
-        if remember { rememberForUndo(running, reopensTimer: true) }
+        if remember { rememberForUndo(newest, reopensTimer: true, closedTimers: running.dropFirst().map(\.objectID)) }
         reload()
         return true
     }
@@ -375,11 +380,11 @@ final class EventStore: ObservableObject {
                 event.updatedAt = .now
             } else {
                 context.delete(event)
-                for id in lastLogged.closedTimers {
-                    guard let closed = try? context.existingObject(with: id) as? LogEvent else { continue }
-                    closed.endedAt = nil
-                    closed.updatedAt = .now
-                }
+            }
+            for id in lastLogged.closedTimers {
+                guard let closed = try? context.existingObject(with: id) as? LogEvent else { continue }
+                closed.endedAt = nil
+                closed.updatedAt = .now
             }
         }
         guard persistence.save(context) else {
@@ -460,9 +465,8 @@ final class EventStore: ObservableObject {
                 event.id = payload.id
             }
         case .stopSleep:
-            if let running = targetEvents.first(where: { $0.eventKind == .sleep && $0.isRunning }),
-               payload.at >= running.start {
-                running.endedAt = max(payload.at, running.start)
+            for running in targetEvents where running.eventKind == .sleep && running.isRunning && payload.at >= running.start {
+                running.endedAt = payload.at
                 running.updatedAt = .now
             }
         }

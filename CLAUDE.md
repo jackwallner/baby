@@ -31,9 +31,11 @@ locking something that shipped free.
 - `Persistence` opens two stores against one model: `private.sqlite` mirrored to
   the private CloudKit database, and `shared.sqlite` mirrored to the shared one.
   A baby another parent shared arrives in the second store, and every query runs
-  across both. Only the app process mirrors; widgets and intents open the same
-  files with mirroring off and write, and the app exports their rows from
-  persistent history on its next run.
+  across both. Only the app process mirrors. Widgets open the same files with
+  mirroring off, and the app exports any extension writes from persistent
+  history on its next run. Interactive logging intents use `LiveActivityIntent`,
+  so iOS runs them in the app process; `EventStore` writes to the mirrored store
+  and republishes the summary. CloudKit delivery to a partner is asynchronous.
 - `EventStore` is the single door to the log: every tap, edit, undo and delete
   goes through it, and it republishes `NowSummary` to the widgets, the Watch and
   the Live Activity after each change.
