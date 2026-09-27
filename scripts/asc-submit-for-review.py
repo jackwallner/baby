@@ -5,7 +5,7 @@ The last step of a release, and the one nothing else in this repo does. It is
 deliberately two operations in one script because they only make sense
 together: a review submission with no items submits nothing, and an item added
 to a submission that is never submitted just freezes the metadata it points at
-(see CLAUDE.md, "ASC submission freezes IAP metadata").
+(see AGENTS.md, "ASC submission freezes IAP metadata").
 
 Products (subscriptions and one-time IAPs) cannot be added here. The v1
 `reviewSubmissionItems` endpoint this API key can see has no relationship for
