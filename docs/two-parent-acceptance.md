@@ -53,7 +53,7 @@ open -n -W --stdout /tmp/baby-host.log --stderr /tmp/baby-host-err.log \
   build/NativeCloudSchema/Build/Products/Debug/BabyCloudSchema.app \
   --args --host-partner-test 30
 # copy BABY_HOST_INVITE_URL from /tmp/baby-host.log, then:
-TEST_RUNNER_BABY_INVITE_URL='<link>' xcodebuild test -project Baby.xcodeproj \
+BABY_INVITE_URL='<link>' xcodebuild test -project Baby.xcodeproj \
   -scheme BabyUITests -destination "id=<signed-in simulator>" \
   -only-testing:BabyUITests/TwoDeviceParticipantUITests
 ```

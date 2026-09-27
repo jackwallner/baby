@@ -105,3 +105,20 @@ example PDF preview as its lead pitch. Onboarding remains purchase-free.
   Connect succeeded. Apple reported the uploaded package is processing.
 - A live two-account CloudKit run was not repeated. Partner delivery remains
   asynchronous; see `docs/two-parent-acceptance.md`.
+
+## App intent runtime check, 2026-09-27
+
+- On an iOS 26.5 simulator, the Feed App Shortcut logged a right-side feed and
+  changed today's total from three to four. The Sleep App Shortcut started a
+  timer. Wake in the expanded Dynamic Island stopped it, and Now returned to
+  Sleep. This used `-NoCloudKit`, so it verifies intent dispatch and local
+  `EventStore` updates, not CloudKit delivery.
+- The standard ad hoc simulator signature caused App Intents to reject the
+  shortcut provider. Re-signing the simulator app with the existing YXG4
+  distribution identity enabled the runtime check. The TestFlight build is
+  `VALID` in App Store Connect.
+- Visual issues observed: Wake wraps onto two lines in the Lock Screen Live
+  Activity, and the elapsed label truncates in the expanded Dynamic Island.
+  The Now screen does not show whether an entry has reached the shared log.
+- No physical iPhones were connected, so the two-account CloudKit round trip
+  remains unverified in this pass.
