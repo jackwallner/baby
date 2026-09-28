@@ -40,5 +40,11 @@ enum AppGroup {
         static let now = "BabyNowWidget"
         static let log = "BabyLogWidget"
         static let complication = "BabyWatchComplication"
+        static let quickFeed = "BabyQuickFeedWidget"
+        static let quickWet = "BabyQuickWetWidget"
+        static let quickDirty = "BabyQuickDirtyWidget"
+        static let feedControl = "com.jackwallner.baby.control.feed"
+        static let wetControl = "com.jackwallner.baby.control.wet"
+        static let dirtyControl = "com.jackwallner.baby.control.dirty"
     }
 }

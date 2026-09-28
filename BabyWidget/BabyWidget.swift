@@ -228,6 +228,14 @@ struct BabyWidgetBundle: WidgetBundle {
     var body: some Widget {
         BabyNowWidget()
         BabyLogWidget()
+        QuickFeedWidget()
+        QuickWetWidget()
+        QuickDirtyWidget()
         BabyLiveActivity()
+        if #available(iOS 18.0, *) {
+            FeedControl()
+            WetControl()
+            DirtyControl()
+        }
     }
 }

@@ -122,3 +122,14 @@ example PDF preview as its lead pitch. Onboarding remains purchase-free.
   The Now screen does not show whether an entry has reached the shared log.
 - No physical iPhones were connected, so the two-account CloudKit round trip
   remains unverified in this pass.
+
+## One-tap widget check, 2026-09-28
+
+`BabyUITests/WidgetUITests` adds the Pee button widget from the Home Screen
+gallery and taps it; the tile's value goes from "3 today" to "4 today". App
+Intents only run for a signed build, so run it as `build-for-testing`, re-sign
+`Baby.app` and `PlugIns/BabyWidget.appex` with the Apple Development identity
+(`codesign --force --sign <id> --preserve-metadata=entitlements,identifier`),
+then `TEST_RUNNER_BABY_WIDGET_TEST=1 xcodebuild test-without-building` (it skips
+without that variable). The Lock Screen circles and iOS 18 controls
+were compiled but not driven in the simulator.

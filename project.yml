@@ -141,6 +141,7 @@ targets:
     sources:
       - path: BabyWidget/BabyWidget.swift
       - path: BabyWidget/BabyLiveActivity.swift
+      - path: BabyWidget/QuickLogWidgets.swift
       - path: BabyWidget/PrivacyInfo.xcprivacy
         buildPhase: resources
       - path: Shared/Models/BabyActivityAttributes.swift

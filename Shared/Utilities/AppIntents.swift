@@ -16,6 +16,9 @@ struct LogEventIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "Log a feed or diaper"
     static let description = IntentDescription("Logs a feed, a pee or poop diaper, or sleep right now.")
     static let openAppWhenRun = false
+    /// A tap on a Lock Screen widget or control logs without unlocking,
+    /// like the flashlight. It only ever adds an entry.
+    static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
 
     @Parameter(title: "What", default: .wet)
     var what: LogChoice

@@ -42,6 +42,15 @@ need Log. Totals count from a day-start hour or the last 24 hours (More >
 Daily totals, `TotalsWindow`), with a four-row hourly strip beneath
 (`WindowTotals`); History and reports keep calendar days.
 
+One-tap logging outside the app (2026-09-28): three single-button widgets,
+Feed, Pee and Poop (`BabyWidget/QuickLogWidgets.swift`), each a Lock Screen
+circle or a Home Screen small tile; separate widgets rather than one
+configurable one so each is ready to place from the gallery. iOS 18+ also
+gets Log feed / Log pee / Log poop controls for the Lock Screen corners,
+Control Center and the Action button. `LogEventIntent` is
+`.alwaysAllowed`, so a locked phone logs like the flashlight. The existing
+four-button "One-tap log" widget and its rectangular Lock Screen row stay.
+
 Animate only meaningful feedback, using the shared spring and respecting
 Reduce Motion. Keep text readable in dark mode and at accessibility sizes.
 Use vertical layouts when the side-by-side version no longer fits.
