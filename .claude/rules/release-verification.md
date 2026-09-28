@@ -14,7 +14,7 @@ Build 19 is attached to the draft App Store version 1.0 and
 `scripts/asc-readiness.py` reports no gaps. Builds 17 to 19 added PDF feed
 gaps and lb/oz units, weight wheels, the one-card Summary with PDFKit
 preview, a paywall that leads with the baby's own page, trend legends, and
-polish from `laudit913.md` and `~/uadit916.md`. The paywall review
+polish from `project-docs/audits/laudit913.md` and `~/uadit916.md`. The paywall review
 screenshots were re-rendered and re-uploaded for all three products.
 Store screenshots were captured from `5c1b697`; the summary thumbnail and the
 sleep frame's "Asleep 0m" (now "Asleep just now") are the visible drift.

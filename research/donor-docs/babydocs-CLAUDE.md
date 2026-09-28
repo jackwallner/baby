@@ -208,7 +208,7 @@ thing sent and overdue back) rather than one that triggers nothing.
   notes and the plan go nowhere. `PrivacyInfo.xcprivacy` declares purchase
   history, not linked, not tracking, for app functionality **and analytics**,
   the last because the RevenueCat dashboard is looked at.
-- Keyword-field notes and the acquisition plan are in `aso-plan.md`. App Store
+- Keyword-field notes and the acquisition plan are in `../../project-docs/marketing/aso-plan.md`. App Store
   search is not the channel, and the numbers now say so rather than the brief:
   every tracked term with popularity at or above 25 has difficulty at or above
   62 and resolves to somebody else's field, while every right-intent term sits
