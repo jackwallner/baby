@@ -4,8 +4,8 @@ Developer notes and historical audits for this repository. The published site re
 
 ## Audits
 
-- [laudit913.md](audits/laudit913.md)
+- [laudit913.md](audits/laudit913.md): Baby Tracker UX audit, laudit913
 
 ## Marketing
 
-- [aso-plan.md](marketing/aso-plan.md)
+- [aso-plan.md](marketing/aso-plan.md): Baby App Store positioning
