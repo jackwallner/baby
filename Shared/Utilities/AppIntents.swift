@@ -44,6 +44,9 @@ struct LogEventIntent: LiveActivityIntent {
             return .result(dialog: "Open Baby Tracker once to set up your baby first.")
         }
         let now = Date.now
+        if what.isDoubleTap(at: now) {
+            return .result(dialog: IntentDialog(stringLiteral: what.loggedDialog))
+        }
         switch what {
         case .feed, .feedLeft, .feedRight, .bottle:
             let side = what.feedSide
@@ -98,6 +101,9 @@ struct LogEventIntent: LiveActivityIntent {
             return .result(dialog: "Open Baby Tracker once to set up your baby first.")
         }
         let now = Date.now
+        if what.isDoubleTap(at: now) {
+            return .result(dialog: IntentDialog(stringLiteral: what.loggedDialog))
+        }
         switch what {
         case .feed, .feedLeft, .feedRight, .bottle:
             guard let event = store.log(.feed, side: what.feedSide, at: now) else {
@@ -154,6 +160,30 @@ enum LogChoice: String, AppEnum {
         case .feedRight: .right
         case .bottle: .bottle
         default: nil
+        }
+    }
+
+    /// The kind a log choice writes; nil for the sleep toggle.
+    var loggedKind: EventKind? {
+        switch self {
+        case .feed, .feedLeft, .feedRight, .bottle: .feed
+        case .wet: .wet
+        case .dirty: .dirty
+        case .sleep: nil
+        }
+    }
+
+    /// A second tap on the same tile before it could redraw as Undo: the
+    /// first tap already logged it, so this one logs nothing.
+    func isDoubleTap(at now: Date) -> Bool {
+        guard let loggedKind, let recent = WidgetUndo.load() else { return false }
+        return recent.kind == loggedKind && now >= recent.loggedAt && now.timeIntervalSince(recent.loggedAt) < WidgetUndo.doubleTapWindow
+    }
+
+    var loggedDialog: String {
+        switch self {
+        case .wet, .dirty: "Logged a \(loggedKind?.label.lowercased() ?? "") diaper."
+        default: feedDialog
         }
     }
 
@@ -227,9 +257,13 @@ struct UndoWidgetLogIntent: LiveActivityIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        let undo = WidgetUndo.load()
+        // A stale tile's Undo must not cost a newer tap its own Undo.
+        guard let undo = WidgetUndo.load(), undo.eventID.uuidString == eventID else {
+            WidgetCenter.shared.reloadAllTimelines()
+            return .result()
+        }
         WidgetUndo.clear()
-        guard let undo, undo.eventID.uuidString == eventID, undo.isAcceptable(at: .now) else {
+        guard undo.isAcceptable(at: .now) else {
             WidgetCenter.shared.reloadAllTimelines()
             return .result()
         }

@@ -58,7 +58,8 @@ entry in `WidgetUndo` (App Group); `UndoWidgetLogIntent` deletes exactly that
 id and reopens any feed timer the log ended, accepting a tap up to 60 seconds
 in case WidgetKit redraws late. Controls, the Action button and Siri have no
 surface for it; History's swipe-to-delete covers them. The four-button widget
-has no Undo.
+has no Undo. A second tap of the same kind within 3 seconds (before the tile
+could redraw) logs nothing, and a stale Undo never clears a newer tap's Undo.
 
 Animate only meaningful feedback, using the shared spring and respecting
 Reduce Motion. Keep text readable in dark mode and at accessibility sizes.

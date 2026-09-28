@@ -496,4 +496,17 @@ final class EventStoreTests: XCTestCase {
         XCTAssertTrue(undo.isAcceptable(at: logged.addingTimeInterval(30)), "WidgetKit can redraw late")
         XCTAssertFalse(undo.isAcceptable(at: logged.addingTimeInterval(61)), "an old Undo left on screen does nothing")
     }
+
+    func testASecondWidgetTapBeforeTheRedrawIsTheSameTap() {
+        let now = Date.now
+        WidgetUndo(eventID: UUID(), kind: .wet, loggedAt: now.addingTimeInterval(-1)).store()
+        XCTAssertTrue(LogChoice.wet.isDoubleTap(at: now), "a pee a second ago was this same tap")
+        XCTAssertFalse(LogChoice.dirty.isDoubleTap(at: now), "a poop right after a pee is its own entry")
+        XCTAssertFalse(LogChoice.sleep.isDoubleTap(at: now))
+        XCTAssertFalse(LogChoice.wet.isDoubleTap(at: now.addingTimeInterval(5)), "a later pee logs")
+        WidgetUndo(eventID: UUID(), kind: .feed, loggedAt: now.addingTimeInterval(-1)).store()
+        XCTAssertTrue(LogChoice.feedLeft.isDoubleTap(at: now))
+        WidgetUndo.clear()
+        XCTAssertFalse(LogChoice.wet.isDoubleTap(at: now), "after Undo a tap logs again")
+    }
 }

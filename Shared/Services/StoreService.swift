@@ -426,7 +426,10 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     }
 
     func restore() async {
-        guard isConfigured else { return }
+        guard isConfigured else {
+            errorMessage = "Purchases aren't available right now. Please try again later."
+            return
+        }
         isLoading = true
         defer { isLoading = false }
         do {

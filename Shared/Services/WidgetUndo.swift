@@ -17,6 +17,10 @@ struct WidgetUndo: Codable, Equatable, Sendable {
     /// WidgetKit can redraw the tile a little late; never so long that an
     /// Undo left on screen by a missed redraw removes an old entry.
     static let acceptFor: TimeInterval = 60
+    /// A second tap of the same kind this soon is the same tap twice, before
+    /// WidgetKit could redraw the tile as Undo. Nobody changes two diapers
+    /// three seconds apart.
+    static let doubleTapWindow: TimeInterval = 3
 
     var hidesAt: Date { loggedAt.addingTimeInterval(Self.showFor) }
 
