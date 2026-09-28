@@ -63,7 +63,7 @@ final class VisualTourUITests: XCTestCase {
         attach(app, "13-editor-dirty")
         app.buttons["Cancel"].tap()
 
-        app.buttons["log.feed.bottle"].press(forDuration: 0.8)
+        app.buttons["log.feed"].press(forDuration: 0.8)
         XCTAssertTrue(app.buttons["Cancel"].waitForExistence(timeout: 5))
         attach(app, "14-editor-feed")
         app.buttons["Cancel"].tap()

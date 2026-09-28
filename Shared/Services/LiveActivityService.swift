@@ -27,11 +27,11 @@ final class LiveActivityService {
 
     func sync(summary: NowSummary) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        let wanted: (kind: EventKind, start: Date, side: FeedSide?)?
+        let wanted: (kind: EventKind, start: Date, side: String?)?
         if let start = summary.runningSleepStart {
             wanted = (.sleep, start, nil)
         } else if let start = summary.runningFeedStart {
-            wanted = (.feed, start, summary.runningFeedSide)
+            wanted = (.feed, start, FeedSide.encode(summary.runningSides))
         } else {
             wanted = nil
         }
@@ -47,7 +47,7 @@ final class LiveActivityService {
         let matching = existing.first {
             $0.attributes.kind == wanted.kind.rawValue
                 && $0.content.state.startedAt == wanted.start
-                && $0.attributes.side == wanted.side?.rawValue
+                && $0.attributes.side == wanted.side
                 && $0.attributes.childName == summary.childName
         }
         if matching != nil {
@@ -61,7 +61,7 @@ final class LiveActivityService {
         }
         do {
             _ = try Activity.request(
-                attributes: BabyActivityAttributes(kind: wanted.kind.rawValue, side: wanted.side?.rawValue, childName: summary.childName),
+                attributes: BabyActivityAttributes(kind: wanted.kind.rawValue, side: wanted.side, childName: summary.childName),
                 content: .init(state: .init(startedAt: wanted.start), staleDate: nil)
             )
         } catch {

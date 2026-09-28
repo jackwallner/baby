@@ -1,7 +1,12 @@
 import SwiftUI
 
 /// The long-press sheet, and the row editor in History. Time first, because
-/// "it was actually twenty minutes ago" is the whole reason it exists.
+/// "it was actually twenty minutes ago" is the whole reason it exists. The
+/// time is an inline wheel, never a popover that could cover the bar.
+///
+/// An existing entry saves as it changes: there is no Save to find, and
+/// closing the sheet any way keeps the edit. A new entry needs Log, so a
+/// sheet opened by accident never adds a row.
 struct EventEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var events: EventStore
@@ -9,27 +14,39 @@ struct EventEditorView: View {
     let request: EditorRequest
 
     @State private var kind: EventKind
-    @State private var startedAt: Date
-    @State private var side: FeedSide
-    @State private var durationMinutes: Int
-    @State private var amount: Double
-    @State private var stool: StoolColor?
-    @State private var note: String
-    @State private var isTimed: Bool
+    @State private var draft: Draft
     @State private var saveError: String?
+    @State private var pendingSave: Task<Void, Never>?
+
+    /// Everything the form edits, compared as one value so any change
+    /// schedules one autosave.
+    struct Draft: Equatable {
+        var startedAt: Date
+        var sides: [FeedSide]
+        var durationMinutes: Int
+        var amount: Double
+        var stool: StoolColor?
+        var note: String
+        var isTimed: Bool
+    }
+
+    /// Long enough for a wheel to settle and a word to be typed.
+    static let autosaveDelay: Duration = .milliseconds(600)
 
     init(request: EditorRequest) {
         self.request = request
         let existing = request.existing
         _kind = State(initialValue: existing?.eventKind ?? request.kind)
-        _startedAt = State(initialValue: existing?.startedAt ?? .now)
-        _side = State(initialValue: existing?.feedSide ?? request.side ?? .left)
         let seconds = existing?.duration ?? 0
-        _durationMinutes = State(initialValue: Int((seconds / 60).rounded()))
-        _amount = State(initialValue: existing?.amount ?? 0)
-        _stool = State(initialValue: existing?.stool)
-        _note = State(initialValue: existing?.note ?? "")
-        _isTimed = State(initialValue: existing?.isRunning ?? false)
+        _draft = State(initialValue: Draft(
+            startedAt: existing?.startedAt ?? request.at ?? .now,
+            sides: existing?.feedSides ?? [],
+            durationMinutes: Int((seconds / 60).rounded()),
+            amount: existing?.amount ?? 0,
+            stool: existing?.stool,
+            note: existing?.note ?? "",
+            isTimed: existing?.isRunning ?? false
+        ))
     }
 
     private var isNew: Bool { request.existing == nil }
@@ -48,57 +65,67 @@ struct EventEditorView: View {
             Form {
                 Group {
                     Section {
-                        LabeledContent("Time") {
-                            DatePicker("Time", selection: $startedAt, in: ...Date.now.addingTimeInterval(60))
-                                .labelsHidden()
-                                .themedDatePicker()
-                        }
+                        DatePicker("Time", selection: $draft.startedAt, in: ...Date.now.addingTimeInterval(60))
+                            .datePickerStyle(.wheel)
+                            .labelsHidden()
+                            .frame(maxWidth: .infinity)
+                            .themedDatePicker()
+                            .accessibilityIdentifier("editor.time")
+                    } header: {
+                        Text(timeHeader)
                     }
                     if kind == .feed {
-                        Section("Feed") {
-                            Picker("Side", selection: $side) {
-                                ForEach(FeedSide.allCases, id: \.self) { Text($0.label).tag($0) }
-                            }
-                            .pickerStyle(.segmented)
-                            if side == .bottle {
-                                Stepper("Amount: \(Format.millilitres(amount))", value: $amount, in: 0...400,
+                        Section {
+                            FeedSideChips(selection: $draft.sides)
+                                .listRowInsets(EdgeInsets(top: AppTheme.spacing, leading: AppTheme.spacing, bottom: AppTheme.spacing, trailing: AppTheme.spacing))
+                            if draft.sides.contains(.bottle) {
+                                Stepper("Amount: \(Format.millilitres(draft.amount))", value: $draft.amount, in: 0...400,
                                         step: Format.usesImperial ? Format.millilitresPerOunce / 2 : 10)
                             }
                             if isNew {
-                                Toggle("Start a timer", isOn: $isTimed)
+                                Toggle("Start a timer", isOn: $draft.isTimed)
                             }
-                            if !isTimed {
-                                Stepper("Length: \(durationMinutes) min", value: $durationMinutes, in: 0...180, step: 1)
+                            if !draft.isTimed {
+                                Stepper("Length: \(draft.durationMinutes) min", value: $draft.durationMinutes, in: 0...180, step: 1)
                             }
+                        } header: {
+                            Text("Side (optional)")
                         }
                     }
                     if kind == .dirty {
                         Section("Color") {
-                            Picker("Color", selection: $stool) {
+                            Picker("Color", selection: $draft.stool) {
                                 Text("Not noted").tag(StoolColor?.none)
                                 ForEach(StoolColor.allCases, id: \.self) { Text($0.label).tag(StoolColor?.some($0)) }
                             }
                             .pickerStyle(.menu)
                         }
                     }
-                    if kind == .sleep, !isTimed {
+                    if kind == .sleep, !draft.isTimed {
                         Section("Sleep") {
-                            Stepper("Length: \(Format.compactDuration(Double(durationMinutes) * 60))", value: $durationMinutes, in: 0...1440, step: 5)
+                            Stepper("Length: \(Format.compactDuration(Double(draft.durationMinutes) * 60))", value: $draft.durationMinutes, in: 0...1440, step: 5)
                         }
                     }
                     if kind == .weight {
                         Section("Weight") {
-                            WeightPicker(grams: $amount)
+                            WeightPicker(grams: $draft.amount)
                         }
                     }
-                    Section("Note") {
-                        TextField("Optional", text: $note, axis: .vertical)
+                    Section {
+                        TextField("Optional", text: $draft.note, axis: .vertical)
                             .lineLimit(1...3)
+                            .accessibilityIdentifier("editor.note")
+                    } header: {
+                        Text("Note")
+                    } footer: {
+                        if !isNew { Text("Changes save as you make them.") }
                     }
                     if !isNew {
                         Section {
                             Button("Delete", role: .destructive) {
                                 guard let existing = request.existing else { return }
+                                pendingSave?.cancel()
+                                pendingSave = nil
                                 if events.delete(existing) {
                                     dismiss()
                                 } else {
@@ -118,19 +145,33 @@ struct EventEditorView: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(isNew ? "Log" : "Save") { save() }
+                if isNew {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { dismiss() }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Log") { logNew() }
+                            .fontWeight(.semibold)
+                    }
+                } else {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {
+                            if saveNow() { dismiss() }
+                        }
                         .fontWeight(.semibold)
+                    }
                 }
             }
         }
         .onAppear {
-            if kind == .weight, amount <= 0 { amount = startingWeight }
+            if isNew, kind == .weight, draft.amount <= 0 { draft.amount = startingWeight }
         }
-        .presentationDetents([.medium, .large])
+        .onChange(of: draft) { _, _ in scheduleSave() }
+        .onDisappear {
+            // Swiped away mid-edit: keep what was changed.
+            if pendingSave != nil { saveNow() }
+        }
+        .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         .alert(
             "Couldn't save changes",
@@ -154,25 +195,48 @@ struct EventEditorView: View {
         }
     }
 
-    private func save() {
-        if let existing = request.existing {
-            applyEdits(to: existing)
-            guard events.save() else {
-                saveError = "Your changes were not saved. Please try again."
-                return
-            }
-            Haptics.logged()
-            dismiss()
-            return
-        }
+    /// "Time · 12m ago", so the wheel's answer reads back in plain words.
+    private var timeHeader: String {
+        let seconds = Date.now.timeIntervalSince(draft.startedAt)
+        return seconds < 60 ? "Time · now" : "Time · \(Format.ago(draft.startedAt))"
+    }
 
+    // MARK: - Saving
+
+    private func scheduleSave() {
+        guard !isNew else { return }
+        pendingSave?.cancel()
+        pendingSave = Task { @MainActor in
+            try? await Task.sleep(for: Self.autosaveDelay)
+            guard !Task.isCancelled else { return }
+            saveNow()
+        }
+    }
+
+    /// Writes the draft to the existing entry. True when there is nothing
+    /// left unsaved.
+    @discardableResult
+    private func saveNow() -> Bool {
+        pendingSave?.cancel()
+        pendingSave = nil
+        guard let existing = request.existing, !existing.isDeleted, existing.managedObjectContext != nil else { return true }
+        applyEdits(to: existing)
+        guard existing.hasChanges else { return true }
+        guard events.save() else {
+            saveError = "Your changes were not saved. Please try again."
+            return false
+        }
+        return true
+    }
+
+    private func logNew() {
         let configure: (LogEvent) -> Void = { [self] event in
             applyEdits(to: event)
         }
-        let event = if isTimed, kind.canRun {
-            events.startTimed(kind, side: kind == .feed ? side : nil, at: startedAt, configure: configure)
+        let event = if draft.isTimed, kind.canRun {
+            events.startTimed(kind, at: draft.startedAt, configure: configure)
         } else {
-            events.log(kind, side: kind == .feed ? side : nil, at: startedAt, configure: configure)
+            events.log(kind, at: draft.startedAt, configure: configure)
         }
         guard event != nil else {
             saveError = "Your log was not saved. Please try again."
@@ -182,17 +246,22 @@ struct EventEditorView: View {
         dismiss()
     }
 
+    /// Sets only what differs, so an untouched entry is not marked changed
+    /// and never re-uploads.
     private func applyEdits(to event: LogEvent) {
-        event.startedAt = startedAt
-        if kind == .feed { event.feedSide = side }
-        if kind == .feed || kind == .weight { event.amount = amount }
-        if kind == .dirty { event.stool = stool }
-        if kind.canRun {
-            event.endedAt = isTimed ? nil : startedAt.addingTimeInterval(Double(durationMinutes) * 60)
+        func set<Value: Equatable>(_ keyPath: ReferenceWritableKeyPath<LogEvent, Value>, _ value: Value) {
+            if event[keyPath: keyPath] != value { event[keyPath: keyPath] = value }
         }
-        let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        event.note = trimmed.isEmpty ? nil : trimmed
-        event.updatedAt = .now
+        set(\.startedAt, draft.startedAt)
+        if kind == .feed, event.feedSides != draft.sides { event.feedSides = draft.sides }
+        if kind == .feed || kind == .weight { set(\.amount, draft.amount) }
+        if kind == .dirty { set(\.stoolColor, draft.stool?.rawValue) }
+        if kind.canRun {
+            let ended: Date? = draft.isTimed ? nil : draft.startedAt.addingTimeInterval(Double(draft.durationMinutes) * 60)
+            set(\.endedAt, ended)
+        }
+        let trimmed = draft.note.trimmingCharacters(in: .whitespacesAndNewlines)
+        set(\.note, trimmed.isEmpty ? nil : trimmed)
     }
 }
 

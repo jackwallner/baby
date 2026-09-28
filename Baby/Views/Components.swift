@@ -228,12 +228,19 @@ struct UndoToast: View {
         case .sleep: logged.reopensTimer ? "Sleep ended" : "Sleep started"
         case .weight: "Logged weight"
         }
-        if logged.kind == .sleep { return base }
+        if logged.kind == .sleep { return base + backdated }
         // A finished feed ended the running feed timer. Say so, so the timer
         // vanishing from Now is explained and Undo is known to bring it back.
         if logged.kind == .feed, !logged.closedTimers.isEmpty { return "\(base), timer ended" }
-        if let detail = logged.detail, !detail.isEmpty { return "\(base) · \(detail)" }
-        return base
+        if let detail = logged.detail, !detail.isEmpty { return "\(base) · \(detail)" + backdated }
+        return base + backdated
+    }
+
+    /// " · 7:15 AM" when the tap logged at a wound-back time, so the parent
+    /// sees the entry landed where they meant it to.
+    private var backdated: String {
+        guard let eventAt = logged.eventAt, logged.at.timeIntervalSince(eventAt) > 90 else { return "" }
+        return " · \(LogClock.label(for: eventAt, now: logged.at))"
     }
 }
 

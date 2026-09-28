@@ -9,14 +9,14 @@ final class LoggingUITests: XCTestCase {
         let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
         app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit"]
         app.launch()
-        XCTAssertTrue(app.buttons["log.feed.left"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 15))
         return app
     }
 
     func testFeedAndDiaperTapsCanBeUndone() {
         let app = launch()
         let originalTally = tally(app)
-        app.buttons["log.feed.right"].tap()
+        app.buttons["log.feed"].tap()
         XCTAssertTrue(app.staticTexts["just now"].waitForExistence(timeout: 3))
         XCTAssertNotEqual(tally(app), originalTally)
         app.buttons["Undo"].tap()
@@ -66,7 +66,7 @@ final class LoggingUITests: XCTestCase {
     func testHoldingAButtonDoesNotLogUntilSaved() {
         let app = launch()
         let originalTally = tally(app)
-        for identifier in ["log.feed.left", "log.wet", "log.dirty", "log.sleep"] {
+        for identifier in ["log.feed", "log.wet", "log.dirty", "log.sleep"] {
             app.buttons[identifier].press(forDuration: 0.7)
             XCTAssertTrue(app.buttons["Cancel"].waitForExistence(timeout: 3))
             app.buttons["Cancel"].tap()
@@ -88,20 +88,12 @@ final class LoggingUITests: XCTestCase {
         app.buttons["Pee diaper"].tap()
         XCTAssertTrue(app.buttons["Log"].waitForExistence(timeout: 3))
 
-        // The compact picker's first button is the date; its popover is a month grid.
-        app.datePickers.firstMatch.buttons.firstMatch.tap()
+        // The time is an inline wheel; its first column is the day.
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: .now)!
-        if !Calendar.current.isDate(yesterday, equalTo: .now, toGranularity: .month) {
-            app.buttons["Previous Month"].tap()
-        }
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US")
-        formatter.dateFormat = "EEEE, MMMM d"
-        let day = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", formatter.string(from: yesterday))).firstMatch
-        XCTAssertTrue(day.waitForExistence(timeout: 3))
-        day.tap()
-        // Close the month grid by tapping the sheet's title, not above the sheet.
-        app.navigationBars["Log a pee diaper"].staticTexts.firstMatch.tap()
+        formatter.dateFormat = "MMM d"
+        app.datePickers["editor.time"].pickerWheels.element(boundBy: 0).adjust(toPickerWheelValue: formatter.string(from: yesterday))
 
         app.buttons["Log"].tap()
         XCTAssertTrue(app.buttons["log.wet"].waitForExistence(timeout: 3))
@@ -145,8 +137,106 @@ final class LoggingUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["onboarding.primary"].waitForExistence(timeout: 10))
         app.buttons["onboarding.primary"].tap()
-        XCTAssertTrue(app.buttons["log.feed.left"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["paywall.billedAmount"].exists)
         XCTAssertFalse(app.tabBars.firstMatch.exists)
+    }
+
+    func testFeedLogsInOneTapAndTheSideIsOptional() {
+        let app = launch()
+        let originalTally = tally(app)
+        XCTAssertFalse(app.buttons["feedSide.left"].exists, "no side choice before a feed is logged")
+        app.buttons["log.feed"].tap()
+        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 3), "the tap alone logged the feed")
+        XCTAssertNotEqual(tally(app), originalTally)
+        XCTAssertTrue(app.staticTexts["just now"].exists)
+        XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 3))
+        attach(app, "feed-sides-offered")
+
+        app.buttons["feedSide.right"].tap()
+        app.buttons["feedSide.left"].tap()
+        XCTAssertTrue(app.buttons["feedSide.right"].isSelected)
+        XCTAssertTrue(app.buttons["feedSide.left"].isSelected)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Right + Left'")).firstMatch.waitForExistence(timeout: 3))
+        attach(app, "feed-sides-chosen")
+        app.buttons["feedSide.right"].tap()
+        XCTAssertFalse(app.buttons["feedSide.right"].isSelected)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Left breast'")).firstMatch.waitForExistence(timeout: 3))
+    }
+
+    func testWindingTheClockBackLogsAtThatTimeThenReturnsToNow() {
+        let app = launch()
+        XCTAssertFalse(app.buttons["logTime.now"].exists)
+        app.buttons["logTime.earlier"].tap()
+        app.buttons["logTime.earlier"].tap()
+        app.buttons["logTime.earlier"].tap()
+        XCTAssertTrue(app.buttons["logTime.now"].waitForExistence(timeout: 2))
+        let hint = app.staticTexts["logHint"]
+        XCTAssertTrue(hint.label.hasPrefix("Taps log at"), hint.label)
+        attach(app, "log-time-wound-back")
+
+        app.buttons["log.wet"].tap()
+        let toast = app.otherElements["undoToast"]
+        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 3))
+        let stamped = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Logged pee · '")).firstMatch
+        XCTAssertTrue(stamped.exists || toast.exists, "the toast names the wound-back time")
+        XCTAssertTrue(app.buttons["logTime.now"].exists, "the chosen time stays for the next tap")
+
+        app.buttons["logTime.now"].tap()
+        XCTAssertFalse(app.buttons["logTime.now"].exists)
+        XCTAssertEqual(app.staticTexts["logHint"].label, "Tap to log now. Hold to add details.")
+    }
+
+    func testEditingAnEntrySavesWithoutASaveButton() {
+        let app = launch()
+        app.buttons["History"].tap()
+        app.buttons["List"].tap()
+        let entry = app.cells.element(boundBy: 2)
+        XCTAssertTrue(entry.waitForExistence(timeout: 5))
+        entry.tap()
+        XCTAssertTrue(app.datePickers["editor.time"].waitForExistence(timeout: 3), "the time wheel is inline")
+        XCTAssertFalse(app.buttons["Save"].exists)
+        XCTAssertTrue(app.buttons["Done"].exists)
+        let note = app.descendants(matching: .any)["editor.note"]
+        note.tap()
+        note.typeText("sleepy")
+        attach(app, "editor-autosave")
+        // Pull the sheet away: the note must already be saved.
+        let editorTime = app.datePickers["editor.time"]
+        for _ in 0..<3 where editorTime.exists {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
+                .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98)))
+            _ = editorTime.waitForNonExistence(timeout: 2)
+        }
+        XCTAssertFalse(editorTime.exists)
+        entry.tap()
+        XCTAssertTrue(note.waitForExistence(timeout: 3))
+        XCTAssertEqual(note.value as? String, "sleepy")
+    }
+
+    func testTotalsCanCountTheLastTwentyFourHours() {
+        let app = launch()
+        XCTAssertTrue(tally(app).hasPrefix("Today:"), tally(app))
+        XCTAssertTrue(app.descendants(matching: .any)["hourStrip"].exists)
+        app.buttons["more"].tap()
+        let mode = app.segmentedControls["totals.mode"]
+        for _ in 0..<6 where !mode.isHittable { app.swipeUp() }
+        mode.buttons["Last 24 hours"].tap()
+        attach(app, "totals-setting")
+        app.buttons["Done"].tap()
+        XCTAssertTrue(tally(app).hasPrefix("Last 24 hours:"), tally(app))
+        attach(app, "totals-last-24")
+        app.buttons["more"].tap()
+        for _ in 0..<6 where !mode.isHittable { app.swipeUp() }
+        mode.buttons["By day"].tap()
+        app.buttons["Done"].tap()
+        XCTAssertTrue(tally(app).hasPrefix("Today:"), tally(app))
+    }
+
+    private func attach(_ app: XCUIApplication, _ name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 }

@@ -33,7 +33,7 @@ enum AppTheme {
     static let graphicSize: CGFloat = 44
     static let wideLayout: CGFloat = 700
     static let contentWidth: CGFloat = 1000
-    static let homeSummaryAllowance: CGFloat = 360
+    static let homeSummaryAllowance: CGFloat = 500
     static let ctaHeight: CGFloat = 52
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72
@@ -43,11 +43,20 @@ enum AppTheme {
     /// Clears the 44pt History and More buttons and their 16pt bar inset.
     static let toastSideInset: CGFloat = 68
     static let dotSize: CGFloat = 5
+    /// The hour strip under Now's totals: a small square per hour and kind.
+    static let cellHeight: CGFloat = 10
+    static let cellGap: CGFloat = 2
+    static let cellRadius: CGFloat = 3
+    static let stripIconWidth: CGFloat = 14
 
     static let feedbackAnimation = Animation.spring(response: 0.32, dampingFraction: 0.82)
 
     static var cardShape: RoundedRectangle {
         RoundedRectangle(cornerRadius: cardRadius, style: .continuous)
+    }
+
+    static var cellShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: cellRadius, style: .continuous)
     }
 
     static var buttonShape: RoundedRectangle {

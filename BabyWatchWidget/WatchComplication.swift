@@ -48,7 +48,7 @@ struct WatchBabyComplicationView: View {
             VStack(spacing: 0) {
                 Image(systemName: EventKind.feed.symbolName).font(.caption2)
                 Text(sinceFeed).font(.headline.bold()).minimumScaleFactor(0.6)
-                if let side = s.lastFeedSide { Text(side.shortLabel).font(.caption2) }
+                if let side = FeedSide.shortLabel(for: s.feedSides) { Text(side).font(.caption2) }
             }
             .foregroundStyle(AppTheme.feed)
         case .accessoryRectangular:
@@ -62,7 +62,7 @@ struct WatchBabyComplicationView: View {
         case .accessoryCorner:
             Text(sinceFeed)
                 .font(.headline.bold())
-                .widgetLabel { Text(s.lastFeedSide?.label ?? "fed") }
+                .widgetLabel { Text(FeedSide.label(for: s.feedSides) ?? "fed") }
         default:
             Text(sinceFeed)
         }

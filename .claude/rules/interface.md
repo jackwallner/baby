@@ -27,11 +27,27 @@ menu (Feed, Pee, Poop, Sleep, Weight) that opens the same editor as History's
 plus button; the editor's date picker does the rest. Added 2026-09-26 for
 version 1.1, because parents install on day three and want the first days in.
 
+2026-09-28 (Jack): Feed is one button. A tap logs a feed with no side;
+then an "Add a side (optional)" row of Left / Right / Bottle chips opens
+under it for 90 seconds and edits that feed (multi-select, stored in tap
+order in the existing `side` string as `right,left`, so no schema change and
+older builds still read single sides). The widget's Feed and the plain Siri
+Feed log no side either; the Watch keeps its L / R / Bottle taps. A "Logging
+at" row above the buttons winds the log time back (minus and plus step the
+five-minute grid, the time opens a wheel); taps log at that time and it
+returns to now 60 seconds after the last touch, with a countdown under the
+buttons. The editor's time is an inline wheel (a compact picker's popover
+covered Save); existing entries autosave with Done only, new entries still
+need Log. Totals count from a day-start hour or the last 24 hours (More >
+Daily totals, `TotalsWindow`), with a four-row hourly strip beneath
+(`WindowTotals`); History and reports keep calendar days.
+
 Animate only meaningful feedback, using the shared spring and respecting
 Reduce Motion. Keep text readable in dark mode and at accessibility sizes.
 Use vertical layouts when the side-by-side version no longer fits.
 
-Verification: LoggingUITests covers direct logging, long-press cancellation,
+Verification: LoggingUITests covers direct logging, optional feed sides, the
+wound-back log time, editor autosave, the totals window, long-press cancellation,
 backfilling yesterday without touching today's totals, Undo, sleep/wake, one-screen onboarding, and free access to the tucked-away
 tools. SharingInterfaceUITests covers the invite explanation, the invite code
 and link, joining from onboarding and More, and the four appearance options.

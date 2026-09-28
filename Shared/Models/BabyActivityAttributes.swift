@@ -11,7 +11,7 @@ struct BabyActivityAttributes: ActivityAttributes {
 
     /// `EventKind` raw value: "feed" or "sleep".
     var kind: String
-    /// `FeedSide` raw value for a feed, nil for sleep.
+    /// `FeedSide.encode` of a feed's sides, nil for sleep or no side.
     var side: String?
     var childName: String
 }

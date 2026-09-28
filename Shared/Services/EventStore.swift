@@ -34,6 +34,9 @@ final class EventStore: ObservableObject {
         let kind: EventKind
         let detail: String?
         let at: Date
+        /// When the entry happened (or the timer ended), so a backdated tap
+        /// can say which time it was logged at.
+        var eventAt: Date?
         var reopensTimer = false
         /// Timers this action ended on the way, reopened again by Undo.
         var closedTimers: [NSManagedObjectID] = []
@@ -223,7 +226,8 @@ final class EventStore: ObservableObject {
 
     // MARK: - Logging
 
-    /// One tap. Feeds get a side; a nil side takes the suggested one.
+    /// One tap. A feed's side is optional: nil logs a feed with no side, and
+    /// `configure` can set several.
     @discardableResult
     func log(
         _ kind: EventKind,
@@ -232,11 +236,10 @@ final class EventStore: ObservableObject {
         configure: ((LogEvent) -> Void)? = nil
     ) -> LogEvent? {
         guard let child else { return nil }
-        let resolvedSide = kind == .feed ? (side ?? summary.suggestedSide) : nil
         // A completed feed logged during a running one means the running feed
         // is over, otherwise Now would keep saying "Feeding" for the older row.
         let closed = kind == .feed ? closeRunning(.feed, at: date) : []
-        let event = persistence.insert(kind: kind, at: date, side: resolvedSide, ended: kind == .feed ? date : nil, for: child, in: context)
+        let event = persistence.insert(kind: kind, at: date, side: kind == .feed ? side : nil, ended: kind == .feed ? date : nil, for: child, in: context)
         configure?(event)
         guard persistence.save(context) else {
             reload()
@@ -258,7 +261,7 @@ final class EventStore: ObservableObject {
     ) -> LogEvent? {
         guard kind.canRun, let child else { return nil }
         let closed = closeRunning(kind, at: date, onlyStartedBefore: false)
-        let event = persistence.insert(kind: kind, at: date, side: kind == .feed ? (side ?? summary.suggestedSide) : nil, ended: nil, for: child, in: context)
+        let event = persistence.insert(kind: kind, at: date, side: kind == .feed ? side : nil, ended: nil, for: child, in: context)
         configure?(event)
         guard persistence.save(context) else {
             reload()
@@ -347,7 +350,8 @@ final class EventStore: ObservableObject {
     // MARK: - Undo
 
     private func rememberForUndo(_ event: LogEvent, reopensTimer: Bool = false, closedTimers: [NSManagedObjectID] = []) {
-        remember(LoggedEvent(objectID: event.objectID, kind: event.eventKind, detail: event.detailText, at: .now, reopensTimer: reopensTimer, closedTimers: closedTimers))
+        let when = reopensTimer ? (event.endedAt ?? .now) : event.start
+        remember(LoggedEvent(objectID: event.objectID, kind: event.eventKind, detail: event.detailText, at: .now, eventAt: when, reopensTimer: reopensTimer, closedTimers: closedTimers))
     }
 
     private func remember(_ logged: LoggedEvent) {

@@ -10,12 +10,20 @@ struct NowSummary: Codable, Equatable, Sendable {
     var childID: UUID?
     var dayOfLife: Int?
     var lastFeedAt: Date?
+    /// The first side of the last feed. Kept beside `lastFeedSides` so a
+    /// Watch still running an older build reads a side.
     var lastFeedSide: FeedSide?
+    /// Every side of the last feed, in order. Optional for older summaries.
+    var lastFeedSides: [FeedSide]?
     var lastDiaperAt: Date?
     var lastDiaperKind: EventKind?
     var runningSleepStart: Date?
     var runningFeedStart: Date?
     var runningFeedSide: FeedSide?
+    var runningFeedSides: [FeedSide]?
+    /// `TotalsWindow.storedValue` the today counts were made with, so the
+    /// Watch resets them at the same hour the phone does. Nil means midnight.
+    var totalsWindow: Int?
     var todayFeeds: Int = 0
     var todayWet: Int = 0
     var todayDirty: Int = 0
@@ -28,8 +36,23 @@ struct NowSummary: Codable, Equatable, Sendable {
     static let empty = NowSummary()
     static let knownEventLimit = 256
 
-    /// The side to offer next, for a one-tap feed with no side chosen.
-    var suggestedSide: FeedSide { lastFeedSide?.next ?? .left }
+    /// The side to offer next: the other breast after a breastfeed.
+    var suggestedSide: FeedSide { feedSides.last?.next ?? .left }
+
+    /// Every side of the last feed, including from summaries that only knew one.
+    var feedSides: [FeedSide] { lastFeedSides ?? lastFeedSide.map { [$0] } ?? [] }
+
+    var runningSides: [FeedSide] { runningFeedSides ?? runningFeedSide.map { [$0] } ?? [] }
+
+    mutating func setLastFeedSides(_ sides: [FeedSide]) {
+        lastFeedSides = sides
+        lastFeedSide = sides.first
+    }
+
+    mutating func setRunningFeedSides(_ sides: [FeedSide]) {
+        runningFeedSides = sides
+        runningFeedSide = sides.first
+    }
 
     var isSleeping: Bool { runningSleepStart != nil }
     var isFeeding: Bool { runningFeedStart != nil }
@@ -39,11 +62,11 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// "Fed 2h 14m ago · Left", or "Feeding · Left · 12m" while a timed feed runs.
     func feedLine(now: Date = .now) -> String {
         if let runningFeedStart {
-            let side = runningFeedSide.map { " · \($0.label)" } ?? ""
+            let side = FeedSide.label(for: runningSides).map { " · \($0)" } ?? ""
             return "Feeding\(side) · \(Format.compactDuration(now.timeIntervalSince(runningFeedStart)))"
         }
         guard let lastFeedAt else { return "No feed logged yet" }
-        let side = lastFeedSide.map { " · \($0.label)" } ?? ""
+        let side = FeedSide.label(for: feedSides).map { " · \($0)" } ?? ""
         return "Fed \(Format.ago(lastFeedAt, now: now))\(side)"
     }
 
@@ -68,10 +91,18 @@ struct NowSummary: Codable, Equatable, Sendable {
     // MARK: - Building
 
     /// Pure: derives the summary from the events list so tests can pin it.
-    static func make(child: Child?, events: [LogEvent], now: Date = .now, calendar: Calendar = .current) -> NowSummary {
+    static func make(
+        child: Child?,
+        events: [LogEvent],
+        now: Date = .now,
+        calendar: Calendar = .current,
+        window: TotalsWindow = .current
+    ) -> NowSummary {
         var summary = NowSummary()
         summary.generatedAt = now
+        summary.totalsWindow = window.storedValue
         guard let child else { return summary }
+        let today = window.interval(at: now, calendar: calendar)
         summary.childName = child.displayName
         summary.childID = child.id
         summary.dayOfLife = child.dayOfLife(on: now, calendar: calendar)
@@ -82,10 +113,10 @@ struct NowSummary: Codable, Equatable, Sendable {
             case .feed:
                 if event.isRunning, summary.runningFeedStart == nil {
                     summary.runningFeedStart = event.startedAt
-                    summary.runningFeedSide = event.feedSide
+                    summary.setRunningFeedSides(event.feedSides)
                 } else if summary.lastFeedAt == nil, !event.isRunning {
                     summary.lastFeedAt = event.startedAt
-                    summary.lastFeedSide = event.feedSide
+                    summary.setLastFeedSides(event.feedSides)
                 }
             case .wet, .dirty:
                 if summary.lastDiaperAt == nil {
@@ -101,7 +132,7 @@ struct NowSummary: Codable, Equatable, Sendable {
             case .weight:
                 break
             }
-            if calendar.isDate(event.start, inSameDayAs: now) {
+            if window.holds(event.start, in: today) {
                 switch event.eventKind {
                 case .feed: summary.todayFeeds += 1
                 case .wet: summary.todayWet += 1
@@ -113,7 +144,7 @@ struct NowSummary: Codable, Equatable, Sendable {
         // A running feed still counts as the most recent feed for "which side".
         if let start = summary.runningFeedStart, start >= (summary.lastFeedAt ?? .distantPast) {
             summary.lastFeedAt = start
-            summary.lastFeedSide = summary.runningFeedSide
+            summary.setLastFeedSides(summary.runningSides)
         }
         return summary
     }
@@ -144,7 +175,8 @@ extension NowSummary {
         guard payload.childID == nil || payload.childID == s.childID else { return s }
         // `generatedAt` is a sync timestamp, not a calendar-day watermark.
         // An overnight offline tap must be compared with the current day.
-        let sameDay = calendar.isDate(payload.at, inSameDayAs: now)
+        let today = window.interval(at: now, calendar: calendar)
+        let sameDay = window.holds(payload.at, in: today)
         if s.knownEventIDs?.contains(payload.id) == true { return s }
         switch payload.action {
         case .log:
@@ -153,7 +185,7 @@ extension NowSummary {
                 let mostRecentFeedAt = max(s.lastFeedAt ?? .distantPast, s.runningFeedStart ?? .distantPast)
                 if payload.at >= mostRecentFeedAt {
                     s.lastFeedAt = payload.at
-                    s.lastFeedSide = payload.side
+                    s.setLastFeedSides(payload.side.map { [$0] } ?? [])
                 }
                 if sameDay { s.todayFeeds += 1 }
             case .wet, .dirty:
@@ -202,8 +234,12 @@ extension NowSummary {
         }
     }
 
+    /// The window the phone counted "today" in.
+    var window: TotalsWindow { TotalsWindow(storedValue: totalsWindow) }
+
     private func resetTodayIfNeeded(calendar: Calendar, now: Date) -> NowSummary {
-        guard !calendar.isDate(generatedAt, inSameDayAs: now) else { return self }
+        let today = window.interval(at: now, calendar: calendar)
+        guard !window.holds(generatedAt, in: today) else { return self }
         var summary = self
         summary.todayFeeds = 0
         summary.todayWet = 0
@@ -231,7 +267,7 @@ struct DayTally: Equatable, Sendable {
             switch event.eventKind {
             case .feed where start >= dayStart && start < dayEnd:
                 tally.feeds += 1
-                if event.feedSide == .bottle { tally.bottleMillilitres += max(0, event.amount) }
+                if event.feedSides.contains(.bottle) { tally.bottleMillilitres += max(0, event.amount) }
             case .wet where start >= dayStart && start < dayEnd:
                 tally.wet += 1
             case .dirty where start >= dayStart && start < dayEnd:
@@ -274,5 +310,161 @@ struct DayTally: Equatable, Sendable {
             }
         }
         return covered
+    }
+}
+
+/// What "today" means for the totals under the log buttons: a day that
+/// starts at a chosen hour (midnight unless the parent picks another), or the
+/// last 24 hours. History and the pediatrician report keep calendar days.
+enum TotalsWindow: Hashable, Sendable {
+    case day(startHour: Int)
+    case last24Hours
+
+    static let midnight = TotalsWindow.day(startHour: 0)
+
+    /// The start hour, or -1 for the last 24 hours. Missing means midnight.
+    init(storedValue: Int?) {
+        switch storedValue {
+        case -1: self = .last24Hours
+        case let hour? where (0...23).contains(hour): self = .day(startHour: hour)
+        default: self = .midnight
+        }
+    }
+
+    var storedValue: Int {
+        switch self {
+        case .day(let hour): hour
+        case .last24Hours: -1
+        }
+    }
+
+    static var current: TotalsWindow {
+        TotalsWindow(storedValue: AppGroup.defaults.object(forKey: AppGroup.Key.totalsWindow) as? Int)
+    }
+
+    /// The window containing `now`: from the most recent start hour to the
+    /// next one, or the 24 hours ending now.
+    func interval(at now: Date, calendar: Calendar = .current) -> DateInterval {
+        switch self {
+        case .last24Hours:
+            return DateInterval(start: now.addingTimeInterval(-24 * 3600), end: now)
+        case .day(let hour):
+            let today = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: now) ?? calendar.startOfDay(for: now)
+            let start = today <= now ? today : (calendar.date(byAdding: .day, value: -1, to: today) ?? today)
+            let end = calendar.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(24 * 3600)
+            return DateInterval(start: start, end: end)
+        }
+    }
+
+    /// Whether a moment falls in `interval`. A day ends where the next one
+    /// starts; the last 24 hours has no future edge, so a tap stamped a
+    /// moment ahead of this clock still counts.
+    func holds(_ date: Date, in interval: DateInterval) -> Bool {
+        switch self {
+        case .day: date >= interval.start && date < interval.end
+        case .last24Hours: date >= interval.start
+        }
+    }
+
+    /// The label above the totals: "Today", "Since 6 AM", "Last 24 hours".
+    func title(calendar: Calendar = .current) -> String {
+        switch self {
+        case .last24Hours: return "Last 24 hours"
+        case .day(0): return "Today"
+        case .day(let hour): return "Since \(Self.hourLabel(hour, calendar: calendar))"
+        }
+    }
+
+    /// "6 AM", or "06:00" on a 24-hour clock.
+    static func hourLabel(_ hour: Int, calendar: Calendar = .current) -> String {
+        let date = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: .now) ?? .now
+        return date.formatted(.dateTime.hour())
+    }
+}
+
+/// The totals under the log buttons and the hour strip beneath them, from
+/// one pass over the log, so the numbers and the squares always agree.
+struct WindowTotals: Equatable, Sendable {
+    static let kinds: [EventKind] = [.feed, .wet, .dirty, .sleep]
+    static let columns = 24
+
+    var interval: DateInterval
+    /// The first column's hour. A day's window starts on the hour; the last
+    /// 24 hours is drawn as the 24 whole hours ending with the current one.
+    var gridStart: Date
+    var feeds = 0
+    var wet = 0
+    var dirty = 0
+    var sleepSeconds: TimeInterval = 0
+    /// Per kind, one value per hour of the window: entries started in that
+    /// hour, or for sleep the fraction of the hour asleep.
+    var hours: [EventKind: [Double]] = [:]
+    /// Columns that start after now: an empty future, not an empty past.
+    var futureFrom: Int = columns
+
+    static func make(events: [LogEvent], window: TotalsWindow, now: Date = .now, calendar: Calendar = .current) -> WindowTotals {
+        let interval = window.interval(at: now, calendar: calendar)
+        let start: Date = switch window {
+        case .day: interval.start
+        case .last24Hours: (calendar.dateInterval(of: .hour, for: now)?.start ?? now).addingTimeInterval(-Double(columns - 1) * 3600)
+        }
+        var totals = WindowTotals(interval: interval, gridStart: start)
+        for kind in kinds { totals.hours[kind] = Array(repeating: 0, count: columns) }
+        func column(_ date: Date) -> Int? {
+            let index = Int(date.timeIntervalSince(start) / 3600)
+            return (0..<columns).contains(index) ? index : nil
+        }
+        var sleeps: [(start: Date, end: Date)] = []
+        for event in events {
+            let at = event.start
+            switch event.eventKind {
+            case .feed, .wet, .dirty:
+                guard window.holds(at, in: interval) else { continue }
+                switch event.eventKind {
+                case .feed: totals.feeds += 1
+                case .wet: totals.wet += 1
+                default: totals.dirty += 1
+                }
+                if let index = column(at) { totals.hours[event.eventKind]?[index] += 1 }
+            case .sleep:
+                let end = min(event.endedAt ?? (event.isRunning ? now : at), now)
+                let clippedStart = max(at, min(interval.start, start))
+                let clippedEnd = min(end, interval.end)
+                if clippedEnd > clippedStart { sleeps.append((clippedStart, clippedEnd)) }
+            case .weight:
+                break
+            }
+        }
+        for bout in DayTally.coveredIntervals(sleeps) {
+            let counted = min(bout.end, interval.end).timeIntervalSince(max(bout.start, interval.start))
+            if counted > 0 { totals.sleepSeconds += counted }
+            for index in 0..<columns {
+                let hourStart = start.addingTimeInterval(Double(index) * 3600)
+                let overlap = min(bout.end, hourStart.addingTimeInterval(3600)).timeIntervalSince(max(bout.start, hourStart))
+                if overlap > 0 { totals.hours[.sleep]?[index] += overlap / 3600 }
+            }
+        }
+        totals.futureFrom = max(0, min(columns, Int(ceil(now.timeIntervalSince(start) / 3600))))
+        return totals
+    }
+
+    func count(_ kind: EventKind) -> Int {
+        switch kind {
+        case .feed: feeds
+        case .wet: wet
+        case .dirty: dirty
+        default: 0
+        }
+    }
+
+    /// "7 feeds · 3 pee · 2 poop · 5h 10m sleep", in the order of the strip.
+    var line: String {
+        var parts = [
+            Format.count(feeds, "feed"),
+            "\(wet) \(EventKind.wet.label.lowercased())",
+            "\(dirty) \(EventKind.dirty.label.lowercased())",
+        ]
+        if sleepSeconds >= 60 { parts.append("\(Format.compactDuration(sleepSeconds)) sleep") }
+        return parts.joined(separator: " · ")
     }
 }

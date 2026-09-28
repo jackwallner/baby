@@ -142,7 +142,7 @@ struct HistoryView: View {
 
     private func eventRow(_ event: LogEvent) -> some View {
         Button {
-            editor = EditorRequest(kind: event.eventKind, side: event.feedSide, existing: event)
+            editor = EditorRequest(kind: event.eventKind, existing: event)
         } label: {
             row(event)
         }

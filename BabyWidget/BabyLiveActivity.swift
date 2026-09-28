@@ -92,7 +92,7 @@ struct BabyLiveActivity: Widget {
 
     private func title(_ context: ActivityViewContext<BabyActivityAttributes>) -> String {
         if context.attributes.kind == EventKind.sleep.rawValue { return "Asleep" }
-        if let side = context.attributes.side.flatMap(FeedSide.init(rawValue:)) { return "Feeding · \(side.label)" }
+        if let sides = FeedSide.label(for: FeedSide.decode(context.attributes.side)) { return "Feeding · \(sides)" }
         return "Feeding"
     }
 

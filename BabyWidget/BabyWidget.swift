@@ -76,7 +76,7 @@ struct BabyNowWidgetView: View {
             VStack(spacing: 0) {
                 Image(systemName: EventKind.feed.symbolName).font(.caption2)
                 Text(sinceFeed).font(.headline.bold()).minimumScaleFactor(0.7)
-                if let side = s.lastFeedSide { Text(side.shortLabel).font(.caption2) }
+                if let side = FeedSide.shortLabel(for: s.feedSides) { Text(side).font(.caption2) }
             }
         case .accessoryInline:
             Label(s.feedLine(now: entry.date), systemImage: EventKind.feed.symbolName)
@@ -152,7 +152,7 @@ struct BabyLogWidgetView: View {
         switch family {
         case .accessoryRectangular:
             HStack(spacing: AppTheme.hairSpacing) {
-                logButton("Feed \(s.suggestedSide.shortLabel)", kind: .feed, choice: .feed(s.suggestedSide))
+                logButton("Feed", kind: .feed, choice: .feed)
                 logButton(EventKind.wet.label, kind: .wet, choice: .wet)
                 logButton(EventKind.dirty.label, kind: .dirty, choice: .dirty)
             }
@@ -181,7 +181,7 @@ struct BabyLogWidgetView: View {
     private var grid: some View {
         VStack(spacing: AppTheme.tightSpacing) {
             HStack(spacing: AppTheme.tightSpacing) {
-                logButton("Feed \(s.suggestedSide.shortLabel)", kind: .feed, choice: .feed(s.suggestedSide))
+                logButton("Feed", kind: .feed, choice: .feed)
                 logButton(EventKind.wet.label, kind: .wet, choice: .wet)
             }
             HStack(spacing: AppTheme.tightSpacing) {

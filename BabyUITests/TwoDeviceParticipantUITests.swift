@@ -56,7 +56,7 @@ final class TwoDeviceParticipantUITests: XCTestCase {
 
         app.buttons["log.dirty"].tap()
         sleep(3)
-        app.buttons["log.feed.right"].tap()
+        app.buttons["log.feed"].tap()
         sleep(2)
         attach(app, "4-partner-logged")
 

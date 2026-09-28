@@ -43,13 +43,7 @@ struct LogEventIntent: LiveActivityIntent {
         let now = Date.now
         switch what {
         case .feed, .feedLeft, .feedRight, .bottle:
-            let summary = NowSummary.make(child: child, events: persistence.events(for: child, in: context, limit: 50), now: now)
-            let side: FeedSide = switch what {
-            case .feedLeft: .left
-            case .feedRight: .right
-            case .bottle: .bottle
-            default: summary.suggestedSide
-            }
+            let side = what.feedSide
             // A completed feed ends any feed timer still running, as in the app.
             for running in persistence.runningEvents(.feed, for: child, in: context) {
                 running.endedAt = max(now, running.start)
@@ -60,7 +54,7 @@ struct LogEventIntent: LiveActivityIntent {
                 return .result(dialog: "I couldn't save that feed. Please try again.")
             }
             WidgetCenter.shared.reloadAllTimelines()
-            return .result(dialog: "Logged a feed, \(side.label.lowercased()).")
+            return .result(dialog: IntentDialog(stringLiteral: what.feedDialog))
         case .wet, .dirty:
             let kind: EventKind = what == .wet ? .wet : .dirty
             persistence.insert(kind: kind, at: now, side: nil, ended: nil, for: child, in: context)
@@ -99,16 +93,10 @@ struct LogEventIntent: LiveActivityIntent {
         let now = Date.now
         switch what {
         case .feed, .feedLeft, .feedRight, .bottle:
-            let side: FeedSide = switch what {
-            case .feedLeft: .left
-            case .feedRight: .right
-            case .bottle: .bottle
-            default: store.summary.suggestedSide
-            }
-            guard store.log(.feed, side: side, at: now) != nil else {
+            guard store.log(.feed, side: what.feedSide, at: now) != nil else {
                 return .result(dialog: "I couldn't save that feed. Please try again.")
             }
-            return .result(dialog: "Logged a feed, \(side.label.lowercased()).")
+            return .result(dialog: IntentDialog(stringLiteral: what.feedDialog))
         case .wet, .dirty:
             let eventKind: EventKind = what == .wet ? .wet : .dirty
             guard store.log(eventKind, at: now) != nil else {
@@ -150,9 +138,24 @@ enum LogChoice: String, AppEnum {
         }
     }
 
+    /// Plain Feed has no side, as on the phone's Feed button.
+    var feedSide: FeedSide? {
+        switch self {
+        case .feedLeft: .left
+        case .feedRight: .right
+        case .bottle: .bottle
+        default: nil
+        }
+    }
+
+    var feedDialog: String {
+        guard let feedSide else { return "Logged a feed." }
+        return "Logged a feed, \(feedSide.label.lowercased())."
+    }
+
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Log")
     static let caseDisplayRepresentations: [LogChoice: DisplayRepresentation] = [
-        .feed: "Feed (next side)",
+        .feed: "Feed",
         .feedLeft: "Feed, left",
         .feedRight: "Feed, right",
         .bottle: "Bottle",

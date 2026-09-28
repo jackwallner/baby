@@ -181,7 +181,7 @@ struct SummaryReport: Equatable, Sendable {
                 start.formatted(.iso8601.year().month().day()),
                 start.formatted(date: .omitted, time: .shortened),
                 event.eventKind.rawValue,
-                event.feedSide?.rawValue ?? "",
+                event.feedSides.map(\.rawValue).joined(separator: "+"),
                 amount,
                 weight,
                 event.stool?.rawValue ?? "",

@@ -25,6 +25,7 @@ struct SettingsView: View {
                 sharingSection
                 appearanceSection
                 diaperWordsSection
+                totalsSection
                 plusSection
                 aboutSection
             }
@@ -220,6 +221,39 @@ struct SettingsView: View {
             }
             .pickerStyle(.inline)
             .labelsHidden()
+        }
+    }
+
+    /// When the totals under the buttons start: a day from a chosen hour
+    /// (for the parent whose day starts with the 6am feed), or a rolling
+    /// 24 hours.
+    private var totalsSection: some View {
+        Section {
+            Picker("Count", selection: Binding(
+                get: { settings.totalsWindow == .last24Hours },
+                set: { settings.totalsWindow = $0 ? .last24Hours : .midnight }
+            )) {
+                Text("By day").tag(false)
+                Text("Last 24 hours").tag(true)
+            }
+            .pickerStyle(.segmented)
+            .accessibilityIdentifier("totals.mode")
+            if case .day(let hour) = settings.totalsWindow {
+                Picker("Day starts at", selection: Binding(
+                    get: { hour },
+                    set: { settings.totalsWindow = .day(startHour: $0) }
+                )) {
+                    ForEach(0..<24, id: \.self) { hour in
+                        Text(TotalsWindow.hourLabel(hour)).tag(hour)
+                    }
+                }
+                .pickerStyle(.menu)
+                .accessibilityIdentifier("totals.dayStart")
+            }
+        } header: {
+            Text("Daily totals")
+        } footer: {
+            Text("For the totals and hour chart under the buttons. History and the pediatrician summary always use calendar days.")
         }
     }
 

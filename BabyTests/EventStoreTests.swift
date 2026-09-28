@@ -30,15 +30,49 @@ final class EventStoreTests: XCTestCase {
         store.createChild(name: "Nora", birthDate: Calendar.current.date(byAdding: .day, value: -2, to: .now))
     }
 
-    func testOneTapFeedLogsNowWithTheSuggestedSide() {
-        XCTAssertEqual(store.summary.suggestedSide, .left, "first feed suggests the left side")
+    func testOneTapFeedLogsNowWithNoSide() {
         store.log(.feed)
         XCTAssertEqual(store.events.count, 1)
+        XCTAssertEqual(store.events[0].feedSides, [], "the side is optional and a tap never guesses one")
+        XCTAssertNil(store.events[0].side)
+        XCTAssertEqual(store.summary.feedSides, [])
+        XCTAssertFalse(store.events[0].isRunning, "a one-tap feed is instant, not a timer")
+        XCTAssertEqual(store.summary.feedLine(), "Fed just now")
+    }
+
+    func testSuggestedSideFollowsTheLastChosenSide() {
+        XCTAssertEqual(store.summary.suggestedSide, .left, "first feed suggests the left side")
+        store.log(.feed, side: .left)
         XCTAssertEqual(store.summary.lastFeedSide, .left)
         XCTAssertEqual(store.summary.suggestedSide, .right, "the other side comes next")
-        XCTAssertFalse(store.events[0].isRunning, "a one-tap feed is instant, not a timer")
         store.log(.feed, side: .bottle)
         XCTAssertEqual(store.summary.suggestedSide, .bottle, "bottle stays bottle")
+    }
+
+    func testSidesAddedAfterATapKeepTheirOrder() throws {
+        let feed = try XCTUnwrap(store.log(.feed))
+        feed.feedSides = [.right, .left]
+        XCTAssertTrue(store.save())
+        XCTAssertEqual(feed.side, "right,left")
+        XCTAssertEqual(store.summary.feedSides, [.right, .left])
+        XCTAssertEqual(store.summary.lastFeedSide, .right, "older Watch builds still read the first side")
+        XCTAssertEqual(store.summary.suggestedSide, .right, "after right then left, right is next")
+        XCTAssertEqual(feed.detailText, "Right + Left")
+        XCTAssertEqual(store.summary.feedLine(), "Fed just now · Right + Left")
+
+        feed.feedSides = [.left, .bottle]
+        feed.amount = 60
+        XCTAssertTrue(store.save())
+        XCTAssertEqual(store.tally(on: .now).bottleMillilitres, 60, "a mixed feed still counts its bottle")
+    }
+
+    func testBackdatedTapsLandAtTheirTimeAndSayWhen() throws {
+        let earlier = Date.now.addingTimeInterval(-11 * 60)
+        let wet = try XCTUnwrap(store.log(.wet, at: earlier))
+        XCTAssertEqual(wet.startedAt, earlier)
+        XCTAssertEqual(store.lastLogged?.eventAt, earlier)
+        store.startTimed(.sleep, at: earlier)
+        XCTAssertEqual(store.summary.runningSleepStart, earlier)
     }
 
     func testDiapersCountTowardTodayAndTheLastDiaperLine() {

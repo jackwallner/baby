@@ -25,8 +25,8 @@ final class LayoutUITests: XCTestCase {
             "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"
         ]
         app.launch()
-        XCTAssertTrue(app.buttons["log.feed.left"].waitForExistence(timeout: 15))
-        for identifier in ["log.feed.left", "log.feed.right", "log.feed.bottle", "log.wet", "log.dirty", "log.sleep"] {
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 15))
+        for identifier in ["logTime.earlier", "log.feed", "log.wet", "log.dirty", "log.sleep"] {
             let button = app.buttons[identifier]
             reveal(button, in: app)
             XCTAssertTrue(button.isHittable, "Unreachable control: \(identifier)")

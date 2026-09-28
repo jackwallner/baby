@@ -57,6 +57,33 @@ enum FeedSide: String, CaseIterable, Codable, Sendable {
         case .bottle: .bottle
         }
     }
+
+    /// "Left", "Left + Right", "Right + Bottle": in the order they were chosen.
+    static func label(for sides: [FeedSide]) -> String? {
+        sides.isEmpty ? nil : sides.map(\.label).joined(separator: " + ")
+    }
+
+    /// "L", "L+R", "R+Bottle", for the widgets and the complication.
+    static func shortLabel(for sides: [FeedSide]) -> String? {
+        sides.isEmpty ? nil : sides.map(\.shortLabel).joined(separator: "+")
+    }
+
+    /// The `side` attribute holds the sides comma-separated in the order they
+    /// were chosen. One side stays its bare raw value, so builds that predate
+    /// multiple sides still read every single-side feed.
+    static func encode(_ sides: [FeedSide]) -> String? {
+        var seen: [FeedSide] = []
+        for side in sides where !seen.contains(side) { seen.append(side) }
+        return seen.isEmpty ? nil : seen.map(\.rawValue).joined(separator: ",")
+    }
+
+    static func decode(_ raw: String?) -> [FeedSide] {
+        var sides: [FeedSide] = []
+        for part in (raw ?? "").split(separator: ",") {
+            if let side = FeedSide(rawValue: String(part)), !sides.contains(side) { sides.append(side) }
+        }
+        return sides
+    }
 }
 
 enum StoolColor: String, CaseIterable, Codable, Sendable {
@@ -201,9 +228,17 @@ final class LogEvent: NSManagedObject {
         set { kind = newValue.rawValue }
     }
 
+    /// Every side of a feed, in the order chosen. Empty when none was given:
+    /// the side is optional, and a one-tap feed has none.
+    var feedSides: [FeedSide] {
+        get { FeedSide.decode(side) }
+        set { side = FeedSide.encode(newValue) }
+    }
+
+    /// The first side, for callers that only ever set one.
     var feedSide: FeedSide? {
-        get { side.flatMap(FeedSide.init(rawValue:)) }
-        set { side = newValue?.rawValue }
+        get { feedSides.first }
+        set { feedSides = newValue.map { [$0] } ?? [] }
     }
 
     var stool: StoolColor? {
@@ -229,8 +264,8 @@ final class LogEvent: NSManagedObject {
         switch eventKind {
         case .feed:
             var parts: [String] = []
-            if let feedSide { parts.append(feedSide.label) }
-            if feedSide == .bottle, amount > 0 { parts.append(Format.millilitres(amount)) }
+            if let sides = FeedSide.label(for: feedSides) { parts.append(sides) }
+            if feedSides.contains(.bottle), amount > 0 { parts.append(Format.millilitres(amount)) }
             if let duration, duration >= 60 { parts.append(Format.compactDuration(duration)) }
             return parts.isEmpty ? nil : parts.joined(separator: " · ")
         case .dirty:

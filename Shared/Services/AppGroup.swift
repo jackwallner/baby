@@ -25,6 +25,8 @@ enum AppGroup {
         static let pendingSharedZone = "pendingSharedZone"
         static let appearance = "appearance"
         static let diaperWords = "diaperWords"
+        /// `TotalsWindow.storedValue`: the hour the totals day starts, or -1.
+        static let totalsWindow = "totalsWindow"
         /// The Watch's copy of the phone's summary, and the phone's last push.
         static let nowSummary = "nowSummary"
         /// Watch-only: log events that have not yet reached the phone.

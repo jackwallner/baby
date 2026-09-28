@@ -54,6 +54,16 @@ final class BabySettings: ObservableObject {
         }
     }
 
+    /// When the totals under the log buttons start counting. The summary the
+    /// widgets and the Watch read is rebuilt with it.
+    @Published var totalsWindow: TotalsWindow {
+        didSet {
+            guard totalsWindow != oldValue else { return }
+            defaults.set(totalsWindow.storedValue, forKey: AppGroup.Key.totalsWindow)
+            EventStore.shared.reload()
+        }
+    }
+
     /// The Now-screen invite card can be put away; Settings keeps the entry.
     @Published var hasDismissedShareCard: Bool {
         didSet { defaults.set(hasDismissedShareCard, forKey: "hasDismissedShareCard") }
@@ -63,6 +73,7 @@ final class BabySettings: ObservableObject {
         hasCompletedSetup = defaults.bool(forKey: AppGroup.Key.hasCompletedSetup)
         appearance = AppAppearance(rawValue: defaults.string(forKey: AppGroup.Key.appearance) ?? "") ?? .system
         diaperWords = .current
+        totalsWindow = .current
         #if DEBUG
         // `-Appearance night` pins a palette for captures and UI tests.
         let arguments = ProcessInfo.processInfo.arguments
