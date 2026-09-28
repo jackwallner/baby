@@ -51,6 +51,15 @@ Control Center and the Action button. `LogEventIntent` is
 `.alwaysAllowed`, so a locked phone logs like the flashlight. The existing
 four-button "One-tap log" widget and its rectangular Lock Screen row stay.
 
+Widget Undo (2026-09-28, Jack: no confirm before logging). After a one-button
+widget logs, that tile shows "Logged / Undo" (the Lock Screen circle an undo
+arrow) for 10 seconds, then its normal face. `LogEventIntent` records the
+entry in `WidgetUndo` (App Group); `UndoWidgetLogIntent` deletes exactly that
+id and reopens any feed timer the log ended, accepting a tap up to 60 seconds
+in case WidgetKit redraws late. Controls, the Action button and Siri have no
+surface for it; History's swipe-to-delete covers them. The four-button widget
+has no Undo.
+
 Animate only meaningful feedback, using the shared spring and respecting
 Reduce Motion. Keep text readable in dark mode and at accessibility sizes.
 Use vertical layouts when the side-by-side version no longer fits.

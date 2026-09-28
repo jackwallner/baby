@@ -32,6 +32,9 @@ enum AppGroup {
         /// Watch-only: log events that have not yet reached the phone.
         static let pendingWatchEvents = "pendingWatchEvents"
         static let appliedWatchActions = "appliedWatchActions"
+        /// `WidgetUndo`: the last entry logged outside the app, for the
+        /// one-button widgets' Undo.
+        static let widgetUndo = "widgetUndo"
         /// Widget and complication kinds, for `reloadTimelines(ofKind:)`.
         static let feedingPreference = "feedingPreference"
     }

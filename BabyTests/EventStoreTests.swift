@@ -455,4 +455,45 @@ final class EventStoreTests: XCTestCase {
             (day.addingTimeInterval(3000), day.addingTimeInterval(4000)),
         ]), 4200 + 1800)
     }
+
+    // MARK: - Widget Undo
+
+    func testWidgetUndoRemovesOnlyTheEntryItOffered() throws {
+        store.log(.wet, at: Date.now.addingTimeInterval(-600))
+        let event = try XCTUnwrap(store.log(.wet))
+        store.offerWidgetUndo(for: event)
+        let undo = try XCTUnwrap(WidgetUndo.showing())
+        XCTAssertEqual(undo.eventID, event.id)
+        XCTAssertEqual(undo.kind, .wet)
+
+        XCTAssertTrue(store.undoWidgetLog(undo))
+        XCTAssertEqual(store.events.count, 1, "the earlier pee stays")
+        XCTAssertFalse(store.undoWidgetLog(undo), "a second Undo finds nothing to take")
+        XCTAssertEqual(store.events.count, 1)
+        WidgetUndo.clear()
+    }
+
+    func testWidgetUndoReopensTheFeedTimerItEnded() throws {
+        store.startTimed(.feed, side: .left, at: Date.now.addingTimeInterval(-600))
+        let feed = try XCTUnwrap(store.log(.feed))
+        XCTAssertNil(store.runningFeed, "a completed feed ends the running one")
+        store.offerWidgetUndo(for: feed)
+        let undo = try XCTUnwrap(WidgetUndo.load())
+        XCTAssertEqual(undo.closedIDs.count, 1)
+
+        XCTAssertTrue(store.undoWidgetLog(undo))
+        XCTAssertNotNil(store.runningFeed, "Undo brings the timer back")
+        XCTAssertEqual(store.events.count, 1)
+        WidgetUndo.clear()
+    }
+
+    func testWidgetUndoShowsBrieflyAndAcceptsALateRedraw() {
+        let logged = Date(timeIntervalSinceReferenceDate: 1_000_000)
+        let undo = WidgetUndo(eventID: UUID(), kind: .dirty, loggedAt: logged)
+        XCTAssertTrue(undo.isShowing(at: logged))
+        XCTAssertTrue(undo.isShowing(at: logged.addingTimeInterval(9)))
+        XCTAssertFalse(undo.isShowing(at: logged.addingTimeInterval(10)))
+        XCTAssertTrue(undo.isAcceptable(at: logged.addingTimeInterval(30)), "WidgetKit can redraw late")
+        XCTAssertFalse(undo.isAcceptable(at: logged.addingTimeInterval(61)), "an old Undo left on screen does nothing")
+    }
 }

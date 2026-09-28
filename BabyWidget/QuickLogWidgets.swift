@@ -15,7 +15,58 @@ struct QuickLogWidgetView: View {
 
     private var s: NowSummary { entry.summary }
 
+    /// This tile's own tap, for the few seconds Undo is offered.
+    private var undo: WidgetUndo? {
+        guard let undo = entry.undo, undo.kind == kind, undo.isShowing(at: entry.date) else { return nil }
+        return undo
+    }
+
     var body: some View {
+        if let undo {
+            Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) { undoFace }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Undo \(kind.label.lowercased())")
+                .accessibilityValue("Logged just now")
+        } else {
+            logButton
+        }
+    }
+
+    /// After a tap: the tile says it logged, and a second tap takes it back.
+    @ViewBuilder
+    private var undoFace: some View {
+        switch family {
+        case .accessoryCircular:
+            ZStack {
+                AccessoryWidgetBackground()
+                VStack(spacing: 0) {
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.title3.weight(.semibold))
+                    Text("Undo")
+                        .font(.caption2.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            .widgetAccentable()
+        default:
+            VStack(spacing: AppTheme.tightSpacing) {
+                CareGraphic(kind: kind)
+                Text("Logged")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink)
+                Label("Undo", systemImage: "arrow.uturn.backward")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(AppTheme.accent)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
+            .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
+        }
+    }
+
+    private var logButton: some View {
         Button(intent: LogEventIntent(what: kind.logChoice)) {
             switch family {
             case .accessoryCircular:

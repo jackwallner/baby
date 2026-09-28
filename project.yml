@@ -72,6 +72,7 @@ targetTemplates:
       - path: Shared/Services/SummaryReport.swift
       - path: Shared/Services/SampleReport.swift
       - path: Shared/Services/AppGroup.swift
+      - path: Shared/Services/WidgetUndo.swift
       - path: Shared/Utilities/AppTheme.swift
       - path: Shared/Utilities/DateHelpers.swift
       - path: Shared/Utilities/Guidance.swift

@@ -48,22 +48,26 @@ struct LogEventIntent: LiveActivityIntent {
         case .feed, .feedLeft, .feedRight, .bottle:
             let side = what.feedSide
             // A completed feed ends any feed timer still running, as in the app.
-            for running in persistence.runningEvents(.feed, for: child, in: context) {
-                running.endedAt = max(now, running.start)
-                running.updatedAt = now
+            let running = persistence.runningEvents(.feed, for: child, in: context)
+            for event in running {
+                event.endedAt = max(now, event.start)
+                event.updatedAt = now
             }
-            persistence.insert(kind: .feed, at: now, side: side, ended: now, for: child, in: context)
+            let closed = running.compactMap(\.id)
+            let event = persistence.insert(kind: .feed, at: now, side: side, ended: now, for: child, in: context)
             guard persistence.save(context) else {
                 return .result(dialog: "I couldn't save that feed. Please try again.")
             }
+            if let id = event.id { WidgetUndo(eventID: id, kind: .feed, loggedAt: now, closedIDs: closed).store() }
             WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: IntentDialog(stringLiteral: what.feedDialog))
         case .wet, .dirty:
             let kind: EventKind = what == .wet ? .wet : .dirty
-            persistence.insert(kind: kind, at: now, side: nil, ended: nil, for: child, in: context)
+            let event = persistence.insert(kind: kind, at: now, side: nil, ended: nil, for: child, in: context)
             guard persistence.save(context) else {
                 return .result(dialog: "I couldn't save that diaper. Please try again.")
             }
+            if let id = event.id { WidgetUndo(eventID: id, kind: kind, loggedAt: now).store() }
             WidgetCenter.shared.reloadAllTimelines()
             return .result(dialog: "Logged a \(kind.label.lowercased()) diaper.")
         case .sleep:
@@ -96,15 +100,17 @@ struct LogEventIntent: LiveActivityIntent {
         let now = Date.now
         switch what {
         case .feed, .feedLeft, .feedRight, .bottle:
-            guard store.log(.feed, side: what.feedSide, at: now) != nil else {
+            guard let event = store.log(.feed, side: what.feedSide, at: now) else {
                 return .result(dialog: "I couldn't save that feed. Please try again.")
             }
+            store.offerWidgetUndo(for: event)
             return .result(dialog: IntentDialog(stringLiteral: what.feedDialog))
         case .wet, .dirty:
             let eventKind: EventKind = what == .wet ? .wet : .dirty
-            guard store.log(eventKind, at: now) != nil else {
+            guard let event = store.log(eventKind, at: now) else {
                 return .result(dialog: "I couldn't save that diaper. Please try again.")
             }
+            store.offerWidgetUndo(for: event)
             return .result(dialog: "Logged a \(eventKind.label.lowercased()) diaper.")
         case .sleep:
             if store.runningSleep != nil {
@@ -196,6 +202,55 @@ struct BabyShortcuts: AppShortcutsProvider {
             shortTitle: "Sleep",
             systemImageName: "moon.fill"
         )
+    }
+}
+
+/// Undo on a one-button widget, a few seconds after its tap. Removes exactly
+/// the entry that tap logged, and nothing once its short window has passed.
+struct UndoWidgetLogIntent: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Undo a widget log"
+    static let openAppWhenRun = false
+    static let isDiscoverable = false
+    /// Only ever takes back what a locked-phone tap just added.
+    static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
+
+    @Parameter(title: "Entry")
+    var eventID: String
+
+    init() {
+        eventID = ""
+    }
+
+    init(eventID: UUID) {
+        self.eventID = eventID.uuidString
+    }
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        let undo = WidgetUndo.load()
+        WidgetUndo.clear()
+        guard let undo, undo.eventID.uuidString == eventID, undo.isAcceptable(at: .now) else {
+            WidgetCenter.shared.reloadAllTimelines()
+            return .result()
+        }
+#if BABY_WIDGET
+        let persistence = Persistence.shared
+        let context = persistence.viewContext
+        let found = persistence.events(ids: [undo.eventID] + undo.closedIDs, in: context)
+        for event in found {
+            if event.id == undo.eventID {
+                context.delete(event)
+            } else {
+                event.endedAt = nil
+                event.updatedAt = .now
+            }
+        }
+        guard persistence.save(context) else { throw IntentSaveError() }
+#else
+        EventStore.shared.undoWidgetLog(undo)
+#endif
+        WidgetCenter.shared.reloadAllTimelines()
+        return .result()
     }
 }
 

@@ -8,6 +8,8 @@ import WidgetKit
 struct BabyEntry: TimelineEntry {
     let date: Date
     let summary: NowSummary
+    /// Set for the few seconds after a tap, when the one-button tiles offer Undo.
+    var undo: WidgetUndo?
 }
 
 struct BabyProvider: TimelineProvider {
@@ -36,9 +38,13 @@ struct BabyProvider: TimelineProvider {
         Task { @MainActor in
             let summary = Self.load()
             let now = Date.now
+            // Just after a tap: Undo first, then the tile's normal face.
+            let undo = WidgetUndo.showing(at: now)
+            let resume = undo?.hidesAt ?? now
             // Relative times ("2h 14m ago") are rendered per entry, so a fresh
             // entry every five minutes keeps them honest without live text.
-            let entries = (0..<12).map { BabyEntry(date: now.addingTimeInterval(Double($0) * 300), summary: summary) }
+            let entries = (undo.map { [BabyEntry(date: now, summary: summary, undo: $0)] } ?? [])
+                + (0..<12).map { BabyEntry(date: resume.addingTimeInterval(Double($0) * 300), summary: summary) }
             completion(Timeline(entries: entries, policy: .atEnd))
         }
     }

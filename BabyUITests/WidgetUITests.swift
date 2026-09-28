@@ -56,9 +56,21 @@ final class WidgetUITests: XCTestCase {
         XCTAssertTrue(widget.waitForExistence(timeout: 10), springboard.debugDescription)
         XCTAssertTrue(widget.value as? String == "3 today", String(describing: widget.value))
         widget.tap()
-        // The tap runs in the app process; the tile redraws with the new count.
+        // The tap runs in the app process; the tile turns into Undo for a few
+        // seconds, then redraws with the new count.
+        let undo = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Undo pee'")).firstMatch
+        XCTAssertTrue(undo.waitForExistence(timeout: 60), "the tile never offered Undo")
+        attach("3-undo-offered")
         let updated = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Log pee' AND value == '4 today'")).firstMatch
         XCTAssertTrue(updated.waitForExistence(timeout: 60), "the tile never showed the new pee")
-        attach("3-after-tap")
+        attach("4-after-undo-window")
+
+        // A second tap, then Undo: the count goes back to four.
+        updated.tap()
+        XCTAssertTrue(undo.waitForExistence(timeout: 60), "the second tap never offered Undo")
+        undo.tap()
+        let restored = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Log pee' AND value == '4 today'")).firstMatch
+        XCTAssertTrue(restored.waitForExistence(timeout: 60), "Undo did not take the second pee back")
+        attach("5-after-undo")
     }
 }

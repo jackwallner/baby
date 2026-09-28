@@ -420,6 +420,42 @@ final class EventStore: ObservableObject {
         undoTask?.cancel()
     }
 
+    // MARK: - Undo outside the app
+
+    /// A widget, control or Siri just logged `event`: offer it back on the
+    /// one-button widgets for a few seconds.
+    func offerWidgetUndo(for event: LogEvent) {
+        guard let id = event.id else { return }
+        let closed = lastLogged?.objectID == event.objectID ? lastLogged?.closedTimers ?? [] : []
+        let closedIDs = closed.compactMap { (try? context.existingObject(with: $0) as? LogEvent)?.id }
+        WidgetUndo(eventID: id, kind: event.eventKind, loggedAt: .now, closedIDs: closedIDs).store()
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    /// The widget's Undo: removes that one entry and reopens any feed timer
+    /// it ended. False if the entry is already gone.
+    @discardableResult
+    func undoWidgetLog(_ undo: WidgetUndo) -> Bool {
+        let found = persistence.events(ids: [undo.eventID] + undo.closedIDs, in: context)
+        guard let event = found.first(where: { $0.id == undo.eventID }) else {
+            reload()
+            return false
+        }
+        let objectID = event.objectID
+        context.delete(event)
+        for closed in found where closed.id != undo.eventID {
+            closed.endedAt = nil
+            closed.updatedAt = .now
+        }
+        guard persistence.save(context) else {
+            reload()
+            return false
+        }
+        if lastLogged?.objectID == objectID { dismissUndo() }
+        reload()
+        return true
+    }
+
     // MARK: - Relay from the Watch
 
     /// Applies a log made on the wrist. Idempotent on the event id so a

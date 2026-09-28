@@ -330,6 +330,14 @@ final class Persistence: @unchecked Sendable {
         return (try? context.fetch(request)) ?? []
     }
 
+    /// Entries by id, from any baby in either store.
+    func events(ids: [UUID], in context: NSManagedObjectContext) -> [LogEvent] {
+        guard !ids.isEmpty else { return [] }
+        let request = NSFetchRequest<LogEvent>(entityName: "LogEvent")
+        request.predicate = NSPredicate(format: "id IN %@", ids)
+        return (try? context.fetch(request)) ?? []
+    }
+
     /// Running feeds or sleeps for one child, however many entries are newer.
     /// Outside-app actions use this so an old timer is never out of reach.
     func runningEvents(_ kind: EventKind, for child: Child, in context: NSManagedObjectContext) -> [LogEvent] {
