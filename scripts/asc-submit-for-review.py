@@ -15,6 +15,7 @@ visible before the submit rather than after the review.
 
     scripts/asc-submit-for-review.py --dry-run   # report, change nothing
     scripts/asc-submit-for-review.py             # add the version, submit
+    scripts/asc-submit-for-review.py --items 5   # first release: version + 4 products
 """
 
 from __future__ import annotations
@@ -29,7 +30,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import asc_lib as a  # noqa: E402
 
 BUNDLE_ID = "com.jackwallner.baby"
-EXPECTED_ITEMS = 5
+# 1.0 went in with the version plus its four products (subscription group,
+# monthly, yearly, lifetime). Once those are approved an update is the
+# version alone.
+FIRST_RELEASE_ITEMS = 5
 
 
 def item_parts(item_id: str) -> list[str]:
@@ -43,6 +47,12 @@ def item_parts(item_id: str) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--items",
+        type=int,
+        default=1,
+        help=f"review items expected in the submission: 1 for an update, {FIRST_RELEASE_ITEMS} for the first release",
+    )
     args = parser.parse_args()
 
     client = a.ASCClient.from_credentials()
@@ -75,8 +85,21 @@ def main() -> int:
     open_submissions = [s for s in submissions if s["attributes"]["state"] == "READY_FOR_REVIEW"]
     if not open_submissions:
         states = ", ".join(sorted({s["attributes"]["state"] for s in submissions})) or "none"
-        print(f"No READY_FOR_REVIEW submission to submit (states: {states}).")
-        return 1
+        if args.dry_run:
+            print(f"No READY_FOR_REVIEW submission (states: {states}); would create one.")
+            return 0
+        created = client.post(
+            "/reviewSubmissions",
+            {
+                "data": {
+                    "type": "reviewSubmissions",
+                    "attributes": {"platform": "IOS"},
+                    "relationships": {"app": {"data": {"type": "apps", "id": app_id}}},
+                }
+            },
+        )["data"]
+        print(f"created review submission {created['id']} (earlier states: {states})")
+        open_submissions = [created]
     submission = open_submissions[0]
     submission_id = submission["id"]
 
@@ -116,11 +139,8 @@ def main() -> int:
             print("version was already queued")
 
     items = a.list_all(client, f"/reviewSubmissions/{submission_id}/items")
-    if len(items) != EXPECTED_ITEMS:
-        print(
-            f"FAIL: expected {EXPECTED_ITEMS} review items (version, subscription group, "
-            f"monthly, yearly, lifetime), found {len(items)}."
-        )
+    if len(items) != args.items:
+        print(f"FAIL: expected {args.items} review item(s), found {len(items)}.")
         return 1
 
     if args.dry_run:
