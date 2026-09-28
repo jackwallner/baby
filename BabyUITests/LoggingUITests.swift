@@ -162,6 +162,9 @@ final class LoggingUITests: XCTestCase {
         app.buttons["feedSide.right"].tap()
         XCTAssertFalse(app.buttons["feedSide.right"].isSelected)
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Left breast'")).firstMatch.waitForExistence(timeout: 3))
+
+        app.buttons["log.wet"].tap()
+        XCTAssertTrue(app.buttons["feedSide.left"].exists, "a diaper change mid-feed keeps the side row")
     }
 
     func testWindingTheClockBackLogsAtThatTimeThenReturnsToNow() {

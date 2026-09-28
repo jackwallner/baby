@@ -138,8 +138,8 @@ struct LogButtons: View {
 
     private func kindButton(_ kind: EventKind, label: String, action: @escaping (Date) -> Bool) -> some View {
         Button {
+            // The side row stays: a diaper change mid-feed must not cost the side.
             reportSave(action(clock.time()))
-            sideTarget = nil
         } label: {
             HStack(spacing: AppTheme.tightSpacing) {
                 if kind == .sleep, events.runningSleep != nil {

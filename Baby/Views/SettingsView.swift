@@ -15,6 +15,9 @@ struct SettingsView: View {
     @State private var hasBirthDate = false
     @State private var birthDate = Date.now
     @State private var showSaveError = false
+    @State private var showAddBaby = false
+    @State private var newBabyName = ""
+    @State private var restoreMessage: String?
 
     var body: some View {
         Form {
@@ -54,6 +57,19 @@ struct SettingsView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Your baby's details were not changed. Please try again.")
+        }
+        .alert("Restore purchases", isPresented: Binding(get: { restoreMessage != nil }, set: { if !$0 { restoreMessage = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(restoreMessage ?? "")
+        }
+        .alert("Add a baby", isPresented: $showAddBaby) {
+            TextField("Name (optional)", text: $newBabyName)
+                .textInputAutocapitalization(.words)
+            Button("Cancel", role: .cancel) {}
+            Button("Add") { addBaby() }
+        } message: {
+            Text("Logging switches to the new baby. Switch back any time under Babies.")
         }
         .onAppear { loadChild() }
         .onChange(of: events.child?.objectID) { _, _ in loadChild() }
@@ -133,7 +149,10 @@ struct SettingsView: View {
                     }
                 }
             }
-            Button("Add a baby") { addBaby() }
+            Button("Add a baby") {
+                newBabyName = ""
+                showAddBaby = true
+            }
             .foregroundStyle(AppTheme.accent)
         } header: {
             Text("Babies")
@@ -143,13 +162,12 @@ struct SettingsView: View {
     }
 
     private func addBaby() {
-        guard events.createChild(name: nil, birthDate: nil) else {
+        let trimmed = newBabyName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard events.createChild(name: trimmed.isEmpty ? nil : trimmed, birthDate: nil) else {
             showSaveError = true
             return
         }
-        name = ""
-        hasBirthDate = false
-        birthDate = .now
+        loadChild()
     }
 
     private var sharingSection: some View {
@@ -267,7 +285,12 @@ struct SettingsView: View {
                 Button("See Baby+") { showPaywall = true }
                 .foregroundStyle(AppTheme.accent)
             }
-            Button("Restore purchases") { Task { await store.restore() } }
+            Button("Restore purchases") {
+                Task {
+                    await store.restore()
+                    restoreMessage = store.isPro ? "Baby+ is active on this Apple ID." : (store.errorMessage ?? "No active Baby+ purchase was found for this Apple ID.")
+                }
+            }
             .foregroundStyle(AppTheme.accent)
             #if DEBUG
             Toggle("Local Pro override (debug)", isOn: Binding(

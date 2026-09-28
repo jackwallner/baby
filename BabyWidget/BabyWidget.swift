@@ -135,7 +135,7 @@ struct BabyNowWidget: Widget {
                 .containerBackground(AppTheme.card, for: .widget)
         }
         .configurationDisplayName("Last feed and diaper")
-        .description("When she last ate, which side, and the last diaper.")
+        .description("When the baby last ate, which side, and the last diaper.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular, .accessoryRectangular, .accessoryInline])
     }
 }
