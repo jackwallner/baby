@@ -1,1 +1,1 @@
-New: add an older entry. Log feeds, diapers, sleep and weigh-ins from earlier days with the link at the bottom of the main screen, so the first days are in your history too.
+New: Feed is one tap, and the side is optional. Logging late? Wind the time back above the buttons, or add older entries from the bottom of the main screen. New Feed, Pee and Poop widgets log with one tap from the Home Screen or Lock Screen, with Undo right on the widget. Totals can start at the hour your day does, or cover the last 24 hours.

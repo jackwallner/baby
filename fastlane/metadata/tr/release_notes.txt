@@ -1,1 +1,1 @@
-Yeni: eski bir kayıt ekleyin. Ana ekranın altındaki bağlantıyla önceki günlerin beslenme, bez, uyku ve tartı kayıtlarını girin; böylece ilk günler de geçmişinizde yer alsın.
+Yeni: beslenme tek dokunuşla kaydedilir, taraf isteğe bağlıdır. Geç mi kaydediyorsunuz? Düğmelerin üstünde saati geri alın ya da ana ekranın altından eski kayıtlar ekleyin. Yeni Beslenme, Çiş ve Kaka widget'ları Ana Ekran'dan veya Kilitli Ekran'dan tek dokunuşla kaydeder, Geri Al da widget'ın üzerindedir. Toplamlar gününüzün başladığı saatten ya da son 24 saatten sayılabilir.

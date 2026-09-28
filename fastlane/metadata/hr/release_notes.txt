@@ -1,1 +1,1 @@
-Novo: dodajte stariji unos. Zabilježite hranjenja, pelene, spavanje i vaganja iz prethodnih dana putem poveznice na dnu glavnog zaslona, kako bi i prvi dani bili u povijesti.
+Novo: hranjenje jednim dodirom, a strana je neobavezna. Bilježite kasnije? Vratite vrijeme iznad tipki ili dodajte starije unose s dna glavnog zaslona. Novi widgeti za hranjenje, piškenje i kakanje bilježe jednim dodirom s početnog ili zaključanog zaslona, s poništavanjem izravno na widgetu. Zbrojevi mogu početi u satu kada počinje vaš dan ili obuhvatiti posljednja 24 sata.

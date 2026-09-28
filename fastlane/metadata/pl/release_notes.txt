@@ -1,1 +1,1 @@
-Nowość: dodaj starszy wpis. Zapisuj karmienia, pieluchy, sen i ważenia z poprzednich dni za pomocą linku na dole ekranu głównego, aby pierwsze dni też trafiły do historii.
+Nowość: karmienie to jedno dotknięcie, a strona jest opcjonalna. Zapisujesz później? Cofnij godzinę nad przyciskami albo dodaj starsze wpisy na dole ekranu głównego. Nowe widżety Karmienie, Siku i Kupa zapisują jednym dotknięciem z ekranu początkowego lub blokady, z Cofnij bezpośrednio na widżecie. Sumy mogą zaczynać się o godzinie, o której zaczyna się twój dzień, lub obejmować ostatnie 24 godziny.

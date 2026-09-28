@@ -1,1 +1,1 @@
-Baru: tambahkan entri lama. Catat menyusui, popok, tidur, dan penimbangan dari hari-hari sebelumnya lewat tautan di bagian bawah layar utama, agar hari-hari pertama juga ada di riwayat.
+Baru: menyusui cukup satu ketukan, dan sisi bersifat opsional. Mencatat terlambat? Mundurkan waktu di atas tombol, atau tambahkan entri lama dari bagian bawah layar utama. Widget Menyusui, Pipis, dan Pup baru mencatat dengan satu ketukan dari Layar Utama atau Layar Terkunci, dengan Urungkan langsung di widget. Total bisa dimulai dari jam hari Anda dimulai, atau mencakup 24 jam terakhir.

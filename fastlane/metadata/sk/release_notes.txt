@@ -1,1 +1,1 @@
-Novinka: pridanie staršieho záznamu. Pomocou odkazu dole na hlavnej obrazovke zapíšete kŕmenia, plienky, spánok aj váženia z predchádzajúcich dní, aby boli v histórii aj prvé dni.
+Novinka: kŕmenie zapíšete jedným ťuknutím a strana je voliteľná. Zapisujete neskôr? Posuňte čas nad tlačidlami späť alebo pridajte staršie záznamy dole na hlavnej obrazovke. Nové widgety Kŕmenie, Cikanie a Kakanie zapisujú jedným ťuknutím z plochy aj zamknutej obrazovky, so Späť priamo vo widgete. Súčty môžu začínať hodinou, keď začína váš deň, alebo pokryť posledných 24 hodín.
