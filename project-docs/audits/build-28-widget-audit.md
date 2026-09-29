@@ -30,10 +30,20 @@ Audited September 29, 2026. Follow-up version: 1.1.1.
 
 ## App Store Connect
 
-Version 1.1.1 was created with manual release. Release notes are set in all 50
-locales, and review instructions use the current Reports and Settings paths.
-The approved purchases are retained. Upload and submission evidence is added
-after Apple's processing completes.
+Version 1.1.1, build 29, was uploaded with `scripts/testflight.sh`. Archive and
+export succeeded. The app, widget and Watch bundle versions are all 1.1.1 (29).
+Apple validated build `762b5c4a-53ee-4585-862e-74546f2d2694`, and it is attached to
+version `12c68f43-582a-4a2c-bbb4-218b450eb46b`.
+
+Release notes are set in all 50 locales, and review instructions use the current
+Reports and Settings paths. The approved purchases are retained.
+`scripts/asc-readiness.py` reports no gaps and all three public URLs return 200.
+
+Submitted at 2026-09-29 23:05:37 UTC. Review submission
+`8b901895-dfff-40ce-a917-2ab70fd662d4` and the App Store version both read
+`WAITING_FOR_REVIEW`. Independently read back `releaseType = MANUAL` and the
+attached build 29 after submission. A phone widget check remains required before
+manually releasing it.
 
 ## Physical-device limits
 
