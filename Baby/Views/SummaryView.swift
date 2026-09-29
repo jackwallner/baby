@@ -469,7 +469,7 @@ struct ReportCharts: View {
             Chart(content: content)
                 .chartXScale(domain: report.start...(Calendar.current.date(byAdding: .day, value: 1, to: report.end) ?? report.end))
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: max(1, report.dayCount / 5))) { value in
+                    AxisMarks(values: .stride(by: .day, count: max(1, report.dayCount / (compact ? 2 : 5)))) { value in
                         AxisValueLabel(format: .dateTime.month(.abbreviated).day())
                     }
                 }

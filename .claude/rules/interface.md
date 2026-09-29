@@ -26,7 +26,8 @@ buttons: Reports (`chart.bar.doc.horizontal`) and Settings (`gearshape`).
 Reports opens `ReportsSheet`: the paywall until Baby+ is active, then the
 reports; a purchase there swaps in the reports without closing. The paywall
 pitches with `ReportPreviews`, three cards (summary page, first trend chart,
-export rows) with one rule: the example is sharp and labelled Example, the
+export rows) with one rule: the example is sharp, labelled Example beside
+its title (the page has its own stamp in the corner), and the
 baby's own data is blurred under one Baby+ lock (the page keeps its name and
 range sharp). The toast clears one button on the left and the pair on the
 right (`toastLeadingInset`, `toastTrailingInset`).
@@ -37,7 +38,10 @@ filters its log by them, so History, totals, reports and CSV follow without
 their own checks; `NowSummary.make` and `SummaryReport.make` filter too, for
 the widget process and tests. The status card leads with the first tracked of
 feed, diaper, sleep (`NowSummary.leadKind` for widgets and Watch). A placed
-one-button widget for an off kind shows "Off in Settings" and does not log.
+one-button widget for an off kind shows "Off in Settings" and does not log;
+a control, the Action button or Siri answers that the button is off.
+`-EmptyLog` (DEBUG) opens an in-memory log, for the reviewer's no-data path
+(`testReportsShowTheExampleBeforeAnythingIsLogged`).
 
 Motion (2026-09-29): every tap, Undo, side chip and log-time change runs in
 one `withAnimation` transaction. Subview `.animation(_:value:)` modifiers

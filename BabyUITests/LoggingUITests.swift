@@ -136,6 +136,30 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Restore purchases"].exists)
     }
 
+    /// App Review 4.3: with nothing logged, Reports shows the labelled
+    /// example, readable in full, with no purchase.
+    func testReportsShowTheExampleBeforeAnythingIsLogged() {
+        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
+        app.launchArguments = ["-NoCloudKit", "-EmptyLog", "-hasCompletedSetup", "NO"]
+        app.launch()
+        XCTAssertTrue(app.buttons["onboarding.primary"].waitForExistence(timeout: 10))
+        app.buttons["onboarding.primary"].tap()
+        XCTAssertTrue(app.buttons["reports"].waitForExistence(timeout: 5))
+        app.buttons["reports"].tap()
+        let summary = app.descendants(matching: .any)["paywall.preview.pediatricianSummary"]
+        XCTAssertTrue(summary.waitForExistence(timeout: 10))
+        XCTAssertEqual(summary.value as? String, "Example with made-up numbers")
+        sleep(2)
+        attach(app, "reports-example")
+        summary.swipeLeft()
+        sleep(1)
+        attach(app, "reports-example-trends")
+        app.descendants(matching: .any)["paywall.preview.trends"].swipeRight()
+        sleep(1)
+        summary.tap()
+        XCTAssertTrue(app.navigationBars["Example summary"].waitForExistence(timeout: 5))
+    }
+
     func testTurningAButtonOffRemovesItEverywhereOnNow() {
         let app = launch()
         XCTAssertTrue(app.buttons["log.sleep"].exists)

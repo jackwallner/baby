@@ -21,7 +21,17 @@ import UIKit
 /// stack stands a throwaway in-memory store in, refuses writes while it is
 /// up, and opens the real file the moment the phone is unlocked.
 final class Persistence: @unchecked Sendable {
-    static let shared = Persistence(cloudKit: Persistence.processWantsCloudKit)
+    static let shared = Persistence(cloudKit: Persistence.processWantsCloudKit, inMemory: Persistence.startsEmpty)
+
+    /// `-EmptyLog` (DEBUG): a fresh in-memory log, for the no-data paths a
+    /// reviewer sees on a first install.
+    private static var startsEmpty: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("-EmptyLog")
+        #else
+        false
+        #endif
+    }
 
     /// Posted after a stand-in store has been replaced by the real file, so
     /// every surface refetches instead of showing the empty stand-in.

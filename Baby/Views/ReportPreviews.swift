@@ -53,12 +53,17 @@ struct ReportPreviews: View {
                 .frame(width: AppTheme.previewCardWidth, height: AppTheme.previewCardHeight, alignment: .top)
                 .background(AppTheme.card)
                 .clipShape(AppTheme.cardShape)
-                .overlay(alignment: isExample ? .topTrailing : .center) { badge }
+                .overlay { if !isExample { badge } }
                 .graphicBorder()
             VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
-                Text(feature.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink)
+                HStack(spacing: AppTheme.tightSpacing) {
+                    Text(feature.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppTheme.ink)
+                    // Beside the title, not on the page: the page carries
+                    // its own example stamp in that corner.
+                    if isExample { badge }
+                }
                 Text(feature.pitchLine)
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
@@ -74,7 +79,7 @@ struct ReportPreviews: View {
         .accessibilityIdentifier("paywall.preview.\(feature.rawValue)")
     }
 
-    /// "Example" in the corner, or the one lock over the blurred part.
+    /// "Example" beside the title, or the one lock over the blurred part.
     private var badge: some View {
         Label(isExample ? "Example" : "Baby+", systemImage: isExample ? "doc.text.magnifyingglass" : "lock.fill")
             .font(.caption.weight(.semibold))
@@ -83,7 +88,6 @@ struct ReportPreviews: View {
             .padding(.vertical, AppTheme.hairSpacing)
             .background(AppTheme.cardElevated, in: Capsule())
             .overlay(Capsule().strokeBorder(AppTheme.edge, lineWidth: AppTheme.hairlineWidth))
-            .padding(AppTheme.tightSpacing)
             .accessibilityHidden(true)
     }
 

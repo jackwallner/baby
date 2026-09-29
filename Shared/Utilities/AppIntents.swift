@@ -35,6 +35,12 @@ struct LogEventIntent: LiveActivityIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        // A button turned off in Settings shows nowhere, so a control, the
+        // Action button or Siri says so rather than log something invisible.
+        let kind = what.loggedKind ?? .sleep
+        if !TrackedKinds.current.contains(kind) {
+            return .result(dialog: "\(kind.label) is turned off in Baby Tracker's Settings, so nothing was logged.")
+        }
 #if BABY_WIDGET
         // Keep the extension build self-contained. iOS executes the app-target
         // implementation of a LiveActivityIntent in the app process.
