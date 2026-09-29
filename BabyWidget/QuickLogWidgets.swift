@@ -76,8 +76,8 @@ struct QuickLogWidgetView: View {
             ZStack {
                 AccessoryWidgetBackground()
                 VStack(spacing: 0) {
-                    Image(systemName: "arrow.uturn.backward")
-                        .font(.title3.weight(.semibold))
+                    Image(systemName: "checkmark")
+                        .font(.title3.weight(.bold))
                     Text("Undo")
                         .font(.caption2.weight(.semibold))
                         .lineLimit(1)
@@ -88,7 +88,7 @@ struct QuickLogWidgetView: View {
         default:
             VStack(spacing: AppTheme.tightSpacing) {
                 CareGraphic(kind: kind)
-                Text("Logged")
+                Label("Logged", systemImage: "checkmark")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(AppTheme.ink)
                 Label("Undo", systemImage: "arrow.uturn.backward")
@@ -136,6 +136,7 @@ struct QuickLogWidgetView: View {
                 .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
             }
         }
+        .invalidatableContent()
         .buttonStyle(.plain)
         .accessibilityLabel("Log \(kind.label.lowercased())")
         .accessibilityValue(detail)
@@ -203,6 +204,8 @@ struct FeedControl: ControlWidget {
         StaticControlConfiguration(kind: AppGroup.WidgetKind.feedControl) {
             ControlWidgetButton(action: LogEventIntent(what: .feed)) {
                 Label("Log feed", systemImage: EventKind.feed.symbolName)
+            } actionLabel: { isActive in
+                ControlConfirmation(kind: .feed, isActive: isActive)
             }
         }
         .displayName("Log feed")
@@ -216,6 +219,8 @@ struct WetControl: ControlWidget {
         StaticControlConfiguration(kind: AppGroup.WidgetKind.wetControl) {
             ControlWidgetButton(action: LogEventIntent(what: .wet)) {
                 Label("Log \(EventKind.wet.label.lowercased())", systemImage: EventKind.wet.symbolName)
+            } actionLabel: { isActive in
+                ControlConfirmation(kind: .wet, isActive: isActive)
             }
         }
         .displayName("Log pee diaper")
@@ -229,10 +234,32 @@ struct DirtyControl: ControlWidget {
         StaticControlConfiguration(kind: AppGroup.WidgetKind.dirtyControl) {
             ControlWidgetButton(action: LogEventIntent(what: .dirty)) {
                 Label("Log \(EventKind.dirty.label.lowercased())", systemImage: EventKind.dirty.symbolName)
+            } actionLabel: { isActive in
+                ControlConfirmation(kind: .dirty, isActive: isActive)
             }
         }
         .displayName("Log poop diaper")
         .description("Logs a poop (dirty) diaper with one tap.")
+    }
+}
+
+/// What a control shows in the system overlay once pressed, so a tap on a
+/// locked phone visibly lands.
+@available(iOS 18.0, *)
+private struct ControlConfirmation: View {
+    let kind: EventKind
+    let isActive: Bool
+
+    private var noun: String { kind == .feed ? "feed" : "\(kind.label.lowercased()) diaper" }
+
+    var body: some View {
+        if !TrackedKinds.current.contains(kind) {
+            Label("\(kind.label) is off in Settings", systemImage: kind.symbolName)
+        } else if isActive {
+            Label("Logging \(noun)", systemImage: kind.symbolName)
+        } else {
+            Label("Logged \(noun)", systemImage: "checkmark")
+        }
     }
 }
 

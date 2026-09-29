@@ -301,6 +301,8 @@ struct StopRunningIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "Stop"
     static let description = IntentDescription("Ends the running feed or sleep.")
     static let openAppWhenRun = false
+    /// Stop on the Lock Screen works without unlocking, like the log buttons.
+    static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
 
     @Parameter(title: "Kind")
     var kind: String

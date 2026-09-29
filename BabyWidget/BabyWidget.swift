@@ -213,7 +213,27 @@ struct BabyLogWidgetView: View {
         }
     }
 
+    /// The button a tap just logged, for the few seconds it offers Undo.
+    private func undo(for kind: EventKind) -> WidgetUndo? {
+        guard let undo = entry.undo, undo.kind == kind, undo.isShowing(at: entry.date) else { return nil }
+        return undo
+    }
+
+    @ViewBuilder
     private func logButton(_ kind: EventKind) -> some View {
+        if let undo = undo(for: kind) {
+            Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) {
+                face(kind, symbol: "checkmark", label: "Undo")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Undo \(kind.label.lowercased())")
+            .accessibilityValue("Logged just now")
+        } else {
+            tapButton(kind)
+        }
+    }
+
+    private func tapButton(_ kind: EventKind) -> some View {
         let label = kind == .sleep ? (s.isSleeping ? "Wake" : "Sleep") : kind.label
         let choice: LogChoice = switch kind {
         case .feed: .feed
@@ -222,21 +242,26 @@ struct BabyLogWidgetView: View {
         default: .sleep
         }
         return Button(intent: LogEventIntent(what: choice)) {
-            VStack(spacing: 0) {
-                Image(systemName: kind.symbolName)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(AppTheme.color(for: kind))
-                Text(label)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
-            .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
+            face(kind, symbol: kind.symbolName, label: label)
+                .invalidatableContent()
         }
         .buttonStyle(.plain)
+    }
+
+    private func face(_ kind: EventKind, symbol: String, label: String) -> some View {
+        VStack(spacing: 0) {
+            Image(systemName: symbol)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(AppTheme.color(for: kind))
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(AppTheme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
+        .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
     }
 }
 

@@ -87,9 +87,20 @@ arrow) for 10 seconds, then its normal face. `LogEventIntent` records the
 entry in `WidgetUndo` (App Group); `UndoWidgetLogIntent` deletes exactly that
 id and reopens any feed timer the log ended, accepting a tap up to 60 seconds
 in case WidgetKit redraws late. Controls, the Action button and Siri have no
-surface for it; History's swipe-to-delete covers them. The four-button widget
-has no Undo. A second tap of the same kind within 3 seconds (before the tile
+surface for it; History's swipe-to-delete covers them. A second tap of the same kind within 3 seconds (before the tile
 could redraw) logs nothing, and a stale Undo never clears a newer tap's Undo.
+
+Tap confirmation (2026-09-29, Jack: "see confirmed click so I know it
+worked"). Every widget log button is `.invalidatableContent()`, so it dims the
+instant it is pressed, before the app process saves. The confirmed face has a
+checkmark: the one-button tile reads "Logged" with Undo, the Lock Screen
+circle a checkmark over "Undo", and the four-button widget swaps the tapped
+button for checkmark / Undo (same `WidgetUndo`, same 10 seconds). Controls
+show "Logged feed" (or "is off in Settings") in the system overlay through
+`ControlConfirmation`. Locked-phone logging: the Home Screen is never reachable
+locked, so the answer is the Lock Screen circles, the four-button Lock Screen
+row, and the corner controls; `LogEventIntent`, `UndoWidgetLogIntent` and the
+Live Activity's `StopRunningIntent` are all `.alwaysAllowed`.
 
 Animate only meaningful feedback, using the shared spring and respecting
 Reduce Motion. Keep text readable in dark mode and at accessibility sizes.
