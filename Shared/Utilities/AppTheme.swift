@@ -37,12 +37,22 @@ enum AppTheme {
     static let ctaHeight: CGFloat = 52
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72
-    static let paywallPageHeight: CGFloat = 128
+    static let chartHeight: CGFloat = 120
+    /// A report preview card on the paywall, and the chart inside it.
+    static let previewCardWidth: CGFloat = 280
+    static let previewCardHeight: CGFloat = 176
+    static let previewChartHeight: CGFloat = 96
+    /// How far a locked preview blurs: the shape of the data, not its numbers.
+    static let previewBlur: CGFloat = 6
     static let inviteCodeSize: CGFloat = 200
     static let toastWidth: CGFloat = 520
-    /// Clears the 44pt History and More buttons and their 16pt bar inset.
-    static let toastSideInset: CGFloat = 68
+    /// Clears the 44pt History button and its 16pt bar inset.
+    static let toastLeadingInset: CGFloat = 68
+    /// Clears the Reports and Settings pair on the right.
+    static let toastTrailingInset: CGFloat = 124
     static let dotSize: CGFloat = 5
+    /// The kind dot beside a total and at the head of each hour-strip row.
+    static let legendDotSize: CGFloat = 8
     /// The hour strip under Now's totals: a small square per hour and kind.
     static let cellHeight: CGFloat = 10
     static let cellGap: CGFloat = 2

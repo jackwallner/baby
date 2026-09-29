@@ -5,7 +5,7 @@ final class SharingInterfaceUITests: XCTestCase {
         let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
         app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit", "-Appearance", "system"] + extra
         app.launch()
-        XCTAssertTrue(app.buttons["more"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["settings"].waitForExistence(timeout: 15))
         return app
     }
 
@@ -24,7 +24,7 @@ final class SharingInterfaceUITests: XCTestCase {
 
     func testSharingExplainsHowSomeoneElseJoins() {
         let app = launch()
-        app.buttons["more"].tap()
+        app.buttons["settings"].tap()
 
         let trigger = app.buttons["settings.partner.share"]
         scrollTo(trigger, in: app)
@@ -42,12 +42,12 @@ final class SharingInterfaceUITests: XCTestCase {
         XCTAssertLessThanOrEqual(invite.frame.maxY, app.frame.maxY, "Create invite must fit inside the screen")
         attach(app, "sharing-explanation")
         app.buttons["sharing.close"].tap()
-        XCTAssertTrue(app.navigationBars["More"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
     }
 
     func testInviteShowsAScannableCodeAndALink() {
         let app = launch(["-SharingPreview"])
-        app.buttons["more"].tap()
+        app.buttons["settings"].tap()
         let trigger = app.buttons["settings.partner.share"]
         scrollTo(trigger, in: app)
         trigger.tap()
@@ -61,7 +61,7 @@ final class SharingInterfaceUITests: XCTestCase {
 
     func testJoinRejectsAPastedLinkThatIsNotAnInvite() {
         let app = launch()
-        app.buttons["more"].tap()
+        app.buttons["settings"].tap()
         let join = app.buttons["settings.partner.join"]
         scrollTo(join, in: app)
         join.tap()
@@ -119,7 +119,7 @@ final class SharingInterfaceUITests: XCTestCase {
 
     func testAppearanceOffersSystemLightDarkAndNightLight() {
         let app = launch()
-        app.buttons["more"].tap()
+        app.buttons["settings"].tap()
         let night = app.buttons["Night light"]
         scrollTo(night, in: app)
         for label in ["System", "Light", "Dark", "Night light"] {

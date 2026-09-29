@@ -139,8 +139,10 @@ private struct UndoToastOverlay: ViewModifier {
     @EnvironmentObject private var events: EventStore
     @State private var showUndoError = false
 
-    /// Undo puts a row back into History, so it animates in like a new one.
+    /// One transaction for everything Undo changes: the toast folds away
+    /// while the card, the buttons and the totals settle back together.
     private func undo() {
+        Haptics.selected()
         withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation) {
             showUndoError = !events.undoLast()
         }
@@ -156,11 +158,17 @@ private struct UndoToastOverlay: ViewModifier {
                     if let logged = events.lastLogged {
                         UndoToast(logged: logged, undo: undo)
                             .frame(maxWidth: AppTheme.toastWidth)
-                            .padding(.horizontal, AppTheme.toastSideInset)
+                            .padding(.leading, AppTheme.toastLeadingInset)
+                            .padding(.trailing, AppTheme.toastTrailingInset)
                             .gesture(DragGesture(minimumDistance: AppTheme.tightSpacing).onEnded { value in
                                 if value.translation.height < 0 { events.dismissUndo() }
                             })
-                            .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                            // In from the top; out by shrinking in place, so a
+                            // toast leaving never slides under the status bar.
+                            .transition(reduceMotion ? .opacity : .asymmetric(
+                                insertion: .move(edge: .top).combined(with: .opacity),
+                                removal: .scale(scale: 0.9).combined(with: .opacity)
+                            ))
                     }
                 }
                 .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.lastLogged)
@@ -256,10 +264,12 @@ struct KindIcon: View {
 /// A kind dot with a label, for the history rows and the tally.
 struct KindDot: View {
     let kind: EventKind
+    var size: CGFloat = AppTheme.spacing
 
     var body: some View {
         Circle()
             .fill(AppTheme.color(for: kind))
-            .frame(width: AppTheme.spacing, height: AppTheme.spacing)
+            .frame(width: size, height: size)
+            .accessibilityHidden(true)
     }
 }

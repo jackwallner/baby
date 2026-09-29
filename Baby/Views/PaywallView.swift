@@ -15,12 +15,12 @@ struct BabyPaywallView: View {
     var displayCloseButton: Bool = true
     var paywallImpressionID: String = "baby_paywall"
     var focus: PlusFeature?
+    /// False where the presenter swaps in the unlocked reports itself.
+    var closesOnPurchase = true
 
     @State private var selected: Package?
     @State private var isRestoring = false
     @State private var restoreMessage: String?
-    /// The first page of this baby's own report, or the labelled example.
-    @State private var pagePreview: UIImage?
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -48,7 +48,6 @@ struct BabyPaywallView: View {
                 .accessibilityLabel("Close")
             }
         }
-        .task { await renderPagePreview() }
         .task {
             store.trackPaywallImpression(id: paywallImpressionID, oncePerSession: !displayCloseButton)
             if store.packages.isEmpty { store.start(forceRefresh: false) }
@@ -56,7 +55,7 @@ struct BabyPaywallView: View {
         }
         .onChange(of: store.packages.count) { _, _ in selectDefaultIfNeeded() }
         .onChange(of: store.isPro) { _, isPro in
-            if isPro && displayCloseButton { dismiss() }
+            if isPro && displayCloseButton && closesOnPurchase { dismiss() }
         }
     }
 
@@ -98,18 +97,21 @@ struct BabyPaywallView: View {
         .padding(AppTheme.margin)
     }
 
-    /// One viewport: hero, three reasons, plans, the billed amount, the CTA,
-    /// the disclosure, and the footer.
+    /// One viewport: the headline, the reports themselves as previews, the
+    /// plans, the billed amount, the CTA, the disclosure, and the footer.
     private var content: some View {
         ScrollView {
             VStack(spacing: AppTheme.spacing) {
                 hero
-                headlineBenefits
-                plans
-                checkout
-                legalFooter
+                    .padding(.horizontal, AppTheme.margin)
+                ReportPreviews(focus: focus)
+                Group {
+                    plans
+                    checkout
+                    legalFooter
+                }
+                .padding(.horizontal, AppTheme.margin)
             }
-            .padding(.horizontal, AppTheme.margin)
             .padding(.top, displayCloseButton ? 44 : AppTheme.tightSpacing)
             .padding(.bottom, AppTheme.tightSpacing)
             .frame(maxWidth: .infinity)
@@ -152,7 +154,7 @@ struct BabyPaywallView: View {
 
     private var hero: some View {
         VStack(spacing: AppTheme.tightSpacing) {
-            heroArt
+            SectionLabel(text: "Baby+")
             Text(headline)
                 .font(.title2.bold())
                 .foregroundStyle(AppTheme.ink)
@@ -166,74 +168,13 @@ struct BabyPaywallView: View {
         }
     }
 
-    private var headlineBenefits: some View {
-        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            ForEach(Self.headlineFeatures) { feature in
-                HStack(spacing: AppTheme.spacing) {
-                    Image(systemName: feature.symbolName)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(AppTheme.accent)
-                        .frame(width: 24)
-                    Text(feature.pitchLine)
-                        .font(.subheadline)
-                        .foregroundStyle(AppTheme.ink)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private static let headlineFeatures: [PlusFeature] = [.pediatricianSummary, .trends, .export]
-
     private var headline: String {
         if let focus { return focus.pitchHeadline }
-        return "Walk into the pediatrician\nwith a clean summary"
+        return "Reports for the pediatrician"
     }
 
     private var subhead: String {
-        "Logging and everything else stay free. Baby+ is the reporting you share with your doctor."
-    }
-
-    /// The report itself is the pitch: the first page of this baby's summary,
-    /// or the stamped example before anything is logged. Trends and export
-    /// keep their symbol.
-    @ViewBuilder
-    private var heroArt: some View {
-        if focus == nil || focus == .pediatricianSummary {
-            Group {
-                if let pagePreview {
-                    Image(uiImage: pagePreview)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .colorMultiply(AppTheme.codePaper)
-                } else {
-                    Rectangle().fill(AppTheme.card)
-                        .aspectRatio(PDFReport.headlineCrop.width / PDFReport.headlineCrop.height, contentMode: .fit)
-                }
-            }
-            .frame(maxHeight: AppTheme.paywallPageHeight)
-            .clipShape(AppTheme.cardShape)
-            .overlay(AppTheme.cardShape.stroke(AppTheme.ink3.opacity(0.3), lineWidth: AppTheme.hairlineWidth))
-            .accessibilityLabel(events.events.isEmpty ? "An example pediatrician summary page" : "Your baby's pediatrician summary page")
-        } else {
-            Image(systemName: focus?.symbolName ?? "doc.text.fill")
-                .font(.title)
-                .foregroundStyle(AppTheme.accent)
-                .frame(width: AppTheme.welcomeIconSize, height: AppTheme.welcomeIconSize)
-                .background(AppTheme.card, in: AppTheme.cardShape)
-                .graphicBorder()
-                .accessibilityHidden(true)
-        }
-    }
-
-    private func renderPagePreview() async {
-        let report = events.visitReport()
-        let isExample = events.events.isEmpty
-        pagePreview = await Task.detached(priority: .userInitiated) {
-            PDFReport.firstPageImage(PDFReport.render(report, isExample: isExample), width: 360, crop: PDFReport.headlineCrop)
-        }.value
+        "Logging and everything else stay free. Baby+ turns your log into what the doctor asks for."
     }
 
     private func benefitRow(_ feature: PlusFeature, unlocked: Bool) -> some View {

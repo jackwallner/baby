@@ -67,6 +67,7 @@ targetTemplates:
     sources:
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Models/DiaperWords.swift
+      - path: Shared/Models/TrackedKinds.swift
       - path: Shared/Services/Persistence.swift
       - path: Shared/Services/NowSummary.swift
       - path: Shared/Services/SummaryReport.swift
@@ -96,6 +97,7 @@ targets:
       - path: Baby/Views/OnboardingView.swift
       - path: Baby/Views/PaywallView.swift
       - path: Baby/Views/SummaryView.swift
+      - path: Baby/Views/ReportPreviews.swift
       - path: Baby/Views/StainHelperView.swift
       - path: Baby/Views/PDFReport.swift
       - path: Baby/Views/Components.swift
@@ -165,6 +167,7 @@ targets:
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Models/DiaperWords.swift
+      - path: Shared/Models/TrackedKinds.swift
       - path: Shared/Services/NowSummary.swift
       - path: Shared/Services/SummaryReport.swift
       - path: Shared/Services/SampleReport.swift
@@ -194,6 +197,7 @@ targets:
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Models/DiaperWords.swift
+      - path: Shared/Models/TrackedKinds.swift
       - path: Shared/Services/NowSummary.swift
       - path: Shared/Services/SummaryReport.swift
       - path: Shared/Services/SampleReport.swift

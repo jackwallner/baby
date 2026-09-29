@@ -17,9 +17,35 @@ History belongs one tap from home, as a List or a month Calendar (dots
 per kind, tap a day for its entries). The calendar grid is plain stacks: a
 LazyVGrid inside a List cell crashed UICollectionView self-sizing. The Undo
 toast is pinned to the top over the navigation bar (swipe up to dismiss), so
-it never lands mid-screen over the log controls. Reports, first-weeks guidance, sharing,
-stain help and Baby+ live in More. Do not restore a four-tab layout or an
-onboarding paywall. Name and birth date are optional; never guess a birth date
+it never lands mid-screen over the log controls. First-weeks guidance,
+sharing and stain help live in Settings. Do not restore a four-tab layout or an
+onboarding paywall.
+
+2026-09-29 (Jack): the top-right ellipsis read as nothing. It is now two
+buttons: Reports (`chart.bar.doc.horizontal`) and Settings (`gearshape`).
+Reports opens `ReportsSheet`: the paywall until Baby+ is active, then the
+reports; a purchase there swaps in the reports without closing. The paywall
+pitches with `ReportPreviews`, three cards (summary page, first trend chart,
+export rows) with one rule: the example is sharp and labelled Example, the
+baby's own data is blurred under one Baby+ lock (the page keeps its name and
+range sharp). The toast clears one button on the left and the pair on the
+right (`toastLeadingInset`, `toastTrailingInset`).
+
+Buttons can be turned off (Settings > Buttons, `TrackedKinds` in the App
+Group, carried to the Watch in `NowSummary.hiddenKinds`). `EventStore`
+filters its log by them, so History, totals, reports and CSV follow without
+their own checks; `NowSummary.make` and `SummaryReport.make` filter too, for
+the widget process and tests. The status card leads with the first tracked of
+feed, diaper, sleep (`NowSummary.leadKind` for widgets and Watch). A placed
+one-button widget for an off kind shows "Off in Settings" and does not log.
+
+Motion (2026-09-29): every tap, Undo, side chip and log-time change runs in
+one `withAnimation` transaction. Subview `.animation(_:value:)` modifiers
+animated one subtree while its siblings jumped, which drew the hint and the
+totals over each other. The side chips fade into space the Feed card grows
+(clipped, so they never slide over Feed); the hero time crossfades rather
+than using the numeric roll, which smeared "just now". Totals are a card: one
+figure per button with a kind dot, and the hour strip uses the same dots. Name and birth date are optional; never guess a birth date
 for someone who did not choose one.
 
 Backfilling lives at the very bottom of Now as a quiet "Add an older entry"
@@ -38,7 +64,7 @@ five-minute grid, the time opens a wheel); taps log at that time and it
 returns to now 60 seconds after the last touch, with a countdown under the
 buttons. The editor's time is an inline wheel (a compact picker's popover
 covered Save); existing entries autosave with Done only, new entries still
-need Log. Totals count from a day-start hour or the last 24 hours (More >
+need Log. Totals count from a day-start hour or the last 24 hours (Settings >
 Daily totals, `TotalsWindow`), with a four-row hourly strip beneath
 (`WindowTotals`); History and reports keep calendar days.
 
@@ -67,9 +93,9 @@ Use vertical layouts when the side-by-side version no longer fits.
 
 Verification: LoggingUITests covers direct logging, optional feed sides, the
 wound-back log time, editor autosave, the totals window, long-press cancellation,
-backfilling yesterday without touching today's totals, Undo, sleep/wake, one-screen onboarding, and free access to the tucked-away
-tools. SharingInterfaceUITests covers the invite explanation, the invite code
-and link, joining from onboarding and More, and the four appearance options.
+backfilling yesterday without touching today's totals, Undo, sleep/wake, turning a button off, one-screen onboarding, and free access to the guides and report previews.
+SharingInterfaceUITests covers the invite explanation, the invite code
+and link, joining from onboarding and Settings, and the four appearance options.
 SharingTests protects the owner's log and separates invitation failures
 from an intentional stop-sharing action. Real cross-account iCloud sync still
 requires two signed-in devices and a deployed production schema.

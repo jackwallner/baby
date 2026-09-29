@@ -26,7 +26,7 @@ struct BabyOnboardingView: View {
                     pathChoice
                     if path == .start {
                         babyDetails
-                        Text("Both are optional. Invite your partner or anyone else helping from More once you're in.")
+                        Text("Both are optional. Invite your partner or anyone else helping from Settings once you're in.")
                             .font(.footnote)
                             .foregroundStyle(AppTheme.ink2)
                             .fixedSize(horizontal: false, vertical: true)

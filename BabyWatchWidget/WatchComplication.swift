@@ -36,35 +36,43 @@ struct WatchBabyComplicationView: View {
 
     private var s: NowSummary { entry.summary }
 
-    private var sinceFeed: String {
-        if let start = s.runningFeedStart { return Format.compactDuration(entry.date.timeIntervalSince(start)) }
-        guard let last = s.lastFeedAt else { return "–" }
-        return Format.compactDuration(entry.date.timeIntervalSince(last))
+    private var sinceLead: String { s.leadElapsed(now: entry.date) }
+
+    private var cornerLabel: String {
+        switch s.leadKind {
+        case .feed: FeedSide.label(for: s.feedSides) ?? "fed"
+        case .sleep: s.isSleeping ? "asleep" : "awake"
+        default: "diaper"
+        }
     }
 
     var body: some View {
         switch family {
         case .accessoryCircular:
             VStack(spacing: 0) {
-                Image(systemName: EventKind.feed.symbolName).font(.caption2)
-                Text(sinceFeed).font(.headline.bold()).minimumScaleFactor(0.6)
-                if let side = FeedSide.shortLabel(for: s.feedSides) { Text(side).font(.caption2) }
+                Image(systemName: s.leadKind.symbolName).font(.caption2)
+                Text(sinceLead).font(.headline.bold()).minimumScaleFactor(0.6)
+                if let detail = s.leadShortDetail { Text(detail).font(.caption2) }
             }
-            .foregroundStyle(AppTheme.feed)
+            .foregroundStyle(AppTheme.color(for: s.leadKind))
         case .accessoryRectangular:
             VStack(alignment: .leading, spacing: 0) {
-                Text(s.feedLine(now: entry.date)).font(.headline).lineLimit(1)
-                Text(s.diaperLine(now: entry.date)).font(.caption2).lineLimit(1)
-                Text(s.sleepLine(now: entry.date) ?? s.todayLine).font(.caption2).lineLimit(1)
+                Text(s.leadLine(now: entry.date)).font(.headline).lineLimit(1)
+                ForEach(Array(s.supportingLines(now: entry.date).prefix(2).enumerated()), id: \.offset) { _, line in
+                    Text(line).font(.caption2).lineLimit(1)
+                }
+                if s.supportingLines(now: entry.date).count < 2, !s.todayLine.isEmpty {
+                    Text(s.todayLine).font(.caption2).lineLimit(1)
+                }
             }
         case .accessoryInline:
-            Label(s.feedLine(now: entry.date), systemImage: EventKind.feed.symbolName)
+            Label(s.leadLine(now: entry.date), systemImage: s.leadKind.symbolName)
         case .accessoryCorner:
-            Text(sinceFeed)
+            Text(sinceLead)
                 .font(.headline.bold())
-                .widgetLabel { Text(FeedSide.label(for: s.feedSides) ?? "fed") }
+                .widgetLabel { Text(cornerLabel) }
         default:
-            Text(sinceFeed)
+            Text(sinceLead)
         }
     }
 }

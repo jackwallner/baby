@@ -22,13 +22,49 @@ struct QuickLogWidgetView: View {
     }
 
     var body: some View {
-        if let undo {
+        if !s.tracked.contains(kind) {
+            offFace
+        } else if let undo {
             Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) { undoFace }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Undo \(kind.label.lowercased())")
                 .accessibilityValue("Logged just now")
         } else {
             logButton
+        }
+    }
+
+    /// The button was turned off in the app. The tile stays put, quietly,
+    /// rather than logging something no screen shows; a tap opens the app.
+    @ViewBuilder
+    private var offFace: some View {
+        switch family {
+        case .accessoryCircular:
+            ZStack {
+                AccessoryWidgetBackground()
+                Image(systemName: kind.symbolName)
+                    .font(.title3.weight(.semibold))
+                    .opacity(0.4)
+            }
+            .accessibilityLabel("\(kind.label) is turned off in Settings")
+        default:
+            VStack(spacing: AppTheme.tightSpacing) {
+                CareGraphic(kind: kind)
+                    .opacity(0.5)
+                Text(kind.label)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink2)
+                Text("Off in Settings")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AppTheme.cardElevated, in: AppTheme.buttonShape)
+            .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.edge, lineWidth: AppTheme.hairlineWidth))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(kind.label) is turned off in Settings")
         }
     }
 

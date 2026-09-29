@@ -23,7 +23,7 @@ final class FormatTests: XCTestCase {
         XCTAssertEqual(summary.diaperLine(now: now), "Last diaper 48m ago · Pee")
         summary.todayWet = 3
         summary.todayDirty = 2
-        XCTAssertEqual(summary.todayLine, "3 pee · 2 poop · 0 feeds")
+        XCTAssertEqual(summary.todayLine, "0 feeds · 3 pee · 2 poop")
         XCTAssertNil(summary.sleepLine(now: now))
         XCTAssertEqual(NowSummary.empty.feedLine(now: now), "No feed logged yet")
     }

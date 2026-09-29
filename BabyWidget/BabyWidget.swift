@@ -70,22 +70,22 @@ struct BabyNowWidgetView: View {
         switch family {
         case .accessoryRectangular:
             VStack(alignment: .leading, spacing: 0) {
-                Text(s.feedLine(now: entry.date)).font(.headline).lineLimit(1)
-                Text(s.diaperLine(now: entry.date)).font(.caption).lineLimit(1)
-                if let sleep = s.sleepLine(now: entry.date) {
-                    Text(sleep).font(.caption).lineLimit(1)
-                } else {
+                Text(s.leadLine(now: entry.date)).font(.headline).lineLimit(1)
+                ForEach(Array(s.supportingLines(now: entry.date).prefix(2).enumerated()), id: \.offset) { _, line in
+                    Text(line).font(.caption).lineLimit(1)
+                }
+                if s.supportingLines(now: entry.date).count < 2, !s.todayLine.isEmpty {
                     Text(s.todayLine).font(.caption2).lineLimit(1)
                 }
             }
         case .accessoryCircular:
             VStack(spacing: 0) {
-                Image(systemName: EventKind.feed.symbolName).font(.caption2)
-                Text(sinceFeed).font(.headline.bold()).minimumScaleFactor(0.7)
-                if let side = FeedSide.shortLabel(for: s.feedSides) { Text(side).font(.caption2) }
+                Image(systemName: s.leadKind.symbolName).font(.caption2)
+                Text(s.leadElapsed(now: entry.date)).font(.headline.bold()).minimumScaleFactor(0.7)
+                if let detail = s.leadShortDetail { Text(detail).font(.caption2) }
             }
         case .accessoryInline:
-            Label(s.feedLine(now: entry.date), systemImage: EventKind.feed.symbolName)
+            Label(s.leadLine(now: entry.date), systemImage: s.leadKind.symbolName)
         case .systemMedium:
             HStack(alignment: .top, spacing: AppTheme.spacing) {
                 glance
@@ -94,9 +94,9 @@ struct BabyNowWidgetView: View {
                     if let day = s.dayOfLife {
                         Text("Day \(day)").font(.caption.weight(.semibold)).foregroundStyle(AppTheme.ink2)
                     }
-                    Text("\(s.todayWet)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.wet) + Text(" \(EventKind.wet.label.lowercased())").font(.caption).foregroundStyle(AppTheme.ink2)
-                    Text("\(s.todayDirty)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.dirty) + Text(" \(EventKind.dirty.label.lowercased())").font(.caption).foregroundStyle(AppTheme.ink2)
-                    Text("\(s.todayFeeds)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.feed) + Text(" feeds").font(.caption).foregroundStyle(AppTheme.ink2)
+                    ForEach(s.tracked.buttons.filter { $0 != .sleep }, id: \.self) { kind in
+                        count(kind)
+                    }
                 }
                 .monospacedDigit()
             }
@@ -105,28 +105,35 @@ struct BabyNowWidgetView: View {
         }
     }
 
-    private var sinceFeed: String {
-        if let start = s.runningFeedStart { return Format.compactDuration(entry.date.timeIntervalSince(start)) }
-        guard let last = s.lastFeedAt else { return "–" }
-        return Format.compactDuration(entry.date.timeIntervalSince(last))
+    private func count(_ kind: EventKind) -> Text {
+        let value = switch kind {
+        case .feed: s.todayFeeds
+        case .wet: s.todayWet
+        default: s.todayDirty
+        }
+        let unit = kind == .feed ? (value == 1 ? "feed" : "feeds") : kind.label.lowercased()
+        return Text("\(value)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.color(for: kind))
+            + Text(" \(unit)").font(.caption).foregroundStyle(AppTheme.ink2)
     }
 
     private var glance: some View {
         VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
             HStack(spacing: AppTheme.hairSpacing) {
-                Image(systemName: EventKind.feed.symbolName).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.feed)
+                Image(systemName: s.leadKind.symbolName).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.color(for: s.leadKind))
                 Text(s.childName).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.ink2).lineLimit(1)
             }
-            Text(s.feedLine(now: entry.date))
+            Text(s.leadLine(now: entry.date))
                 .font(.headline)
                 .foregroundStyle(AppTheme.ink)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
-            Text(s.diaperLine(now: entry.date))
-                .font(.caption)
-                .foregroundStyle(AppTheme.ink2)
-                .lineLimit(2)
-            if let sleep = s.sleepLine(now: entry.date) {
+            if s.leadKind == .feed, s.tracked.tracksDiapers {
+                Text(s.diaperLine(now: entry.date))
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink2)
+                    .lineLimit(2)
+            }
+            if s.leadKind != .sleep, s.tracked.contains(.sleep), let sleep = s.sleepLine(now: entry.date) {
                 Text(sleep).font(.caption).foregroundStyle(AppTheme.sleep).lineLimit(1)
             }
         }
@@ -158,22 +165,24 @@ struct BabyLogWidgetView: View {
         switch family {
         case .accessoryRectangular:
             HStack(spacing: AppTheme.hairSpacing) {
-                logButton("Feed", kind: .feed, choice: .feed)
-                logButton(EventKind.wet.label, kind: .wet, choice: .wet)
-                logButton(EventKind.dirty.label, kind: .dirty, choice: .dirty)
+                ForEach(rowKinds, id: \.self) { kind in
+                    logButton(kind)
+                }
             }
         case .systemMedium:
             HStack(spacing: AppTheme.spacing) {
                 VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
-                    Text(s.feedLine(now: entry.date))
+                    Text(s.leadLine(now: entry.date))
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(AppTheme.ink)
                         .lineLimit(2)
                         .minimumScaleFactor(0.8)
-                    Text(s.diaperLine(now: entry.date))
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.ink2)
-                        .lineLimit(2)
+                    if let line = s.supportingLines(now: entry.date).first {
+                        Text(line)
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.ink2)
+                            .lineLimit(2)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 grid
@@ -184,21 +193,35 @@ struct BabyLogWidgetView: View {
         }
     }
 
+    /// The Lock Screen row: the one-tap kinds, or Sleep if that is all.
+    private var rowKinds: [EventKind] {
+        let taps = s.tracked.buttons.filter { $0 != .sleep }
+        return taps.isEmpty ? [.sleep] : taps
+    }
+
+    /// The tracked buttons two to a row, in their usual order.
     private var grid: some View {
-        VStack(spacing: AppTheme.tightSpacing) {
-            HStack(spacing: AppTheme.tightSpacing) {
-                logButton("Feed", kind: .feed, choice: .feed)
-                logButton(EventKind.wet.label, kind: .wet, choice: .wet)
-            }
-            HStack(spacing: AppTheme.tightSpacing) {
-                logButton(EventKind.dirty.label, kind: .dirty, choice: .dirty)
-                logButton(s.isSleeping ? "Wake" : "Sleep", kind: .sleep, choice: .sleep)
+        let kinds = s.tracked.buttons
+        return VStack(spacing: AppTheme.tightSpacing) {
+            ForEach(Array(stride(from: 0, to: kinds.count, by: 2)), id: \.self) { start in
+                HStack(spacing: AppTheme.tightSpacing) {
+                    ForEach(kinds[start..<min(start + 2, kinds.count)], id: \.self) { kind in
+                        logButton(kind)
+                    }
+                }
             }
         }
     }
 
-    private func logButton(_ label: String, kind: EventKind, choice: LogChoice) -> some View {
-        Button(intent: LogEventIntent(what: choice)) {
+    private func logButton(_ kind: EventKind) -> some View {
+        let label = kind == .sleep ? (s.isSleeping ? "Wake" : "Sleep") : kind.label
+        let choice: LogChoice = switch kind {
+        case .feed: .feed
+        case .wet: .wet
+        case .dirty: .dirty
+        default: .sleep
+        }
+        return Button(intent: LogEventIntent(what: choice)) {
             VStack(spacing: 0) {
                 Image(systemName: kind.symbolName)
                     .font(.caption.weight(.semibold))
@@ -224,7 +247,7 @@ struct BabyLogWidget: Widget {
                 .containerBackground(AppTheme.card, for: .widget)
         }
         .configurationDisplayName("One-tap log")
-        .description("Log a feed, a pee or poop diaper, or sleep without opening the app.")
+        .description("Log with one tap, without opening the app.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }

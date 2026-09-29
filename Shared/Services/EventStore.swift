@@ -91,7 +91,10 @@ final class EventStore: ObservableObject {
         isAwaitingSharedBaby = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone) != nil
         child = persistence.activeChild(in: context)
         if let child {
-            events = persistence.events(for: child, in: context)
+            // A turned-off button's entries stay stored but leave every
+            // surface that reads the log, until it is turned back on.
+            let tracked = TrackedKinds.current
+            events = persistence.events(for: child, in: context).filter { tracked.contains($0.eventKind) }
         } else {
             events = []
         }

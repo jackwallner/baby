@@ -68,7 +68,7 @@ struct JoinLogForm: View {
             Label("Scan their code", systemImage: "qrcode.viewfinder")
                 .font(.headline)
                 .foregroundStyle(AppTheme.ink)
-            Text("On their phone: More, then Invite someone. A QR code appears.")
+            Text("On their phone: Settings, then Invite someone. A QR code appears.")
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.ink2)
                 .fixedSize(horizontal: false, vertical: true)

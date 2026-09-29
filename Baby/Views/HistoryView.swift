@@ -5,6 +5,7 @@ import SwiftUI
 struct HistoryView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
+    @EnvironmentObject private var settings: BabySettings
     @AppStorage("historyLayout") private var layout = HistoryLayout.list
     @State private var editor: EditorRequest?
     @State private var month = Calendar.current.startOfMonth(for: .now)
@@ -59,7 +60,7 @@ struct HistoryView: View {
             Text("Nothing logged yet")
                 .font(.headline)
                 .foregroundStyle(AppTheme.ink)
-            Text("Every tap on Now shows up here, with the day's totals.")
+            Text("Every tap shows up here, with the day's totals.")
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.ink2)
                 .multilineTextAlignment(.center)
@@ -154,8 +155,12 @@ struct HistoryView: View {
 
     private func dayHeader(_ day: Date) -> some View {
         let tally = events.tally(on: day)
-        var parts = ["\(tally.wet) \(EventKind.wet.label.lowercased())", "\(tally.dirty) \(EventKind.dirty.label.lowercased())", Format.count(tally.feeds, "feed")]
-        if tally.sleepSeconds >= 60 { parts.append("\(Format.compactDuration(tally.sleepSeconds)) sleep") }
+        let tracked = settings.tracked
+        var parts: [String] = []
+        if tracked.contains(.feed) { parts.append(Format.count(tally.feeds, "feed")) }
+        if tracked.contains(.wet) { parts.append("\(tally.wet) \(EventKind.wet.label.lowercased())") }
+        if tracked.contains(.dirty) { parts.append("\(tally.dirty) \(EventKind.dirty.label.lowercased())") }
+        if tracked.contains(.sleep), tally.sleepSeconds >= 60 { parts.append("\(Format.compactDuration(tally.sleepSeconds)) sleep") }
         return VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
             Text(Format.dayTitle(day))
                 .font(.headline)

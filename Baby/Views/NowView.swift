@@ -1,13 +1,16 @@
 import SwiftUI
 
-/// The whole everyday app: the last feed, four log controls and today's totals.
-/// History is one tap away. Everything else lives in More.
+/// The whole everyday app: the last feed, the log controls and today's
+/// totals. History is one tap away on the left; Reports and Settings sit on
+/// the right.
 struct NowView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var events: EventStore
+    @EnvironmentObject private var settings: BabySettings
     @State private var editor: EditorRequest?
     @State private var showSettings = false
+    @State private var showReports = false
     @State private var now = Date.now
     @StateObject private var logClock = LogClock()
 
@@ -29,7 +32,7 @@ struct NowView: View {
                     } else {
                         VStack(alignment: .leading, spacing: AppTheme.spacing) {
                             NowStatusCard(now: now, clock: logClock)
-                            LoggingControls(height: min(AppTheme.maxLogButtonHeight, max(AppTheme.logButtonHeight, (geometry.size.height - AppTheme.homeSummaryAllowance) / 3)), clock: logClock, editor: $editor)
+                            LoggingControls(height: buttonHeight(for: geometry.size.height), clock: logClock, editor: $editor)
                             Spacer(minLength: 0)
                             TodayTotalsView(now: now)
                             OlderEntryLink(editor: $editor)
@@ -52,10 +55,13 @@ struct NowView: View {
                 NavigationLink { HistoryView() } label: { Image(systemName: "clock.arrow.circlepath") }
                     .accessibilityLabel("History")
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showSettings = true } label: { Image(systemName: "ellipsis") }
-                    .accessibilityLabel("More")
-                    .accessibilityIdentifier("more")
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button { showReports = true } label: { Image(systemName: "chart.bar.doc.horizontal") }
+                    .accessibilityLabel("Reports")
+                    .accessibilityIdentifier("reports")
+                Button { showSettings = true } label: { Image(systemName: "gearshape") }
+                    .accessibilityLabel("Settings")
+                    .accessibilityIdentifier("settings")
             }
         }
         .sheet(item: $editor) { request in
@@ -63,6 +69,9 @@ struct NowView: View {
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack { SettingsView() }
+        }
+        .sheet(isPresented: $showReports) {
+            ReportsSheet()
         }
         .onReceive(clock) { date in
             // A new totals day: rebuild the summary the widgets and Watch read.
@@ -88,6 +97,12 @@ struct NowView: View {
         return child.displayName
     }
 
+    /// Tall enough to hit while holding a baby, taller when fewer rows share
+    /// the screen, never so tall the totals leave it.
+    private func buttonHeight(for available: CGFloat) -> CGFloat {
+        let rows = CGFloat(max(1, LogButtons.rows(for: settings.tracked).count))
+        return min(AppTheme.maxLogButtonHeight, max(AppTheme.logButtonHeight, (available - AppTheme.homeSummaryAllowance) / rows))
+    }
 }
 
 private struct LoggingControls: View {
@@ -126,7 +141,7 @@ private struct LogTimeRow: View {
                     nudge("minus", label: "5 minutes earlier", id: "logTime.earlier") { clock.nudge(earlier: true) }
                     DatePicker(
                         "Log time",
-                        selection: Binding(get: { clock.time(now: context.date) }, set: { clock.set($0) }),
+                        selection: Binding(get: { clock.time(now: context.date) }, set: { date in animate { clock.set(date) } }),
                         displayedComponents: .hourAndMinute
                     )
                     .labelsHidden()
@@ -137,11 +152,19 @@ private struct LogTimeRow: View {
                         .opacity(clock.isAdjusted ? 1 : 0.35)
                 }
             }
+            // Inset inside the wound-back outline, so the round buttons never
+            // sit on its edge.
             .padding(.horizontal, AppTheme.spacing)
+            .padding(.vertical, AppTheme.hairSpacing)
             .background(clock.isAdjusted ? AppTheme.actionFill.opacity(0.35) : .clear, in: AppTheme.buttonShape)
             .overlay(AppTheme.buttonShape.strokeBorder(clock.isAdjusted ? AppTheme.accent : .clear, lineWidth: AppTheme.hairlineWidth))
         }
-        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: clock.chosen)
+    }
+
+    /// The row and the hint under the buttons change together, in one
+    /// transaction, so nothing between them jumps.
+    private func animate(_ change: () -> Void) {
+        withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation, change)
     }
 
     @ViewBuilder
@@ -149,7 +172,7 @@ private struct LogTimeRow: View {
         if clock.isAdjusted {
             Button {
                 Haptics.selected()
-                clock.reset()
+                animate { clock.reset() }
             } label: {
                 Label("Now", systemImage: "arrow.uturn.backward")
                     .font(.subheadline.weight(.semibold))
@@ -169,7 +192,7 @@ private struct LogTimeRow: View {
     private func nudge(_ symbol: String, label: String, id: String, action: @escaping () -> Void) -> some View {
         Button {
             Haptics.selected()
-            action()
+            animate(action)
         } label: {
             Image(systemName: symbol)
                 .font(.body.weight(.bold))
@@ -299,64 +322,87 @@ final class LogClock: ObservableObject {
     }
 }
 
+
+/// The answer to the 3am question. It leads with the last feed; a family that
+/// does not track feeds sees the last diaper instead, and one that tracks
+/// only sleep sees how long the baby has been asleep or awake.
 private struct NowStatusCard: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
+    @EnvironmentObject private var settings: BabySettings
     @State private var showSaveError = false
     let now: Date
     @ObservedObject var clock: LogClock
+
+    private enum Lead { case feed, diaper, sleep }
+
+    private var lead: Lead {
+        if settings.tracked.contains(.feed) { return .feed }
+        return settings.tracked.tracksDiapers ? .diaper : .sleep
+    }
+
+    private var summary: NowSummary { events.summary }
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             (dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
                 : AnyLayout(HStackLayout())) {
-                Label(events.summary.isFeeding ? "Feeding now" : "Last feed", systemImage: EventKind.feed.symbolName)
+                Label(heading, systemImage: headingKind.symbolName)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(AppTheme.feed)
+                    .foregroundStyle(AppTheme.color(for: headingKind))
                 if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: AppTheme.tightSpacing) }
-                if let day = events.summary.dayOfLife {
+                if let day = summary.dayOfLife {
                     Text("Day \(day)")
                         .font(.caption.weight(.medium))
                         .foregroundStyle(AppTheme.ink2)
                 }
             }
             VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
-                Text(feedTime)
+                Text(leadTime)
                     .font(.system(.largeTitle, design: .rounded, weight: .bold))
                     .foregroundStyle(AppTheme.ink)
                     .monospacedDigit()
-                    .contentTransition(reduceMotion ? .identity : .numericText())
+                    // A crossfade: "just now" to "2h 15m ago" is not a number
+                    // rolling over, and the numeric roll smeared the letters.
+                    .contentTransition(reduceMotion ? .identity : .opacity)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(feedDetail)
+                Text(leadDetail)
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.ink2)
+                    .contentTransition(reduceMotion ? .identity : .opacity)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(events.summary.feedLine(now: now))
-            if events.summary.isFeeding {
-                Button("Finish feed") { showSaveError = !events.stopRunning(.feed, at: clock.time()) }
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.accent)
-                    .frame(minHeight: 44)
-                    .accessibilityIdentifier("finishFeed")
+            .accessibilityLabel(accessibilityLine)
+            if lead == .feed, summary.isFeeding {
+                Button("Finish feed") {
+                    withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation) {
+                        showSaveError = !events.stopRunning(.feed, at: clock.time())
+                    }
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AppTheme.accent)
+                .frame(minHeight: 44)
+                .accessibilityIdentifier("finishFeed")
             }
-            Divider().overlay(AppTheme.cardElevated)
-            HStack(spacing: AppTheme.tightSpacing) {
-                Image(systemName: (events.summary.lastDiaperKind ?? .wet).symbolName)
-                    .foregroundStyle(AppTheme.color(for: events.summary.lastDiaperKind ?? .wet))
-                    .accessibilityHidden(true)
-                Text(events.summary.diaperLine(now: now))
-                    .font(.subheadline)
-                    .foregroundStyle(AppTheme.ink2)
-                    .monospacedDigit()
-                    .fixedSize(horizontal: false, vertical: true)
+            if lead == .feed, settings.tracked.tracksDiapers {
+                Divider().overlay(AppTheme.cardElevated)
+                HStack(spacing: AppTheme.tightSpacing) {
+                    Image(systemName: diaperKind.symbolName)
+                        .foregroundStyle(AppTheme.color(for: diaperKind))
+                        .accessibilityHidden(true)
+                    Text(summary.diaperLine(now: now))
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.ink2)
+                        .monospacedDigit()
+                        .contentTransition(reduceMotion ? .identity : .opacity)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
         .card()
-        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.summary)
         .accessibilityIdentifier("nowCard")
         .alert("Couldn't finish this feed", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
@@ -365,31 +411,80 @@ private struct NowStatusCard: View {
         }
     }
 
-    private var feedTime: String {
-        if let start = events.summary.runningFeedStart { return Format.compactDuration(now.timeIntervalSince(start)) }
-        guard let date = events.summary.lastFeedAt else { return "A fresh start" }
-        return Format.ago(date, now: now)
+    /// The diaper kind to draw: the last one logged, else the first tracked.
+    private var diaperKind: EventKind {
+        summary.lastDiaperKind ?? (settings.tracked.contains(.wet) ? .wet : .dirty)
     }
 
-    private var feedDetail: String {
-        let summary = events.summary
-        guard let date = summary.runningFeedStart ?? summary.lastFeedAt else {
-            return "Log a first feed below. We’ll remember the time and side."
+    private var headingKind: EventKind {
+        switch lead {
+        case .feed: .feed
+        case .diaper: diaperKind
+        case .sleep: .sleep
         }
-        let sides = summary.isFeeding ? summary.runningSides : summary.feedSides
-        let label: String? = switch sides.count {
-        case 1: sides[0] == .bottle ? "Bottle" : "\(sides[0].label) breast"
-        default: FeedSide.label(for: sides)
+    }
+
+    private var heading: String {
+        switch lead {
+        case .feed: summary.isFeeding ? "Feeding now" : "Last feed"
+        case .diaper: "Last diaper"
+        case .sleep: summary.isSleeping ? "Asleep" : "Awake"
         }
-        return [label, Format.time(date)].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    private var leadTime: String {
+        switch lead {
+        case .feed:
+            if let start = summary.runningFeedStart { return Format.compactDuration(now.timeIntervalSince(start)) }
+            guard let date = summary.lastFeedAt else { return "A fresh start" }
+            return Format.ago(date, now: now)
+        case .diaper:
+            guard let date = summary.lastDiaperAt else { return "A fresh start" }
+            return Format.ago(date, now: now)
+        case .sleep:
+            if let start = summary.runningSleepStart { return Format.compactDuration(now.timeIntervalSince(start)) }
+            guard let woke = summary.lastWokeAt else { return "A fresh start" }
+            return Format.compactDuration(now.timeIntervalSince(woke))
+        }
+    }
+
+    private var leadDetail: String {
+        switch lead {
+        case .feed:
+            guard let date = summary.runningFeedStart ?? summary.lastFeedAt else {
+                return "Log a first feed below. We’ll remember the time and side."
+            }
+            let sides = summary.isFeeding ? summary.runningSides : summary.feedSides
+            let label: String? = switch sides.count {
+            case 1: sides[0] == .bottle ? "Bottle" : "\(sides[0].label) breast"
+            default: FeedSide.label(for: sides)
+            }
+            return [label, Format.time(date)].compactMap { $0 }.joined(separator: " · ")
+        case .diaper:
+            guard let date = summary.lastDiaperAt else { return "Log a first diaper below." }
+            return [summary.lastDiaperKind?.label, Format.time(date)].compactMap { $0 }.joined(separator: " · ")
+        case .sleep:
+            if let start = summary.runningSleepStart { return "Since \(Format.time(start))" }
+            guard let woke = summary.lastWokeAt else { return "Tap Sleep when the baby falls asleep." }
+            return "Woke at \(Format.time(woke))"
+        }
+    }
+
+    private var accessibilityLine: String {
+        switch lead {
+        case .feed: summary.feedLine(now: now)
+        case .diaper: summary.diaperLine(now: now)
+        case .sleep: summary.awakeLine(now: now)
+        }
     }
 }
 
-/// The day so far, counted from the hour the parent chose in More (or over
-/// the last 24 hours), with an hour-by-hour strip beneath: one row per
-/// button, one square per hour.
+/// The day so far, counted from the hour the parent chose in Settings (or
+/// over the last 24 hours): one figure per button, then an hour-by-hour
+/// strip beneath with one row per button.
 private struct TodayTotalsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var settings: BabySettings
     let now: Date
@@ -397,41 +492,67 @@ private struct TodayTotalsView: View {
     var body: some View {
         let totals = WindowTotals.make(events: events.events, window: settings.totalsWindow, now: now)
         let title = settings.totalsWindow.title()
-        VStack(spacing: AppTheme.tightSpacing) {
-            VStack(spacing: AppTheme.hairSpacing) {
-                SectionLabel(text: title)
-                Text(totals.line)
-                    .font(.subheadline)
-                    .foregroundStyle(AppTheme.ink2)
-                    .monospacedDigit()
-                    .contentTransition(reduceMotion ? .identity : .numericText())
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+        let kinds = settings.tracked.buttons
+        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+            SectionLabel(text: title)
+            (dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
+                : AnyLayout(HStackLayout(alignment: .top, spacing: AppTheme.tightSpacing))) {
+                ForEach(kinds, id: \.self) { kind in
+                    stat(kind, totals: totals)
+                }
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("\(title): \(totals.line)")
+            .accessibilityLabel("\(title): \(totals.line(settings.tracked))")
             .accessibilityIdentifier("todayTotals")
-            HourStrip(totals: totals)
+            HourStrip(totals: totals, kinds: kinds)
         }
-        .frame(maxWidth: .infinity)
-        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: totals)
+        .card()
+    }
+
+    private func stat(_ kind: EventKind, totals: WindowTotals) -> some View {
+        let value = kind == .sleep ? Format.compactDuration(totals.sleepSeconds) : "\(totals.count(kind))"
+        return VStack(alignment: .leading, spacing: 0) {
+            Text(value)
+                .font(.system(.title3, design: .rounded, weight: .bold))
+                .foregroundStyle(AppTheme.ink)
+                .monospacedDigit()
+                .contentTransition(reduceMotion ? .identity : .numericText())
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            HStack(spacing: AppTheme.hairSpacing) {
+                KindDot(kind: kind, size: AppTheme.legendDotSize)
+                Text(unit(kind, count: totals.count(kind)))
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink2)
+                    .lineLimit(1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func unit(_ kind: EventKind, count: Int) -> String {
+        switch kind {
+        case .feed: count == 1 ? "feed" : "feeds"
+        case .sleep: "sleep"
+        default: kind.label.lowercased()
+        }
     }
 }
 
-/// A contribution-graph for one day: four rows (the four buttons), 24 hourly
-/// squares. Darker is more; sleep fills by how much of the hour was asleep.
-/// Hours still to come stay faint.
+/// A contribution graph for the day: one row per button, 24 hourly squares.
+/// Darker is more; sleep fills by how much of the hour was asleep. Hours still
+/// to come stay faint.
 private struct HourStrip: View {
     let totals: WindowTotals
+    let kinds: [EventKind]
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.cellGap) {
-            ForEach(WindowTotals.kinds, id: \.self) { kind in
+            ForEach(kinds, id: \.self) { kind in
                 HStack(spacing: AppTheme.cellGap) {
-                    Image(systemName: kind.symbolName)
-                        .font(.system(size: AppTheme.cellHeight - 1, weight: .bold))
-                        .foregroundStyle(AppTheme.color(for: kind))
-                        .frame(width: AppTheme.stripIconWidth, height: AppTheme.cellHeight)
+                    KindDot(kind: kind, size: AppTheme.legendDotSize)
+                        .frame(width: AppTheme.stripIconWidth, height: AppTheme.cellHeight, alignment: .leading)
                     ForEach(0..<WindowTotals.columns, id: \.self) { hour in
                         AppTheme.cellShape
                             .fill(fill(kind: kind, hour: hour))
@@ -450,6 +571,7 @@ private struct HourStrip: View {
                 }
             }
             .padding(.leading, AppTheme.stripIconWidth + AppTheme.cellGap)
+            .padding(.top, AppTheme.hairSpacing)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Hour by hour")
@@ -468,7 +590,7 @@ private struct HourStrip: View {
 
     /// "Feed: 2 AM, 5 AM. Pee: 3 AM." Hours with at least one entry.
     private var spokenSummary: String {
-        WindowTotals.kinds.compactMap { kind -> String? in
+        kinds.compactMap { kind -> String? in
             let hours = (totals.hours[kind] ?? []).enumerated().filter { $0.element > 0 }.map {
                 totals.gridStart.addingTimeInterval(Double($0.offset) * 3600).formatted(.dateTime.hour())
             }
@@ -488,7 +610,7 @@ private struct OlderEntryLink: View {
             NewEntryMenuItems(editor: $editor)
         } label: {
             Label("Add an older entry", systemImage: "clock.badge.plus")
-                .font(.subheadline.weight(.medium))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppTheme.accent)
                 .frame(minHeight: 44)
         }

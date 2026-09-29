@@ -268,13 +268,13 @@ struct EventEditorView: View {
 /// The kinds a hand-entered row can be, for History's add button and the
 /// older-entry link on Now. The editor opens at the current time to adjust.
 struct NewEntryMenuItems: View {
+    @EnvironmentObject private var settings: BabySettings
     @Binding var editor: EditorRequest?
 
     var body: some View {
-        Button("Feed") { editor = EditorRequest(kind: .feed) }
-        Button("\(EventKind.wet.label) diaper") { editor = EditorRequest(kind: .wet) }
-        Button("\(EventKind.dirty.label) diaper") { editor = EditorRequest(kind: .dirty) }
-        Button("Sleep") { editor = EditorRequest(kind: .sleep) }
+        ForEach(settings.tracked.buttons, id: \.self) { kind in
+            Button(kind.isDiaper ? "\(kind.label) diaper" : kind.label) { editor = EditorRequest(kind: kind) }
+        }
         Button("Weight") { editor = EditorRequest(kind: .weight) }
     }
 }

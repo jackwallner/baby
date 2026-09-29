@@ -34,8 +34,10 @@ enum PDFReport {
 
     private struct Column: Sendable {
         let title: String
-        let width: CGFloat
+        var width: CGFloat
         let alignment: NSTextAlignment
+        /// The button the column belongs to; nil for date, day and weight.
+        var kind: EventKind? = nil
         let value: @Sendable (SummaryReport.Day) -> String
     }
 
@@ -43,27 +45,27 @@ enum PDFReport {
     /// drawn 6pt narrower than its column so two numbers can never touch.
     private static let gutter: CGFloat = 6
 
-    private static let columns: [Column] = [
+    private static let allColumns: [Column] = [
         Column(title: "DATE", width: 46, alignment: .left) {
             $0.date.formatted(.dateTime.month(.abbreviated).day())
         },
         Column(title: "DAY", width: 24, alignment: .right) { $0.dayOfLife.map(String.init) ?? "" },
-        Column(title: "FEEDS", width: 38, alignment: .right) { String($0.feeds) },
-        Column(title: "GAP", width: 52, alignment: .right) {
+        Column(title: "FEEDS", width: 38, alignment: .right, kind: .feed) { String($0.feeds) },
+        Column(title: "GAP", width: 52, alignment: .right, kind: .feed) {
             $0.longestFeedGapSeconds >= 60 ? Format.compactDuration($0.longestFeedGapSeconds) : ""
         },
-        Column(title: "WET", width: 32, alignment: .right) { String($0.wet) },
-        Column(title: "DIRTY", width: 38, alignment: .right) { String($0.dirty) },
-        Column(title: "BOTTLE", width: 44, alignment: .right) {
+        Column(title: "WET", width: 32, alignment: .right, kind: .wet) { String($0.wet) },
+        Column(title: "DIRTY", width: 38, alignment: .right, kind: .dirty) { String($0.dirty) },
+        Column(title: "BOTTLE", width: 44, alignment: .right, kind: .feed) {
             $0.bottleMillilitres > 0 ? Format.millilitres($0.bottleMillilitres) : ""
         },
-        Column(title: "SLEEP", width: 56, alignment: .right) {
+        Column(title: "SLEEP", width: 56, alignment: .right, kind: .sleep) {
             $0.sleepSeconds >= 60 ? Format.compactDuration($0.sleepSeconds) : ""
         },
-        Column(title: "LONGEST", width: 50, alignment: .right) {
+        Column(title: "LONGEST", width: 50, alignment: .right, kind: .sleep) {
             $0.longestSleepSeconds >= 60 ? Format.compactDuration($0.longestSleepSeconds) : ""
         },
-        Column(title: "STOOL", width: 74, alignment: .left) {
+        Column(title: "STOOL", width: 74, alignment: .left, kind: .dirty) {
             let colors = Array(Set($0.stoolColors.map(\.label))).sorted()
             return colors.joined(separator: ", ")
         },
@@ -71,6 +73,19 @@ enum PDFReport {
             $0.weightGrams.map { Format.grams($0) } ?? ""
         },
     ]
+
+    /// The columns for the buttons this family uses, widened in proportion
+    /// so the table still spans the page.
+    private static func columns(for tracked: TrackedKinds) -> [Column] {
+        let kept = allColumns.filter { $0.kind.map(tracked.contains) ?? true }
+        let total = kept.reduce(0) { $0 + $1.width }
+        let full = allColumns.reduce(0) { $0 + $1.width }
+        return kept.map { column in
+            var column = column
+            column.width *= full / total
+            return column
+        }
+    }
 
     // MARK: - Rendering
 
@@ -88,14 +103,14 @@ enum PDFReport {
                     y = drawHeader(report, isExample: isExample, at: y)
                     y = drawStats(report, at: y)
                 }
-                y = drawTableHeader(at: y)
+                y = drawTableHeader(columns(for: report.tracked), at: y)
                 while let day = rows.first, y + 18 < pageSize.height - margin - 40 {
-                    drawRow(day, at: y, striped: (report.days.count - rows.count) % 2 == 1)
+                    drawRow(day, columns: columns(for: report.tracked), at: y, striped: (report.days.count - rows.count) % 2 == 1)
                     y += 18
                     rows = rows.dropFirst()
                 }
                 if rows.isEmpty {
-                    y = drawKey(at: y + 8)
+                    y = drawKey(report.tracked, at: y + 8)
                     y = drawNotes(report, at: y + 12)
                 }
                 drawFooter(report, page: page, isExample: isExample)
@@ -136,15 +151,15 @@ enum PDFReport {
         }
     }
 
-    /// The name, the averages and the first rows: what the paywall shows.
-    static let headlineCrop = CGRect(x: 36, y: 36, width: 540, height: 250)
+    /// The name, the averages and the first rows: the paywall's preview card.
+    static let previewCrop = CGRect(x: 36, y: 36, width: 540, height: 340)
 
     // MARK: - Pieces
 
     private static func metadata(for report: SummaryReport) -> UIGraphicsPDFRendererFormat {
         let format = UIGraphicsPDFRendererFormat()
         format.documentInfo = [
-            kCGPDFContextTitle as String: "\(report.childName): feeds, diapers and sleep",
+            kCGPDFContextTitle as String: "\(report.childName): \(report.tracked.headline.lowercased())",
             kCGPDFContextCreator as String: "Baby Tracker",
         ]
         return format
@@ -162,7 +177,7 @@ enum PDFReport {
             draw(badge, font: Font.sectionLabel, color: Ink.secondary, at: CGPoint(x: rect.minX + 6, y: rect.minY + 3.5))
         }
         y += 30
-        var line = "Feeds, diapers and sleep"
+        var line = report.tracked.headline
         if let birth = report.birthDate {
             line += " · born \(birth.formatted(.dateTime.month(.abbreviated).day().year()))"
             if let day = DateHelpers.dayOfLife(birthDate: birth, on: report.end) {
@@ -178,14 +193,15 @@ enum PDFReport {
     }
 
     private static func drawStats(_ report: SummaryReport, at y: CGFloat) -> CGFloat {
-        let stats: [(String, String)] = [
-            (oneDecimal(report.averageFeedsPerDay), "feeds / day"),
-            (oneDecimal(report.averageWetPerDay), "wet / day"),
-            (oneDecimal(report.averageDirtyPerDay), "dirty / day"),
-            (report.longestFeedGapSeconds >= 60 ? Format.compactDuration(report.longestFeedGapSeconds) : "—", "longest feed gap"),
-            (report.longestSleepSeconds >= 60 ? Format.compactDuration(report.longestSleepSeconds) : "—", "longest sleep"),
-            (weightValue(report), weightLabel(report)),
+        let all: [(kind: EventKind, value: String, label: String)] = [
+            (.feed, oneDecimal(report.averageFeedsPerDay), "feeds / day"),
+            (.wet, oneDecimal(report.averageWetPerDay), "wet / day"),
+            (.dirty, oneDecimal(report.averageDirtyPerDay), "dirty / day"),
+            (.feed, report.longestFeedGapSeconds >= 60 ? Format.compactDuration(report.longestFeedGapSeconds) : "—", "longest feed gap"),
+            (.sleep, report.longestSleepSeconds >= 60 ? Format.compactDuration(report.longestSleepSeconds) : "—", "longest sleep"),
+            (.weight, weightValue(report), weightLabel(report)),
         ]
+        let stats = all.filter { report.tracked.contains($0.kind) }.map { ($0.value, $0.label) }
         let width = (pageSize.width - margin * 2) / CGFloat(stats.count)
         for (index, stat) in stats.enumerated() {
             let x = margin + CGFloat(index) * width
@@ -210,7 +226,7 @@ enum PDFReport {
         return "weight \(Format.gramsChange(change))"
     }
 
-    private static func drawTableHeader(at y: CGFloat) -> CGFloat {
+    private static func drawTableHeader(_ columns: [Column], at y: CGFloat) -> CGFloat {
         var x = margin
         for column in columns {
             draw(column.title, font: Font.columnHeader, color: Ink.secondary,
@@ -221,7 +237,7 @@ enum PDFReport {
         return y + 19
     }
 
-    private static func drawRow(_ day: SummaryReport.Day, at y: CGFloat, striped: Bool) {
+    private static func drawRow(_ day: SummaryReport.Day, columns: [Column], at y: CGFloat, striped: Bool) {
         if striped {
             Ink.band.setFill()
             UIBezierPath(rect: CGRect(x: margin - 4, y: y - 3, width: pageSize.width - margin * 2 + 8, height: 18)).fill()
@@ -275,9 +291,12 @@ enum PDFReport {
     }
 
     /// What the two columns a parent could misread mean, in one line.
-    private static func drawKey(at y: CGFloat) -> CGFloat {
-        draw("Gap: longest time between two logged feeds, start to start. Longest: longest single sleep. Only what was logged is counted.",
-             font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
+    private static func drawKey(_ tracked: TrackedKinds, at y: CGFloat) -> CGFloat {
+        var key: [String] = []
+        if tracked.contains(.feed) { key.append("Gap: longest time between two logged feeds, start to start.") }
+        if tracked.contains(.sleep) { key.append("Longest: longest single sleep.") }
+        key.append("Only what was logged is counted.")
+        draw(key.joined(separator: " "), font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
         return y + 12
     }
 

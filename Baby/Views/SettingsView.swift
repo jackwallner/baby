@@ -22,13 +22,14 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Group {
-                toolsSection
                 babySection
-                babiesSection
-                sharingSection
-                appearanceSection
-                diaperWordsSection
+                buttonsSection
+                if settings.tracked.tracksDiapers { diaperWordsSection }
                 totalsSection
+                appearanceSection
+                sharingSection
+                babiesSection
+                guidesSection
                 plusSection
                 aboutSection
             }
@@ -38,7 +39,7 @@ struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .background(AppTheme.paper)
         .tint(AppTheme.accent)
-        .navigationTitle("More")
+        .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
@@ -78,18 +79,47 @@ struct SettingsView: View {
         .onChange(of: birthDate) { _, _ in saveChild() }
     }
 
-    private var toolsSection: some View {
-        Section("When you need them") {
+    private var guidesSection: some View {
+        Section("Guides") {
             NavigationLink { FirstWeeksView() } label: {
                 Label("First Weeks", systemImage: "checklist")
-            }
-            NavigationLink { SummaryView() } label: {
-                Label("Pediatrician summary", systemImage: "doc.text")
             }
             Button { showStainHelper = true } label: {
                 Label("Stain helper", systemImage: "tshirt")
             }
         }
+    }
+
+    /// Which buttons this family uses. The last one left cannot be turned
+    /// off, so the home screen is never empty.
+    private var buttonsSection: some View {
+        Section {
+            ForEach(TrackedKinds.buttons, id: \.self) { kind in
+                Toggle(isOn: trackingBinding(kind)) {
+                    HStack(spacing: AppTheme.tightSpacing) {
+                        KindDot(kind: kind, size: AppTheme.legendDotSize)
+                        Text(kind.label)
+                    }
+                }
+                .disabled(settings.tracked.buttons == [kind])
+                .accessibilityIdentifier("track.\(kind.rawValue)")
+            }
+        } header: {
+            Text("Buttons")
+        } footer: {
+            Text("A button that is off leaves the home screen, widgets, Watch, History and reports. What was logged with it is kept, and comes back if you turn it on again.")
+        }
+    }
+
+    private func trackingBinding(_ kind: EventKind) -> Binding<Bool> {
+        Binding(
+            get: { settings.tracked.contains(kind) },
+            set: { isOn in
+                var hidden = settings.tracked.hidden
+                if isOn { hidden.remove(kind) } else { hidden.insert(kind) }
+                settings.tracked = TrackedKinds(hidden: hidden)
+            }
+        )
     }
 
     private func loadChild() {
@@ -228,8 +258,8 @@ struct SettingsView: View {
     }
 
     private var diaperWordsSection: some View {
-        Section("Diaper buttons") {
-            Picker("Diaper buttons", selection: $settings.diaperWords) {
+        Section("Diaper words") {
+            Picker("Diaper words", selection: $settings.diaperWords) {
                 ForEach(DiaperWords.allCases, id: \.rawValue) { words in
                     Text(words.label)
                         .foregroundStyle(AppTheme.ink)
@@ -271,7 +301,7 @@ struct SettingsView: View {
         } header: {
             Text("Daily totals")
         } footer: {
-            Text("For the totals and hour chart under the buttons. History and the pediatrician summary always use calendar days.")
+            Text("For the totals and hour chart under the buttons. History and reports always use calendar days.")
         }
     }
 

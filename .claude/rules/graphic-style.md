@@ -43,7 +43,7 @@ Sharing is "Log together" and is written for the second phone: install,
 scan the code, both log. The invite is a read/write link, deliberately not a
 contact-only invite, because those fail when the partner's Apple ID differs
 from the address they were sent to. Say plainly that anyone with the link can
-edit. Joining is a first-class onboarding path and lives in More; a new
+edit. Joining is a first-class onboarding path and lives in Settings; a new
 parent is never shown setup while an invitation's baby is on its way, and
 entries logged before joining can be moved into the shared baby. The joined
 list shows only accepted people. Never put an accessibility identifier on a

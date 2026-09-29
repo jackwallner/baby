@@ -1,15 +1,17 @@
 import CoreData
 import SwiftUI
 
-/// The four buttons. They never move and never gain a fifth: a stable layout
-/// is the feature. The diaper pair reads Pee and Poop, or Wet and Dirty when
-/// the parent picks those words in More. A tap logs at the log clock's time
-/// (now, unless the parent wound it back); a long press opens the editor with
-/// that kind pre-filled.
+/// The log buttons. They never move: a stable layout is the feature. Feed,
+/// then the diaper pair, then Sleep; a family can turn any of them off in
+/// Settings and the rest keep their order. The diaper pair reads Pee and
+/// Poop, or Wet and Dirty. A tap logs at the log clock's time (now, unless
+/// the parent wound it back); a long press opens the editor with that kind
+/// pre-filled.
 struct LogButtons: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
+    @EnvironmentObject private var settings: BabySettings
     @ObservedObject var clock: LogClock
     @State private var showSaveError = false
     /// The feed the side chips edit: the one Feed just logged.
@@ -22,26 +24,54 @@ struct LogButtons: View {
     /// How long the side chips stay after the last tap on them or on Feed.
     static let sideWindow: TimeInterval = 90
 
+    /// The rows the tracked buttons make: Feed, the diaper pair (or the one
+    /// diaper button left), Sleep.
+    static func rows(for tracked: TrackedKinds) -> [[EventKind]] {
+        [[.feed], [.wet, .dirty], [.sleep]]
+            .map { $0.filter(tracked.contains) }
+            .filter { !$0.isEmpty }
+    }
+
     var body: some View {
         VStack(spacing: AppTheme.spacing) {
-            feedCard
-            (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: AppTheme.spacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
-                kindButton(.wet, label: EventKind.wet.label) { events.log(.wet, at: $0) != nil }
-                kindButton(.dirty, label: EventKind.dirty.label) { events.log(.dirty, at: $0) != nil }
+            ForEach(Self.rows(for: settings.tracked), id: \.self) { row in
+                if row == [.feed] {
+                    feedCard
+                } else {
+                    (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: AppTheme.spacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
+                        ForEach(row, id: \.self) { kind in
+                            button(for: kind)
+                        }
+                    }
+                }
             }
+        }
+        .alert("Couldn't save this entry", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Nothing was logged. Please try again.")
+        }
+    }
+
+    @ViewBuilder
+    private func button(for kind: EventKind) -> some View {
+        switch kind {
+        case .sleep:
             kindButton(.sleep, label: events.runningSleep == nil ? "Sleep" : "Wake") { at in
                 if events.runningSleep != nil {
                     return events.stopRunning(.sleep, at: at)
                 }
                 return events.startTimed(.sleep, at: at) != nil
             }
+        default:
+            kindButton(kind, label: kind.label) { events.log(kind, at: $0) != nil }
         }
-        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: sideTarget)
-        .alert("Couldn't save this entry", isPresented: $showSaveError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Nothing was logged. Please try again.")
-        }
+    }
+
+    /// Every tap changes the card, the totals and the toast together: one
+    /// transaction, so nothing on the screen moves on its own schedule.
+    private func animate<T>(_ change: () -> T) -> T {
+        withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation, change)
     }
 
     // MARK: - Feed
@@ -74,21 +104,27 @@ struct LogButtons: View {
             .accessibilityAction(named: "Add details") { onEdit(.feed) }
 
             if let target = targetFeed {
-                Rectangle()
-                    .fill(AppTheme.feed.opacity(0.35))
-                    .frame(height: AppTheme.hairlineWidth)
-                    .padding(.horizontal, AppTheme.spacing)
                 VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+                    Rectangle()
+                        .fill(AppTheme.feed.opacity(0.35))
+                        .frame(height: AppTheme.hairlineWidth)
                     Text("Add a side (optional)")
                         .font(.caption.weight(.medium))
                         .foregroundStyle(AppTheme.ink2)
+                        .padding(.top, AppTheme.hairSpacing)
                     FeedSideChips(selection: sidesBinding(for: target))
                 }
-                .padding(AppTheme.spacing)
-                .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top)))
+                .padding([.horizontal, .bottom], AppTheme.spacing)
+                // The card grows and the row fades up into the new space; on
+                // the way out it fades first, so chips never slide over Feed.
+                .transition(reduceMotion ? .opacity : .asymmetric(
+                    insertion: .opacity.combined(with: .offset(y: -AppTheme.tightSpacing)),
+                    removal: .opacity
+                ))
             }
         }
         .background(AppTheme.fill(for: .feed), in: AppTheme.buttonShape)
+        .clipShape(AppTheme.buttonShape)
         .graphicBorder()
     }
 
@@ -98,19 +134,25 @@ struct LogButtons: View {
     }
 
     private func logFeed() {
-        let event = events.log(.feed, at: clock.time())
+        let at = clock.time()
+        let event = animate {
+            let event = events.log(.feed, at: at)
+            if let event { sideTarget = event.objectID }
+            return event
+        }
         reportSave(event != nil)
-        guard let event else { return }
-        sideTarget = event.objectID
-        holdSides()
+        if event != nil { holdSides() }
     }
 
     private func sidesBinding(for event: LogEvent) -> Binding<[FeedSide]> {
         Binding(
             get: { event.feedSides },
             set: { sides in
-                event.feedSides = sides
-                if !events.save() { showSaveError = true }
+                let saved = animate {
+                    event.feedSides = sides
+                    return events.save()
+                }
+                if !saved { showSaveError = true }
                 holdSides()
             }
         )
@@ -121,7 +163,7 @@ struct LogButtons: View {
         sideTimeout = Task { @MainActor in
             try? await Task.sleep(for: .seconds(Self.sideWindow))
             guard !Task.isCancelled else { return }
-            sideTarget = nil
+            animate { sideTarget = nil }
         }
     }
 
@@ -139,7 +181,8 @@ struct LogButtons: View {
     private func kindButton(_ kind: EventKind, label: String, action: @escaping (Date) -> Bool) -> some View {
         Button {
             // The side row stays: a diaper change mid-feed must not cost the side.
-            reportSave(action(clock.time()))
+            let at = clock.time()
+            reportSave(animate { action(at) })
         } label: {
             HStack(spacing: AppTheme.tightSpacing) {
                 if kind == .sleep, events.runningSleep != nil {
@@ -181,7 +224,6 @@ struct LogButtons: View {
         .accessibilityIdentifier("log.\(kind.rawValue)")
         .accessibilityHint(kind == .sleep ? "Starts or ends sleep. Hold to log an earlier sleep." : "Logs a diaper. Hold to add details.")
         .accessibilityAction(named: "Add details") { onEdit(kind) }
-        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.summary.isSleeping)
     }
 }
 

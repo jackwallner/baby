@@ -54,6 +54,16 @@ final class BabySettings: ObservableObject {
         }
     }
 
+    /// The buttons this family uses. Turning one off rebuilds the log and the
+    /// summary, so Now, History, the reports, widgets and Watch all follow.
+    @Published var tracked: TrackedKinds {
+        didSet {
+            guard tracked != oldValue else { return }
+            tracked.store()
+            EventStore.shared.reload()
+        }
+    }
+
     /// When the totals under the log buttons start counting. The summary the
     /// widgets and the Watch read is rebuilt with it.
     @Published var totalsWindow: TotalsWindow {
@@ -73,6 +83,13 @@ final class BabySettings: ObservableObject {
         hasCompletedSetup = defaults.bool(forKey: AppGroup.Key.hasCompletedSetup)
         appearance = AppAppearance(rawValue: defaults.string(forKey: AppGroup.Key.appearance) ?? "") ?? .system
         diaperWords = .current
+        #if DEBUG
+        // Seeded runs start with every button, whatever a previous run left.
+        if ProcessInfo.processInfo.arguments.contains("-SeedScreenshotData") {
+            AppGroup.defaults.removeObject(forKey: AppGroup.Key.hiddenKinds)
+        }
+        #endif
+        tracked = .current
         totalsWindow = .current
         #if DEBUG
         // `-Appearance night` pins a palette for captures and UI tests.

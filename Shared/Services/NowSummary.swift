@@ -18,6 +18,8 @@ struct NowSummary: Codable, Equatable, Sendable {
     var lastDiaperAt: Date?
     var lastDiaperKind: EventKind?
     var runningSleepStart: Date?
+    /// When the last finished sleep ended. Optional for older summaries.
+    var lastWokeAt: Date?
     var runningFeedStart: Date?
     var runningFeedSide: FeedSide?
     var runningFeedSides: [FeedSide]?
@@ -32,6 +34,9 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// cached summaries from older builds decodable and gives Watch replay a
     /// real acknowledgement watermark instead of guessing from `generatedAt`.
     var knownEventIDs: [UUID]?
+    /// The buttons turned off on the phone, so the Watch hides them too.
+    /// Optional for summaries from older builds, which tracked everything.
+    var hiddenKinds: [EventKind]?
 
     static let empty = NowSummary()
     static let knownEventLimit = 256
@@ -53,6 +58,8 @@ struct NowSummary: Codable, Equatable, Sendable {
         runningFeedSides = sides
         runningFeedSide = sides.first
     }
+
+    var tracked: TrackedKinds { TrackedKinds(hidden: Set(hiddenKinds ?? [])) }
 
     var isSleeping: Bool { runningSleepStart != nil }
     var isFeeding: Bool { runningFeedStart != nil }
@@ -83,9 +90,68 @@ struct NowSummary: Codable, Equatable, Sendable {
         return Format.asleep(now.timeIntervalSince(runningSleepStart))
     }
 
-    /// "3 pee · 2 poop · 7 feeds".
+    /// "Awake 2h 10m", or "Asleep 1h 05m" while a sleep runs.
+    func awakeLine(now: Date = .now) -> String {
+        if let sleep = sleepLine(now: now) { return sleep }
+        guard let lastWokeAt else { return "No sleep logged yet" }
+        return "Awake \(Format.compactDuration(now.timeIntervalSince(lastWokeAt)))"
+    }
+
+    // MARK: - Glances
+
+    /// What the widgets, the Watch and the complication lead with: the last
+    /// feed, or the last diaper for a family that does not log feeds, or
+    /// sleep when that is all they log.
+    var leadKind: EventKind {
+        let tracked = tracked
+        if tracked.contains(.feed) { return .feed }
+        guard tracked.tracksDiapers else { return .sleep }
+        return lastDiaperKind ?? (tracked.contains(.wet) ? .wet : .dirty)
+    }
+
+    func leadLine(now: Date = .now) -> String {
+        switch leadKind {
+        case .feed: feedLine(now: now)
+        case .sleep: awakeLine(now: now)
+        default: diaperLine(now: now)
+        }
+    }
+
+    /// The lines under the lead: the last diaper under a feed, and a sleep
+    /// that is running.
+    func supportingLines(now: Date = .now) -> [String] {
+        let tracked = tracked
+        var lines: [String] = []
+        if leadKind == .feed, tracked.tracksDiapers { lines.append(diaperLine(now: now)) }
+        if leadKind != .sleep, tracked.contains(.sleep), let sleep = sleepLine(now: now) { lines.append(sleep) }
+        return lines
+    }
+
+    /// "2h 14m" since the lead, for the round complications. A dash before
+    /// anything is logged.
+    func leadElapsed(now: Date = .now) -> String {
+        let since: Date? = switch leadKind {
+        case .feed: runningFeedStart ?? lastFeedAt
+        case .sleep: runningSleepStart ?? lastWokeAt
+        default: lastDiaperAt
+        }
+        guard let since else { return "–" }
+        return Format.compactDuration(now.timeIntervalSince(since))
+    }
+
+    /// "L", "R+L" under a feed's elapsed time; nil for anything else.
+    var leadShortDetail: String? {
+        leadKind == .feed ? FeedSide.shortLabel(for: feedSides) : nil
+    }
+
+    /// "7 feeds · 3 pee · 2 poop", only the kinds this family tracks.
     var todayLine: String {
-        "\(todayWet) \(EventKind.wet.label.lowercased()) · \(todayDirty) \(EventKind.dirty.label.lowercased()) · \(Format.count(todayFeeds, "feed"))"
+        let tracked = tracked
+        var parts: [String] = []
+        if tracked.contains(.feed) { parts.append(Format.count(todayFeeds, "feed")) }
+        if tracked.contains(.wet) { parts.append("\(todayWet) \(EventKind.wet.label.lowercased())") }
+        if tracked.contains(.dirty) { parts.append("\(todayDirty) \(EventKind.dirty.label.lowercased())") }
+        return parts.joined(separator: " · ")
     }
 
     // MARK: - Building
@@ -96,12 +162,15 @@ struct NowSummary: Codable, Equatable, Sendable {
         events: [LogEvent],
         now: Date = .now,
         calendar: Calendar = .current,
-        window: TotalsWindow = .current
+        window: TotalsWindow = .current,
+        tracked: TrackedKinds = .current
     ) -> NowSummary {
         var summary = NowSummary()
         summary.generatedAt = now
         summary.totalsWindow = window.storedValue
+        summary.hiddenKinds = tracked.hidden.isEmpty ? nil : TrackedKinds.buttons.filter { !tracked.contains($0) }
         guard let child else { return summary }
+        let events = events.filter { tracked.contains($0.eventKind) }
         let today = window.interval(at: now, calendar: calendar)
         summary.childName = child.displayName
         summary.childID = child.id
@@ -128,6 +197,8 @@ struct NowSummary: Codable, Equatable, Sendable {
                 // parents started one, the baby has been asleep since the first.
                 if event.isRunning {
                     summary.runningSleepStart = event.startedAt
+                } else if summary.lastWokeAt == nil {
+                    summary.lastWokeAt = event.endedAt
                 }
             case .weight:
                 break
@@ -458,13 +529,15 @@ struct WindowTotals: Equatable, Sendable {
     }
 
     /// "7 feeds · 3 pee · 2 poop · 5h 10m sleep", in the order of the strip.
-    var line: String {
-        var parts = [
-            Format.count(feeds, "feed"),
-            "\(wet) \(EventKind.wet.label.lowercased())",
-            "\(dirty) \(EventKind.dirty.label.lowercased())",
-        ]
-        if sleepSeconds >= 60 { parts.append("\(Format.compactDuration(sleepSeconds)) sleep") }
+    var line: String { line(.all) }
+
+    /// The same, for only the buttons this family uses.
+    func line(_ tracked: TrackedKinds) -> String {
+        var parts: [String] = []
+        if tracked.contains(.feed) { parts.append(Format.count(feeds, "feed")) }
+        if tracked.contains(.wet) { parts.append("\(wet) \(EventKind.wet.label.lowercased())") }
+        if tracked.contains(.dirty) { parts.append("\(dirty) \(EventKind.dirty.label.lowercased())") }
+        if tracked.contains(.sleep), sleepSeconds >= 60 { parts.append("\(Format.compactDuration(sleepSeconds)) sleep") }
         return parts.joined(separator: " · ")
     }
 }

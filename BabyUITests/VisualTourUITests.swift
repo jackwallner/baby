@@ -44,7 +44,7 @@ final class VisualTourUITests: XCTestCase {
 
     func testTourDailyUse() {
         let app = launch(["-SeedScreenshotData"])
-        XCTAssertTrue(app.buttons["more"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["settings"].waitForExistence(timeout: 15))
         attach(app, "10-home")
 
         app.buttons["log.wet"].tap()
@@ -73,44 +73,49 @@ final class VisualTourUITests: XCTestCase {
         attach(app, "15-history")
     }
 
-    func testTourMore() {
+    func testTourSettings() {
         let app = launch(["-SeedScreenshotData"])
-        XCTAssertTrue(app.buttons["more"].waitForExistence(timeout: 15))
-        app.buttons["more"].tap()
-        XCTAssertTrue(app.navigationBars["More"].waitForExistence(timeout: 5))
-        attach(app, "20-more-top")
+        XCTAssertTrue(app.buttons["settings"].waitForExistence(timeout: 15))
+        app.buttons["settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+        attach(app, "20-settings-top")
         app.swipeUp()
-        attach(app, "21-more-middle")
+        attach(app, "21-settings-middle")
         app.swipeUp()
         app.swipeUp()
-        attach(app, "22-more-bottom")
+        attach(app, "22-settings-bottom")
         app.swipeDown()
         app.swipeDown()
         app.swipeDown()
 
-        app.buttons["First Weeks"].tap()
+        let firstWeeks = app.buttons["First Weeks"]
+        scrollTo(firstWeeks, in: app)
+        firstWeeks.tap()
         XCTAssertTrue(app.otherElements["tallyTable"].waitForExistence(timeout: 5) || app.navigationBars.count > 0)
         attach(app, "23-first-weeks")
         app.swipeUp()
         attach(app, "24-first-weeks-lower")
         app.navigationBars.buttons.element(boundBy: 0).tap()
 
-        app.buttons["Pediatrician summary"].tap()
-        sleep(1)
-        attach(app, "25-summary")
-        app.swipeUp()
-        attach(app, "26-summary-lower")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-
-        app.buttons["Stain helper"].tap()
+        let stainHelper = app.buttons["Stain helper"]
+        scrollTo(stainHelper, in: app)
+        stainHelper.tap()
         sleep(1)
         attach(app, "27-stain-helper")
     }
 
+    func testTourReports() {
+        let app = launch(["-SeedScreenshotData"])
+        XCTAssertTrue(app.buttons["reports"].waitForExistence(timeout: 15))
+        app.buttons["reports"].tap()
+        sleep(2)
+        attach(app, "25-reports-paywall")
+    }
+
     func testTourLogTogether() {
         let app = launch(["-SeedScreenshotData"])
-        XCTAssertTrue(app.buttons["more"].waitForExistence(timeout: 15))
-        app.buttons["more"].tap()
+        XCTAssertTrue(app.buttons["settings"].waitForExistence(timeout: 15))
+        app.buttons["settings"].tap()
         let invite = app.buttons["settings.partner.share"]
         scrollTo(invite, in: app)
         invite.tap()
@@ -127,8 +132,8 @@ final class VisualTourUITests: XCTestCase {
 
     func testTourInvite() {
         let app = launch(["-SeedScreenshotData", "-SharingPreview"])
-        XCTAssertTrue(app.buttons["more"].waitForExistence(timeout: 15))
-        app.buttons["more"].tap()
+        XCTAssertTrue(app.buttons["settings"].waitForExistence(timeout: 15))
+        app.buttons["settings"].tap()
         let invite = app.buttons["settings.partner.share"]
         scrollTo(invite, in: app)
         invite.tap()

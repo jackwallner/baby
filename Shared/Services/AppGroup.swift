@@ -25,6 +25,8 @@ enum AppGroup {
         static let pendingSharedZone = "pendingSharedZone"
         static let appearance = "appearance"
         static let diaperWords = "diaperWords"
+        /// `TrackedKinds`: the buttons this family turned off.
+        static let hiddenKinds = "hiddenKinds"
         /// `TotalsWindow.storedValue`: the hour the totals day starts, or -1.
         static let totalsWindow = "totalsWindow"
         /// The Watch's copy of the phone's summary, and the phone's last push.

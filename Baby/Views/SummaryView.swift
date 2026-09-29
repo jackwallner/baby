@@ -4,12 +4,43 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
-/// The reporting tab: the pediatrician summary, the trends behind it, and the
-/// export. The page itself is always visible, with or without data and with or
-/// without Baby+ (App Review 4.3); Baby+ is what hands you the file.
+/// What the Reports button opens: the paywall, which previews every report,
+/// until Baby+ is active; then the reports themselves. A purchase made here
+/// turns the sheet into the reports without closing it.
+struct ReportsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @EnvironmentObject private var store: StoreService
+
+    var body: some View {
+        Group {
+            if store.isPro {
+                NavigationStack {
+                    SummaryView()
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") { dismiss() }
+                            }
+                        }
+                }
+                .transition(.opacity)
+            } else {
+                BabyPaywallView(paywallImpressionID: "baby_reports", closesOnPurchase: false)
+                    .transition(.opacity)
+            }
+        }
+        .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: store.isPro)
+    }
+}
+
+/// Baby+ reporting: the pediatrician summary, the trends behind it, and the
+/// export. Reached through `ReportsSheet` once Baby+ is active. Before that
+/// the paywall shows the same reports as previews (the example page in full
+/// when nothing is logged, App Review 4.3).
 struct SummaryView: View {
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var store: StoreService
+    @EnvironmentObject private var settings: BabySettings
 
     /// nil until the child is known. Resolving it lazily rather than in
     /// `onAppear` keeps the first render from using today and then flickering
@@ -40,7 +71,7 @@ struct SummaryView: View {
             .padding(.vertical, AppTheme.spacing)
         }
         .background(AppTheme.paper)
-        .navigationTitle("Summary")
+        .navigationTitle("Reports")
         .navigationBarTitleDisplayMode(.large)
         .task(id: reportKey) { await rebuild() }
         .onChange(of: events.child?.objectID) { _, _ in chosenSince = nil }
@@ -67,7 +98,7 @@ struct SummaryView: View {
     private var defaultSince: Date { events.defaultVisitStart }
 
     private var reportKey: String {
-        "\(events.revision)-\(DateHelpers.dayKey(for: since))-\(events.child?.id?.uuidString ?? "")"
+        "\(events.revision)-\(DateHelpers.dayKey(for: since))-\(events.child?.id?.uuidString ?? "")-\(settings.tracked.hidden.count)"
     }
 
     private var report: SummaryReport { events.visitReport(since: since) }
@@ -120,7 +151,7 @@ struct SummaryView: View {
 
     private var rangeLine: String {
         if isExample {
-            return "Log a few feeds and diapers and the page fills in with your own. Until then the preview is an example."
+            return "Log a few entries and the page fills in with your own. Until then the preview is an example."
         }
         let days = report.dayCount
         return "\(since.formatted(.dateTime.month(.abbreviated).day())) to today, \(Format.count(days, "day")). One page to AirDrop, print or send to the office."
@@ -136,7 +167,7 @@ struct SummaryView: View {
             .buttonStyle(PrimaryButtonStyle())
         } else if store.isPro {
             Button {} label: {
-                Text("Log a feed to make your own").frame(maxWidth: .infinity)
+                Text("Log something to make your own").frame(maxWidth: .infinity)
             }
             .buttonStyle(PrimaryButtonStyle())
             .disabled(true)
@@ -187,122 +218,15 @@ struct SummaryView: View {
     private var trendsCard: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             SectionLabel(text: "Trends")
-            ZStack {
-                charts
-                    .blur(radius: store.isPro ? 0 : 7)
-                    .allowsHitTesting(store.isPro)
-                    .accessibilityHidden(!store.isPro)
-                if !store.isPro {
-                    VStack(spacing: AppTheme.tightSpacing) {
-                        Image(systemName: "lock.fill")
-                            .foregroundStyle(AppTheme.accent)
-                        Text("Your own weeks, in Baby+")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(AppTheme.ink)
-                    }
-                }
-            }
-            if !store.isPro {
-                Button("See Baby+") { paywallFocus = .trends }
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.accent)
-                    .frame(minHeight: 44)
-            }
+            ReportCharts(report: report)
         }
         .card()
-    }
-
-    private var charts: some View {
-        VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-            chart(title: "Feeds a day", summary: trendSummary(\.feeds, unit: "feeds")) {
-                ForEach(report.days) { day in
-                    BarMark(
-                        x: .value("Day", day.date, unit: .day),
-                        y: .value("Feeds", day.feeds)
-                    )
-                    .foregroundStyle(AppTheme.feed)
-                }
-            }
-            chart(title: "Diapers a day", legend: [(EventKind.wet.label, AppTheme.wet), (EventKind.dirty.label, AppTheme.dirty)], summary: "\(trendSummary(\.wet, unit: "wet")). \(trendSummary(\.dirty, unit: "dirty"))") {
-                ForEach(report.days) { day in
-                    BarMark(x: .value("Day", day.date, unit: .day), y: .value("Wet", day.wet))
-                        .foregroundStyle(AppTheme.wet)
-                    BarMark(x: .value("Day", day.date, unit: .day), y: .value("Dirty", day.dirty))
-                        .foregroundStyle(AppTheme.dirty)
-                }
-            }
-            chart(title: "Longest sleep stretch, hours", summary: sleepSummary) {
-                // A day with no sleep logged is a gap in the line, not a zero.
-                ForEach(report.days.filter { $0.longestSleepSeconds >= 60 }) { day in
-                    // Midday, so each point sits over its day like the bars do.
-                    LineMark(
-                        x: .value("Day", day.date.addingTimeInterval(12 * 3600)),
-                        y: .value("Hours", day.longestSleepSeconds / 3600)
-                    )
-                    .foregroundStyle(AppTheme.sleep)
-                    .interpolationMethod(.monotone)
-                    PointMark(
-                        x: .value("Day", day.date.addingTimeInterval(12 * 3600)),
-                        y: .value("Hours", day.longestSleepSeconds / 3600)
-                    )
-                    .foregroundStyle(AppTheme.sleep)
-                }
-            }
-        }
-    }
-
-    /// What a chart says, for VoiceOver: the daily average and the latest day.
-    private func trendSummary(_ value: KeyPath<SummaryReport.Day, Int>, unit: String) -> String {
-        guard let latest = report.days.last, !report.days.isEmpty else { return "No days yet" }
-        let average = Double(report.days.map { $0[keyPath: value] }.reduce(0, +)) / Double(report.days.count)
-        return "Average \(average.formatted(.number.precision(.fractionLength(0...1)))) \(unit) a day, \(latest[keyPath: value]) on the latest day"
-    }
-
-    private var sleepSummary: String {
-        guard let latest = report.days.last, let longest = report.days.map(\.longestSleepSeconds).max() else { return "No days yet" }
-        return "Longest \(Format.compactDuration(longest)) in this range, \(Format.compactDuration(latest.longestSleepSeconds)) on the latest day"
-    }
-
-    private func chart<Content: ChartContent>(
-        title: String,
-        legend: [(String, Color)] = [],
-        summary: String,
-        @ChartContentBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            HStack(spacing: AppTheme.spacing) {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink)
-                Spacer(minLength: 0)
-                ForEach(legend, id: \.0) { name, color in
-                    HStack(spacing: AppTheme.hairSpacing) {
-                        Circle().fill(color).frame(width: AppTheme.dotSize * 2, height: AppTheme.dotSize * 2)
-                        Text(name)
-                            .font(.caption)
-                            .foregroundStyle(AppTheme.ink2)
-                    }
-                }
-            }
-            Chart(content: content)
-                .chartXScale(domain: report.start...(Calendar.current.date(byAdding: .day, value: 1, to: report.end) ?? report.end))
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: max(1, report.dayCount / 5))) { value in
-                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                    }
-                }
-                .chartYAxis { AxisMarks(position: .leading) }
-                .frame(height: 120)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(title)
-        .accessibilityValue(summary)
     }
 
     private var exportCard: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
             SectionLabel(text: "Export")
-            Text("Every entry as a spreadsheet: one row per feed, diaper, sleep and weight, with the time and any note.")
+            Text("Every entry as a spreadsheet: one row each, with the time and any note.")
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -314,10 +238,15 @@ struct SummaryView: View {
                     Text("Export CSV").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(PrimaryButtonStyle())
+            } else if store.isPro {
+                Button {} label: {
+                    Text("Log something to export").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(true)
             } else {
                 Button("Export with Baby+") { paywallFocus = .export }
                     .buttonStyle(PrimaryButtonStyle())
-                    .disabled(store.isPro && !hasData)
             }
         }
         .card()
@@ -353,7 +282,7 @@ struct SummaryView: View {
 }
 
 /// Every page of the report, zoomable, the way it will print.
-private struct PDFPages: UIViewRepresentable {
+struct PDFPages: UIViewRepresentable {
     let data: Data
 
     func makeUIView(context: Context) -> PDFView {
@@ -409,13 +338,147 @@ extension EventStore {
     /// The report the summary page and the paywall both show. With nothing
     /// logged it is the labelled example.
     func visitReport(since: Date? = nil) -> SummaryReport {
-        guard !events.isEmpty, let child else { return SampleReport.make() }
+        let tracked = TrackedKinds.current
+        guard !events.isEmpty, let child else {
+            var example = SampleReport.make()
+            example.tracked = tracked
+            return example
+        }
         return SummaryReport.make(
             childName: child.displayName,
             birthDate: child.birthDate,
             events: events,
             from: since ?? defaultVisitStart,
-            to: .now
+            to: .now,
+            tracked: tracked
         )
     }
+}
+
+/// Feeds a day, diapers a day and the longest sleep, for the buttons this
+/// family uses. Shared by Reports and the paywall's preview.
+struct ReportCharts: View {
+    let report: SummaryReport
+    var compact = false
+    /// Just the first chart, for a preview card.
+    var firstOnly = false
+
+    private var showsDiapers: Bool {
+        report.tracked.tracksDiapers && !(firstOnly && report.tracked.contains(.feed))
+    }
+
+    private var showsSleep: Bool {
+        report.tracked.contains(.sleep) && !(firstOnly && (report.tracked.contains(.feed) || report.tracked.tracksDiapers))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
+            if report.tracked.contains(.feed) {
+                chart(title: "Feeds a day", summary: trendSummary(\.feeds, unit: "feeds")) {
+                    ForEach(report.days) { day in
+                        BarMark(
+                            x: .value("Day", day.date, unit: .day),
+                            y: .value("Feeds", day.feeds)
+                        )
+                        .foregroundStyle(AppTheme.feed)
+                    }
+                }
+            }
+            if showsDiapers {
+                chart(title: "Diapers a day", legend: diaperLegend, summary: diaperSummary) {
+                    ForEach(report.days) { day in
+                        if report.tracked.contains(.wet) {
+                            BarMark(x: .value("Day", day.date, unit: .day), y: .value("Wet", day.wet))
+                                .foregroundStyle(AppTheme.wet)
+                        }
+                        if report.tracked.contains(.dirty) {
+                            BarMark(x: .value("Day", day.date, unit: .day), y: .value("Dirty", day.dirty))
+                                .foregroundStyle(AppTheme.dirty)
+                        }
+                    }
+                }
+            }
+            if showsSleep {
+                chart(title: "Longest sleep stretch, hours", summary: sleepSummary) {
+                    // A day with no sleep logged is a gap in the line, not a zero.
+                    ForEach(report.days.filter { $0.longestSleepSeconds >= 60 }) { day in
+                        // Midday, so each point sits over its day like the bars do.
+                        LineMark(
+                            x: .value("Day", day.date.addingTimeInterval(12 * 3600)),
+                            y: .value("Hours", day.longestSleepSeconds / 3600)
+                        )
+                        .foregroundStyle(AppTheme.sleep)
+                        .interpolationMethod(.monotone)
+                        PointMark(
+                            x: .value("Day", day.date.addingTimeInterval(12 * 3600)),
+                            y: .value("Hours", day.longestSleepSeconds / 3600)
+                        )
+                        .foregroundStyle(AppTheme.sleep)
+                    }
+                }
+            }
+        }
+    }
+
+    private var diaperLegend: [(String, Color)] {
+        [(EventKind.wet, AppTheme.wet), (EventKind.dirty, AppTheme.dirty)]
+            .filter { report.tracked.contains($0.0) }
+            .map { ($0.0.label, $0.1) }
+    }
+
+    private var diaperSummary: String {
+        var parts: [String] = []
+        if report.tracked.contains(.wet) { parts.append(trendSummary(\.wet, unit: "wet")) }
+        if report.tracked.contains(.dirty) { parts.append(trendSummary(\.dirty, unit: "dirty")) }
+        return parts.joined(separator: ". ")
+    }
+
+    /// What a chart says, for VoiceOver: the daily average and the latest day.
+    private func trendSummary(_ value: KeyPath<SummaryReport.Day, Int>, unit: String) -> String {
+        guard let latest = report.days.last, !report.days.isEmpty else { return "No days yet" }
+        let average = Double(report.days.map { $0[keyPath: value] }.reduce(0, +)) / Double(report.days.count)
+        return "Average \(average.formatted(.number.precision(.fractionLength(0...1)))) \(unit) a day, \(latest[keyPath: value]) on the latest day"
+    }
+
+    private var sleepSummary: String {
+        guard let latest = report.days.last, let longest = report.days.map(\.longestSleepSeconds).max() else { return "No days yet" }
+        return "Longest \(Format.compactDuration(longest)) in this range, \(Format.compactDuration(latest.longestSleepSeconds)) on the latest day"
+    }
+
+    private func chart<Content: ChartContent>(
+        title: String,
+        legend: [(String, Color)] = [],
+        summary: String,
+        @ChartContentBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+            HStack(spacing: AppTheme.spacing) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink)
+                Spacer(minLength: 0)
+                ForEach(legend, id: \.0) { name, color in
+                    HStack(spacing: AppTheme.hairSpacing) {
+                        Circle().fill(color).frame(width: AppTheme.dotSize * 2, height: AppTheme.dotSize * 2)
+                        Text(name)
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.ink2)
+                    }
+                }
+            }
+            Chart(content: content)
+                .chartXScale(domain: report.start...(Calendar.current.date(byAdding: .day, value: 1, to: report.end) ?? report.end))
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day, count: max(1, report.dayCount / 5))) { value in
+                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                    }
+                }
+                .chartYAxis { AxisMarks(position: .leading) }
+                .frame(height: compact ? AppTheme.previewChartHeight : AppTheme.chartHeight)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(summary)
+    }
+
 }

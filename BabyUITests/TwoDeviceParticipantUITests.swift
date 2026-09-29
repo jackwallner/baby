@@ -42,7 +42,7 @@ final class TwoDeviceParticipantUITests: XCTestCase {
         attach(app, "1-joining")
 
         let error = app.staticTexts["join.error"]
-        let home = app.buttons["more"]
+        let home = app.buttons["settings"]
         let arrived = eventuallyWithoutLeaving(timeout: 240) { home.exists || error.exists }
         attach(app, "2-after-join")
         XCTAssertFalse(error.exists, "Join failed: \(error.label)")

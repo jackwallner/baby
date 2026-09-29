@@ -7,20 +7,25 @@ answer "when did she last eat, and which side". XcodeGen project and scheme:
 ## Product
 
 The everyday app is one screen: last feed and side, last diaper, Feed / Pee /
-Poop / Sleep controls, and quiet daily totals. The diaper pair can read Wet /
-Dirty instead (More > Diaper buttons, `DiaperWords`); reports for a doctor
-always say wet and dirty. History is one tap away through
-the top-left clock; "Add an older entry" at the bottom backfills. More is the top-right ellipsis.
+Poop / Sleep controls, and daily totals. Any of the four buttons can be turned
+off in Settings > Buttons (`TrackedKinds`, at least one stays); an off
+button leaves Now, History, reports, widgets and the Watch, and its entries
+come back when it is turned on. The diaper pair can read Wet / Dirty instead
+(Settings > Diaper words, `DiaperWords`); reports for a doctor always say wet
+and dirty. History is the top-left clock; "Add an older entry" at the bottom
+backfills. Top right: Reports (the paywall with report previews until Baby+
+is active, then the reports, `ReportsSheet`) and the Settings gear.
 
-Everything outside logging lives in More: First Weeks, Pediatrician summary,
-logging together, appearance, diaper words, stain helper, baby settings, and Baby+. No tab bar, automatic
-review prompts, promotional cards, or purchase screen during onboarding.
+Everything else lives in Settings: baby, buttons, diaper words, totals,
+appearance, logging together, babies, First Weeks, stain helper, and Baby+
+status. No tab bar, automatic review prompts, promotional cards, or purchase
+screen during onboarding.
 Onboarding is one screen with two paths: Start a new log (optional name and
 birth date) or Join a shared log (scan or paste an invite). An invitation
 opened before setup shows a joining screen instead of onboarding.
 
-Never: ads, AI panels or predictions, moving the four buttons or renaming them beyond that setting, or
-locking something that shipped free.
+Never: ads, AI panels or predictions, reordering the buttons or renaming them
+beyond that setting, or locking something that shipped free.
 
 ## Architecture
 
@@ -115,10 +120,10 @@ behind it. More than one baby is free.
 
 ## App Review constraints
 
-- **4.3:** a reviewer on a fresh install reaches More > First Weeks
-  and More > Pediatrician summary with no purchase and no
-  data. The summary preview renders a worked example stamped
-  "EXAMPLE, NOT YOUR BABY'S DATA" until something is logged.
+- **4.3:** a reviewer on a fresh install reaches Settings > First Weeks
+  and Reports with no purchase and no data. Reports' preview cards show a
+  worked example stamped "EXAMPLE, NOT YOUR BABY'S DATA" (the page opens in
+  full) until something is logged; after that the baby's own previews blur.
 - **1.4.1 and 1.1.6:** First Weeks labels its diaper/feed table as a breastfeeding
   reference for the first two weeks, sourced to NHS Healthier Together. It never
   assesses logged counts against a target. AAP sources support newborn feeding

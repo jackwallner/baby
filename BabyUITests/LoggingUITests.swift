@@ -116,19 +116,42 @@ final class LoggingUITests: XCTestCase {
         add(attachment)
     }
 
-    func testSecondaryToolsStayInMoreAndRemainFree() {
+    func testGuidesLiveInSettingsAndReportsPreviewWithoutPaying() {
         let app = launch()
         XCTAssertFalse(app.tabBars.firstMatch.exists)
         XCTAssertFalse(app.buttons["Stain helper"].exists)
         XCTAssertFalse(app.buttons["See Baby+"].exists)
 
-        app.buttons["more"].tap()
-        app.buttons["First Weeks"].tap()
+        app.buttons["settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        let firstWeeks = app.buttons["First Weeks"]
+        for _ in 0..<8 where !firstWeeks.isHittable { app.swipeUp() }
+        firstWeeks.tap()
         XCTAssertTrue(app.navigationBars["First Weeks"].waitForExistence(timeout: 3))
-        app.navigationBars["First Weeks"].buttons["More"].tap()
-        app.buttons["Pediatrician summary"].tap()
-        XCTAssertTrue(app.navigationBars["Summary"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["Preview of the pediatrician summary"].waitForExistence(timeout: 10))
+        app.navigationBars["First Weeks"].buttons["Settings"].tap()
+        app.buttons["Done"].tap()
+
+        app.buttons["reports"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["paywall.preview.pediatricianSummary"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Restore purchases"].exists)
+    }
+
+    func testTurningAButtonOffRemovesItEverywhereOnNow() {
+        let app = launch()
+        XCTAssertTrue(app.buttons["log.sleep"].exists)
+        app.buttons["settings"].tap()
+        let sleep = app.switches["track.sleep"]
+        XCTAssertTrue(sleep.waitForExistence(timeout: 3))
+        sleep.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        app.buttons["Done"].tap()
+        XCTAssertFalse(app.buttons["log.sleep"].waitForExistence(timeout: 2))
+        XCTAssertFalse(tally(app).contains("sleep"), tally(app))
+        attach(app, "tracking-no-sleep")
+
+        app.buttons["settings"].tap()
+        app.switches["track.sleep"].coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.buttons["log.sleep"].waitForExistence(timeout: 3))
     }
 
     func testOptionalSetupGoesStraightToLogging() {
@@ -221,7 +244,7 @@ final class LoggingUITests: XCTestCase {
         let app = launch()
         XCTAssertTrue(tally(app).hasPrefix("Today:"), tally(app))
         XCTAssertTrue(app.descendants(matching: .any)["hourStrip"].exists)
-        app.buttons["more"].tap()
+        app.buttons["settings"].tap()
         let mode = app.segmentedControls["totals.mode"]
         for _ in 0..<6 where !mode.isHittable { app.swipeUp() }
         mode.buttons["Last 24 hours"].tap()
@@ -229,7 +252,7 @@ final class LoggingUITests: XCTestCase {
         app.buttons["Done"].tap()
         XCTAssertTrue(tally(app).hasPrefix("Last 24 hours:"), tally(app))
         attach(app, "totals-last-24")
-        app.buttons["more"].tap()
+        app.buttons["settings"].tap()
         for _ in 0..<6 where !mode.isHittable { app.swipeUp() }
         mode.buttons["By day"].tap()
         app.buttons["Done"].tap()

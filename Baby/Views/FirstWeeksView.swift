@@ -6,6 +6,7 @@ import SwiftUI
 struct FirstWeeksView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
+    @EnvironmentObject private var settings: BabySettings
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var now = Date.now
 
@@ -79,7 +80,7 @@ struct FirstWeeksView: View {
                         .monospacedDigit()
                 }
             }
-            Text("Add your baby's birth date in More and this fills in day by day.")
+            Text("Add your baby's birth date in Settings and this fills in day by day.")
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .padding(.top, AppTheme.hairSpacing)
@@ -113,9 +114,9 @@ struct FirstWeeksView: View {
     private var header: some View {
         HStack(spacing: AppTheme.tightSpacing) {
             Text("DAY").frame(width: 44, alignment: .leading)
-            Text("WET").frame(maxWidth: .infinity)
-            Text("DIRTY").frame(maxWidth: .infinity)
-            Text("FEEDS").frame(maxWidth: .infinity)
+            if settings.tracked.contains(.wet) { Text("WET").frame(maxWidth: .infinity) }
+            if settings.tracked.contains(.dirty) { Text("DIRTY").frame(maxWidth: .infinity) }
+            if settings.tracked.contains(.feed) { Text("FEEDS").frame(maxWidth: .infinity) }
             Text("GUIDE").frame(width: 92, alignment: .trailing)
         }
         .font(.caption2.weight(.semibold))
@@ -131,7 +132,7 @@ struct FirstWeeksView: View {
                 VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
                     Text("Day \(day) · \(date.formatted(.dateTime.month(.abbreviated).day()))")
                         .font(.headline)
-                    Text(dim ? "Not yet logged" : "\(tally.wet) wet · \(tally.dirty) dirty · \(tally.feeds) feeds")
+                    Text(dim ? "Not yet logged" : loggedLine(tally))
                         .font(.body)
                     Text("Breastfeeding reference: \(range.summary)")
                         .font(.subheadline)
@@ -148,9 +149,9 @@ struct FirstWeeksView: View {
                             .foregroundStyle(AppTheme.ink3)
                     }
                     .frame(width: 44, alignment: .leading)
-                    count(dim ? nil : tally.wet, kind: .wet, min: range.wetMin, complete: state == .past)
-                    count(dim ? nil : tally.dirty, kind: .dirty, min: range.dirtyMin, complete: state == .past)
-                    count(dim ? nil : tally.feeds, kind: .feed, min: range.feedsMin, complete: state == .past)
+                    if settings.tracked.contains(.wet) { count(dim ? nil : tally.wet, kind: .wet, min: range.wetMin, complete: state == .past) }
+                    if settings.tracked.contains(.dirty) { count(dim ? nil : tally.dirty, kind: .dirty, min: range.dirtyMin, complete: state == .past) }
+                    if settings.tracked.contains(.feed) { count(dim ? nil : tally.feeds, kind: .feed, min: range.feedsMin, complete: state == .past) }
                     VStack(alignment: .trailing, spacing: 0) {
                         Text("\(range.wetMin)+ · \(range.dirtyMin)+")
                         Text("\(range.feedsMin) to \(range.feedsMax)")
@@ -169,7 +170,16 @@ struct FirstWeeksView: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(dim
             ? "Day \(day), upcoming. Breastfeeding reference: \(range.summary)."
-            : "Day \(day): \(tally.wet) wet, \(tally.dirty) dirty, \(tally.feeds) feeds logged. Breastfeeding reference: \(range.summary).")
+            : "Day \(day): \(loggedLine(tally)) logged. Breastfeeding reference: \(range.summary).")
+    }
+
+    /// "3 wet · 1 dirty · 8 feeds", for the counts this family logs.
+    private func loggedLine(_ tally: DayTally) -> String {
+        var parts: [String] = []
+        if settings.tracked.contains(.wet) { parts.append("\(tally.wet) wet") }
+        if settings.tracked.contains(.dirty) { parts.append("\(tally.dirty) dirty") }
+        if settings.tracked.contains(.feed) { parts.append("\(tally.feeds) feeds") }
+        return parts.isEmpty ? "Nothing counted" : parts.joined(separator: " · ")
     }
 
     private func count(_ value: Int?, kind: EventKind, min: Int, complete: Bool) -> some View {

@@ -31,9 +31,12 @@ struct SummaryReport: Equatable, Sendable {
     var end: Date
     var days: [Day]
     var notes: [(date: Date, text: String)]
+    /// The buttons this family uses. The page, the charts and the export
+    /// leave out the rest rather than print a column of zeros.
+    var tracked: TrackedKinds = .all
 
     static func == (lhs: SummaryReport, rhs: SummaryReport) -> Bool {
-        lhs.childName == rhs.childName && lhs.birthDate == rhs.birthDate
+        lhs.childName == rhs.childName && lhs.birthDate == rhs.birthDate && lhs.tracked == rhs.tracked
             && lhs.start == rhs.start && lhs.end == rhs.end && lhs.days == rhs.days
             && lhs.notes.map(\.text) == rhs.notes.map(\.text)
     }
@@ -95,6 +98,7 @@ struct SummaryReport: Equatable, Sendable {
         events: [LogEvent],
         from start: Date,
         to end: Date,
+        tracked: TrackedKinds = .all,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> SummaryReport {
@@ -112,6 +116,7 @@ struct SummaryReport: Equatable, Sendable {
             .map(\.start)
             .sorted()
         let events = events.filter { event in
+            guard tracked.contains(event.eventKind) else { return false }
             let finish = event.endedAt ?? (event.isRunning ? now : event.start)
             return event.start < rangeEnd && max(finish, event.start) >= firstDay
         }
@@ -161,7 +166,8 @@ struct SummaryReport: Equatable, Sendable {
             start: firstDay,
             end: lastDay,
             days: days,
-            notes: notes
+            notes: notes,
+            tracked: tracked
         )
     }
 

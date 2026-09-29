@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The wrist: the last feed and diaper, then six taps. Nothing to scroll for
+/// The wrist: the last feed and diaper, then up to six taps. Nothing to scroll for
 /// on a 3am check, everything reachable with one thumb.
 struct WatchNowView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -13,16 +13,18 @@ struct WatchNowView: View {
         ScrollView {
             VStack(spacing: AppTheme.hairSpacing) {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(store.summary.feedLine(now: now))
+                    Text(store.summary.leadKind.isDiaper ? diaperLine : store.summary.leadLine(now: now))
                         .font(.headline)
                         .foregroundStyle(AppTheme.ink)
                         .lineLimit(2)
                         .minimumScaleFactor(0.8)
-                    Text(diaperLine)
-                        .font(.caption2)
-                        .foregroundStyle(AppTheme.ink2)
-                        .lineLimit(2)
-                    if let sleep = store.summary.sleepLine(now: now) {
+                    if store.summary.leadKind == .feed, tracked.tracksDiapers {
+                        Text(diaperLine)
+                            .font(.caption2)
+                            .foregroundStyle(AppTheme.ink2)
+                            .lineLimit(2)
+                    }
+                    if store.summary.leadKind != .sleep, tracked.contains(.sleep), let sleep = store.summary.sleepLine(now: now) {
                         Text(sleep)
                             .font(.caption2)
                             .foregroundStyle(AppTheme.sleep)
@@ -31,16 +33,23 @@ struct WatchNowView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, AppTheme.hairSpacing)
 
-                HStack(spacing: AppTheme.hairSpacing) {
-                    ForEach(FeedSide.allCases, id: \.self) { side in
-                        logButton(side.shortLabel, kind: .feed) { store.log(.feed, side: side) }
+                // The phone's buttons, minus any turned off in its Settings.
+                if tracked.contains(.feed) {
+                    HStack(spacing: AppTheme.hairSpacing) {
+                        ForEach(FeedSide.allCases, id: \.self) { side in
+                            logButton(side.shortLabel, kind: .feed) { store.log(.feed, side: side) }
+                        }
                     }
                 }
-                HStack(spacing: AppTheme.hairSpacing) {
-                    logButton(EventKind.wet.label, kind: .wet) { store.log(.wet) }
-                    logButton(EventKind.dirty.label, kind: .dirty) { store.log(.dirty) }
+                if tracked.tracksDiapers {
+                    HStack(spacing: AppTheme.hairSpacing) {
+                        if tracked.contains(.wet) { logButton(EventKind.wet.label, kind: .wet) { store.log(.wet) } }
+                        if tracked.contains(.dirty) { logButton(EventKind.dirty.label, kind: .dirty) { store.log(.dirty) } }
+                    }
                 }
-                logButton(store.summary.isSleeping ? "Wake" : "Sleep", kind: .sleep) { store.toggleSleep() }
+                if tracked.contains(.sleep) {
+                    logButton(store.summary.isSleeping ? "Wake" : "Sleep", kind: .sleep) { store.toggleSleep() }
+                }
 
                 if let action = store.lastAction {
                     Text(action)
@@ -60,6 +69,8 @@ struct WatchNowView: View {
         .onReceive(clock) { now = $0 }
         .animation(reduceMotion ? nil : .default, value: store.lastAction)
     }
+
+    private var tracked: TrackedKinds { store.summary.tracked }
 
     private var diaperLine: String {
         guard let date = store.summary.lastDiaperAt else { return "No diaper logged yet" }
