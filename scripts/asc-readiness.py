@@ -249,7 +249,7 @@ def main() -> None:
                 .get("state")
             )
             fields_complete = bool(localizations and prices and availability) and screenshot_state == "COMPLETE"
-            subscription_ready = state == "READY_TO_SUBMIT" or (
+            subscription_ready = state in {"READY_TO_SUBMIT", "APPROVED"} or (
                 state == "MISSING_METADATA" and fields_complete
             )
             displayed_state = (
@@ -285,7 +285,7 @@ def main() -> None:
         check(
             f"in-app purchase {product_id}",
             attributes.get("state"),
-            attributes.get("state") == "READY_TO_SUBMIT",
+            attributes.get("state") in {"READY_TO_SUBMIT", "APPROVED"},
         )
 
     # Which build, not just whether one is attached. A draft version keeps

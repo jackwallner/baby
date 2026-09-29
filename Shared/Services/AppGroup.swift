@@ -37,6 +37,7 @@ enum AppGroup {
         /// `WidgetUndo`: the last entry logged outside the app, for the
         /// one-button widgets' Undo.
         static let widgetUndo = "widgetUndo"
+        static let widgetLogResult = "widgetLogResult"
         /// Widget and complication kinds, for `reloadTimelines(ofKind:)`.
         static let feedingPreference = "feedingPreference"
     }

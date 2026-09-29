@@ -1,1 +1,1 @@
-Újdonság: az etetés egy koppintás, az oldal megadása nem kötelező. Később rögzítesz? Tekerd vissza az időt a gombok fölött, vagy adj hozzá korábbi bejegyzéseket a főképernyő aljáról. Az új Etetés, Pisi és Kaki widgetek egy koppintással rögzítenek a főképernyőről vagy a zárolási képernyőről, a Visszavonás pedig ott van a widgeten. Az összesítők indulhatnak attól az órától, amikor a napod kezdődik, vagy lefedhetik az utolsó 24 órát.
+Megbízhatóbb naplózás widgetekből, egyértelműbb visszajelzések és továbbfejlesztett visszavonás.

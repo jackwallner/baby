@@ -1,1 +1,1 @@
-Nieuw: een voeding is één tik, en de kant is optioneel. Later invoeren? Draai de tijd boven de knoppen terug, of voeg oudere invoer toe onderaan het hoofdscherm. Nieuwe widgets voor voeding, plas en poep leggen met één tik vast vanaf het beginscherm of het toegangsscherm, met Herstel direct op de widget. Totalen kunnen beginnen op het uur waarop je dag begint, of de laatste 24 uur beslaan.
+Betrouwbaarder loggen via widgets, duidelijkere bevestigingen en verbeterd ongedaan maken.

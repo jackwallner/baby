@@ -26,6 +26,8 @@ final class EventStoreTests: XCTestCase {
         persistence = Persistence(cloudKit: false, inMemory: true)
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.activeChildID)
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.appliedWatchActions)
+        WidgetUndo.clear()
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetLogResult)
         store = EventStore(persistence: persistence)
         store.createChild(name: "Nora", birthDate: Calendar.current.date(byAdding: .day, value: -2, to: .now))
     }
@@ -248,6 +250,8 @@ final class EventStoreTests: XCTestCase {
         // Even if the bounded receipt cache no longer contains the old stop,
         // its timestamp must not close a more recent timer.
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.appliedWatchActions)
+        WidgetUndo.clear()
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetLogResult)
         XCTAssertTrue(store.apply(wake))
         XCTAssertTrue(second.isRunning)
     }
@@ -509,4 +513,136 @@ final class EventStoreTests: XCTestCase {
         WidgetUndo.clear()
         XCTAssertFalse(LogChoice.wet.isDoubleTap(at: now), "after Undo a tap logs again")
     }
+
+    func testWidgetSleepDoubleTapKeepsTheStartedTimerAndOffersUndo() throws {
+        let intent = LogEventIntent(what: .sleep)
+        let now = Date.now
+        XCTAssertEqual(try intent.log(in: store, at: now), "Sleep started.")
+        XCTAssertEqual(try intent.log(in: store, at: now.addingTimeInterval(1)), "Sleep started.")
+        XCTAssertEqual(store.events.count, 1)
+        XCTAssertNotNil(store.runningSleep)
+        let undo = try XCTUnwrap(WidgetUndo.load())
+        XCTAssertFalse(undo.reopensTimer)
+        try store.performWidgetUndo(eventID: undo.eventID.uuidString)
+        XCTAssertNil(store.runningSleep)
+        XCTAssertTrue(store.events.isEmpty)
+    }
+
+    func testWidgetWakeDoubleTapAndUndoReopenTheSameSleep() throws {
+        let start = Date.now.addingTimeInterval(-600)
+        let sleep = try XCTUnwrap(store.startTimed(.sleep, at: start))
+        let intent = LogEventIntent(what: .sleep)
+        let now = Date.now
+        XCTAssertEqual(try intent.log(in: store, at: now), "Sleep ended.")
+        XCTAssertEqual(try intent.log(in: store, at: now.addingTimeInterval(1)), "Sleep ended.")
+        XCTAssertNil(store.runningSleep)
+        let undo = try XCTUnwrap(WidgetUndo.load())
+        XCTAssertTrue(undo.reopensTimer)
+        try store.performWidgetUndo(eventID: undo.eventID.uuidString)
+        XCTAssertEqual(store.runningSleep?.id, sleep.id)
+        XCTAssertEqual(store.runningSleep?.start, start)
+        XCTAssertEqual(store.events.count, 1)
+    }
+
+    func testWidgetUndoSaveFailureCanRetry() throws {
+        let controller = SaveController()
+        let persistence = Persistence(cloudKit: false, inMemory: true, saveOperation: { try controller.save($0) })
+        let store = EventStore(persistence: persistence)
+        XCTAssertTrue(store.createChild(name: "Nora", birthDate: nil))
+        let wet = try XCTUnwrap(store.log(.wet))
+        store.offerWidgetUndo(for: wet)
+        let undo = try XCTUnwrap(WidgetUndo.load())
+        controller.failureOnCall = controller.callCount + 1
+        XCTAssertThrowsError(try store.performWidgetUndo(eventID: undo.eventID.uuidString))
+        XCTAssertEqual(WidgetUndo.load(), undo)
+        XCTAssertEqual(store.events.count, 1)
+        controller.failureOnCall = nil
+        try store.performWidgetUndo(eventID: undo.eventID.uuidString)
+        XCTAssertNil(WidgetUndo.load())
+        XCTAssertTrue(store.events.isEmpty)
+    }
+
+    func testWidgetUndoForAnotherBabyDoesNotSuppressOrDeleteATap() throws {
+        let first = try XCTUnwrap(store.child)
+        let event = try XCTUnwrap(store.log(.wet))
+        store.offerWidgetUndo(for: event)
+        let undo = try XCTUnwrap(WidgetUndo.load())
+        XCTAssertTrue(store.createChild(name: "Leo", birthDate: nil))
+        XCTAssertNil(WidgetUndo.load())
+        XCTAssertFalse(LogChoice.wet.isDoubleTap(at: .now))
+        XCTAssertFalse(store.undoWidgetLog(undo))
+        XCTAssertEqual(try LogEventIntent(what: .wet).log(in: store, at: .now), "Logged a pee diaper.")
+        XCTAssertEqual(store.events.count, 1)
+        store.setActive(first)
+        XCTAssertEqual(store.events.count, 1)
+        XCTAssertEqual(store.events.first?.id, event.id)
+    }
+
+    func testWidgetSaveFailureThrowsWithoutOfferingUndo() throws {
+        let controller = SaveController()
+        let persistence = Persistence(cloudKit: false, inMemory: true, saveOperation: { try controller.save($0) })
+        let store = EventStore(persistence: persistence)
+        XCTAssertTrue(store.createChild(name: "Nora", birthDate: nil))
+        controller.failureOnCall = controller.callCount + 1
+        XCTAssertThrowsError(try LogEventIntent(what: .wet).log(in: store, at: .now))
+        XCTAssertTrue(store.events.isEmpty)
+        XCTAssertNil(WidgetUndo.load())
+    }
+
+    func testControlConfirmationRequiresAResultForThisBabyAndKind() {
+        let now = Date.now
+        XCTAssertNil(WidgetLogResult.load(for: .wet))
+        WidgetLogResult(kind: .wet, message: "Logged a pee diaper.", succeeded: true, at: now).store()
+        XCTAssertEqual(WidgetLogResult.load(for: .wet, at: now)?.succeeded, true)
+        XCTAssertNil(WidgetLogResult.load(for: .dirty, at: now))
+        WidgetLogResult(kind: .wet, message: "Couldn't save", succeeded: false, at: now).store()
+        XCTAssertEqual(WidgetLogResult.load(for: .wet, at: now)?.succeeded, false)
+        XCTAssertNil(WidgetLogResult.load(for: .wet, at: now.addingTimeInterval(60)))
+        XCTAssertTrue(store.createChild(name: "Leo", birthDate: nil))
+        XCTAssertNil(WidgetLogResult.load(for: .wet, at: now))
+    }
+
+
+    func testStaleWidgetCannotLogForADifferentBaby() throws {
+        let first = try XCTUnwrap(store.child?.id)
+        let intent = LogEventIntent(what: .wet, childID: first)
+        XCTAssertTrue(store.createChild(name: "Leo", birthDate: nil))
+        XCTAssertThrowsError(try intent.log(in: store, at: .now))
+        XCTAssertTrue(store.events.isEmpty)
+    }
+
+    func testStaleLiveActivityStopCannotEndANewerTimer() throws {
+        guard #available(iOS 17.2, *) else { return }
+        let oldStart = Date.now.addingTimeInterval(-600)
+        store.startTimed(.sleep, at: oldStart)
+        let intent = StopRunningIntent(kind: EventKind.sleep.rawValue, startedAt: oldStart)
+        store.stopRunning(.sleep)
+        let newer = try XCTUnwrap(store.startTimed(.sleep))
+        try intent.stop(in: store)
+        XCTAssertEqual(store.runningSleep?.id, newer.id)
+        try StopRunningIntent(kind: EventKind.sleep.rawValue, startedAt: newer.start).stop(in: store)
+        XCTAssertNil(store.runningSleep)
+    }
+
+    func testUndoInTheAppClearsTheWidgetConfirmationAndAllowsAnotherTap() throws {
+        let intent = LogEventIntent(what: .wet)
+        _ = try intent.log(in: store, at: .now)
+        XCTAssertNotNil(WidgetUndo.load())
+        XCTAssertTrue(store.undoLast())
+        XCTAssertNil(WidgetUndo.load())
+        _ = try intent.log(in: store, at: .now)
+        XCTAssertEqual(store.events.count, 1)
+    }
+
+    func testFallbackBabySelectionRepairsTheIdentityUsedByWidgets() throws {
+        let expected = try XCTUnwrap(store.child?.id)
+        AppGroup.defaults.set(UUID().uuidString, forKey: AppGroup.Key.activeChildID)
+        store.reload()
+        XCTAssertEqual(store.child?.id, expected)
+        XCTAssertEqual(AppGroup.defaults.string(forKey: AppGroup.Key.activeChildID), expected.uuidString)
+        let event = try XCTUnwrap(store.log(.wet))
+        store.offerWidgetUndo(for: event)
+        XCTAssertEqual(WidgetUndo.load()?.childID, expected)
+    }
+
 }

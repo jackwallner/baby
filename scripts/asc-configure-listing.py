@@ -28,21 +28,21 @@ Baby trackers are a crowded category, so this one is deliberately narrow and bui
 
 WHAT A FRESH INSTALL SHOWS, WITH NO PURCHASE AND NO DATA
 1. One setup screen with two paths. Start a new log asks for an optional name and birth date; tap Start tracking. Join a shared log is only for a second parent holding an invite, and can be ignored. There is no purchase screen during onboarding.
-2. Home: four log controls, Feed (Left, Right, Bottle), Pee, Poop and Sleep. One tap logs at the current time; a long press opens the editor for the time, side, bottle amount or stool colour. Undo appears at the top for a few seconds. History is the top-left clock button. More > Diaper buttons can rename Pee and Poop to Wet and Dirty.
-3. More (top-right ellipsis) > First Weeks: a breastfeeding reference table for the first two weeks, sourced to NHS Healthier Together, beside the counts the parent logged, with the "call your pediatrician if" lines under the table. It renders with no data and with no purchase.
-4. More > Pediatrician summary: a full-page preview of the pediatrician PDF. With nothing logged it renders a worked example stamped "EXAMPLE, NOT YOUR BABY'S DATA" whose numbers are invented. No reviewer purchase is needed to see it.
+2. Home: four log controls, Feed (optional Left, Right or Bottle after logging), Pee, Poop and Sleep. One tap logs at the current time; a long press opens the editor for the time, side, bottle amount or stool colour. Undo appears at the top for a few seconds. History is the top-left clock button. Settings (top-right gear) > Diaper words can rename Pee and Poop to Wet and Dirty.
+3. Settings > First Weeks: a breastfeeding reference table for the first two weeks, sourced to NHS Healthier Together, beside the counts the parent logged, with the "call your pediatrician if" lines under the table. It renders with no data and with no purchase.
+4. Reports (top-right chart icon): tap the summary preview to see the full pediatrician PDF example. With nothing logged it renders a worked example stamped "EXAMPLE, NOT YOUR BABY'S DATA" whose numbers are invented. No reviewer purchase is needed to see it.
 
 FREE, AND STAYING FREE
 Logging, the first-weeks table, full history, both widgets, the Apple Watch app and complication, the Live Activity, logging together, the stain helper, every appearance and more than one baby.
 
 BABY+ (com.jackwallner.baby.monthly, com.jackwallner.baby.yearly, com.jackwallner.baby.pro.lifetime)
-Reporting to share with a doctor: sharing or exporting the pediatrician PDF (daily feeds, the longest gap between feeds, wet and dirty counts, sleep, weights and notes), the trends charts, and CSV export. The paywall opens from the locked buttons on the Pediatrician summary page and from More > Baby+. Nothing that ships free is locked later.
+Reporting to share with a doctor: sharing or exporting the pediatrician PDF (daily feeds, the longest gap between feeds, wet and dirty counts, sleep, weights and notes), the trends charts, and CSV export. Reports shows example previews and the Baby+ plans until Baby+ is active; after purchase it opens the reports. Plans are also in Settings > Baby+. Nothing that ships free is locked later.
 
 LOGGING TOGETHER
-More > Log together > Invite someone shows a QR code and a link for a CloudKit CKShare on the baby's record zone, with read/write access. The other parent scans it in the app or opens the link, on their own iCloud account. There is no server of ours and no account to create. It needs iCloud on the device; without it, logging is unaffected and the rest of the app works. It cannot be tested with a single Apple ID.
+Settings > Log together > Invite someone shows a QR code and a link for a CloudKit CKShare on the baby's record zone, with read/write access. The other parent scans it in the app or opens the link, on their own iCloud account. There is no server of ours and no account to create. It needs iCloud on the device; without it, logging is unaffected and the rest of the app works. It cannot be tested with a single Apple ID.
 
 HEALTH CLAIMS
-The First Weeks table is labelled as a breastfeeding reference for the first two weeks, not a target, and the app never assesses the logged counts against it. Fever and feeding links go to the American Academy of Pediatrics' parent site. The app never says normal or abnormal, never diagnoses or treats, and is not a medical device. The disclaimer appears in onboarding, First Weeks, the Pediatrician summary and More.
+The First Weeks table is labelled as a breastfeeding reference for the first two weeks, not a target, and the app never assesses the logged counts against it. Fever and feeding links go to the American Academy of Pediatrics' parent site. The app never says normal or abnormal, never diagnoses or treats, and is not a medical device. The disclaimer appears in onboarding, First Weeks, the Pediatrician summary and Settings.
 
 PRIVACY
 Entries stay on the device and in the user's own iCloud. RevenueCat receives an anonymous app user id, purchase state and coarse purchase-screen interaction counters. No baby names, birth dates or log entries are sent to RevenueCat."""

@@ -1,1 +1,1 @@
-Nou: masa se notează dintr-o atingere, iar partea este opțională. Notezi mai târziu? Dă ora înapoi deasupra butoanelor sau adaugă înregistrări mai vechi din partea de jos a ecranului principal. Widgeturi noi pentru masă, pipi și caca notează dintr-o atingere de pe ecranul principal sau de pe ecranul blocat, cu Anulează direct pe widget. Totalurile pot începe la ora la care începe ziua ta sau pot acoperi ultimele 24 de ore.
+Înregistrare mai fiabilă din widgeturi, confirmări mai clare și anulare îmbunătățită.

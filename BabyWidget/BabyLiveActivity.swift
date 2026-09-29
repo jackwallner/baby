@@ -76,13 +76,16 @@ struct BabyLiveActivity: Widget {
     @ViewBuilder
     private func stopButton(_ context: ActivityViewContext<BabyActivityAttributes>) -> some View {
         if #available(iOS 17.2, *) {
-            Button(intent: StopRunningIntent(kind: context.attributes.kind)) {
+            Button(intent: StopRunningIntent(kind: context.attributes.kind, startedAt: context.state.startedAt)) {
                 Text(context.attributes.kind == EventKind.sleep.rawValue ? "Wake" : "Stop")
                     .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                     .padding(.horizontal, AppTheme.spacing)
                     .frame(height: 44)
             }
             .tint(color(context))
+            .invalidatableContent()
         }
     }
 

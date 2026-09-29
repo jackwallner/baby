@@ -224,6 +224,8 @@ struct BabyLogWidgetView: View {
         if let undo = undo(for: kind) {
             Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) {
                 face(kind, symbol: "checkmark", label: "Undo")
+                    .contentShape(Rectangle())
+                    .invalidatableContent()
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Undo \(kind.label.lowercased())")
@@ -241,11 +243,13 @@ struct BabyLogWidgetView: View {
         case .dirty: .dirty
         default: .sleep
         }
-        return Button(intent: LogEventIntent(what: choice)) {
+        return Button(intent: WidgetLogEventIntent(what: choice, childID: s.childID)) {
             face(kind, symbol: kind.symbolName, label: label)
+                .contentShape(Rectangle())
                 .invalidatableContent()
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(kind == .sleep ? label : "Log \(label.lowercased())")
     }
 
     private func face(_ kind: EventKind, symbol: String, label: String) -> some View {

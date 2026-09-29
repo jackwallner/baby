@@ -1,1 +1,1 @@
-Mới: ghi cữ bú chỉ với một chạm, bên bú là tùy chọn. Ghi muộn? Lùi giờ ngay trên các nút, hoặc thêm mục cũ hơn từ cuối màn hình chính. Tiện ích Bú, Tè và Ị mới ghi chỉ với một chạm từ Màn hình chính hoặc Màn hình khóa, có Hoàn tác ngay trên tiện ích. Tổng số có thể bắt đầu từ giờ ngày của bạn bắt đầu, hoặc tính trong 24 giờ qua.
+Ghi nhật ký từ tiện ích đáng tin cậy hơn, xác nhận thao tác rõ ràng hơn và cải thiện hoàn tác.

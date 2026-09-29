@@ -91,6 +91,12 @@ final class EventStore: ObservableObject {
         isAwaitingSharedBaby = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone) != nil
         child = persistence.activeChild(in: context)
         if let child {
+            // A removed or not-yet-imported selection can fall back to a
+            // stored baby. Keep the widget's identity in step with that choice.
+            if let id = child.id?.uuidString,
+               AppGroup.defaults.string(forKey: AppGroup.Key.activeChildID) != id {
+                AppGroup.defaults.set(id, forKey: AppGroup.Key.activeChildID)
+            }
             // A turned-off button's entries stay stored but leave every
             // surface that reads the log, until it is turned back on.
             let tracked = TrackedKinds.current
@@ -370,6 +376,10 @@ final class EventStore: ObservableObject {
     @discardableResult
     func undoLast() -> Bool {
         guard let lastLogged else { return false }
+        let widgetUndo = WidgetUndo.load()
+        let clearsWidgetUndo = widgetUndo.map { undo in
+            persistence.events(ids: [undo.eventID], in: context).contains { $0.objectID == lastLogged.objectID }
+        } ?? false
         if let deleted = lastLogged.deleted {
             guard restore(deleted) else {
                 self.lastLogged = nil
@@ -400,6 +410,10 @@ final class EventStore: ObservableObject {
         }
         self.lastLogged = nil
         undoTask?.cancel()
+        if clearsWidgetUndo {
+            WidgetUndo.clear()
+            AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetLogResult)
+        }
         reload()
         return true
     }
@@ -431,7 +445,9 @@ final class EventStore: ObservableObject {
         guard let id = event.id else { return }
         let closed = lastLogged?.objectID == event.objectID ? lastLogged?.closedTimers ?? [] : []
         let closedIDs = closed.compactMap { (try? context.existingObject(with: $0) as? LogEvent)?.id }
-        WidgetUndo(eventID: id, kind: event.eventKind, loggedAt: .now, closedIDs: closedIDs).store()
+        WidgetUndo(eventID: id, kind: event.eventKind, loggedAt: .now, closedIDs: closedIDs,
+                   reopensTimer: lastLogged?.objectID == event.objectID && lastLogged?.reopensTimer == true,
+                   childID: child?.id).store()
         WidgetCenter.shared.reloadAllTimelines()
     }
 
@@ -444,8 +460,14 @@ final class EventStore: ObservableObject {
             reload()
             return false
         }
+        guard event.child == child else { return false }
         let objectID = event.objectID
-        context.delete(event)
+        if undo.reopensTimer {
+            event.endedAt = nil
+            event.updatedAt = .now
+        } else {
+            context.delete(event)
+        }
         for closed in found where closed.id != undo.eventID {
             closed.endedAt = nil
             closed.updatedAt = .now
@@ -457,6 +479,19 @@ final class EventStore: ObservableObject {
         if lastLogged?.objectID == objectID { dismissUndo() }
         reload()
         return true
+    }
+
+    /// Keep the offered Undo after a failed save so the same tap can retry.
+    func performWidgetUndo(eventID: String, at now: Date = .now) throws {
+        guard let undo = WidgetUndo.load(), undo.eventID.uuidString == eventID else { return }
+        guard undo.isAcceptable(at: now) else {
+            WidgetUndo.clear()
+            return
+        }
+        let exists = persistence.events(ids: [undo.eventID], in: context).contains { $0.child == child }
+        if exists && !undoWidgetLog(undo) { throw WidgetSaveError() }
+        WidgetUndo.clear()
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetLogResult)
     }
 
     // MARK: - Relay from the Watch

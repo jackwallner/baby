@@ -17,13 +17,7 @@ final class WidgetUITests: XCTestCase {
         add(attachment)
     }
 
-    func testPeeButtonWidgetLogsWithOneTap() throws {
-        try XCTSkipUnless(ProcessInfo.processInfo.environment["BABY_WIDGET_TEST"] == "1", "needs a re-signed build; see release-verification.md")
-        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
-        app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit"]
-        app.launch()
-        XCTAssertTrue(app.buttons["log.wet"].waitForExistence(timeout: 20))
-
+    private func addWidget(named name: String) {
         XCUIDevice.shared.press(.home)
         sleep(2)
         springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.72)).press(forDuration: 2)
@@ -38,21 +32,32 @@ final class WidgetUITests: XCTestCase {
 
         let preview = springboard.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Baby Tracker, '")).firstMatch
         XCTAssertTrue(preview.waitForExistence(timeout: 5))
-        let peeButton = springboard.buttons.matching(NSPredicate(format: "label CONTAINS 'Pee button'")).firstMatch
-        for _ in 0..<8 where !(peeButton.exists && peeButton.isHittable) {
+        let page = springboard.buttons.matching(NSPredicate(format: "label CONTAINS %@", name)).firstMatch
+        for _ in 0..<8 where !(page.exists && page.isHittable) {
             springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.6))
                 .press(forDuration: 0.05, thenDragTo: springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.6)))
             sleep(1)
         }
-        XCTAssertTrue(peeButton.isHittable, "Pee button page not reached")
-        attach("1-gallery-pee-button")
+        XCTAssertTrue(page.isHittable, "\(name) page not reached")
+        attach("gallery-\(name)")
         springboard.buttons.matching(NSPredicate(format: "label ENDSWITH 'Add Widget'")).firstMatch.tap()
         sleep(2)
         springboard.buttons["Done"].tap()
         sleep(2)
         attach("2-home-screen")
 
-        let widget = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Log pee'")).firstMatch
+    }
+
+    func testPeeButtonWidgetLogsWithOneTap() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["BABY_WIDGET_TEST"] == "1", "needs a re-signed build; see release-verification.md")
+        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
+        app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit"]
+        app.launch()
+        XCTAssertTrue(app.buttons["log.wet"].waitForExistence(timeout: 20))
+
+        addWidget(named: "Pee button")
+
+        let widget = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Log pee' AND value == '3 today'")).firstMatch
         XCTAssertTrue(widget.waitForExistence(timeout: 10), springboard.debugDescription)
         XCTAssertTrue(widget.value as? String == "3 today", String(describing: widget.value))
         widget.tap()
@@ -73,4 +78,28 @@ final class WidgetUITests: XCTestCase {
         XCTAssertTrue(restored.waitForExistence(timeout: 60), "Undo did not take the second pee back")
         attach("5-after-undo")
     }
+
+    func testOneTapWidgetConfirmsFeedAndSleepAndUndoesBoth() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["BABY_WIDGET_TEST"] == "1", "needs a re-signed build")
+        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
+        app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit"]
+        app.launch()
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 20))
+        addWidget(named: "One-tap log")
+
+        for (label, undoLabel) in [("Log feed", "Undo feed"), ("Sleep", "Undo sleep")] {
+            let button = springboard.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
+            XCTAssertTrue(button.waitForExistence(timeout: 20), springboard.debugDescription)
+            button.tap()
+            let undo = springboard.descendants(matching: .any).matching(NSPredicate(format: "label == %@", undoLabel)).firstMatch
+            XCTAssertTrue(undo.waitForExistence(timeout: 30), "missing confirmation for \(label)")
+            XCTAssertEqual(undo.value as? String, "Logged just now")
+            attach("confirmed-\(label)")
+            undo.tap()
+            XCTAssertTrue(button.waitForExistence(timeout: 30), "Undo did not restore \(label)")
+        }
+        app.activate()
+        XCTAssertEqual(app.buttons["log.sleep"].label, "Sleep", "widget Undo must remove the started sleep")
+    }
+
 }

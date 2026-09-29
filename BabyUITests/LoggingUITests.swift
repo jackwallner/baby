@@ -42,10 +42,12 @@ final class LoggingUITests: XCTestCase {
         let entry = app.cells.element(boundBy: 2)
         XCTAssertTrue(entry.waitForExistence(timeout: 5))
         let originalTotals = totals.label
+        attach(app, "history-before-delete")
         entry.swipeLeft()
         // A long swipe deletes at once; a short one reveals the button.
         if app.buttons["Delete"].waitForExistence(timeout: 2) { app.buttons["Delete"].tap() }
         XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 3))
+        attach(app, "history-after-delete")
         XCTAssertNotEqual(totals.label, originalTotals)
         app.buttons["Undo"].tap()
         XCTAssertEqual(totals.label, originalTotals)

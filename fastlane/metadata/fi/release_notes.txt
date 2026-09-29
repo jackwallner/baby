@@ -1,1 +1,1 @@
-Uutta: syöttö kirjautuu yhdellä napautuksella, ja puoli on valinnainen. Kirjaatko myöhässä? Siirrä aikaa taaksepäin painikkeiden yläpuolella tai lisää vanhempia merkintöjä päänäkymän alareunasta. Uudet syöttö-, pissa- ja kakkawidgetit kirjaavat yhdellä napautuksella koti- tai lukitusnäytöltä, ja Kumoa on suoraan widgetissä. Yhteenvedot voivat alkaa siitä tunnista, josta päiväsi alkaa, tai kattaa viimeiset 24 tuntia.
+Luotettavampi kirjaaminen widgeteistä, selkeämmät vahvistukset ja parempi kumoaminen.

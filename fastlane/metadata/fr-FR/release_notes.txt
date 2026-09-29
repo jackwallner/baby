@@ -1,1 +1,1 @@
-Nouveau : la tétée se note d'un toucher, et le côté est facultatif. Vous notez en retard ? Reculez l'heure au-dessus des boutons, ou ajoutez des entrées antérieures en bas de l'écran principal. De nouveaux widgets Tétée, Pipi et Caca notent d'un toucher depuis l'écran d'accueil ou l'écran verrouillé, avec Annuler directement sur le widget. Les totaux peuvent commencer à l'heure où débute votre journée, ou couvrir les 24 dernières heures.
+Saisie plus fiable depuis les widgets, confirmations plus claires et annulation améliorée.

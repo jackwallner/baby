@@ -82,8 +82,7 @@ Control Center and the Action button. `LogEventIntent` is
 four-button "One-tap log" widget and its rectangular Lock Screen row stay.
 
 Widget Undo (2026-09-28, Jack: no confirm before logging). After a one-button
-widget logs, that tile shows "Logged / Undo" (the Lock Screen circle an undo
-arrow) for 10 seconds, then its normal face. `LogEventIntent` records the
+widget logs, that tile shows "Logged / Undo" (the Lock Screen circle a checkmark with Undo) for 10 seconds, then its normal face. `LogEventIntent` records the
 entry in `WidgetUndo` (App Group); `UndoWidgetLogIntent` deletes exactly that
 id and reopens any feed timer the log ended, accepting a tap up to 60 seconds
 in case WidgetKit redraws late. Controls, the Action button and Siri have no
@@ -95,12 +94,24 @@ worked"). Every widget log button is `.invalidatableContent()`, so it dims the
 instant it is pressed, before the app process saves. The confirmed face has a
 checkmark: the one-button tile reads "Logged" with Undo, the Lock Screen
 circle a checkmark over "Undo", and the four-button widget swaps the tapped
-button for checkmark / Undo (same `WidgetUndo`, same 10 seconds). Controls
+button for checkmark / Undo (same `WidgetUndo`, same 10 seconds, including Sleep and Wake). Controls
 show "Logged feed" (or "is off in Settings") in the system overlay through
 `ControlConfirmation`. Locked-phone logging: the Home Screen is never reachable
 locked, so the answer is the Lock Screen circles, the four-button Lock Screen
 row, and the corner controls; `LogEventIntent`, `UndoWidgetLogIntent` and the
 Live Activity's `StopRunningIntent` are all `.alwaysAllowed`.
+
+Widget audit (2026-09-29): Sleep and Wake also suppress duplicate taps and
+support Undo. Undo is consumed after a successful save, so a failed save can
+retry; app Undo clears the matching widget confirmation too. Widget intents
+carry the displayed baby's id and refuse a stale tap after a baby switch.
+Control confirmation uses a value provider and a persisted save result;
+`isActive == false` alone cannot mean a save succeeded. A Live Activity Stop
+carries its timer start so an old activity cannot end a newer timer. Apple
+already defaults intents to `.alwaysAllowed`; adding the explicit declaration
+does not prove locked-device behavior. Test that on a physical iPhone. The
+rectangular Lock Screen log row shows Feed, Pee and Poop, or Sleep when it is
+the only tracked kind; the Home Screen grid shows all tracked kinds.
 
 Animate only meaningful feedback, using the shared spring and respecting
 Reduce Motion. Keep text readable in dark mode and at accessibility sizes.

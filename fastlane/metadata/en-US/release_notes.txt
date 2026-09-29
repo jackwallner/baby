@@ -1,1 +1,1 @@
-New: Feed is one tap, and the side is optional. Logging late? Wind the time back above the buttons, or add older entries from the bottom of the main screen. New Feed, Pee and Poop widgets log with one tap from the Home Screen or Lock Screen, with Undo right on the widget. Totals can start at the hour your day does, or cover the last 24 hours.
+More reliable widget logging, clearer tap confirmations, and improved Undo.

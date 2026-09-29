@@ -25,7 +25,9 @@ struct QuickLogWidgetView: View {
         if !s.tracked.contains(kind) {
             offFace
         } else if let undo {
-            Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) { undoFace }
+            Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) {
+                undoFace.contentShape(Rectangle()).invalidatableContent()
+            }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Undo \(kind.label.lowercased())")
                 .accessibilityValue("Logged just now")
@@ -103,43 +105,47 @@ struct QuickLogWidgetView: View {
     }
 
     private var logButton: some View {
-        Button(intent: LogEventIntent(what: kind.logChoice)) {
-            switch family {
-            case .accessoryCircular:
-                ZStack {
-                    AccessoryWidgetBackground()
-                    VStack(spacing: 0) {
-                        Image(systemName: kind.symbolName)
-                            .font(.title3.weight(.semibold))
-                        Text(kind.label)
-                            .font(.caption2.weight(.semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                    }
-                }
-                .widgetAccentable()
-            default:
-                VStack(spacing: AppTheme.tightSpacing) {
-                    CareGraphic(kind: kind)
-                    Text(kind.label)
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(AppTheme.ink)
-                    Text(detail)
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.ink2)
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
-                .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
-            }
+        Button(intent: WidgetLogEventIntent(what: kind.logChoice, childID: s.childID)) {
+            logFace.contentShape(Rectangle()).invalidatableContent()
         }
-        .invalidatableContent()
         .buttonStyle(.plain)
         .accessibilityLabel("Log \(kind.label.lowercased())")
         .accessibilityValue(detail)
+    }
+
+    @ViewBuilder
+    private var logFace: some View {
+        switch family {
+        case .accessoryCircular:
+            ZStack {
+                AccessoryWidgetBackground()
+                VStack(spacing: 0) {
+                    Image(systemName: kind.symbolName)
+                        .font(.title3.weight(.semibold))
+                    Text(kind.label)
+                        .font(.caption2.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            .widgetAccentable()
+        default:
+            VStack(spacing: AppTheme.tightSpacing) {
+                CareGraphic(kind: kind)
+                Text(kind.label)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink2)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
+            .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
+        }
     }
 
     /// Under the tile's label: what the tap will change.
@@ -201,11 +207,11 @@ struct QuickDirtyWidget: Widget {
 @available(iOS 18.0, *)
 struct FeedControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: AppGroup.WidgetKind.feedControl) {
+        StaticControlConfiguration(kind: AppGroup.WidgetKind.feedControl, provider: LogControlProvider(kind: .feed)) { result in
             ControlWidgetButton(action: LogEventIntent(what: .feed)) {
                 Label("Log feed", systemImage: EventKind.feed.symbolName)
             } actionLabel: { isActive in
-                ControlConfirmation(kind: .feed, isActive: isActive)
+                ControlConfirmation(kind: .feed, isActive: isActive, result: result)
             }
         }
         .displayName("Log feed")
@@ -216,11 +222,11 @@ struct FeedControl: ControlWidget {
 @available(iOS 18.0, *)
 struct WetControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: AppGroup.WidgetKind.wetControl) {
+        StaticControlConfiguration(kind: AppGroup.WidgetKind.wetControl, provider: LogControlProvider(kind: .wet)) { result in
             ControlWidgetButton(action: LogEventIntent(what: .wet)) {
                 Label("Log \(EventKind.wet.label.lowercased())", systemImage: EventKind.wet.symbolName)
             } actionLabel: { isActive in
-                ControlConfirmation(kind: .wet, isActive: isActive)
+                ControlConfirmation(kind: .wet, isActive: isActive, result: result)
             }
         }
         .displayName("Log pee diaper")
@@ -231,11 +237,11 @@ struct WetControl: ControlWidget {
 @available(iOS 18.0, *)
 struct DirtyControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: AppGroup.WidgetKind.dirtyControl) {
+        StaticControlConfiguration(kind: AppGroup.WidgetKind.dirtyControl, provider: LogControlProvider(kind: .dirty)) { result in
             ControlWidgetButton(action: LogEventIntent(what: .dirty)) {
                 Label("Log \(EventKind.dirty.label.lowercased())", systemImage: EventKind.dirty.symbolName)
             } actionLabel: { isActive in
-                ControlConfirmation(kind: .dirty, isActive: isActive)
+                ControlConfirmation(kind: .dirty, isActive: isActive, result: result)
             }
         }
         .displayName("Log poop diaper")
@@ -249,6 +255,7 @@ struct DirtyControl: ControlWidget {
 private struct ControlConfirmation: View {
     let kind: EventKind
     let isActive: Bool
+    let result: WidgetLogResult?
 
     private var noun: String { kind == .feed ? "feed" : "\(kind.label.lowercased()) diaper" }
 
@@ -257,10 +264,20 @@ private struct ControlConfirmation: View {
             Label("\(kind.label) is off in Settings", systemImage: kind.symbolName)
         } else if isActive {
             Label("Logging \(noun)", systemImage: kind.symbolName)
+        } else if let result {
+            Label(result.succeeded ? "Logged \(noun)" : "Not logged. Open Baby Tracker.",
+                  systemImage: result.succeeded ? "checkmark" : "exclamationmark.circle")
         } else {
-            Label("Logged \(noun)", systemImage: "checkmark")
+            Label("Log \(noun)", systemImage: kind.symbolName)
         }
     }
+}
+
+@available(iOS 18.0, *)
+private struct LogControlProvider: ControlValueProvider {
+    let kind: EventKind
+    var previewValue: WidgetLogResult? { nil }
+    func currentValue() async throws -> WidgetLogResult? { WidgetLogResult.load(for: kind) }
 }
 
 private extension EventKind {

@@ -1,1 +1,1 @@
-Baru: menyusui cukup satu ketukan, dan sisi bersifat opsional. Mencatat terlambat? Mundurkan waktu di atas tombol, atau tambahkan entri lama dari bagian bawah layar utama. Widget Menyusui, Pipis, dan Pup baru mencatat dengan satu ketukan dari Layar Utama atau Layar Terkunci, dengan Urungkan langsung di widget. Total bisa dimulai dari jam hari Anda dimulai, atau mencakup 24 jam terakhir.
+Pencatatan widget lebih andal, konfirmasi ketukan lebih jelas, dan pembatalan yang lebih baik.

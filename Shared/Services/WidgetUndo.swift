@@ -10,6 +10,9 @@ struct WidgetUndo: Codable, Equatable, Sendable {
     var loggedAt: Date
     /// Feed timers this log ended, reopened by Undo.
     var closedIDs: [UUID] = []
+    /// A stopped sleep is reopened instead of deleted.
+    var reopensTimer = false
+    var childID: UUID? = AppGroup.defaults.string(forKey: AppGroup.Key.activeChildID).flatMap(UUID.init(uuidString:))
 
     /// How long the tile shows Undo.
     static let showFor: TimeInterval = 10
@@ -40,7 +43,9 @@ struct WidgetUndo: Codable, Equatable, Sendable {
 
     static func load() -> WidgetUndo? {
         guard let data = AppGroup.defaults.data(forKey: AppGroup.Key.widgetUndo) else { return nil }
-        return try? JSONDecoder().decode(WidgetUndo.self, from: data)
+        guard let undo = try? JSONDecoder().decode(WidgetUndo.self, from: data),
+              undo.childID?.uuidString == AppGroup.defaults.string(forKey: AppGroup.Key.activeChildID) else { return nil }
+        return undo
     }
 
     func store() {
@@ -50,5 +55,28 @@ struct WidgetUndo: Codable, Equatable, Sendable {
 
     static func clear() {
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetUndo)
+    }
+}
+
+/// A control's confirmation comes from a completed save, never its idle state.
+struct WidgetLogResult: Codable, Equatable, Sendable {
+    let kind: EventKind
+    let message: String
+    let succeeded: Bool
+    var at: Date = .now
+    var childID: String? = AppGroup.defaults.string(forKey: AppGroup.Key.activeChildID)
+
+    func store() {
+        guard let data = try? JSONEncoder().encode(self) else { return }
+        AppGroup.defaults.set(data, forKey: AppGroup.Key.widgetLogResult)
+    }
+
+    static func load(for kind: EventKind, at now: Date = .now) -> WidgetLogResult? {
+        guard let data = AppGroup.defaults.data(forKey: AppGroup.Key.widgetLogResult),
+              let result = try? JSONDecoder().decode(Self.self, from: data),
+              result.kind == kind,
+              result.childID == AppGroup.defaults.string(forKey: AppGroup.Key.activeChildID),
+              now >= result.at, now.timeIntervalSince(result.at) < WidgetUndo.acceptFor else { return nil }
+        return result
     }
 }

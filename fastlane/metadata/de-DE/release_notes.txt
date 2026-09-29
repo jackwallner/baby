@@ -1,1 +1,1 @@
-Neu: Mahlzeiten mit einem Tippen, die Seite ist optional. Zu spät eingetragen? Dreh die Zeit über den Tasten zurück oder trage ältere Einträge unten auf dem Hauptbildschirm nach. Neue Widgets für Mahlzeit, Pipi und Kacka tragen mit einem Tippen vom Home- oder Sperrbildschirm ein, mit Widerrufen direkt im Widget. Summen können zu der Stunde beginnen, mit der dein Tag beginnt, oder die letzten 24 Stunden umfassen.
+Zuverlässigere Einträge über Widgets, deutlichere Bestätigungen und verbessertes Rückgängigmachen.

@@ -1,1 +1,1 @@
-Nytt: amning är ett tryck, och sidan är valfri. Loggar du i efterhand? Vrid tillbaka tiden ovanför knapparna, eller lägg till äldre poster längst ned på huvudskärmen. Nya widgetar för amning, kiss och bajs loggar med ett tryck från hemskärmen eller låsskärmen, med Ångra direkt på widgeten. Summorna kan börja vid den timme din dag börjar, eller täcka de senaste 24 timmarna.
+Tillförlitligare registrering från widgetar, tydligare bekräftelser och förbättrad ångra-funktion.
