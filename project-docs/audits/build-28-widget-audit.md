@@ -61,3 +61,21 @@ The rectangular Lock Screen log row displays Feed, Pee and Poop. It displays
 Sleep when Sleep is the only tracked kind. The Home Screen grid displays all
 tracked kinds, so the earlier claim of four buttons in the Lock Screen row was
 inaccurate.
+
+## 1.1.1 replaced by 1.2 (build 31), 2026-09-30
+
+Build 29 put `.invalidatableContent()` on and inside the widget
+`Button(intent:)` views. On a re-signed simulator build the renderer treated a
+tap as a plain widget tap ("Launching with no widgetURL"): the app opened, no
+entry was logged and no Undo appeared. Jack's phone logged the taps but never
+showed the confirmation. Either way, 1.1.1's release note ("clearer tap
+confirmations") did not hold. Removing the modifier made both `WidgetUITests`
+cases pass (log, Logged / Undo, Undo restores the count).
+
+Review submission `8b901895-dfff-40ce-a917-2ab70fd662d4` was cancelled. The same
+App Store version (`12c68f43-582a-4a2c-bbb4-218b450eb46b`) was renamed 1.2, given
+build 31 and the staged en-US keywords (pediatrician out, feeding in), and
+resubmitted as `98930747-2fba-4f52-9a78-7c04a33027ad` at 17:10 UTC. It reads back
+`WAITING_FOR_REVIEW`, `releaseType = MANUAL`, build 31. `asc-readiness.py`
+reported no gaps. The Lock Screen circle is still unverified on a physical
+iPhone; check it before releasing.
