@@ -85,7 +85,6 @@ struct BabyLiveActivity: Widget {
                     .frame(height: 44)
             }
             .tint(color(context))
-            .invalidatableContent()
         }
     }
 

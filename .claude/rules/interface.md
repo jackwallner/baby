@@ -90,8 +90,7 @@ surface for it; History's swipe-to-delete covers them. A second tap of the same 
 could redraw) logs nothing, and a stale Undo never clears a newer tap's Undo.
 
 Tap confirmation (2026-09-29, Jack: "see confirmed click so I know it
-worked"). Every widget log button is `.invalidatableContent()`, so it dims the
-instant it is pressed, before the app process saves. The confirmed face has a
+worked"). The confirmed face has a
 checkmark: the one-button tile reads "Logged" with Undo, the Lock Screen
 circle a checkmark over "Undo", and the four-button widget swaps the tapped
 button for checkmark / Undo (same `WidgetUndo`, same 10 seconds, including Sleep and Wake). Controls
@@ -112,6 +111,13 @@ already defaults intents to `.alwaysAllowed`; adding the explicit declaration
 does not prove locked-device behavior. Test that on a physical iPhone. The
 rectangular Lock Screen log row shows Feed, Pee and Poop, or Sleep when it is
 the only tracked kind; the Home Screen grid shows all tracked kinds.
+
+Never put `.invalidatableContent()` (or a `contentShape`) on or inside a
+widget `Button(intent:)` (2026-09-29, builds 28 and 29 shipped with it). The
+renderer then treats the tap as a plain widget tap: it opens the app and the
+intent never runs, so nothing logs and no Undo appears. That applies to the
+Home Screen tiles, the Lock Screen circles and row, and the Live Activity
+Stop. `WidgetUITests` catches it on a re-signed simulator build.
 
 Animate only meaningful feedback, using the shared spring and respecting
 Reduce Motion. Keep text readable in dark mode and at accessibility sizes.

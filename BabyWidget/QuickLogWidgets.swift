@@ -26,7 +26,7 @@ struct QuickLogWidgetView: View {
             offFace
         } else if let undo {
             Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) {
-                undoFace.contentShape(Rectangle()).invalidatableContent()
+                undoFace
             }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Undo \(kind.label.lowercased())")
@@ -106,7 +106,7 @@ struct QuickLogWidgetView: View {
 
     private var logButton: some View {
         Button(intent: WidgetLogEventIntent(what: kind.logChoice, childID: s.childID)) {
-            logFace.contentShape(Rectangle()).invalidatableContent()
+            logFace
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Log \(kind.label.lowercased())")

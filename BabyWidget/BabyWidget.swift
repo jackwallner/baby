@@ -224,8 +224,6 @@ struct BabyLogWidgetView: View {
         if let undo = undo(for: kind) {
             Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) {
                 face(kind, symbol: "checkmark", label: "Undo")
-                    .contentShape(Rectangle())
-                    .invalidatableContent()
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Undo \(kind.label.lowercased())")
@@ -245,8 +243,6 @@ struct BabyLogWidgetView: View {
         }
         return Button(intent: WidgetLogEventIntent(what: choice, childID: s.childID)) {
             face(kind, symbol: kind.symbolName, label: label)
-                .contentShape(Rectangle())
-                .invalidatableContent()
         }
         .buttonStyle(.plain)
         .accessibilityLabel(kind == .sleep ? label : "Log \(label.lowercased())")
