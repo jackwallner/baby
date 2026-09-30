@@ -67,10 +67,14 @@ struct LogEventIntent: LiveActivityIntent {
             throw WidgetSaveError(message: "\(kind.label) is turned off in Baby Tracker's Settings, so nothing was logged.")
         }
 #if BABY_WIDGET
-        // Keep the extension build self-contained. iOS executes the app-target
-        // implementation of a LiveActivityIntent in the app process.
+        // A widget button runs here, inside the widget extension, so the
+        // widget redraws as Logged / Undo the moment this returns. The app
+        // exports the entry to CloudKit from persistent history when it next
+        // runs. Controls and Siri use the app-target implementation below.
         let persistence = Persistence.shared
         let context = persistence.viewContext
+        // The extension outlives single taps; drop rows the app changed since.
+        context.refreshAllObjects()
         guard let child = persistence.activeChild(in: context) else {
             throw WidgetSaveError(message: "Open Baby Tracker once to set up your baby first.")
         }
@@ -189,7 +193,13 @@ struct LogEventIntent: LiveActivityIntent {
 
 /// Keep the public Siri action's parameters stable. Widgets carry their
 /// displayed baby's identity in an action that is hidden from Shortcuts.
-struct WidgetLogEventIntent: LiveActivityIntent {
+///
+/// A plain `AppIntent`, so a widget tap runs in the widget extension like the
+/// headache app's, and the confirmation never waits on a background launch of
+/// the app. As a `LiveActivityIntent` it ran in the app, and on a phone the
+/// widget redrew before that slow launch had saved, so Logged / Undo never
+/// showed (2026-09-30).
+struct WidgetLogEventIntent: AppIntent {
     static let title: LocalizedStringResource = "Log an event"
     static let openAppWhenRun = false
     static let isDiscoverable = false
@@ -323,7 +333,8 @@ struct BabyShortcuts: AppShortcutsProvider {
 
 /// Undo on a one-button widget, a few seconds after its tap. Removes exactly
 /// the entry that tap logged, and nothing once its short window has passed.
-struct UndoWidgetLogIntent: LiveActivityIntent {
+/// Runs in the widget extension, like `WidgetLogEventIntent`.
+struct UndoWidgetLogIntent: AppIntent {
     static let title: LocalizedStringResource = "Undo a widget log"
     static let openAppWhenRun = false
     static let isDiscoverable = false
@@ -356,6 +367,7 @@ struct UndoWidgetLogIntent: LiveActivityIntent {
 #if BABY_WIDGET
         let persistence = Persistence.shared
         let context = persistence.viewContext
+        context.refreshAllObjects()
         let found = persistence.events(ids: [undo.eventID] + undo.closedIDs, in: context)
         for event in found {
             if event.id == undo.eventID && !undo.reopensTimer {

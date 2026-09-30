@@ -112,10 +112,20 @@ does not prove locked-device behavior. Test that on a physical iPhone. The
 rectangular Lock Screen log row shows Feed, Pee and Poop, or Sleep when it is
 the only tracked kind; the Home Screen grid shows all tracked kinds.
 
+Widget taps run in the widget extension (2026-09-30, Jack chose this over
+instant partner sync: "like the headache app"). As `LiveActivityIntent`s they
+ran in the app, and on a phone the app's background launch was slow enough that
+WidgetKit redrew the tile before the save, then throttled the app's own reload,
+so taps logged but Logged / Undo never showed. The simulator only reproduced it
+with a 4 second delay in the app and the app's reloads removed.
+`WidgetUITests.testPeeButtonConfirmsWhenAppIsNotRunning` checks the tile
+confirms with the app never launched. Controls and Siri stay in the app.
+
 Never put `.invalidatableContent()` (or a `contentShape`) on or inside a
-widget `Button(intent:)` (2026-09-29, builds 28 and 29 shipped with it). The
-renderer then treats the tap as a plain widget tap: it opens the app and the
-intent never runs, so nothing logs and no Undo appears. That applies to the
+widget `Button(intent:)` (2026-09-29, builds 28 and 29 shipped with it). On
+the simulator the renderer then treats the tap as a plain widget tap: it opens
+the app and the intent never runs. (Jack's phone still logged those taps, so the
+device difference is unproven; the modifier stays out.) That applies to the
 Home Screen tiles, the Lock Screen circles and row, and the Live Activity
 Stop. `WidgetUITests` catches it on a re-signed simulator build.
 

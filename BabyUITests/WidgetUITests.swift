@@ -102,4 +102,28 @@ final class WidgetUITests: XCTestCase {
         XCTAssertEqual(app.buttons["log.sleep"].label, "Sleep", "widget Undo must remove the started sleep")
     }
 
+    /// The usual case on a phone: the app is not running when the tile is
+    /// tapped, so iOS launches it in the background to run the intent. The
+    /// tile must still turn into Logged / Undo.
+    func testPeeButtonConfirmsWhenAppIsNotRunning() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["BABY_WIDGET_TEST"] == "1", "needs a re-signed build")
+        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
+        app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit"]
+        app.launch()
+        XCTAssertTrue(app.buttons["log.wet"].waitForExistence(timeout: 20))
+        addWidget(named: "Pee button")
+        app.terminate()
+        sleep(3)
+
+        let widget = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Log pee'")).firstMatch
+        XCTAssertTrue(widget.waitForExistence(timeout: 10), springboard.debugDescription)
+        let before = widget.value as? String
+        widget.tap()
+        let undo = springboard.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Undo pee'")).firstMatch
+        XCTAssertTrue(undo.waitForExistence(timeout: 10), "a cold tap never showed Logged / Undo (was \(before ?? "?"))")
+        attach("cold-undo-offered")
+        // The tap ran in the widget extension; it never had to launch the app.
+        XCTAssertEqual(app.state, .notRunning)
+    }
+
 }

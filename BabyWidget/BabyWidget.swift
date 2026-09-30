@@ -53,6 +53,8 @@ struct BabyProvider: TimelineProvider {
     static func load() -> NowSummary {
         let persistence = Persistence.shared
         let context = persistence.viewContext
+        // The extension process lives across reloads; read what the app saved.
+        context.refreshAllObjects()
         guard let child = persistence.activeChild(in: context) else { return NowSummary.load() }
         return NowSummary.make(child: child, events: persistence.events(for: child, in: context, limit: 200))
     }

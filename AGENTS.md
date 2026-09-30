@@ -38,9 +38,13 @@ beyond that setting, or locking something that shipped free.
   A baby another parent shared arrives in the second store, and every query runs
   across both. Only the app process mirrors. Widgets open the same files with
   mirroring off, and the app exports any extension writes from persistent
-  history on its next run. Interactive logging intents use `LiveActivityIntent`,
-  so iOS runs them in the app process; `EventStore` writes to the mirrored store
-  and republishes the summary. CloudKit delivery to a partner is asynchronous.
+  history on its next run. Widget buttons (`WidgetLogEventIntent`,
+  `UndoWidgetLogIntent`) are plain `AppIntent`s that run and save in the widget
+  extension, so Logged / Undo shows at once; the partner, Watch and Live
+  Activity see a widget tap when the app next runs. Controls, Siri and the Live
+  Activity Stop use `LiveActivityIntent`, so iOS runs them in the app process;
+  `EventStore` writes to the mirrored store and republishes the summary.
+  CloudKit delivery to a partner is asynchronous.
 - `EventStore` is the single door to the log: every tap, edit, undo and delete
   goes through it, and it republishes `NowSummary` to the widgets, the Watch and
   the Live Activity after each change.
