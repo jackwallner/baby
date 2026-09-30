@@ -79,3 +79,21 @@ resubmitted as `98930747-2fba-4f52-9a78-7c04a33027ad` at 17:10 UTC. It reads bac
 `WAITING_FOR_REVIEW`, `releaseType = MANUAL`, build 31. `asc-readiness.py`
 reported no gaps. The Lock Screen circle is still unverified on a physical
 iPhone; check it before releasing.
+
+## 1.2 build 31 replaced by build 32, 2026-09-30
+
+On Jack's phone build 31 logged widget taps but never showed Logged / Undo.
+Cause: the widget intents were `LiveActivityIntent`s, so each tap waited on a
+background launch of the app. WidgetKit redrew the tile before that launch had
+saved, and throttled the app's own reload. The simulator reproduced it only with
+a 4 second delay in the app and the app's reloads removed. Build 32 makes
+`WidgetLogEventIntent` and `UndoWidgetLogIntent` plain `AppIntent`s that save in
+the widget extension, like the headache app (Jack's choice over instant partner
+sync). `testPeeButtonConfirmsWhenAppIsNotRunning` confirms the tile shows Undo
+with the app never launched; all three widget tests and 112 unit tests pass.
+
+Submission `98930747-2fba-4f52-9a78-7c04a33027ad` was cancelled and 1.2 went back
+in with build 32 as `818e4973-3b3e-4522-8071-d759815d2d92` at 18:39 UTC: reads back
+`WAITING_FOR_REVIEW`, `MANUAL`, build 32, new en-US keywords kept. Still to do by
+hand before release: tap a Home Screen tile and the Lock Screen circle (locked)
+on the phone.
