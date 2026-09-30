@@ -26,6 +26,15 @@ enum AppTheme {
     /// The four log buttons: tall enough to hit while holding a baby.
     static let logButtonHeight: CGFloat = 88
     static let maxLogButtonHeight: CGFloat = 124
+    /// The shortest a log button gets when Now fits a small phone.
+    static let minLogButtonHeight: CGFloat = 52
+    /// Now's cards on a phone, where the page fits one screen.
+    static let compactCardPadding: CGFloat = 16
+    /// Below this much page height (a Pro, not a Pro Max), Now drops the
+    /// "Tap to log now" hint so the buttons keep their size.
+    static let nowHintMinHeight: CGFloat = 740
+    /// Below this much page height (an SE), Now drops the hour strip.
+    static let hourStripMinHeight: CGFloat = 620
     static let outlineWidth: CGFloat = 2
     /// Card edges in dark themes: tone does the separating, the line only hints.
     static let hairlineWidth: CGFloat = 1
@@ -33,7 +42,6 @@ enum AppTheme {
     static let graphicSize: CGFloat = 44
     static let wideLayout: CGFloat = 700
     static let contentWidth: CGFloat = 1000
-    static let homeSummaryAllowance: CGFloat = 500
     static let ctaHeight: CGFloat = 52
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72

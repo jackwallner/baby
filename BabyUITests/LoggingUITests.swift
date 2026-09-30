@@ -236,7 +236,9 @@ final class LoggingUITests: XCTestCase {
 
         app.buttons["logTime.now"].tap()
         XCTAssertFalse(app.buttons["logTime.now"].exists)
-        XCTAssertEqual(app.staticTexts["logHint"].label, "Tap to log now. Hold to add details.")
+        // The idle hint only shows on a tall phone; the countdown is gone either way.
+        let idle = app.staticTexts["logHint"]
+        XCTAssertTrue(!idle.exists || idle.label == "Tap to log now. Hold to add details.", idle.label)
     }
 
     func testEditingAnEntrySavesWithoutASaveButton() {

@@ -18,8 +18,15 @@ struct LogButtons: View {
     @State private var sideTarget: NSManagedObjectID?
     @State private var sideTimeout: Task<Void, Never>?
     @ScaledMetric(relativeTo: .title3) private var buttonHeight = AppTheme.logButtonHeight
-    var minimumHeight: CGFloat = AppTheme.logButtonHeight
+    /// Each button's height, fitted to the screen; nil uses the scaled default.
+    var height: CGFloat? = nil
+    var spacing = AppTheme.spacing
     let onEdit: (EventKind) -> Void
+
+    /// A fitted button can get as short as its graphic allows.
+    private var labelPadding: CGFloat {
+        height == nil ? AppTheme.tightSpacing : AppTheme.hairSpacing
+    }
 
     /// How long the side chips stay after the last tap on them or on Feed.
     static let sideWindow: TimeInterval = 90
@@ -33,12 +40,12 @@ struct LogButtons: View {
     }
 
     var body: some View {
-        VStack(spacing: AppTheme.spacing) {
+        VStack(spacing: spacing) {
             ForEach(Self.rows(for: settings.tracked), id: \.self) { row in
                 if row == [.feed] {
                     feedCard
                 } else {
-                    (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: AppTheme.spacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
+                    (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: spacing)) : AnyLayout(HStackLayout(spacing: spacing))) {
                         ForEach(row, id: \.self) { kind in
                             button(for: kind)
                         }
@@ -89,8 +96,8 @@ struct LogButtons: View {
                         .foregroundStyle(AppTheme.ink)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, AppTheme.tightSpacing)
-                .frame(minHeight: max(buttonHeight, minimumHeight))
+                .padding(.vertical, labelPadding)
+                .frame(minHeight: height ?? buttonHeight)
                 .contentShape(Rectangle())
             }
             .pressableCard()
@@ -104,17 +111,20 @@ struct LogButtons: View {
             .accessibilityAction(named: "Add details") { onEdit(.feed) }
 
             if let target = targetFeed {
-                VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-                    Rectangle()
-                        .fill(AppTheme.feed.opacity(0.35))
-                        .frame(height: AppTheme.hairlineWidth)
-                    Text("Add a side (optional)")
+                // One row, label beside the chips, so opening it costs the
+                // buttons as little height as it can.
+                (dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
+                    : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))) {
+                    Text("Side")
                         .font(.caption.weight(.medium))
                         .foregroundStyle(AppTheme.ink2)
-                        .padding(.top, AppTheme.hairSpacing)
+                        .fixedSize()
+                        .accessibilityLabel("Add a side, optional")
                     FeedSideChips(selection: sidesBinding(for: target))
                 }
-                .padding([.horizontal, .bottom], AppTheme.spacing)
+                .padding(.horizontal, AppTheme.spacing)
+                .padding(.bottom, AppTheme.tightSpacing)
                 // The card grows and the row fades up into the new space; on
                 // the way out it fades first, so chips never slide over Feed.
                 .transition(reduceMotion ? .opacity : .asymmetric(
@@ -209,8 +219,8 @@ struct LogButtons: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, AppTheme.tightSpacing)
-            .frame(minHeight: max(buttonHeight, minimumHeight))
+            .padding(.vertical, labelPadding)
+            .frame(minHeight: height ?? buttonHeight)
             .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
             .graphicBorder()
             .contentShape(AppTheme.buttonShape)

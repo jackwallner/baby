@@ -52,13 +52,24 @@ than using the numeric roll, which smeared "just now". Totals are a card: one
 figure per button with a kind dot, and the hour strip uses the same dots. Name and birth date are optional; never guess a birth date
 for someone who did not choose one.
 
+One screen (2026-09-30, Jack: "dynamically fit on one screen without having
+to scroll"). On a phone, Now measures itself (`NowFit`): everything but the
+log buttons is a fixed height, and the buttons split what the screen leaves,
+between `minLogButtonHeight` and `maxLogButtonHeight`; slack past the cap sits
+above the totals. Opening the side chips shrinks the buttons instead of pushing
+the page. Short screens shed extras by page height: under `nowHintMinHeight`
+the idle "Tap to log now" hint (the wound-back countdown always shows), under
+`hourStripMinHeight` (an SE) the hour strip. Accessibility sizes and iPad keep
+the scrolling layouts. `LayoutUITests.testNowFitsOneScreenWithoutScrolling`
+checks it on each leased device.
+
 Backfilling lives at the very bottom of Now as a quiet "Add an older entry"
 menu (Feed, Pee, Poop, Sleep, Weight) that opens the same editor as History's
 plus button; the editor's date picker does the rest. Added 2026-09-26 for
 version 1.1, because parents install on day three and want the first days in.
 
 2026-09-28 (Jack): Feed is one button. A tap logs a feed with no side;
-then an "Add a side (optional)" row of Left / Right / Bottle chips opens
+then a "Side" row of Left / Right / Bottle chips opens
 under it for 90 seconds and edits that feed (multi-select, stored in tap
 order in the existing `side` string as `right,left`, so no schema change and
 older builds still read single sides). The widget's Feed and the plain Siri

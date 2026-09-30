@@ -5,10 +5,11 @@ import SwiftUI
 
 struct CardBackground: ViewModifier {
     var elevated = false
+    var padding = AppTheme.looseSpacing
 
     func body(content: Content) -> some View {
         content
-            .padding(AppTheme.looseSpacing)
+            .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(elevated ? AppTheme.cardElevated : AppTheme.card, in: AppTheme.cardShape)
             .graphicBorder()
@@ -49,8 +50,8 @@ extension View {
         modifier(NightLightMultiply())
     }
 
-    func card(elevated: Bool = false) -> some View {
-        modifier(CardBackground(elevated: elevated))
+    func card(elevated: Bool = false, padding: CGFloat = AppTheme.looseSpacing) -> some View {
+        modifier(CardBackground(elevated: elevated, padding: padding))
     }
 
     /// A card or row that answers back under the finger.

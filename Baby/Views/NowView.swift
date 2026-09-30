@@ -11,7 +11,9 @@ struct NowView: View {
     @State private var editor: EditorRequest?
     @State private var showSettings = false
     @State private var showReports = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var now = Date.now
+    @State private var fit = NowFit()
     @StateObject private var logClock = LogClock()
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -29,20 +31,22 @@ struct NowView: View {
                             }
                             LoggingControls(height: AppTheme.maxLogButtonHeight, clock: logClock, editor: $editor)
                         }
-                    } else {
+                        .padding(.vertical, AppTheme.looseSpacing)
+                    } else if dynamicTypeSize.isAccessibilitySize {
                         VStack(alignment: .leading, spacing: AppTheme.spacing) {
                             NowStatusCard(now: now, clock: logClock)
-                            LoggingControls(height: buttonHeight(for: geometry.size.height), clock: logClock, editor: $editor)
-                            Spacer(minLength: 0)
+                            LoggingControls(height: nil, clock: logClock, editor: $editor)
                             TodayTotalsView(now: now)
                             OlderEntryLink(editor: $editor)
                         }
-                        .frame(minHeight: max(0, geometry.size.height - AppTheme.looseSpacing * 2), alignment: .top)
+                        .padding(.vertical, AppTheme.looseSpacing)
+                    } else {
+                        fitted(available: geometry.size.height - AppTheme.tightSpacing * 2)
+                            .padding(.vertical, AppTheme.tightSpacing)
                     }
                 }
                 .frame(maxWidth: AppTheme.contentWidth)
                 .padding(.horizontal, AppTheme.margin)
-                .padding(.vertical, AppTheme.looseSpacing)
                 .frame(maxWidth: .infinity)
             }
             .scrollBounceBehavior(.basedOnSize)
@@ -97,26 +101,85 @@ struct NowView: View {
         return child.displayName
     }
 
-    /// Tall enough to hit while holding a baby, taller when fewer rows share
-    /// the screen, never so tall the totals leave it.
-    private func buttonHeight(for available: CGFloat) -> CGFloat {
-        let rows = CGFloat(max(1, LogButtons.rows(for: settings.tracked).count))
-        return min(AppTheme.maxLogButtonHeight, max(AppTheme.logButtonHeight, (available - AppTheme.homeSummaryAllowance) / rows))
+    /// A phone: everything on one screen. The buttons take whatever height
+    /// the rest leaves (within a floor and a cap), so they grow on a Pro Max,
+    /// shrink on a small phone, and give way when the side chips open. A
+    /// shorter screen drops the how-to hint, the shortest the hour strip too.
+    /// Past the floor (large text), the page scrolls rather than clipping.
+    private func fitted(available: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+            NowStatusCard(now: now, clock: logClock, compact: true)
+            LoggingControls(
+                height: fit.buttonHeight,
+                spacing: AppTheme.tightSpacing,
+                showsIdleHint: available >= AppTheme.nowHintMinHeight,
+                clock: logClock,
+                editor: $editor
+            )
+            .padding(.bottom, fit.slack)
+            TodayTotalsView(now: now, compact: true, showsHourStrip: available >= AppTheme.hourStripMinHeight)
+            OlderEntryLink(editor: $editor)
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+            // The page as drawn, less the part the last fit decided, is the
+            // part that does not stretch.
+            let fixed = height - fit.slack - fit.buttonHeight * rows
+            refit(fixed: fixed, available: available, animated: fit.fixed != nil)
+        }
+        .onChange(of: available) { _, available in
+            if let fixed = fit.fixed { refit(fixed: fixed, available: available, animated: false) }
+        }
+        .frame(minHeight: max(0, available), alignment: .top)
+    }
+
+    private var rows: CGFloat {
+        CGFloat(max(1, LogButtons.rows(for: settings.tracked).count))
+    }
+
+    /// The buttons split what the rest leaves. Slack past the cap goes above
+    /// the totals, so they sit at the bottom of the screen.
+    private func refit(fixed: CGFloat, available: CGFloat, animated: Bool) {
+        let share = ((available - fixed) / rows).rounded(.down)
+        let height = min(AppTheme.maxLogButtonHeight, max(AppTheme.minLogButtonHeight, share))
+        let next = NowFit(fixed: fixed, buttonHeight: height, slack: max(0, available - fixed - height * rows))
+        guard abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
+            fit.fixed = fixed
+            return
+        }
+        // The first fit lands before anything draws; later ones (the side
+        // chips opening) ride the same spring as the tap that caused them.
+        withAnimation(animated && !reduceMotion ? AppTheme.feedbackAnimation : nil) {
+            fit = next
+        }
     }
 }
 
+/// The phone layout's last fit: the height that does not stretch (nil until
+/// measured), each button's height, and the slack above the totals.
+private struct NowFit: Equatable {
+    var fixed: CGFloat?
+    var buttonHeight: CGFloat = AppTheme.logButtonHeight
+    var slack: CGFloat = 0
+}
+
 private struct LoggingControls: View {
-    let height: CGFloat
+    /// Nil: the scaled default, for accessibility text sizes.
+    let height: CGFloat?
+    var spacing = AppTheme.spacing
+    /// "Tap to log now." A wound-back time's countdown always shows.
+    var showsIdleHint = true
     @ObservedObject var clock: LogClock
     @Binding var editor: EditorRequest?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+        VStack(alignment: .leading, spacing: spacing) {
             LogTimeRow(clock: clock)
-            LogButtons(clock: clock, minimumHeight: height) { kind in
+            LogButtons(clock: clock, height: height, spacing: spacing) { kind in
                 editor = EditorRequest(kind: kind, at: clock.chosen)
             }
-            LogHint(clock: clock)
+            if showsIdleHint || clock.isAdjusted {
+                LogHint(clock: clock)
+            }
         }
     }
 }
@@ -334,6 +397,8 @@ private struct NowStatusCard: View {
     @State private var showSaveError = false
     let now: Date
     @ObservedObject var clock: LogClock
+    /// A phone fitting one screen: a tighter card.
+    var compact = false
 
     private enum Lead { case feed, diaper, sleep }
 
@@ -345,7 +410,7 @@ private struct NowStatusCard: View {
     private var summary: NowSummary { events.summary }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+        VStack(alignment: .leading, spacing: compact ? AppTheme.tightSpacing : AppTheme.spacing) {
             (dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
                 : AnyLayout(HStackLayout())) {
@@ -402,7 +467,7 @@ private struct NowStatusCard: View {
                 }
             }
         }
-        .card()
+        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing)
         .accessibilityIdentifier("nowCard")
         .alert("Couldn't finish this feed", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
@@ -488,12 +553,14 @@ private struct TodayTotalsView: View {
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var settings: BabySettings
     let now: Date
+    var compact = false
+    var showsHourStrip = true
 
     var body: some View {
         let totals = WindowTotals.make(events: events.events, window: settings.totalsWindow, now: now)
         let title = settings.totalsWindow.title()
         let kinds = settings.tracked.buttons
-        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+        VStack(alignment: .leading, spacing: compact ? AppTheme.tightSpacing : AppTheme.spacing) {
             SectionLabel(text: title)
             (dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
@@ -505,9 +572,11 @@ private struct TodayTotalsView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(title): \(totals.line(settings.tracked))")
             .accessibilityIdentifier("todayTotals")
-            HourStrip(totals: totals, kinds: kinds)
+            if showsHourStrip {
+                HourStrip(totals: totals, kinds: kinds)
+            }
         }
-        .card()
+        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing)
     }
 
     private func stat(_ kind: EventKind, totals: WindowTotals) -> some View {

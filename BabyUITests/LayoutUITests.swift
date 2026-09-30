@@ -18,6 +18,41 @@ final class LayoutUITests: XCTestCase {
         attach(app, name: "setup-disclaimer-reachable")
     }
 
+    /// Now fits the phone it runs on: every control and both cards on one
+    /// screen, before and after the side chips open, with no scrolling.
+    func testNowFitsOneScreenWithoutScrolling() {
+        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
+        app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit"]
+        app.launch()
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 15))
+        let screen = app.windows.firstMatch.frame
+        let ids = ["nowCard", "logTime.earlier", "log.feed", "log.wet", "log.dirty", "log.sleep", "todayTotals", "addOlderEntry"]
+        assertOnScreen(ids, in: app, screen: screen)
+        let bottom = app.buttons["addOlderEntry"].frame
+        attach(app, name: "now-fits")
+
+        app.buttons["log.feed"].tap()
+        XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 3))
+        // Let the spring settle before reading frames.
+        _ = app.buttons["feedSide.bottle"].waitForExistence(timeout: 1)
+        Thread.sleep(forTimeInterval: 1)
+        assertOnScreen(ids + ["feedSide.left", "feedSide.bottle"], in: app, screen: screen)
+        // The buttons gave the side row its room: nothing below them moved.
+        XCTAssertEqual(app.buttons["addOlderEntry"].frame.minY, bottom.minY, accuracy: 1)
+        attach(app, name: "now-fits-with-sides")
+    }
+
+    private func assertOnScreen(_ ids: [String], in app: XCUIApplication, screen: CGRect) {
+        for id in ids {
+            let element = app.descendants(matching: .any).matching(identifier: id).firstMatch
+            XCTAssertTrue(element.exists, "Missing: \(id)")
+            XCTAssertTrue(screen.contains(element.frame), "Off screen: \(id) \(element.frame) in \(screen)")
+        }
+        for id in ["log.feed", "log.wet", "log.dirty", "log.sleep"] {
+            XCTAssertGreaterThanOrEqual(app.buttons[id].frame.height, 44, "Too small to hit: \(id)")
+        }
+    }
+
     func testLargestTextKeepsLoggingAndUndoReachable() {
         let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
         app.launchArguments = [
