@@ -57,11 +57,21 @@ to scroll"). On a phone, Now measures itself (`NowFit`): everything but the
 log buttons is a fixed height, and the buttons split what the screen leaves,
 between `minLogButtonHeight` and `maxLogButtonHeight`; slack past the cap sits
 above the totals. Opening the side chips shrinks the buttons instead of pushing
-the page. Short screens shed extras by page height: under `nowHintMinHeight`
-the idle "Tap to log now" hint (the wound-back countdown always shows), under
-`hourStripMinHeight` (an SE) the hour strip. Accessibility sizes and iPad keep
+the page. Sections sit 12 apart; the time row and the buttons, one control,
+8. There is no idle "Tap to log now" hint (Jack: not needed); only the
+wound-back countdown shows under the buttons. Under `hourStripMinHeight` (an
+SE) the hour strip drops. Accessibility sizes and iPad keep
 the scrolling layouts. `LayoutUITests.testNowFitsOneScreenWithoutScrolling`
 checks it on each leased device.
+
+Reports (2026-09-30, Jack: the old page "doesn't display things in an easy
+to see or understand way"; modelled on VO2's Trends). Top to bottom: a 7 / 14
+/ 30 days / Custom range (Custom is the saved visit date), a 2-column grid of
+daily averages per button with one supporting figure, one card per chart
+(title, a one-sentence takeaway, bars per day with a dashed average line;
+diapers grouped, not stacked), then For the doctor (summary thumbnail row,
+Share PDF, CSV row). Ranges never start before the first entry. Averages skip
+today. The paywall preview reuses `ReportChart`.
 
 Backfilling lives at the very bottom of Now as a quiet "Add an older entry"
 menu (Feed, Pee, Poop, Sleep, Weight) that opens the same editor as History's

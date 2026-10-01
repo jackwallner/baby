@@ -30,9 +30,6 @@ enum AppTheme {
     static let minLogButtonHeight: CGFloat = 52
     /// Now's cards on a phone, where the page fits one screen.
     static let compactCardPadding: CGFloat = 16
-    /// Below this much page height (a Pro, not a Pro Max), Now drops the
-    /// "Tap to log now" hint so the buttons keep their size.
-    static let nowHintMinHeight: CGFloat = 740
     /// Below this much page height (an SE), Now drops the hour strip.
     static let hourStripMinHeight: CGFloat = 620
     static let outlineWidth: CGFloat = 2
@@ -45,7 +42,9 @@ enum AppTheme {
     static let ctaHeight: CGFloat = 52
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72
-    static let chartHeight: CGFloat = 120
+    static let chartHeight: CGFloat = 160
+    /// The summary page's thumbnail beside its row in Reports.
+    static let pageThumbnailWidth: CGFloat = 44
     /// A report preview card on the paywall, and the chart inside it.
     static let previewCardWidth: CGFloat = 280
     static let previewCardHeight: CGFloat = 176
@@ -66,6 +65,13 @@ enum AppTheme {
     static let cellGap: CGFloat = 2
     static let cellRadius: CGFloat = 3
     static let stripIconWidth: CGFloat = 14
+    /// Watch log buttons: Apple's wrist minimum, and the shorter Sleep row.
+    static let watchButtonHeight: CGFloat = 44
+    static let watchCompactButtonHeight: CGFloat = 38
+    /// The crown-driven time wheel in the Watch's Log earlier sheet.
+    static let watchWheelHeight: CGFloat = 64
+    /// Buttons behind an always-on (wrist down) screen: the glance stays lit.
+    static let watchDimmedOpacity: Double = 0.35
 
     static let feedbackAnimation = Animation.spring(response: 0.32, dampingFraction: 0.82)
 
@@ -155,6 +161,12 @@ enum AppTheme {
     /// the label stays ink-on-paper and the buttons read as one family.
     static func fill(for kind: EventKind) -> Color {
         color(for: kind).opacity(0.20)
+    }
+
+    /// The same fill, stronger: the side to offer next on the Watch, and a
+    /// sleep that is running.
+    static func strongFill(for kind: EventKind) -> Color {
+        color(for: kind).opacity(0.42)
     }
 }
 

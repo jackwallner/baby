@@ -33,24 +33,23 @@ struct ReportsSheet: View {
     }
 }
 
-/// Baby+ reporting: the pediatrician summary, the trends behind it, and the
-/// export. Reached through `ReportsSheet` once Baby+ is active. Before that
-/// the paywall shows the same reports as previews (the example page in full
-/// when nothing is logged, App Review 4.3).
+/// Baby+ reporting, read top to bottom: pick a range, see the day-by-day
+/// averages, the chart behind each one, then hand the summary to the doctor.
+/// Reached through `ReportsSheet` once Baby+ is active. Before that the
+/// paywall shows the same reports as previews (the example page in full when
+/// nothing is logged, App Review 4.3).
 struct SummaryView: View {
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var store: StoreService
     @EnvironmentObject private var settings: BabySettings
 
-    /// nil until the child is known. Resolving it lazily rather than in
-    /// `onAppear` keeps the first render from using today and then flickering
-    /// to the real range.
-    @State private var chosenSince: Date?
+    /// nil until the parent picks one: then a saved visit date means Custom,
+    /// anything else the last two weeks.
+    @State private var chosenRange: ReportRange?
     @State private var pdfData: Data?
     @State private var preview: UIImage?
     @State private var showFullPreview = false
     @State private var paywallFocus: PlusFeature?
-    @State private var csvURL: URL?
 
     private var hasData: Bool { !events.events.isEmpty }
     private var isExample: Bool { !hasData }
@@ -58,10 +57,18 @@ struct SummaryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-                visitCard
-                previewCard
-                trendsCard
-                exportCard
+                rangeSection
+                if isExample {
+                    Label("Example, not your baby's data. Log a few entries and this fills in.", systemImage: "info.circle")
+                        .font(.footnote)
+                        .foregroundStyle(AppTheme.ink2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                statsGrid
+                ForEach(ReportMetric.shown(for: report.tracked), id: \.self) { metric in
+                    chartCard(metric)
+                }
+                doctorCard
                 Text(Guidance.disclaimer)
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
@@ -74,34 +81,55 @@ struct SummaryView: View {
         .navigationTitle("Reports")
         .navigationBarTitleDisplayMode(.large)
         .task(id: reportKey) { await rebuild() }
-        .onChange(of: events.child?.objectID) { _, _ in chosenSince = nil }
+        .onChange(of: events.child?.objectID) { _, _ in chosenRange = nil }
         .sheet(isPresented: $showFullPreview) { fullPreview }
         .sheet(item: $paywallFocus) { focus in
             BabyPaywallView(paywallImpressionID: "baby_summary_\(focus.rawValue)", focus: focus)
         }
     }
 
-    // MARK: - Report
+    // MARK: - Range
 
-    private var since: Date { chosenSince ?? defaultSince }
+    private var range: ReportRange {
+        chosenRange ?? (events.child?.lastVisitAt == nil ? .twoWeeks : .custom)
+    }
 
-    private var sinceBinding: Binding<Date> {
-        Binding(get: { since }, set: { value in
-            guard let child = events.child else { return }
-            child.lastVisitAt = value
-            if events.save() {
-                chosenSince = value
-            }
+    private var rangeBinding: Binding<ReportRange> {
+        Binding(get: { range }, set: { value in
+            Haptics.selected()
+            chosenRange = value
         })
     }
 
-    private var defaultSince: Date { events.defaultVisitStart }
+    /// Custom starts at the saved visit date, which is what the date row edits.
+    private var customStart: Date { events.child?.lastVisitAt ?? events.defaultVisitStart }
+
+    private var customBinding: Binding<Date> {
+        Binding(get: { customStart }, set: { value in
+            guard let child = events.child else { return }
+            child.lastVisitAt = value
+            _ = events.save()
+        })
+    }
+
+    /// The range's first day, never before the first entry: days before the
+    /// log began are not blank days, they are days nobody was logging.
+    private var since: Date {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        let start = switch range {
+        case .custom: customStart
+        default: calendar.date(byAdding: .day, value: 1 - range.days, to: today) ?? today
+        }
+        guard let first = events.events.map(\.start).min() else { return start }
+        return max(start, calendar.startOfDay(for: first))
+    }
 
     private var reportKey: String {
         "\(events.revision)-\(DateHelpers.dayKey(for: since))-\(events.child?.id?.uuidString ?? "")-\(settings.tracked.hidden.count)"
     }
 
-    private var report: SummaryReport { events.visitReport(since: since) }
+    private var report: SummaryReport { events.visitReport(since: isExample ? nil : since) }
 
     private func rebuild() async {
         let snapshot = report
@@ -110,51 +138,168 @@ struct SummaryView: View {
             PDFReport.render(snapshot, isExample: example)
         }.value
         let image = await Task.detached(priority: .userInitiated) {
-            PDFReport.firstPageImage(data, width: 900)
+            PDFReport.firstPageImage(data, width: 300)
         }.value
         guard !Task.isCancelled else { return }
         pdfData = data
         preview = image
     }
 
-    // MARK: - Cards
-
-    /// The whole job of this page in one card: pick where the report starts,
-    /// then hand it over. Everything below it is the preview and the extras.
-    private var visitCard: some View {
+    private var rangeSection: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            SectionLabel(text: "For the next visit")
-            LabeledContent("From") {
-                DatePicker("From", selection: sinceBinding, in: ...Date.now, displayedComponents: .date)
-                    .labelsHidden()
-                    .themedDatePicker()
-            }
-            .foregroundStyle(AppTheme.ink)
-            Text(rangeLine)
-                .font(.footnote)
-                .foregroundStyle(AppTheme.ink2)
-                .fixedSize(horizontal: false, vertical: true)
-            shareButton
-            if hasData, Calendar.current.startOfDay(for: since) < Calendar.current.startOfDay(for: .now) {
-                Button("Visit done? Start the next summary from today") {
-                    sinceBinding.wrappedValue = Calendar.current.startOfDay(for: .now)
-                    Haptics.selected()
+            Picker("Range", selection: rangeBinding) {
+                ForEach(ReportRange.allCases, id: \.self) { range in
+                    Text(range.title).tag(range)
                 }
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(AppTheme.accent)
-                .frame(minHeight: 44)
             }
+            .pickerStyle(.segmented)
+            .accessibilityIdentifier("reportRange")
+            if range == .custom {
+                LabeledContent("From") {
+                    DatePicker("From", selection: customBinding, in: ...Date.now, displayedComponents: .date)
+                        .labelsHidden()
+                        .themedDatePicker()
+                }
+                .foregroundStyle(AppTheme.ink)
+            }
+            Text(rangeLine)
+                .font(.subheadline)
+                .foregroundStyle(AppTheme.ink2)
         }
-        .card()
-        .accessibilityIdentifier("summaryCard")
     }
 
     private var rangeLine: String {
-        if isExample {
-            return "Log a few entries and the page fills in with your own. Until then the preview is an example."
+        "\(rangeDates) · \(Format.count(report.dayCount, "day"))"
+    }
+
+    /// "Sep 28 to today".
+    private var rangeDates: String {
+        let start = report.start.formatted(.dateTime.month(.abbreviated).day())
+        let end = Calendar.current.isDateInToday(report.end) ? "today" : report.end.formatted(.dateTime.month(.abbreviated).day())
+        return "\(start) to \(end)"
+    }
+
+    // MARK: - At a glance
+
+    /// One tile per button in use: the daily average, and the one number a
+    /// doctor asks about next.
+    private var statsGrid: some View {
+        let tiles = statTiles
+        return VStack(alignment: .leading, spacing: AppTheme.spacing) {
+            ForEach(Array(stride(from: 0, to: tiles.count, by: 2)), id: \.self) { index in
+                // Both tiles in a row share its height.
+                HStack(alignment: .top, spacing: AppTheme.spacing) {
+                    tiles[index]
+                    if index + 1 < tiles.count {
+                        tiles[index + 1]
+                    } else {
+                        Color.clear.frame(maxWidth: .infinity)
+                    }
+                }
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            if report.completeDays.count < report.days.count {
+                Text("Daily averages leave out today, which isn't over yet.")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink3)
+            }
         }
-        let days = report.dayCount
-        return "\(since.formatted(.dateTime.month(.abbreviated).day())) to today, \(Format.count(days, "day")). One page to AirDrop, print or send to the office."
+        .accessibilityIdentifier("summaryCard")
+    }
+
+    private var statTiles: [StatTile] {
+        var tiles: [StatTile] = []
+        if report.tracked.contains(.feed) {
+            tiles.append(StatTile(kind: .feed, value: Self.decimal(report.averageFeedsPerDay), unit: "Feeds a day",
+                                  detail: report.longestFeedGapSeconds > 0 ? "Longest gap \(Format.compactDuration(report.longestFeedGapSeconds))" : nil))
+        }
+        for kind in [EventKind.wet, .dirty] where report.tracked.contains(kind) {
+            let average = kind == .wet ? report.averageWetPerDay : report.averageDirtyPerDay
+            let total = kind == .wet ? report.totalWet : report.totalDirty
+            tiles.append(StatTile(kind: kind, value: Self.decimal(average), unit: "\(kind.label) a day",
+                                  detail: "\(total) in \(Format.count(report.dayCount, "day"))"))
+        }
+        if report.tracked.contains(.sleep) {
+            tiles.append(StatTile(kind: .sleep, value: Format.compactDuration(report.averageSleepSeconds), unit: "Sleep a day",
+                                  detail: report.longestSleepSeconds > 0 ? "Longest \(Format.compactDuration(report.longestSleepSeconds))" : nil))
+        }
+        return tiles
+    }
+
+    static func decimal(_ value: Double) -> String {
+        value.formatted(.number.precision(.fractionLength(0...1)))
+    }
+
+    // MARK: - Charts
+
+    private func chartCard(_ metric: ReportMetric) -> some View {
+        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+            VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
+                Text(metric.title)
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.ink)
+                Text(ReportChart.takeaway(metric, report: report))
+                    .font(.subheadline)
+                    .foregroundStyle(AppTheme.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            ReportChart(report: report, metric: metric)
+        }
+        .card(padding: AppTheme.compactCardPadding)
+    }
+
+    // MARK: - For the doctor
+
+    private var doctorCard: some View {
+        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+            SectionLabel(text: "For the doctor")
+            Button {
+                showFullPreview = true
+            } label: {
+                HStack(spacing: AppTheme.spacing) {
+                    pageThumbnail
+                    VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
+                        Text(isExample ? "Example summary" : "One-page summary")
+                            .font(.headline)
+                            .foregroundStyle(AppTheme.ink)
+                        Text("Feeds, diapers, sleep and weights, \(rangeDates). Tap to read it.")
+                            .font(.footnote)
+                            .foregroundStyle(AppTheme.ink2)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(AppTheme.ink3)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Preview the summary")
+            shareButton
+            Divider().overlay(AppTheme.separator)
+            exportRow
+        }
+        .card(padding: AppTheme.compactCardPadding)
+    }
+
+    private var pageThumbnail: some View {
+        Group {
+            if let preview {
+                Image(uiImage: preview)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .colorMultiply(AppTheme.codePaper)
+            } else {
+                Rectangle().fill(AppTheme.cardElevated)
+            }
+        }
+        .frame(width: AppTheme.pageThumbnailWidth)
+        .aspectRatio(612.0 / 792.0, contentMode: .fit)
+        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cellRadius, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: AppTheme.cellRadius, style: .continuous).strokeBorder(AppTheme.separator, lineWidth: AppTheme.hairlineWidth))
+        .accessibilityHidden(true)
     }
 
     @ViewBuilder
@@ -162,94 +307,57 @@ struct SummaryView: View {
         if store.isPro, let pdfData, !isExample {
             ShareLink(item: PDFFile(data: pdfData, name: report.childName, date: .now), preview: SharePreview("\(report.childName) summary")) {
                 Label("Share PDF", systemImage: "square.and.arrow.up")
-                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(PrimaryButtonStyle())
         } else if store.isPro {
-            Button {} label: {
-                Text("Log something to make your own").frame(maxWidth: .infinity)
-            }
-            .buttonStyle(PrimaryButtonStyle())
-            .disabled(true)
-        } else {
-            Button {
-                paywallFocus = .pediatricianSummary
-            } label: {
-                Text("Get the PDF with Baby+").frame(maxWidth: .infinity)
-            }
-            .buttonStyle(PrimaryButtonStyle())
-        }
-    }
-
-    private var previewCard: some View {
-        VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            HStack {
-                SectionLabel(text: isExample ? "Example page" : "Preview")
-                Spacer()
-                Text(isExample ? "Made-up numbers" : "Tap to see every page")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink2)
-            }
-            Button {
-                showFullPreview = true
-            } label: {
-                Group {
-                    if let preview {
-                        Image(uiImage: preview)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .colorMultiply(AppTheme.codePaper)
-                    } else {
-                        Rectangle()
-                            .fill(AppTheme.cardElevated)
-                            .aspectRatio(612.0 / 792.0, contentMode: .fit)
-                            .overlay(ProgressView())
-                    }
-                }
-                .clipShape(AppTheme.cardShape)
-                .overlay(AppTheme.cardShape.stroke(AppTheme.ink3.opacity(0.25), lineWidth: 1))
-                .accessibilityLabel("Preview of the pediatrician summary")
-            }
-            .pressableCard()
-        }
-        .card()
-    }
-
-    private var trendsCard: some View {
-        VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            SectionLabel(text: "Trends")
-            ReportCharts(report: report)
-        }
-        .card()
-    }
-
-    private var exportCard: some View {
-        VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            SectionLabel(text: "Export")
-            Text("Every entry as a spreadsheet: one row each, with the time and any note.")
-                .font(.footnote)
-                .foregroundStyle(AppTheme.ink2)
-                .fixedSize(horizontal: false, vertical: true)
-            if store.isPro, hasData {
-                ShareLink(
-                    item: CSVFile(text: SummaryReport.csv(events: events.events, childName: report.childName), name: report.childName),
-                    preview: SharePreview("\(report.childName) log")
-                ) {
-                    Text("Export CSV").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(PrimaryButtonStyle())
-            } else if store.isPro {
-                Button {} label: {
-                    Text("Log something to export").frame(maxWidth: .infinity)
-                }
+            Button {} label: { Text("Log something to make your own") }
                 .buttonStyle(PrimaryButtonStyle())
                 .disabled(true)
-            } else {
-                Button("Export with Baby+") { paywallFocus = .export }
-                    .buttonStyle(PrimaryButtonStyle())
-            }
+        } else {
+            Button { paywallFocus = .pediatricianSummary } label: { Text("Get the PDF with Baby+") }
+                .buttonStyle(PrimaryButtonStyle())
         }
-        .card()
+    }
+
+    @ViewBuilder
+    private var exportRow: some View {
+        let label = HStack(spacing: AppTheme.spacing) {
+            Image(systemName: "tablecells")
+                .font(.title3)
+                .foregroundStyle(AppTheme.accent)
+                .frame(width: AppTheme.pageThumbnailWidth)
+            VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
+                Text("Spreadsheet (CSV)")
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.ink)
+                Text("Every entry, one row each, with times and notes.")
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.ink2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: store.isPro ? "square.and.arrow.up" : "lock.fill")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(hasData || !store.isPro ? AppTheme.accent : AppTheme.ink3)
+        }
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
+
+        if store.isPro, hasData {
+            ShareLink(
+                item: CSVFile(text: SummaryReport.csv(events: events.events, childName: report.childName), name: report.childName),
+                preview: SharePreview("\(report.childName) log")
+            ) { label }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Export CSV")
+        } else if store.isPro {
+            label.opacity(0.5).accessibilityLabel("Log something to export")
+        } else {
+            Button { paywallFocus = .export } label: { label }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Export with Baby+")
+        }
     }
 
     private var fullPreview: some View {
@@ -278,6 +386,63 @@ struct SummaryView: View {
                 }
             }
         }
+    }
+}
+
+/// The report's range. Custom starts at the saved visit date.
+enum ReportRange: CaseIterable, Hashable {
+    case week, twoWeeks, month, custom
+
+    var title: String {
+        switch self {
+        case .week: "7 days"
+        case .twoWeeks: "14 days"
+        case .month: "30 days"
+        case .custom: "Custom"
+        }
+    }
+
+    var days: Int {
+        switch self {
+        case .week: 7
+        case .twoWeeks: 14
+        case .month, .custom: 30
+        }
+    }
+}
+
+/// A number at a glance: a kind, its daily figure and one supporting line.
+private struct StatTile: View {
+    let kind: EventKind
+    let value: String
+    let unit: String
+    let detail: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
+            HStack(spacing: AppTheme.hairSpacing) {
+                KindDot(kind: kind, size: AppTheme.legendDotSize)
+                Text(unit)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AppTheme.ink2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            Text(value)
+                .font(.system(.title, design: .rounded, weight: .bold))
+                .foregroundStyle(AppTheme.ink)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if let detail {
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink3)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .card(padding: AppTheme.compactCardPadding)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -355,130 +520,168 @@ extension EventStore {
     }
 }
 
-/// Feeds a day, diapers a day and the longest sleep, for the buttons this
-/// family uses. Shared by Reports and the paywall's preview.
+/// What a report chart shows.
+enum ReportMetric: CaseIterable, Hashable {
+    case feeds, diapers, sleep
+
+    var title: String {
+        switch self {
+        case .feeds: "Feeds a day"
+        case .diapers: "Diapers a day"
+        case .sleep: "Longest sleep stretch"
+        }
+    }
+
+    static func shown(for tracked: TrackedKinds) -> [ReportMetric] {
+        allCases.filter { metric in
+            switch metric {
+            case .feeds: tracked.contains(.feed)
+            case .diapers: tracked.tracksDiapers
+            case .sleep: tracked.contains(.sleep)
+            }
+        }
+    }
+}
+
+/// One chart: a bar per day in the kind's colour, with a dashed line at the
+/// daily average so a glance says whether a day was high or low.
+struct ReportChart: View {
+    let report: SummaryReport
+    let metric: ReportMetric
+    var compact = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+            if metric == .diapers, legend.count > 1 {
+                HStack(spacing: AppTheme.spacing) {
+                    ForEach(legend, id: \.0) { name, color in
+                        HStack(spacing: AppTheme.hairSpacing) {
+                            Circle().fill(color).frame(width: AppTheme.legendDotSize, height: AppTheme.legendDotSize)
+                            Text(name)
+                                .font(.caption)
+                                .foregroundStyle(AppTheme.ink2)
+                        }
+                    }
+                }
+            }
+            chart
+                .chartXScale(domain: report.start...(Calendar.current.date(byAdding: .day, value: 1, to: report.end) ?? report.end))
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day, count: labelStride)) { _ in
+                        AxisValueLabel(format: labelFormat, centered: true)
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { value in
+                        AxisGridLine()
+                        AxisValueLabel {
+                            if let number = value.as(Double.self) {
+                                Text(metric == .sleep ? "\(SummaryView.decimal(number))h" : SummaryView.decimal(number))
+                            }
+                        }
+                    }
+                }
+                .frame(height: compact ? AppTheme.previewChartHeight : AppTheme.chartHeight)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(metric.title)
+        .accessibilityValue(Self.takeaway(metric, report: report))
+    }
+
+    private var chart: some View {
+        Chart {
+            switch metric {
+            case .feeds:
+                ForEach(report.days) { day in
+                    BarMark(x: .value("Day", day.date, unit: .day), y: .value("Feeds", day.feeds), width: .ratio(0.6))
+                        .foregroundStyle(AppTheme.feed)
+                        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cellRadius, style: .continuous))
+                }
+                averageLine(report.averageFeedsPerDay)
+            case .diapers:
+                ForEach(report.days) { day in
+                    ForEach(diaperKinds, id: \.self) { kind in
+                        BarMark(
+                            x: .value("Day", day.date, unit: .day),
+                            y: .value("Count", kind == .wet ? day.wet : day.dirty),
+                            width: .ratio(0.7)
+                        )
+                        .position(by: .value("Kind", kind.label))
+                        .foregroundStyle(AppTheme.color(for: kind))
+                        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cellRadius, style: .continuous))
+                    }
+                }
+            case .sleep:
+                ForEach(report.days) { day in
+                    BarMark(x: .value("Day", day.date, unit: .day), y: .value("Hours", day.longestSleepSeconds / 3600), width: .ratio(0.6))
+                        .foregroundStyle(AppTheme.sleep)
+                        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cellRadius, style: .continuous))
+                }
+            }
+        }
+    }
+
+    private func averageLine(_ value: Double) -> some ChartContent {
+        RuleMark(y: .value("Average", value))
+            .foregroundStyle(AppTheme.ink3)
+            .lineStyle(StrokeStyle(lineWidth: AppTheme.hairlineWidth, dash: [AppTheme.hairSpacing, AppTheme.hairSpacing]))
+    }
+
+    private var diaperKinds: [EventKind] {
+        [EventKind.wet, .dirty].filter { report.tracked.contains($0) }
+    }
+
+    private var legend: [(String, Color)] {
+        diaperKinds.map { ($0.label, AppTheme.color(for: $0)) }
+    }
+
+    /// A label under every bar for a week; fewer, by date, beyond that.
+    private var labelStride: Int {
+        report.dayCount <= 7 ? 1 : Int((Double(report.dayCount) / (compact ? 3 : 5)).rounded(.up))
+    }
+
+    private var labelFormat: Date.FormatStyle {
+        report.dayCount <= 7 ? .dateTime.weekday(.abbreviated) : .dateTime.month(.abbreviated).day()
+    }
+
+    /// The chart in one sentence, shown above it and read by VoiceOver.
+    static func takeaway(_ metric: ReportMetric, report: SummaryReport) -> String {
+        guard let latest = report.days.last else { return "Nothing logged in this range yet." }
+        let latestName = Calendar.current.isDateInToday(latest.date) ? "today" : "on \(latest.date.formatted(.dateTime.month(.abbreviated).day()))"
+        switch metric {
+        case .feeds:
+            return "About \(SummaryView.decimal(report.averageFeedsPerDay)) a day, \(latest.feeds) \(latestName)."
+        case .diapers:
+            let parts = [(EventKind.wet, report.averageWetPerDay), (.dirty, report.averageDirtyPerDay)]
+                .filter { report.tracked.contains($0.0) }
+                .map { "\(SummaryView.decimal($0.1)) \($0.0.label.lowercased())" }
+            return "About \(parts.joined(separator: " and ")) a day."
+        case .sleep:
+            guard report.longestSleepSeconds > 0 else { return "No sleep logged in this range." }
+            return "Longest \(Format.compactDuration(report.longestSleepSeconds)) in this range, \(Format.compactDuration(latest.longestSleepSeconds)) \(latestName)."
+        }
+    }
+}
+
+/// Every chart this family uses, stacked. The paywall's preview card shows
+/// just the first, small.
 struct ReportCharts: View {
     let report: SummaryReport
     var compact = false
     /// Just the first chart, for a preview card.
     var firstOnly = false
 
-    private var showsDiapers: Bool {
-        report.tracked.tracksDiapers && !(firstOnly && report.tracked.contains(.feed))
-    }
-
-    private var showsSleep: Bool {
-        report.tracked.contains(.sleep) && !(firstOnly && (report.tracked.contains(.feed) || report.tracked.tracksDiapers))
-    }
-
     var body: some View {
+        let metrics = ReportMetric.shown(for: report.tracked)
         VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-            if report.tracked.contains(.feed) {
-                chart(title: "Feeds a day", summary: trendSummary(\.feeds, unit: "feeds")) {
-                    ForEach(report.days) { day in
-                        BarMark(
-                            x: .value("Day", day.date, unit: .day),
-                            y: .value("Feeds", day.feeds)
-                        )
-                        .foregroundStyle(AppTheme.feed)
-                    }
-                }
-            }
-            if showsDiapers {
-                chart(title: "Diapers a day", legend: diaperLegend, summary: diaperSummary) {
-                    ForEach(report.days) { day in
-                        if report.tracked.contains(.wet) {
-                            BarMark(x: .value("Day", day.date, unit: .day), y: .value("Wet", day.wet))
-                                .foregroundStyle(AppTheme.wet)
-                        }
-                        if report.tracked.contains(.dirty) {
-                            BarMark(x: .value("Day", day.date, unit: .day), y: .value("Dirty", day.dirty))
-                                .foregroundStyle(AppTheme.dirty)
-                        }
-                    }
-                }
-            }
-            if showsSleep {
-                chart(title: "Longest sleep stretch, hours", summary: sleepSummary) {
-                    // A day with no sleep logged is a gap in the line, not a zero.
-                    ForEach(report.days.filter { $0.longestSleepSeconds >= 60 }) { day in
-                        // Midday, so each point sits over its day like the bars do.
-                        LineMark(
-                            x: .value("Day", day.date.addingTimeInterval(12 * 3600)),
-                            y: .value("Hours", day.longestSleepSeconds / 3600)
-                        )
-                        .foregroundStyle(AppTheme.sleep)
-                        .interpolationMethod(.monotone)
-                        PointMark(
-                            x: .value("Day", day.date.addingTimeInterval(12 * 3600)),
-                            y: .value("Hours", day.longestSleepSeconds / 3600)
-                        )
-                        .foregroundStyle(AppTheme.sleep)
-                    }
+            ForEach(firstOnly ? Array(metrics.prefix(1)) : metrics, id: \.self) { metric in
+                VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+                    Text(metric.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppTheme.ink)
+                    ReportChart(report: report, metric: metric, compact: compact)
                 }
             }
         }
     }
-
-    private var diaperLegend: [(String, Color)] {
-        [(EventKind.wet, AppTheme.wet), (EventKind.dirty, AppTheme.dirty)]
-            .filter { report.tracked.contains($0.0) }
-            .map { ($0.0.label, $0.1) }
-    }
-
-    private var diaperSummary: String {
-        var parts: [String] = []
-        if report.tracked.contains(.wet) { parts.append(trendSummary(\.wet, unit: "wet")) }
-        if report.tracked.contains(.dirty) { parts.append(trendSummary(\.dirty, unit: "dirty")) }
-        return parts.joined(separator: ". ")
-    }
-
-    /// What a chart says, for VoiceOver: the daily average and the latest day.
-    private func trendSummary(_ value: KeyPath<SummaryReport.Day, Int>, unit: String) -> String {
-        guard let latest = report.days.last, !report.days.isEmpty else { return "No days yet" }
-        let average = Double(report.days.map { $0[keyPath: value] }.reduce(0, +)) / Double(report.days.count)
-        return "Average \(average.formatted(.number.precision(.fractionLength(0...1)))) \(unit) a day, \(latest[keyPath: value]) on the latest day"
-    }
-
-    private var sleepSummary: String {
-        guard let latest = report.days.last, let longest = report.days.map(\.longestSleepSeconds).max() else { return "No days yet" }
-        return "Longest \(Format.compactDuration(longest)) in this range, \(Format.compactDuration(latest.longestSleepSeconds)) on the latest day"
-    }
-
-    private func chart<Content: ChartContent>(
-        title: String,
-        legend: [(String, Color)] = [],
-        summary: String,
-        @ChartContentBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            HStack(spacing: AppTheme.spacing) {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink)
-                Spacer(minLength: 0)
-                ForEach(legend, id: \.0) { name, color in
-                    HStack(spacing: AppTheme.hairSpacing) {
-                        Circle().fill(color).frame(width: AppTheme.dotSize * 2, height: AppTheme.dotSize * 2)
-                        Text(name)
-                            .font(.caption)
-                            .foregroundStyle(AppTheme.ink2)
-                    }
-                }
-            }
-            Chart(content: content)
-                .chartXScale(domain: report.start...(Calendar.current.date(byAdding: .day, value: 1, to: report.end) ?? report.end))
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: max(1, report.dayCount / (compact ? 2 : 5)))) { value in
-                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                    }
-                }
-                .chartYAxis { AxisMarks(position: .leading) }
-                .frame(height: compact ? AppTheme.previewChartHeight : AppTheme.chartHeight)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(title)
-        .accessibilityValue(summary)
-    }
-
 }

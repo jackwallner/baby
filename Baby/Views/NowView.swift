@@ -103,20 +103,16 @@ struct NowView: View {
 
     /// A phone: everything on one screen. The buttons take whatever height
     /// the rest leaves (within a floor and a cap), so they grow on a Pro Max,
-    /// shrink on a small phone, and give way when the side chips open. A
-    /// shorter screen drops the how-to hint, the shortest the hour strip too.
-    /// Past the floor (large text), the page scrolls rather than clipping.
+    /// shrink on a small phone, and give way when the side chips open. The
+    /// shortest screen (an SE) drops the hour strip. Past the floor (large
+    /// text), the page scrolls rather than clipping.
     private func fitted(available: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+        // Sections sit 12 apart; the time row and the buttons, one control,
+        // sit 8 apart.
+        VStack(alignment: .leading, spacing: AppTheme.spacing) {
             NowStatusCard(now: now, clock: logClock, compact: true)
-            LoggingControls(
-                height: fit.buttonHeight,
-                spacing: AppTheme.tightSpacing,
-                showsIdleHint: available >= AppTheme.nowHintMinHeight,
-                clock: logClock,
-                editor: $editor
-            )
-            .padding(.bottom, fit.slack)
+            LoggingControls(height: fit.buttonHeight, spacing: AppTheme.tightSpacing, clock: logClock, editor: $editor)
+                .padding(.bottom, fit.slack)
             TodayTotalsView(now: now, compact: true, showsHourStrip: available >= AppTheme.hourStripMinHeight)
             OlderEntryLink(editor: $editor)
         }
@@ -166,8 +162,6 @@ private struct LoggingControls: View {
     /// Nil: the scaled default, for accessibility text sizes.
     let height: CGFloat?
     var spacing = AppTheme.spacing
-    /// "Tap to log now." A wound-back time's countdown always shows.
-    var showsIdleHint = true
     @ObservedObject var clock: LogClock
     @Binding var editor: EditorRequest?
 
@@ -177,7 +171,7 @@ private struct LoggingControls: View {
             LogButtons(clock: clock, height: height, spacing: spacing) { kind in
                 editor = EditorRequest(kind: kind, at: clock.chosen)
             }
-            if showsIdleHint || clock.isAdjusted {
+            if clock.isAdjusted {
                 LogHint(clock: clock)
             }
         }
@@ -271,29 +265,24 @@ private struct LogTimeRow: View {
     }
 }
 
-/// Under the buttons: how to use them, or, while the time is wound back,
-/// which time a tap logs at and when it returns to now.
+/// Under the buttons while the time is wound back: which time a tap logs at
+/// and when it returns to now.
 private struct LogHint: View {
     @ObservedObject var clock: LogClock
 
     var body: some View {
-        Group {
-            if let chosen = clock.chosen, let returnsAt = clock.returnsAt {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text("Taps log at \(LogClock.label(for: chosen, now: context.date)). Back to now in \(Self.countdown(returnsAt.timeIntervalSince(context.date))).")
-                        .foregroundStyle(AppTheme.accent)
-                        .monospacedDigit()
-                }
-            } else {
-                Text("Tap to log now. Hold to add details.")
-                    .foregroundStyle(AppTheme.ink2)
+        if let chosen = clock.chosen, let returnsAt = clock.returnsAt {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                Text("Taps log at \(LogClock.label(for: chosen, now: context.date)). Back to now in \(Self.countdown(returnsAt.timeIntervalSince(context.date))).")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.accent)
+                    .monospacedDigit()
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityIdentifier("logHint")
             }
         }
-        .font(.caption)
-        .multilineTextAlignment(.center)
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(maxWidth: .infinity)
-        .accessibilityIdentifier("logHint")
     }
 
     static func countdown(_ seconds: TimeInterval) -> String {

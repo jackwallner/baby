@@ -42,6 +42,26 @@ final class LayoutUITests: XCTestCase {
         attach(app, name: "now-fits-with-sides")
     }
 
+    /// Reports read top to bottom: range, averages, charts, then the doctor.
+    func testReportsReadTopToBottom() {
+        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
+        app.launchArguments = ["-SeedScreenshotData", "-NoCloudKit", "-DemoPro", "-StartTab", "3"]
+        app.launch()
+        let range = app.segmentedControls["reportRange"]
+        XCTAssertTrue(range.waitForExistence(timeout: 15))
+        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "summaryCard").firstMatch.exists)
+        XCTAssertTrue(app.otherElements["Feeds a day"].exists || app.staticTexts["Feeds a day"].exists)
+        attach(app, name: "reports-top")
+        range.buttons["Custom"].tap()
+        XCTAssertTrue(app.datePickers.firstMatch.waitForExistence(timeout: 2), "Custom shows the From date")
+        range.buttons["7 days"].tap()
+        let export = app.buttons["Export CSV"]
+        for _ in 0..<6 where !export.isHittable { app.swipeUp() }
+        XCTAssertTrue(export.isHittable)
+        XCTAssertTrue(app.buttons["Share PDF"].exists)
+        attach(app, name: "reports-bottom")
+    }
+
     private func assertOnScreen(_ ids: [String], in app: XCUIApplication, screen: CGRect) {
         for id in ids {
             let element = app.descendants(matching: .any).matching(identifier: id).firstMatch
