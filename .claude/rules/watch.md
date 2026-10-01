@@ -46,6 +46,24 @@ with the sides one tap away. `simctl openurl` cannot open custom schemes on
 the watch simulator, so the link is unit-tested (`testWatchLinksRoundTripTheirKind`)
 and the tap itself needs a device check.
 
+Sync (2026-09-30, found by `scripts/watch-e2e.sh`): with the phone in
+reach, a tap goes as `sendMessage` and the reply is its receipt; otherwise,
+or if the message fails, it queues as `transferUserInfo`. The phone applies
+each id once whichever way it lands. On opening, the Watch asks for the
+summary by message (`needsSummary`), and queues the same request when it has
+none. The phone pushes on `sessionWatchStateDidChange`, so a Watch app
+installed after the phone's last change is not left on "Open Baby Tracker on
+your iPhone". In the simulator a foreground phone app never received queued
+transfers and application context took minutes, which hid both gaps.
+`WatchStore.receive` ignores a summary older than the one it has, since a
+reply and a pushed context can cross.
+
+`scripts/watch-e2e.sh <owner>` (a `--watch` lease) runs the real path:
+phone seeded with `-SeedScreenshotData`, Watch app reinstalled, then
+`WatchPhoneSyncUITests` taps Poop, then Pee and Undo, and the script reads the
+phone's sqlite to prove one more dirty and no new wet. The test skips unless
+`TEST_RUNNER_BABY_WATCH_E2E=1`.
+
 DEBUG: `-WatchDemo` seeds a night three log; `-WatchPage 1` opens Today.
 `BabyWatchUITests` (scheme `BabyWatch`, lease `baby-watch --watch`) covers
 log, Undo, next side, sleep, Log earlier and Today. `axe` cannot drive the

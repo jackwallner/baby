@@ -16,7 +16,9 @@ struct BabyWatchApp: App {
             root
                 .environmentObject(store)
                 .onChange(of: scenePhase) { _, phase in
-                    if phase == .active { store.retryPending() }
+                    guard phase == .active else { return }
+                    store.retryPending()
+                    WatchSyncService.shared.requestSummary()
                 }
         }
     }
@@ -61,6 +63,14 @@ struct WatchRootView: View {
         .onChange(of: store.confirmation) { _, confirmation in
             guard let confirmation else { return }
             WKInterfaceDevice.current().play(confirmation.canUndo ? .success : .directionDown)
+        }
+        .task {
+            // Until the first summary lands, keep asking: a lost reply would
+            // otherwise leave a new Watch on "Open Baby Tracker on your iPhone".
+            while !store.hasHeardFromPhone, !Task.isCancelled {
+                WatchSyncService.shared.requestSummary()
+                try? await Task.sleep(for: .seconds(10))
+            }
         }
         .onOpenURL { url in
             page = 0

@@ -62,6 +62,8 @@ final class WatchStore: ObservableObject {
     /// The phone's summary wins, then the taps it has not seen yet are
     /// replayed on top, so the wrist never shows an older state than its own.
     func receive(_ phoneSummary: NowSummary) {
+        // A reply and a pushed context can cross; the older one never wins.
+        if hasHeardFromPhone, phoneSummary.generatedAt < phone.generatedAt { return }
         phone = phoneSummary
         hasHeardFromPhone = true
         defaults.set(try? JSONEncoder().encode(phoneSummary), forKey: AppGroup.Key.phoneSummary)

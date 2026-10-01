@@ -2,6 +2,14 @@ import XCTest
 
 /// The wrist's core loop on a seeded log (`-WatchDemo`: fed Left 2h 14m ago,
 /// pee 48m ago): tap, see it confirmed, take it back.
+/// The accessibility tree is ready before a loaded simulator finishes the
+/// launch animation, and a tap synthesized then never reaches the app (seen
+/// on the SE pair). Wait for the first button, then for the screen to draw.
+func settle(_ app: XCUIApplication) {
+    _ = app.buttons.firstMatch.waitForExistence(timeout: 20)
+    Thread.sleep(forTimeInterval: 2)
+}
+
 final class WatchLoggingUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
@@ -11,6 +19,7 @@ final class WatchLoggingUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-WatchDemo"] + arguments
         app.launch()
+        settle(app)
         return app
     }
 
@@ -32,7 +41,7 @@ final class WatchLoggingUITests: XCTestCase {
         attach(app, "now")
         pee.tap()
         XCTAssertTrue(app.staticTexts["Pee logged"].waitForExistence(timeout: 3))
-        XCTAssertTrue(text(app, containing: "just now").exists, "the glance shows the new diaper at once")
+        XCTAssertTrue(text(app, containing: "just now").waitForExistence(timeout: 3), "the glance shows the new diaper at once")
         attach(app, "pee-logged")
         app.buttons["Undo"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Removed"].waitForExistence(timeout: 3))
