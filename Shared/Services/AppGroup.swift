@@ -33,6 +33,9 @@ enum AppGroup {
         static let nowSummary = "nowSummary"
         /// Watch-only: log events that have not yet reached the phone.
         static let pendingWatchEvents = "pendingWatchEvents"
+        /// Watch-only: the phone's last summary as sent, before the wrist's
+        /// own unconfirmed taps are replayed over it.
+        static let phoneSummary = "phoneSummary"
         static let appliedWatchActions = "appliedWatchActions"
         /// `WidgetUndo`: the last entry logged outside the app, for the
         /// one-button widgets' Undo.
@@ -42,10 +45,32 @@ enum AppGroup {
         static let feedingPreference = "feedingPreference"
     }
 
+    /// Complications open the Watch app with `babywatch://log/<kind>` to log
+    /// in one tap. `babywatch://open` just opens it.
+    enum WatchLink {
+        static let scheme = "babywatch"
+
+        static func log(_ kind: EventKind) -> URL {
+            URL(string: "\(scheme)://log/\(kind.rawValue)")!
+        }
+
+        static let open = URL(string: "\(scheme)://open")!
+
+        /// The kind a link logs, or nil for any other link.
+        static func kind(in url: URL) -> EventKind? {
+            guard url.scheme == scheme, url.host == "log" else { return nil }
+            return EventKind(rawValue: url.lastPathComponent)
+        }
+    }
+
     enum WidgetKind {
         static let now = "BabyNowWidget"
         static let log = "BabyLogWidget"
         static let complication = "BabyWatchComplication"
+        static let watchDiaper = "BabyWatchDiaper"
+        static let watchLogWet = "BabyWatchLogWet"
+        static let watchLogDirty = "BabyWatchLogDirty"
+        static let watchSleep = "BabyWatchSleep"
         static let quickFeed = "BabyQuickFeedWidget"
         static let quickWet = "BabyQuickWetWidget"
         static let quickDirty = "BabyQuickDirtyWidget"

@@ -159,6 +159,7 @@ and a fresh Development-to-Production deploy before the build that ships it.
 - `.claude/rules/interface.md`: simplicity decisions and verification expectations.
 - `.claude/rules/graphic-style.md`: graphic vocabulary, responsive layouts, and guidance scope.
 - `.claude/rules/release-verification.md`: build 16 test, listing and screenshot evidence.
+- `.claude/rules/watch.md`: Watch pages, wrist Undo, complications and their tests.
 
 ---
 Shared iOS conventions (build, simulator, release/TestFlight, ASC key, signing,

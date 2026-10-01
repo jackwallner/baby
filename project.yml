@@ -57,6 +57,11 @@ schemes:
     build:
       targets:
         BabyWatch: all
+        BabyWatchUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - BabyWatchUITests
     run:
       config: Debug
 
@@ -162,6 +167,11 @@ targets:
     sources:
       - path: BabyWatch/App.swift
       - path: BabyWatch/Views/WatchNowView.swift
+      - path: BabyWatch/Views/WatchTodayView.swift
+      - path: BabyWatch/Views/WatchEarlierView.swift
+      - path: BabyWatch/Views/WatchComponents.swift
+      - path: BabyWatch/Views/ComplicationGallery.swift
+      - path: BabyWatchWidget/ComplicationViews.swift
       - path: BabyWatch/Assets.xcassets
       - path: BabyWatch/PrivacyInfo.xcprivacy
         buildPhase: resources
@@ -193,6 +203,7 @@ targets:
     platform: watchOS
     sources:
       - path: BabyWatchWidget/WatchComplication.swift
+      - path: BabyWatchWidget/ComplicationViews.swift
       - path: BabyWatchWidget/PrivacyInfo.xcprivacy
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
@@ -225,6 +236,19 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby.tests
     dependencies:
       - target: Baby
+
+  BabyWatchUITests:
+    type: bundle.ui-testing
+    platform: watchOS
+    sources:
+      - path: BabyWatchUITests
+    dependencies:
+      - target: BabyWatch
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby.watch.uitests
+        TEST_TARGET_NAME: BabyWatch
 
   BabyUITests:
     type: bundle.ui-testing

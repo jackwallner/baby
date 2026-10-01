@@ -216,4 +216,78 @@ final class FormatTests: XCTestCase {
         let next = early.applying(WatchLogPayload(action: .log, kind: .feed, at: at(28, 6, 10)), calendar: utc, now: at(28, 6, 10))
         XCTAssertEqual(next.todayFeeds, 1)
     }
+
+    func testWatchUndoTakesATapBackOutOfTheSummary() {
+        let now = Date.now
+        let earlierFeed = RecentEntry(id: UUID(), kind: .feed, at: now.addingTimeInterval(-7200), endedAt: now.addingTimeInterval(-7200), sides: [.left])
+        let earlierPee = RecentEntry(id: UUID(), kind: .wet, at: now.addingTimeInterval(-3000), endedAt: nil, sides: nil)
+        var phone = NowSummary()
+        phone.generatedAt = now
+        phone.recent = [earlierPee, earlierFeed]
+        phone.knownEventIDs = [earlierFeed.id, earlierPee.id]
+        phone.lastFeedAt = earlierFeed.at
+        phone.setLastFeedSides([.left])
+        phone.lastDiaperAt = earlierPee.at
+        phone.lastDiaperKind = .wet
+        phone.todayFeeds = 1
+        phone.todayWet = 1
+
+        let feed = WatchLogPayload(action: .log, kind: .feed, side: .right, at: now.addingTimeInterval(-10))
+        let poop = WatchLogPayload(action: .log, kind: .dirty, at: now.addingTimeInterval(-5))
+        let tapped = phone.applyingPending([feed, poop], now: now)
+        XCTAssertEqual(tapped.feedSides, [.right])
+        XCTAssertEqual(tapped.lastDiaperKind, .dirty)
+        XCTAssertEqual(tapped.recent?.first?.id, poop.id, "taps join the recent list, newest first")
+
+        // Undo while the taps are still queued for the phone.
+        let undone = phone.applyingPending([feed, poop, poop.undo, feed.undo], now: now)
+        XCTAssertEqual(undone.lastFeedAt, earlierFeed.at)
+        XCTAssertEqual(undone.feedSides, [.left])
+        XCTAssertEqual(undone.lastDiaperKind, .wet)
+        XCTAssertEqual(undone.lastDiaperAt, earlierPee.at)
+        XCTAssertEqual(undone.todayFeeds, 1)
+        XCTAssertEqual(undone.todayDirty, 0)
+        XCTAssertEqual(undone.recent?.map(\.id), [earlierPee.id, earlierFeed.id])
+
+        // The phone already has the tap: the queued Undo still hides it, and
+        // once the phone has deleted it the Undo changes nothing.
+        let phoneWithPoop = phone.applying(poop, now: now)
+        XCTAssertEqual(phoneWithPoop.applyingPending([poop.undo], now: now).lastDiaperKind, .wet)
+        XCTAssertEqual(phone.applyingPending([poop.undo], now: now), phone.applyingPending([], now: now))
+    }
+
+    func testWatchUndoReopensASleepItsWakeEnded() {
+        let now = Date.now
+        let start = WatchLogPayload(action: .startSleep, kind: .sleep, at: now.addingTimeInterval(-3600))
+        let asleep = NowSummary().applying(start, now: now)
+        XCTAssertTrue(asleep.isSleeping)
+        let wake = WatchLogPayload(action: .stopSleep, kind: .sleep, at: now.addingTimeInterval(-60))
+        let awake = asleep.applying(wake, now: now)
+        XCTAssertFalse(awake.isSleeping)
+        XCTAssertEqual(awake.lastWokeAt, wake.at)
+        let reopened = awake.applying(wake.undo, now: now)
+        XCTAssertEqual(reopened.runningSleepStart, start.at)
+        XCTAssertEqual(asleep.applying(start.undo, now: now).runningSleepStart, nil, "undoing Sleep clears it")
+    }
+
+    func testOlderPhoneSummariesWithoutRecentEntriesStillDecode() throws {
+        var summary = NowSummary()
+        summary.recent = nil
+        let data = try JSONEncoder().encode(summary)
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json.removeValue(forKey: "recent")
+        let decoded = try JSONDecoder().decode(NowSummary.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertNil(decoded.recent)
+        let payload = WatchLogPayload(action: .log, kind: .wet)
+        var payloadJSON = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(payload)) as? [String: Any])
+        payloadJSON.removeValue(forKey: "targetID")
+        XCTAssertEqual(try JSONDecoder().decode(WatchLogPayload.self, from: JSONSerialization.data(withJSONObject: payloadJSON)).id, payload.id)
+    }
+
+    func testWatchLinksRoundTripTheirKind() {
+        XCTAssertEqual(AppGroup.WatchLink.kind(in: AppGroup.WatchLink.log(.wet)), .wet)
+        XCTAssertEqual(AppGroup.WatchLink.kind(in: AppGroup.WatchLink.log(.sleep)), .sleep)
+        XCTAssertNil(AppGroup.WatchLink.kind(in: AppGroup.WatchLink.open))
+        XCTAssertNil(AppGroup.WatchLink.kind(in: URL(string: "https://example.com/log/wet")!))
+    }
 }

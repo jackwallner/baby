@@ -11,6 +11,10 @@
 <key>CFBundleShortVersionString</key><string>$(MARKETING_VERSION)</string>
 <key>CFBundleVersion</key><string>$(CURRENT_PROJECT_VERSION)</string>
 <key>ITSAppUsesNonExemptEncryption</key><false/>
+<key>CFBundleURLTypes</key><array><dict>
+<key>CFBundleURLName</key><string>com.jackwallner.baby.watch</string>
+<key>CFBundleURLSchemes</key><array><string>babywatch</string></array>
+</dict></array>
 <key>WKApplication</key><true/>
 <key>WKCompanionAppBundleIdentifier</key><string>com.jackwallner.baby</string>
 </dict></plist>

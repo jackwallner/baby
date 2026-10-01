@@ -1,103 +1,46 @@
 import SwiftUI
 
-/// The wrist: the last feed and diaper, then up to six taps. Nothing to scroll for
-/// on a 3am check, everything reachable with one thumb.
+/// The wrist: when she last ate and which side, the last diaper, then the
+/// taps. Everything reachable with one thumb on a 3am check.
 struct WatchNowView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.isLuminanceReduced) private var isLuminanceReduced
     @EnvironmentObject private var store: WatchStore
-    @State private var now = Date.now
-
-    private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
+    @State private var showsEarlier = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: AppTheme.hairSpacing) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(store.summary.leadKind.isDiaper ? diaperLine : store.summary.leadLine(now: now))
-                        .font(.headline)
-                        .foregroundStyle(AppTheme.ink)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.8)
-                    if store.summary.leadKind == .feed, tracked.tracksDiapers {
-                        Text(diaperLine)
+        TimelineView(.periodic(from: .now, by: 15)) { context in
+            ScrollView {
+                VStack(spacing: AppTheme.tightSpacing) {
+                    if !store.hasHeardFromPhone {
+                        Text("Open Baby Tracker on your iPhone to connect")
                             .font(.caption2)
                             .foregroundStyle(AppTheme.ink2)
-                            .lineLimit(2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    if store.summary.leadKind != .sleep, tracked.contains(.sleep), let sleep = store.summary.sleepLine(now: now) {
-                        Text(sleep)
+                    WatchGlance(summary: store.summary, now: context.date)
+                        .padding(.horizontal, AppTheme.hairSpacing)
+                    WatchLogGrid(now: context.date)
+                        .opacity(isLuminanceReduced ? AppTheme.watchDimmedOpacity : 1)
+                    if store.waitingCount > 0 {
+                        Label("\(store.waitingCount) waiting for iPhone", systemImage: "iphone.radiowaves.left.and.right")
                             .font(.caption2)
-                            .foregroundStyle(AppTheme.sleep)
+                            .foregroundStyle(AppTheme.ink3)
                     }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, AppTheme.hairSpacing)
-
-                // The phone's buttons, minus any turned off in its Settings.
-                if tracked.contains(.feed) {
-                    HStack(spacing: AppTheme.hairSpacing) {
-                        ForEach(FeedSide.allCases, id: \.self) { side in
-                            logButton(side.shortLabel, kind: .feed) { store.log(.feed, side: side) }
-                        }
-                    }
-                }
-                if tracked.tracksDiapers {
-                    HStack(spacing: AppTheme.hairSpacing) {
-                        if tracked.contains(.wet) { logButton(EventKind.wet.label, kind: .wet) { store.log(.wet) } }
-                        if tracked.contains(.dirty) { logButton(EventKind.dirty.label, kind: .dirty) { store.log(.dirty) } }
-                    }
-                }
-                if tracked.contains(.sleep) {
-                    logButton(store.summary.isSleeping ? "Wake" : "Sleep", kind: .sleep) { store.toggleSleep() }
-                }
-
-                if let action = store.lastAction {
-                    Text(action)
-                        .font(.caption2)
-                        .foregroundStyle(AppTheme.ink2)
-                        .transition(.opacity)
-                }
-                if !store.pending.isEmpty {
-                    Text("\(store.pending.count) waiting for iPhone")
-                        .font(.caption2)
-                        .foregroundStyle(AppTheme.ink3)
                 }
             }
         }
-        .navigationTitle(store.summary.childName)
-        .toolbarTitleDisplayMode(.inline)
-        .onReceive(clock) { now = $0 }
-        .animation(reduceMotion ? nil : .default, value: store.lastAction)
-    }
-
-    private var tracked: TrackedKinds { store.summary.tracked }
-
-    private var diaperLine: String {
-        guard let date = store.summary.lastDiaperAt else { return "No diaper logged yet" }
-        let kind = store.summary.lastDiaperKind.map { " · \($0.label)" } ?? ""
-        return "Diaper \(Format.ago(date, now: now))\(kind)"
-    }
-
-    private func logButton(_ label: String, kind: EventKind, action: @escaping () -> Void) -> some View {
-        Button {
-            WKInterfaceDevice.current().play(.click)
-            action()
-        } label: {
-            HStack(spacing: AppTheme.hairSpacing) {
-                if kind != .feed {
-                    Image(systemName: kind == .sleep && store.summary.isSleeping ? "sun.max" : kind.symbolName)
-                        .font(.caption.weight(.bold))
-                        .accessibilityHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    showsEarlier = true
+                } label: {
+                    Image(systemName: "clock.arrow.circlepath")
                 }
-                Text(label).font(.headline)
+                .accessibilityLabel("Log earlier")
             }
-            .foregroundStyle(AppTheme.ink)
-            .frame(maxWidth: .infinity)
-            .frame(minHeight: 44)
-            .contentShape(AppTheme.buttonShape)
         }
-        .buttonStyle(.plain)
-        .background(AppTheme.fill(for: kind), in: AppTheme.buttonShape)
-        .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.outline, lineWidth: AppTheme.outlineWidth))
+        .sheet(isPresented: $showsEarlier) {
+            WatchEarlierView()
+        }
     }
 }

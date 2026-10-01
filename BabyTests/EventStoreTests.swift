@@ -645,4 +645,40 @@ final class EventStoreTests: XCTestCase {
         XCTAssertEqual(WidgetUndo.load()?.childID, expected)
     }
 
+    func testWatchUndoRemovesTheTapAndReopensWhatItEnded() throws {
+        let feedStart = Date.now.addingTimeInterval(-900)
+        let running = try XCTUnwrap(store.startTimed(.feed, side: .left, at: feedStart))
+        let feed = WatchLogPayload(action: .log, kind: .feed, side: .right, at: Date.now.addingTimeInterval(-60))
+        XCTAssertTrue(store.apply(feed))
+        XCTAssertFalse(running.isRunning, "a wrist feed ends the running feed")
+        XCTAssertTrue(store.apply(feed.undo))
+        XCTAssertFalse(store.events.contains { $0.id == feed.id })
+        XCTAssertTrue(running.isRunning, "Undo reopens the feed the tap ended")
+        XCTAssertFalse(store.summary.knownEventIDs?.contains(feed.id) == true)
+    }
+
+    func testWatchUndoOfAWakeReopensTheSleep() throws {
+        let sleep = try XCTUnwrap(store.startTimed(.sleep, at: Date.now.addingTimeInterval(-3600)))
+        let wake = WatchLogPayload(action: .stopSleep, kind: .sleep, at: Date.now.addingTimeInterval(-30))
+        XCTAssertTrue(store.apply(wake))
+        XCTAssertFalse(sleep.isRunning)
+        XCTAssertTrue(store.apply(wake.undo))
+        XCTAssertTrue(sleep.isRunning)
+        XCTAssertNotNil(store.runningSleep)
+    }
+
+    func testAnUndoThatArrivesFirstDropsItsTapWhenItLands() {
+        let pee = WatchLogPayload(action: .log, kind: .wet, at: .now)
+        XCTAssertTrue(store.apply(pee.undo))
+        XCTAssertTrue(store.apply(pee), "the late tap is acknowledged")
+        XCTAssertTrue(store.events.isEmpty, "and never written")
+    }
+
+    func testSummaryCarriesRecentEntriesNewestFirst() {
+        store.log(.wet, at: Date.now.addingTimeInterval(-120))
+        store.log(.feed, side: .left, at: Date.now.addingTimeInterval(-60))
+        store.log(.weight, at: .now)
+        XCTAssertEqual(store.summary.recent?.map(\.kind), [.feed, .wet], "weights are not buttons and stay off the Watch")
+        XCTAssertEqual(store.summary.recent?.first?.sides, [.left])
+    }
 }

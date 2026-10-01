@@ -299,6 +299,8 @@ struct WatchLogPayload: Codable, Equatable, Sendable {
         case log
         case startSleep
         case stopSleep
+        /// Takes back an earlier wrist action, named by `targetID`.
+        case undo
     }
 
     var id: UUID
@@ -309,6 +311,10 @@ struct WatchLogPayload: Codable, Equatable, Sendable {
     /// The baby selected on the Watch when this action was created. Optional
     /// keeps transfers queued by older builds compatible.
     var childID: UUID?
+    /// For `.undo`: the action it takes back. The undo carries that action's
+    /// kind, side and time, so the phone can find what a Wake closed.
+    var targetID: UUID?
+    var targetAction: Action?
 
     static let key = "watchLog"
 
@@ -323,7 +329,9 @@ struct WatchLogPayload: Codable, Equatable, Sendable {
         kind: EventKind,
         side: FeedSide? = nil,
         at: Date = .now,
-        childID: UUID? = nil
+        childID: UUID? = nil,
+        targetID: UUID? = nil,
+        targetAction: Action? = nil
     ) {
         self.id = id
         self.action = action
@@ -331,6 +339,13 @@ struct WatchLogPayload: Codable, Equatable, Sendable {
         self.side = side
         self.at = at
         self.childID = childID
+        self.targetID = targetID
+        self.targetAction = targetAction
+    }
+
+    /// The Undo for this action: same kind, side, time and baby.
+    var undo: WatchLogPayload {
+        WatchLogPayload(action: .undo, kind: kind, side: side, at: at, childID: childID, targetID: id, targetAction: action)
     }
 
     init?(userInfo: [String: Any]) {

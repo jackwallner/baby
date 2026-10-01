@@ -547,6 +547,12 @@ final class EventStore: ObservableObject {
                 running.endedAt = payload.at
                 running.updatedAt = .now
             }
+        case .undo:
+            guard let undoneID = payload.targetID else { break }
+            // Recorded as applied, so a target still in flight is dropped
+            // when it lands instead of reappearing after its Undo.
+            if !applied.contains(undoneID.uuidString) { applied.append(undoneID.uuidString) }
+            undoWatchAction(payload, targetID: undoneID, in: targetEvents)
         }
         guard persistence.save(context) else {
             reload()
@@ -558,5 +564,28 @@ final class EventStore: ObservableObject {
         AppGroup.defaults.set(Array(applied.suffix(NowSummary.knownEventLimit)), forKey: AppGroup.Key.appliedWatchActions)
         reload()
         return true
+    }
+
+    /// Removes what a wrist tap logged, reopening any feed timer it ended, or
+    /// reopens the sleep a wrist Wake closed. Nothing to do if it never landed.
+    private func undoWatchAction(_ payload: WatchLogPayload, targetID: UUID, in events: [LogEvent]) {
+        func sameMoment(_ date: Date?) -> Bool {
+            date.map { abs($0.timeIntervalSince(payload.at)) < 0.001 } ?? false
+        }
+        if payload.targetAction == .stopSleep {
+            for sleep in events where sleep.eventKind == .sleep && sameMoment(sleep.endedAt) {
+                sleep.endedAt = nil
+                sleep.updatedAt = .now
+            }
+            return
+        }
+        guard let event = events.first(where: { $0.id == targetID }) else { return }
+        if event.eventKind == .feed {
+            for feed in events where feed.eventKind == .feed && feed.id != targetID && feed.start < payload.at && sameMoment(feed.endedAt) {
+                feed.endedAt = nil
+                feed.updatedAt = .now
+            }
+        }
+        context.delete(event)
     }
 }

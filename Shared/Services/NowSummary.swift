@@ -37,9 +37,13 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// The buttons turned off on the phone, so the Watch hides them too.
     /// Optional for summaries from older builds, which tracked everything.
     var hiddenKinds: [EventKind]?
+    /// The newest entries, newest first, for the Watch's Today list and for
+    /// taking back a wrist tap. Optional for summaries from older builds.
+    var recent: [RecentEntry]?
 
     static let empty = NowSummary()
     static let knownEventLimit = 256
+    static let recentLimit = 24
 
     /// The side to offer next: the other breast after a breastfeed.
     var suggestedSide: FeedSide { feedSides.last?.next ?? .left }
@@ -177,6 +181,7 @@ struct NowSummary: Codable, Equatable, Sendable {
         summary.dayOfLife = child.dayOfLife(on: now, calendar: calendar)
         let sorted = events.sorted { $0.start > $1.start }
         summary.knownEventIDs = Array(sorted.prefix(Self.knownEventLimit).reversed().compactMap(\.id))
+        summary.recent = sorted.lazy.compactMap(RecentEntry.init).prefix(Self.recentLimit).map { $0 }
         for event in sorted {
             switch event.eventKind {
             case .feed:
@@ -251,8 +256,21 @@ extension NowSummary {
         if s.knownEventIDs?.contains(payload.id) == true { return s }
         switch payload.action {
         case .log:
+            s.insertRecent(RecentEntry(id: payload.id, kind: payload.kind, at: payload.at,
+                                       endedAt: payload.kind == .feed ? payload.at : nil,
+                                       sides: payload.side.map { [$0] }))
             switch payload.kind {
             case .feed:
+                // The phone ends a running feed at a wrist feed, as it does for its own.
+                if let running = s.runningFeedStart, running <= payload.at {
+                    s.runningFeedStart = nil
+                    s.setRunningFeedSides([])
+                    s.recent = s.recent?.map { entry in
+                        var entry = entry
+                        if entry.kind == .feed, entry.id != payload.id, entry.endedAt == nil, entry.at <= payload.at { entry.endedAt = payload.at }
+                        return entry
+                    }
+                }
                 let mostRecentFeedAt = max(s.lastFeedAt ?? .distantPast, s.runningFeedStart ?? .distantPast)
                 if payload.at >= mostRecentFeedAt {
                     s.lastFeedAt = payload.at
@@ -272,12 +290,23 @@ extension NowSummary {
             }
         case .startSleep:
             if s.runningSleepStart == nil || payload.at >= (s.runningSleepStart ?? .distantPast) {
+                if s.runningSleepStart == nil {
+                    s.insertRecent(RecentEntry(id: payload.id, kind: .sleep, at: payload.at, endedAt: nil, sides: nil))
+                }
                 s.runningSleepStart = payload.at
             }
         case .stopSleep:
-            if s.runningSleepStart == nil || payload.at >= (s.runningSleepStart ?? .distantPast) {
+            if let start = s.runningSleepStart, payload.at >= start {
                 s.runningSleepStart = nil
+                s.lastWokeAt = payload.at
+                s.recent = s.recent?.map { entry in
+                    var entry = entry
+                    if entry.kind == .sleep, entry.endedAt == nil, entry.at <= payload.at { entry.endedAt = payload.at }
+                    return entry
+                }
             }
+        case .undo:
+            return s.undoing(payload, calendar: calendar, now: now)
         }
         var ids = s.knownEventIDs ?? []
         ids.removeAll { $0 == payload.id }
@@ -305,8 +334,88 @@ extension NowSummary {
         }
     }
 
+    /// Takes a wrist action back out of the summary. Idempotent: an action
+    /// the summary does not show (never landed, or already undone on the
+    /// phone) changes nothing, so a phone summary can arrive at any point.
+    private func undoing(_ undo: WatchLogPayload, calendar: Calendar, now: Date) -> NowSummary {
+        guard let targetID = undo.targetID else { return self }
+        var s = self
+        let today = window.interval(at: now, calendar: calendar)
+        switch undo.targetAction {
+        case .log?:
+            guard let entry = recent?.first(where: { $0.id == targetID }) else { return self }
+            s.recent?.removeAll { $0.id == targetID }
+            s.knownEventIDs?.removeAll { $0 == targetID }
+            if window.holds(entry.at, in: today) {
+                switch entry.kind {
+                case .feed: s.todayFeeds = max(0, s.todayFeeds - 1)
+                case .wet: s.todayWet = max(0, s.todayWet - 1)
+                case .dirty: s.todayDirty = max(0, s.todayDirty - 1)
+                default: break
+                }
+            }
+            if entry.kind == .feed, s.runningFeedStart == nil,
+               let index = s.recent?.firstIndex(where: { $0.kind == .feed && $0.at < undo.at && $0.endedAt.map { abs($0.timeIntervalSince(undo.at)) < 0.001 } == true }) {
+                s.recent?[index].endedAt = nil
+                s.runningFeedStart = s.recent?[index].at
+                s.setRunningFeedSides(s.recent?[index].sides ?? [])
+            }
+            s.refreshLastFromRecent(kind: entry.kind)
+        case .startSleep?:
+            guard let entry = recent?.first(where: { $0.id == targetID }), entry.endedAt == nil else { return self }
+            s.recent?.removeAll { $0.id == targetID }
+            s.knownEventIDs?.removeAll { $0 == targetID }
+            s.runningSleepStart = s.recent?.first { $0.kind == .sleep && $0.endedAt == nil }?.at
+        case .stopSleep?:
+            guard s.runningSleepStart == nil,
+                  let index = recent?.firstIndex(where: { $0.kind == .sleep && $0.endedAt.map { abs($0.timeIntervalSince(undo.at)) < 0.001 } == true })
+            else { return self }
+            s.recent?[index].endedAt = nil
+            s.runningSleepStart = s.recent?[index].at
+            s.lastWokeAt = s.recent?.first { $0.kind == .sleep && $0.endedAt != nil }?.endedAt
+        default:
+            return self
+        }
+        s.generatedAt = now
+        return s
+    }
+
+    /// After an undo, the last feed or diaper is the newest one left.
+    private mutating func refreshLastFromRecent(kind: EventKind) {
+        let entries = recent ?? []
+        if kind == .feed {
+            let last = entries.first { $0.kind == .feed }
+            lastFeedAt = last?.at
+            setLastFeedSides(last?.sides ?? [])
+        } else if kind.isDiaper {
+            let last = entries.first { $0.kind.isDiaper }
+            lastDiaperAt = last?.at
+            lastDiaperKind = last?.kind
+        }
+    }
+
+    private mutating func insertRecent(_ entry: RecentEntry) {
+        var entries = recent ?? []
+        entries.removeAll { $0.id == entry.id }
+        let index = entries.firstIndex { $0.at < entry.at } ?? entries.endIndex
+        entries.insert(entry, at: index)
+        recent = Array(entries.prefix(Self.recentLimit))
+    }
+
+    /// Recent entries in the current totals window, newest first.
+    func recentInWindow(now: Date = .now, calendar: Calendar = .current) -> [RecentEntry] {
+        let today = window.interval(at: now, calendar: calendar)
+        return (recent ?? []).filter { tracked.contains($0.kind) && ($0.endedAt == nil && $0.kind == .sleep || window.holds($0.at, in: today)) }
+    }
+
     /// The window the phone counted "today" in.
     var window: TotalsWindow { TotalsWindow(storedValue: totalsWindow) }
+
+    /// The same summary with today's counts cleared once the day it counted
+    /// is over, for a Watch that has not heard from the phone since.
+    func current(now: Date = .now, calendar: Calendar = .current) -> NowSummary {
+        resetTodayIfNeeded(calendar: calendar, now: now)
+    }
 
     private func resetTodayIfNeeded(calendar: Calendar, now: Date) -> NowSummary {
         let today = window.interval(at: now, calendar: calendar)
@@ -317,6 +426,50 @@ extension NowSummary {
         summary.todayDirty = 0
         summary.generatedAt = now
         return summary
+    }
+}
+
+/// One entry as the Watch lists it: enough to draw a row and to take back a
+/// tap, nothing a report needs.
+struct RecentEntry: Codable, Equatable, Sendable, Identifiable {
+    var id: UUID
+    var kind: EventKind
+    var at: Date
+    var endedAt: Date?
+    var sides: [FeedSide]?
+
+    init(id: UUID, kind: EventKind, at: Date, endedAt: Date?, sides: [FeedSide]?) {
+        self.id = id
+        self.kind = kind
+        self.at = at
+        self.endedAt = endedAt
+        self.sides = sides
+    }
+
+    /// Nil for a weight, which is never a button, and for a row with no id.
+    init?(_ event: LogEvent) {
+        guard let id = event.id, event.eventKind != .weight else { return nil }
+        self.init(id: id, kind: event.eventKind, at: event.start, endedAt: event.endedAt,
+                  sides: event.eventKind == .feed ? event.feedSides : nil)
+    }
+
+    var isRunning: Bool { kind.canRun && endedAt == nil }
+
+    /// "Feed · Left", "Pee", "Sleep · 1h 05m", "Asleep".
+    func title(now: Date = .now) -> String {
+        switch kind {
+        case .feed:
+            let sides = FeedSide.label(for: sides ?? []).map { " · \($0)" } ?? ""
+            if let endedAt, endedAt.timeIntervalSince(at) >= 60 {
+                return "Feed\(sides) · \(Format.compactDuration(endedAt.timeIntervalSince(at)))"
+            }
+            return isRunning ? "Feeding\(sides)" : "Feed\(sides)"
+        case .sleep:
+            guard let endedAt else { return "Asleep" }
+            return "Sleep · \(Format.duration(endedAt.timeIntervalSince(at)))"
+        default:
+            return kind.label
+        }
     }
 }
 
