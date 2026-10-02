@@ -61,8 +61,7 @@ the page. Sections sit 12 apart; the time row and the buttons, one control,
 8. There is no idle "Tap to log now" hint (Jack: not needed); only the
 wound-back countdown shows under the buttons. Under `hourStripMinHeight` (an
 SE) the hour strip drops. Accessibility sizes and iPad keep
-the scrolling layouts. `LayoutUITests.testNowFitsOneScreenWithoutScrolling`
-checks it on each leased device.
+the scrolling layouts.
 
 Reports (2026-09-30, Jack: the old page "doesn't display things in an easy
 to see or understand way"; modelled on VO2's Trends). Top to bottom: a 7 / 14
@@ -157,8 +156,6 @@ Use vertical layouts when the side-by-side version no longer fits.
 Verification: LoggingUITests covers direct logging, optional feed sides, the
 wound-back log time, editor autosave, the totals window, long-press cancellation,
 backfilling yesterday without touching today's totals, Undo, sleep/wake, turning a button off, one-screen onboarding, and free access to the guides and report previews.
-SharingInterfaceUITests covers the invite explanation, the invite code
-and link, joining from onboarding and Settings, and the four appearance options.
 SharingTests protects the owner's log and separates invitation failures
 from an intentional stop-sharing action. Real cross-account iCloud sync still
 requires two signed-in devices and a deployed production schema.
