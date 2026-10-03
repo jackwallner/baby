@@ -81,8 +81,11 @@ to see or understand way"; modelled on VO2's Trends). Top to bottom: a 7 / 14
 daily averages per button with one supporting figure, one card per chart
 (title, a one-sentence takeaway, bars per day with a dashed average line;
 diapers grouped, not stacked), then For the doctor (summary thumbnail row,
-Share PDF, CSV row). Ranges never start before the first entry. Averages skip
-today. The paywall preview reuses `ReportChart`.
+preview and share PDF, CSV row). Ranges never start before the first entry.
+Averages skip today. The paywall preview reuses `ReportChart`.
+
+2026-10-03: The Reports PDF action opens the complete preview first. Its toolbar
+shares the PDF, matching the generate, review, then share flow in Vitals and VO2.
 
 Backfilling lives at the very bottom of Now as a quiet "Add an older entry"
 menu (Feed, Pee, Poop, Sleep, Weight) that opens the same editor as History's

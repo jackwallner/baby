@@ -402,6 +402,16 @@ final class LoggingUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Done"].exists)
         XCTAssertFalse(app.buttons["Close"].exists)
         attach(app, "compact-navigation-paid-reports")
+
+        let preview = app.buttons["summary.previewAndSharePDF"]
+        for _ in 0..<8 where !preview.isHittable { app.swipeUp() }
+        XCTAssertTrue(preview.waitForExistence(timeout: 5))
+        XCTAssertTrue(preview.isHittable)
+        preview.tap()
+        XCTAssertTrue(app.navigationBars["Summary"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Share PDF"].waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+
         app.buttons["tab.settings"].tap()
         XCTAssertTrue(override.isHittable, "Settings keeps its scroll position")
         override.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()

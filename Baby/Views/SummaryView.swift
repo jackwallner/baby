@@ -257,7 +257,7 @@ struct SummaryView: View {
                         Text(isExample ? "Example summary" : "One-page summary")
                             .font(.headline)
                             .foregroundStyle(AppTheme.ink)
-                        Text("Feeds, diapers, sleep and weights, \(rangeDates). Tap to read it.")
+                        Text("Feeds, diapers, sleep and weights, \(rangeDates). Preview before sharing.")
                             .font(.footnote)
                             .foregroundStyle(AppTheme.ink2)
                             .multilineTextAlignment(.leading)
@@ -300,10 +300,11 @@ struct SummaryView: View {
     @ViewBuilder
     private var shareButton: some View {
         if store.isPro, let pdfData, !isExample {
-            ShareLink(item: PDFFile(data: pdfData, name: report.childName, date: .now), preview: SharePreview("\(report.childName) summary")) {
-                Label("Share PDF", systemImage: "square.and.arrow.up")
+            Button { showFullPreview = true } label: {
+                Label("Preview and share PDF", systemImage: "doc.text.magnifyingglass")
             }
             .buttonStyle(PrimaryButtonStyle())
+            .accessibilityIdentifier("summary.previewAndSharePDF")
         } else if store.isPro {
             Button {} label: { Text("Log something to make your own") }
                 .buttonStyle(PrimaryButtonStyle())
@@ -368,11 +369,11 @@ struct SummaryView: View {
             .navigationTitle(isExample ? "Example summary" : "Summary")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { showFullPreview = false }
                 }
                 if store.isPro, let pdfData, !isExample {
-                    ToolbarItem(placement: .topBarLeading) {
+                    ToolbarItem(placement: .topBarTrailing) {
                         ShareLink(item: PDFFile(data: pdfData, name: report.childName, date: .now), preview: SharePreview("\(report.childName) summary")) {
                             Image(systemName: "square.and.arrow.up")
                         }
