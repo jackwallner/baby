@@ -404,7 +404,7 @@ private struct NavigationCapsuleBackground: View {
         if reduceTransparency || nightLight {
             Capsule().fill(AppTheme.card)
         } else {
-            Capsule().fill(.ultraThinMaterial)
+            Capsule().fill(.regularMaterial)
         }
     }
 }

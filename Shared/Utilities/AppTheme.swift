@@ -40,9 +40,9 @@ enum AppTheme {
     static let wideLayout: CGFloat = 700
     static let contentWidth: CGFloat = 1000
     static let ctaHeight: CGFloat = 52
-    /// A floating navigation capsule, with four 44pt touch targets.
-    static let tabWidth: CGFloat = 68
-    static let tabHeight: CGFloat = 44
+    /// A floating navigation capsule, with four 48pt touch targets.
+    static let tabWidth: CGFloat = 72
+    static let tabHeight: CGFloat = 48
     static let tabIconSize: CGFloat = 18
     static let tabLabelSize: CGFloat = 10
     static let iconSize: CGFloat = 36
