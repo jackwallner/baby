@@ -43,6 +43,9 @@ enum AppTheme {
     /// A floating navigation capsule, with four 48pt touch targets.
     static let tabWidth: CGFloat = 72
     static let tabHeight: CGFloat = 48
+    static var bottomNavigationReservedHeight: CGFloat {
+        tabHeight + hairSpacing * 4
+    }
     static let tabIconSize: CGFloat = 18
     static let tabLabelSize: CGFloat = 10
     static let iconSize: CGFloat = 36

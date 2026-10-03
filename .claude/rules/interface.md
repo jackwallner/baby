@@ -26,10 +26,12 @@ Upgrade and Settings; Upgrade becomes Reports for Baby+ subscribers, including
 immediately after a purchase or restore. Remove the top navigation buttons.
 Reserve the capsule's space so it never covers log controls, list rows or the
 paywall's billed amount, disclosure and links. Keep Log's one-screen fit and
-44pt tab touch targets. Hide inactive screens from accessibility and never
+48pt tab touch targets. Hide inactive screens from accessibility and never
 record a paywall impression merely because a hidden tab exists.
-Reserve the capsule's height in the outer VStack. Clip the tabs so scrolling
-content stays below the status bar, and hide the system tab bar on each tab.
+Reserve the capsule in a bottom safe-area inset, and exclude its full height
+from Now's fit so controls and Add an older entry stay above it. Clip the tabs
+so scrolling content stays below the status bar, and hide the system tab bar
+on each tab.
 
 The paywall pitches with `ReportPreviews`, three cards (summary page, first
 trend chart, export rows) with one rule: the example is sharp, labelled Example

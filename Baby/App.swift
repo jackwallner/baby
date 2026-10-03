@@ -324,6 +324,7 @@ struct BabyHomeView: View {
                 .padding(.top, AppTheme.hairSpacing)
                 .padding(.bottom, AppTheme.hairSpacing)
                 .padding(.horizontal, AppTheme.margin)
+                .frame(height: AppTheme.bottomNavigationReservedHeight)
         }
         .undoToast()
         .tint(AppTheme.accent)

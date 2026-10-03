@@ -39,7 +39,13 @@ struct NowView: View {
                         }
                         .padding(.vertical, AppTheme.looseSpacing)
                     } else {
-                        fitted(available: geometry.size.height - geometry.safeAreaInsets.bottom - AppTheme.tightSpacing * 2)
+                        // TabView draws under its floating inset, so reserve the capsule before fitting Now.
+                        fitted(
+                            available: geometry.size.height
+                                - geometry.safeAreaInsets.bottom
+                                - AppTheme.bottomNavigationReservedHeight
+                                - AppTheme.tightSpacing * 2
+                        )
                             .padding(.vertical, AppTheme.tightSpacing)
                     }
                 }
@@ -668,8 +674,8 @@ private struct OlderEntryLink: View {
             NewEntryMenuItems(editor: $editor)
         } label: {
             Label("Add an older entry", systemImage: "clock.badge.plus")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(AppTheme.accent)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(AppTheme.ink2)
                 .frame(minHeight: 44)
         }
         .frame(maxWidth: .infinity)
