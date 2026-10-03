@@ -317,8 +317,9 @@ struct BabyHomeView: View {
         }
         .toolbar(.hidden, for: .tabBar)
         .clipped()
-        .background(AppTheme.paper)
-        .ignoresSafeArea(edges: .bottom)
+        // Keep the bottom safe area active so the inset resizes every tab.
+        // Only the background extends beneath the home indicator.
+        .background { AppTheme.paper.ignoresSafeArea() }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             navigationCapsule
                 .padding(.top, AppTheme.hairSpacing)

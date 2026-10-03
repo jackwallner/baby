@@ -320,10 +320,24 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(tabs[1].isSelected)
         XCTAssertFalse(app.buttons["log.feed"].exists)
         attach(app, "compact-navigation-history")
+        let recentEntry = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Pee,")).firstMatch
+        XCTAssertTrue(recentEntry.waitForExistence(timeout: 3))
+        XCTAssertTrue(recentEntry.isHittable)
+        XCTAssertLessThanOrEqual(recentEntry.frame.maxY, tabs[0].frame.minY)
+
         tabs[3].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.buttons["Done"].exists)
+        let diaperWord = app.buttons["Pee and Poop"]
+        XCTAssertTrue(diaperWord.waitForExistence(timeout: 3))
+        XCTAssertTrue(diaperWord.isHittable)
         attach(app, "compact-navigation-settings")
+
+        tabs[2].tap()
+        let purchase = app.buttons["Continue with Baby+"]
+        XCTAssertTrue(purchase.waitForExistence(timeout: 5))
+        XCTAssertLessThanOrEqual(purchase.frame.maxY, tabs[0].frame.minY)
+
         tabs[0].tap()
         XCTAssertTrue(app.buttons["log.feed"].isHittable)
     }

@@ -33,6 +33,11 @@ from Now's fit so controls and Add an older entry stay above it. Clip the tabs
 so scrolling content stays below the status bar, and hide the system tab bar
 on each tab.
 
+2026-10-03: Keep the tab content inside the bottom safe area so the capsule's
+inset resizes every tab on entry. Extend the paper background under the home
+indicator while preserving that safe area for each NavigationStack, List, Form
+and ScrollView. Now keeps its explicit height fit against the capsule.
+
 The paywall pitches with `ReportPreviews`, three cards (summary page, first
 trend chart, export rows) with one rule: the example is sharp, labelled Example
 beside its title (the page has its own stamp in the corner), and the baby's own

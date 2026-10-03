@@ -39,7 +39,7 @@ struct NowView: View {
                         }
                         .padding(.vertical, AppTheme.looseSpacing)
                     } else {
-                        // TabView draws under its floating inset, so reserve the capsule before fitting Now.
+                        // Now fits against the capsule's full reserved height.
                         fitted(
                             available: geometry.size.height
                                 - geometry.safeAreaInsets.bottom
