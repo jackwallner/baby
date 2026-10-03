@@ -133,3 +133,21 @@ Intents only run for a signed build, so run it as `build-for-testing`, re-sign
 then `TEST_RUNNER_BABY_WIDGET_TEST=1 xcodebuild test-without-building` (it skips
 without that variable). The Lock Screen circles and iOS 18 controls
 were compiled but not driven in the simulator.
+
+# Build 37 navigation verification, 2026-10-02
+
+Log, History, Upgrade / Reports and Settings share a compact bottom capsule.
+The Log page gives the hour strip's space to the logging controls when needed;
+the strip returns when more room is available.
+
+- `Baby` scheme: 120 unit tests, zero failures.
+- `LoggingUITests` and `PaywallScreenshotUITests`: 21 tests, zero failures on
+  iPhone 17e. The earlier iPhone 17 Pro run also passed all 21 tests.
+- Final iPhone 17 Pro captures verify idle, feed side chips and Sleep disabled:
+  logging controls and Add an older entry stay above all four 68 x 44pt tabs.
+- Checked the capsule in Light, Dark, Night light and accessibility text sizes.
+- `python3 scripts/design-audit.py`: zero drift, seven style advisories.
+- `./scripts/testflight.sh`: version 1.3, build 37 archived and uploaded
+  successfully. Xcode reported the uploaded package is processing.
+- Evidence: `build/navigation-resume/`, including the unit and UI result
+  bundles, final phone captures and `testflight.log`.
