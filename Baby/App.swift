@@ -306,24 +306,25 @@ struct BabyHomeView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            TabView(selection: $selected) {
-                ForEach(HomeTab.allCases) { tab in
-                    Group {
-                        if visited.contains(tab) { screen(tab) }
-                    }
-                    .toolbar(.hidden, for: .tabBar)
-                    .tag(tab)
+        TabView(selection: $selected) {
+            ForEach(HomeTab.allCases) { tab in
+                Group {
+                    if visited.contains(tab) { screen(tab) }
                 }
+                .toolbar(.hidden, for: .tabBar)
+                .tag(tab)
             }
-            .toolbar(.hidden, for: .tabBar)
-            .clipped()
+        }
+        .toolbar(.hidden, for: .tabBar)
+        .clipped()
+        .background(AppTheme.paper)
+        .ignoresSafeArea(edges: .bottom)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             navigationCapsule
                 .padding(.top, AppTheme.hairSpacing)
                 .padding(.bottom, AppTheme.hairSpacing)
                 .padding(.horizontal, AppTheme.margin)
         }
-        .background(AppTheme.paper)
         .undoToast()
         .tint(AppTheme.accent)
     }
