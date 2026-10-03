@@ -16,21 +16,25 @@ same logging controls in the same order.
 History belongs one tap from home, as a List or a month Calendar (dots
 per kind, tap a day for its entries). The calendar grid is plain stacks: a
 LazyVGrid inside a List cell crashed UICollectionView self-sizing. The Undo
-toast is pinned to the top over the navigation bar (swipe up to dismiss), so
-it never lands mid-screen over the log controls. First-weeks guidance,
-sharing and stain help live in Settings. Do not restore a four-tab layout or an
-onboarding paywall.
+toast is pinned to the top (swipe up to dismiss), so it never lands mid-screen
+over the log controls. First-weeks guidance, sharing and stain help live in
+Settings. No onboarding paywall.
 
-2026-09-29 (Jack): the top-right ellipsis read as nothing. It is now two
-buttons: Reports (`chart.bar.doc.horizontal`) and Settings (`gearshape`).
-Reports opens `ReportsSheet`: the paywall until Baby+ is active, then the
-reports; a purchase there swaps in the reports without closing. The paywall
-pitches with `ReportPreviews`, three cards (summary page, first trend chart,
-export rows) with one rule: the example is sharp, labelled Example beside
-its title (the page has its own stamp in the corner), and the
-baby's own data is blurred under one Baby+ lock (the page keeps its name and
-range sharp). The toast clears one button on the left and the pair on the
-right (`toastLeadingInset`, `toastTrailingInset`).
+2026-10-02 (Jack): all navigation belongs in one small translucent bottom
+capsule, like Total Calories, not a full-width bar. Tabs are Log, History,
+Upgrade and Settings; Upgrade becomes Reports for Baby+ subscribers, including
+immediately after a purchase or restore. Remove the top navigation buttons.
+Reserve the capsule's space so it never covers log controls, list rows or the
+paywall's billed amount, disclosure and links. Keep Log's one-screen fit and
+44pt tab touch targets. Hide inactive screens from accessibility and never
+record a paywall impression merely because a hidden tab exists.
+Reserve the capsule's height in the outer VStack. Clip the tabs so scrolling
+content stays below the status bar, and hide the system tab bar on each tab.
+
+The paywall pitches with `ReportPreviews`, three cards (summary page, first
+trend chart, export rows) with one rule: the example is sharp, labelled Example
+beside its title (the page has its own stamp in the corner), and the baby's own
+data is blurred under one Baby+ lock (the page keeps its name and range sharp).
 
 Buttons can be turned off (Settings > Buttons, `TrackedKinds` in the App
 Group, carried to the Watch in `NowSummary.hiddenKinds`). `EventStore`
@@ -60,7 +64,8 @@ above the totals. Opening the side chips shrinks the buttons instead of pushing
 the page. Sections sit 12 apart; the time row and the buttons, one control,
 8. There is no idle "Tap to log now" hint (Jack: not needed); only the
 wound-back countdown shows under the buttons. Under `hourStripMinHeight` (an
-SE) the hour strip drops. Accessibility sizes and iPad keep
+SE), or when the side chips and minimum button heights need its space, the
+hour strip drops. Accessibility sizes and iPad keep
 the scrolling layouts.
 
 Reports (2026-09-30, Jack: the old page "doesn't display things in an easy

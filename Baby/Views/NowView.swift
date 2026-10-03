@@ -1,19 +1,17 @@
 import SwiftUI
 
-/// The whole everyday app: the last feed, the log controls and today's
-/// totals. History is one tap away on the left; Reports and Settings sit on
-/// the right.
+/// The everyday log: the last feed, the log controls and today's totals.
 struct NowView: View {
+    var isVisible = true
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var settings: BabySettings
     @State private var editor: EditorRequest?
-    @State private var showSettings = false
-    @State private var showReports = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var now = Date.now
     @State private var fit = NowFit()
+    @State private var hourStripHeight: CGFloat = 0
     @StateObject private var logClock = LogClock()
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -41,7 +39,7 @@ struct NowView: View {
                         }
                         .padding(.vertical, AppTheme.looseSpacing)
                     } else {
-                        fitted(available: geometry.size.height - AppTheme.tightSpacing * 2)
+                        fitted(available: geometry.size.height - geometry.safeAreaInsets.bottom - AppTheme.tightSpacing * 2)
                             .padding(.vertical, AppTheme.tightSpacing)
                     }
                 }
@@ -54,28 +52,13 @@ struct NowView: View {
         .background(AppTheme.paper)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                NavigationLink { HistoryView() } label: { Image(systemName: "clock.arrow.circlepath") }
-                    .accessibilityLabel("History")
-            }
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button { showReports = true } label: { Image(systemName: "chart.bar.doc.horizontal") }
-                    .accessibilityLabel("Reports")
-                    .accessibilityIdentifier("reports")
-                Button { showSettings = true } label: { Image(systemName: "gearshape") }
-                    .accessibilityLabel("Settings")
-                    .accessibilityIdentifier("settings")
-            }
-        }
         .sheet(item: $editor) { request in
             EventEditorView(request: request)
         }
-        .sheet(isPresented: $showSettings) {
-            NavigationStack { SettingsView() }
-        }
-        .sheet(isPresented: $showReports) {
-            ReportsSheet()
+        .onChange(of: isVisible) { _, visible in
+            guard visible else { return }
+            now = .now
+            logClock.expireIfDue()
         }
         .onReceive(clock) { date in
             // A new totals day: rebuild the summary the widgets and Watch read.
@@ -107,23 +90,29 @@ struct NowView: View {
     /// shortest screen (an SE) drops the hour strip. Past the floor (large
     /// text), the page scrolls rather than clipping.
     private func fitted(available: CGFloat) -> some View {
+        let showsHourStrip = available >= AppTheme.hourStripMinHeight && fit.showsHourStrip
         // Sections sit 12 apart; the time row and the buttons, one control,
         // sit 8 apart.
-        VStack(alignment: .leading, spacing: AppTheme.spacing) {
+        return VStack(alignment: .leading, spacing: AppTheme.spacing) {
             NowStatusCard(now: now, clock: logClock, compact: true)
             LoggingControls(height: fit.buttonHeight, spacing: AppTheme.tightSpacing, clock: logClock, editor: $editor)
                 .padding(.bottom, fit.slack)
-            TodayTotalsView(now: now, compact: true, showsHourStrip: available >= AppTheme.hourStripMinHeight)
+            TodayTotalsView(now: now, compact: true, showsHourStrip: showsHourStrip) { height in
+                hourStripHeight = height
+            }
             OlderEntryLink(editor: $editor)
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             // The page as drawn, less the part the last fit decided, is the
             // part that does not stretch.
             let fixed = height - fit.slack - fit.buttonHeight * rows
-            refit(fixed: fixed, available: available, animated: fit.fixed != nil)
+            refit(fixed: fixed, available: available, showsHourStrip: showsHourStrip, animated: fit.fixed != nil)
         }
         .onChange(of: available) { _, available in
-            if let fixed = fit.fixed { refit(fixed: fixed, available: available, animated: false) }
+            if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
+        }
+        .onChange(of: hourStripHeight) { _, _ in
+            if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
         }
         .frame(minHeight: max(0, available), alignment: .top)
     }
@@ -134,12 +123,16 @@ struct NowView: View {
 
     /// The buttons split what the rest leaves. Slack past the cap goes above
     /// the totals, so they sit at the bottom of the screen.
-    private func refit(fixed: CGFloat, available: CGFloat, animated: Bool) {
-        let share = ((available - fixed) / rows).rounded(.down)
+    private func refit(fixed: CGFloat, available: CGFloat, showsHourStrip: Bool, animated: Bool) {
+        let withoutStrip = fixed - (showsHourStrip ? hourStripHeight : 0)
+        let keepsStrip = available >= AppTheme.hourStripMinHeight
+            && withoutStrip + hourStripHeight + AppTheme.minLogButtonHeight * rows <= available
+        let fittedFixed = withoutStrip + (keepsStrip ? hourStripHeight : 0)
+        let share = ((available - fittedFixed) / rows).rounded(.down)
         let height = min(AppTheme.maxLogButtonHeight, max(AppTheme.minLogButtonHeight, share))
-        let next = NowFit(fixed: fixed, buttonHeight: height, slack: max(0, available - fixed - height * rows))
-        guard abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
-            fit.fixed = fixed
+        let next = NowFit(fixed: fittedFixed, buttonHeight: height, slack: max(0, available - fittedFixed - height * rows), showsHourStrip: keepsStrip)
+        guard next.showsHourStrip != fit.showsHourStrip || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
+            fit.fixed = fittedFixed
             return
         }
         // The first fit lands before anything draws; later ones (the side
@@ -156,6 +149,7 @@ private struct NowFit: Equatable {
     var fixed: CGFloat?
     var buttonHeight: CGFloat = AppTheme.logButtonHeight
     var slack: CGFloat = 0
+    var showsHourStrip = true
 }
 
 private struct LoggingControls: View {
@@ -544,6 +538,7 @@ private struct TodayTotalsView: View {
     let now: Date
     var compact = false
     var showsHourStrip = true
+    var onHourStripHeightChange: ((CGFloat) -> Void)?
 
     var body: some View {
         let totals = WindowTotals.make(events: events.events, window: settings.totalsWindow, now: now)
@@ -563,6 +558,11 @@ private struct TodayTotalsView: View {
             .accessibilityIdentifier("todayTotals")
             if showsHourStrip {
                 HourStrip(totals: totals, kinds: kinds)
+                    .onGeometryChange(for: CGFloat.self) { geometry in
+                        geometry.size.height + (compact ? AppTheme.tightSpacing : AppTheme.spacing)
+                    } action: { height in
+                        onHourStripHeightChange?(height)
+                    }
             }
         }
         .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing)

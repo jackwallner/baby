@@ -17,6 +17,8 @@ struct BabyPaywallView: View {
     var focus: PlusFeature?
     /// False where the presenter swaps in the unlocked reports itself.
     var closesOnPurchase = true
+    /// A retained tab must not record an impression while another tab is shown.
+    var isVisible = true
 
     @State private var selected: Package?
     @State private var isRestoring = false
@@ -24,8 +26,6 @@ struct BabyPaywallView: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            AppTheme.paper.ignoresSafeArea()
-
             if store.isPro {
                 subscriberContent
             } else if store.packages.isEmpty && store.isLoadingProducts {
@@ -48,7 +48,9 @@ struct BabyPaywallView: View {
                 .accessibilityLabel("Close")
             }
         }
-        .task {
+        .background(AppTheme.paper.ignoresSafeArea())
+        .task(id: isVisible) {
+            guard isVisible else { return }
             store.trackPaywallImpression(id: paywallImpressionID, oncePerSession: !displayCloseButton)
             if store.packages.isEmpty { store.start(forceRefresh: false) }
             selectDefaultIfNeeded()

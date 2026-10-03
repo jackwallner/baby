@@ -42,17 +42,17 @@ final class TwoDeviceParticipantUITests: XCTestCase {
         attach(app, "1-joining")
 
         let error = app.staticTexts["join.error"]
-        let home = app.buttons["settings"]
+        let home = app.buttons["tab.settings"]
         let arrived = eventuallyWithoutLeaving(timeout: 240) { home.exists || error.exists }
         attach(app, "2-after-join")
         XCTAssertFalse(error.exists, "Join failed: \(error.label)")
         XCTAssertTrue(arrived && home.exists, "The shared baby never arrived")
         XCTAssertTrue(app.navigationBars["Two-device check"].exists || app.staticTexts["Two-device check"].exists, "Home is not showing the owner's baby")
 
-        app.buttons["History"].tap()
+        app.buttons["tab.history"].tap()
         XCTAssertTrue(eventually(app, timeout: 120) { app.staticTexts["Feed"].exists && app.staticTexts["Pee"].exists }, "The owner's entries did not import")
         attach(app, "3-owner-history")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["tab.log"].tap()
 
         app.buttons["log.dirty"].tap()
         sleep(3)
@@ -60,7 +60,7 @@ final class TwoDeviceParticipantUITests: XCTestCase {
         sleep(2)
         attach(app, "4-partner-logged")
 
-        app.buttons["History"].tap()
+        app.buttons["tab.history"].tap()
         XCTAssertTrue(eventually(app, timeout: 300) { app.staticTexts["Sleep"].exists }, "The owner's reply entry never reached this phone")
         attach(app, "5-owner-reply-arrived")
     }

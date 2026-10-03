@@ -40,6 +40,11 @@ enum AppTheme {
     static let wideLayout: CGFloat = 700
     static let contentWidth: CGFloat = 1000
     static let ctaHeight: CGFloat = 52
+    /// A floating navigation capsule, with four 44pt touch targets.
+    static let tabWidth: CGFloat = 68
+    static let tabHeight: CGFloat = 44
+    static let tabIconSize: CGFloat = 18
+    static let tabLabelSize: CGFloat = 10
     static let iconSize: CGFloat = 36
     static let welcomeIconSize: CGFloat = 72
     static let chartHeight: CGFloat = 160
@@ -53,10 +58,9 @@ enum AppTheme {
     static let previewBlur: CGFloat = 6
     static let inviteCodeSize: CGFloat = 200
     static let toastWidth: CGFloat = 520
-    /// Clears the 44pt History button and its 16pt bar inset.
+    /// Clears a pushed screen's back button and History's add-entry menu.
     static let toastLeadingInset: CGFloat = 68
-    /// Clears the Reports and Settings pair on the right.
-    static let toastTrailingInset: CGFloat = 124
+    static let toastTrailingInset: CGFloat = 68
     static let dotSize: CGFloat = 5
     /// The kind dot beside a total and at the head of each hour-strip row.
     static let legendDotSize: CGFloat = 8

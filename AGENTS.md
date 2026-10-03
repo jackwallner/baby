@@ -12,14 +12,15 @@ off in Settings > Buttons (`TrackedKinds`, at least one stays); an off
 button leaves Now, History, reports, widgets and the Watch, and its entries
 come back when it is turned on. The diaper pair can read Wet / Dirty instead
 (Settings > Diaper words, `DiaperWords`); reports for a doctor always say wet
-and dirty. History is the top-left clock; "Add an older entry" at the bottom
-backfills. Top right: Reports (the paywall with report previews until Baby+
-is active, then the reports, `ReportsSheet`) and the Settings gear.
+and dirty. A compact translucent bottom capsule holds Log, History,
+Upgrade / Reports and Settings. Upgrade shows the paywall with report previews
+until Baby+ is active, then becomes Reports. No top navigation buttons.
+"Add an older entry" at the bottom of Log backfills.
 
 Everything else lives in Settings: baby, buttons, diaper words, totals,
 appearance, logging together, babies, First Weeks, stain helper, and Baby+
-status. No tab bar, automatic review prompts, promotional cards, or purchase
-screen during onboarding.
+status. No automatic review prompts, promotional cards, or purchase screen
+during onboarding.
 Onboarding is one screen with two paths: Start a new log (optional name and
 birth date) or Join a shared log (scan or paste an invite). An invitation
 opened before setup shows a joining screen instead of onboarding.

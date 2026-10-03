@@ -2,7 +2,6 @@ import StoreKit
 import SwiftUI
 
 struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var settings: BabySettings
     @EnvironmentObject private var store: StoreService
     @EnvironmentObject private var events: EventStore
@@ -41,11 +40,6 @@ struct SettingsView: View {
         .tint(AppTheme.accent)
         .navigationTitle("Settings")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Done") { dismiss() }
-            }
-        }
         .sheet(isPresented: $showPaywall) {
             BabyPaywallView(paywallImpressionID: "baby_settings")
         }

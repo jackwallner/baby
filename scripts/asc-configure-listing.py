@@ -28,9 +28,9 @@ Baby trackers are a crowded category, so this one is deliberately narrow and bui
 
 WHAT A FRESH INSTALL SHOWS, WITH NO PURCHASE AND NO DATA
 1. One setup screen with two paths. Start a new log asks for an optional name and birth date; tap Start tracking. Join a shared log is only for a second parent holding an invite, and can be ignored. There is no purchase screen during onboarding.
-2. Home: four log controls, Feed (optional Left, Right or Bottle after logging), Pee, Poop and Sleep. One tap logs at the current time; a long press opens the editor for the time, side, bottle amount or stool colour. Undo appears at the top for a few seconds. History is the top-left clock button. Settings (top-right gear) > Diaper words can rename Pee and Poop to Wet and Dirty.
+2. Home: four log controls, Feed (optional Left, Right or Bottle after logging), Pee, Poop and Sleep. One tap logs at the current time; a long press opens the editor for the time, side, bottle amount or stool colour. Undo appears at the top for a few seconds. The small bottom bar has Log, History, Upgrade and Settings. Upgrade becomes Reports when Baby+ is active. Settings > Diaper words can rename Pee and Poop to Wet and Dirty.
 3. Settings > First Weeks: a breastfeeding reference table for the first two weeks, sourced to NHS Healthier Together, beside the counts the parent logged, with the "call your pediatrician if" lines under the table. It renders with no data and with no purchase.
-4. Reports (top-right chart icon): tap the summary preview to see the full pediatrician PDF example. With nothing logged it renders a worked example stamped "EXAMPLE, NOT YOUR BABY'S DATA" whose numbers are invented. No reviewer purchase is needed to see it.
+4. Upgrade (bottom bar): tap the summary preview to see the full pediatrician PDF example. With nothing logged it renders a worked example stamped "EXAMPLE, NOT YOUR BABY'S DATA" whose numbers are invented. No reviewer purchase is needed to see it.
 
 FREE, AND STAYING FREE
 Logging, the first-weeks table, full history, both widgets, the Apple Watch app and complication, the Live Activity, logging together, the stain helper, every appearance and more than one baby.

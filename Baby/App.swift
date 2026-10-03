@@ -283,20 +283,161 @@ private struct RevenueCatProbeStatusView: View {
 }
 #endif
 
-/// One home screen. The alternate entry points are for existing capture flows.
+/// Keep each visited screen alive, with one compact capsule for navigation.
 struct BabyHomeView: View {
-    var initialScreen = 0
+    @EnvironmentObject private var store: StoreService
+    @State private var selected: HomeTab
+    @State private var visited: Set<HomeTab>
+    @State private var settingsPath: [SettingsDestination]
+    private let showsReportSnapshot: Bool
+
+    init(initialScreen: Int = 0) {
+        // Capture routes predate the tabs: 1 is First Weeks, 2 History, 3 Reports.
+        let tab: HomeTab = switch initialScreen {
+        case 1: .settings
+        case 2: .history
+        case 3: .reports
+        default: .log
+        }
+        _selected = State(initialValue: tab)
+        _visited = State(initialValue: [tab])
+        _settingsPath = State(initialValue: initialScreen == 1 ? [.firstWeeks] : [])
+        showsReportSnapshot = initialScreen == 3
+    }
 
     var body: some View {
-        NavigationStack {
-            switch initialScreen {
-            case 1: FirstWeeksView()
-            case 2: HistoryView()
-            case 3: SummaryView()
-            default: NowView()
+        VStack(spacing: 0) {
+            TabView(selection: $selected) {
+                ForEach(HomeTab.allCases) { tab in
+                    Group {
+                        if visited.contains(tab) { screen(tab) }
+                    }
+                    .toolbar(.hidden, for: .tabBar)
+                    .tag(tab)
+                }
             }
+            .toolbar(.hidden, for: .tabBar)
+            .clipped()
+            navigationCapsule
+                .padding(.top, AppTheme.hairSpacing)
+                .padding(.bottom, AppTheme.hairSpacing)
+                .padding(.horizontal, AppTheme.margin)
         }
+        .background(AppTheme.paper)
         .undoToast()
         .tint(AppTheme.accent)
+    }
+
+    @ViewBuilder
+    private func screen(_ tab: HomeTab) -> some View {
+        switch tab {
+        case .log:
+            NavigationStack { NowView(isVisible: selected == .log) }
+        case .history:
+            NavigationStack { HistoryView() }
+        case .reports:
+            ReportsTabView(isVisible: selected == .reports, showsSnapshot: showsReportSnapshot)
+        case .settings:
+            NavigationStack(path: $settingsPath) {
+                SettingsView()
+                    .navigationDestination(for: SettingsDestination.self) { _ in FirstWeeksView() }
+            }
+        }
+    }
+
+    private var navigationCapsule: some View {
+        HStack(spacing: 0) {
+            ForEach(HomeTab.allCases) { tab in
+                HomeTabButton(
+                    icon: tab.icon(isPro: store.isPro),
+                    label: tab.label(isPro: store.isPro),
+                    identifier: "tab.\(tab.rawValue)",
+                    isSelected: selected == tab
+                ) {
+                    guard selected != tab else { return }
+                    Haptics.selected()
+                    visited.insert(tab)
+                    selected = tab
+                }
+            }
+        }
+        .padding(AppTheme.hairSpacing)
+        .background { NavigationCapsuleBackground() }
+        .overlay(Capsule().strokeBorder(AppTheme.separator, lineWidth: AppTheme.hairlineWidth))
+    }
+
+    private enum SettingsDestination: Hashable {
+        case firstWeeks
+    }
+}
+
+private enum HomeTab: String, CaseIterable, Identifiable {
+    case log, history, reports, settings
+
+    var id: Self { self }
+
+    func label(isPro: Bool) -> String {
+        switch self {
+        case .log: "Log"
+        case .history: "History"
+        case .reports: isPro ? "Reports" : "Upgrade"
+        case .settings: "Settings"
+        }
+    }
+
+    func icon(isPro: Bool) -> String {
+        switch self {
+        case .log: "heart"
+        case .history: "clock.arrow.circlepath"
+        case .reports: isPro ? "chart.bar.doc.horizontal" : "lock"
+        case .settings: "gearshape"
+        }
+    }
+}
+
+private struct NavigationCapsuleBackground: View {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.nightLight) private var nightLight
+
+    var body: some View {
+        if reduceTransparency || nightLight {
+            Capsule().fill(AppTheme.card)
+        } else {
+            Capsule().fill(.ultraThinMaterial)
+        }
+    }
+}
+
+private struct HomeTabButton: View {
+    let icon: String
+    let label: String
+    let identifier: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: AppTheme.hairSpacing) {
+                Image(systemName: icon)
+                    .font(.system(size: AppTheme.tabIconSize, weight: .medium))
+                Text(label)
+                    .font(.system(size: AppTheme.tabLabelSize, weight: .semibold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(isSelected ? AppTheme.accent : AppTheme.ink2)
+            .frame(width: AppTheme.tabWidth, height: AppTheme.tabHeight)
+            .background(isSelected ? AppTheme.accent.opacity(0.12) : .clear, in: Capsule())
+            .contentShape(Capsule())
+        }
+        .buttonStyle(HomeTabButtonStyle())
+        .accessibilityLabel(label)
+        .accessibilityIdentifier(identifier)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+}
+
+private struct HomeTabButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.opacity(configuration.isPressed ? 0.6 : 1)
     }
 }

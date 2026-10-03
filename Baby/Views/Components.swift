@@ -129,9 +129,8 @@ struct SectionLabel: View {
 }
 
 extension View {
-    /// The Undo toast pinned to the top, in the navigation bar between History
-    /// and More, so it covers only the title: never the log controls and never
-    /// the bar buttons. Applied once around the navigation stack.
+    /// Undo stays above the controls, clearing back and add-entry buttons.
+    /// Applied once around all tabs so History deletion can be undone too.
     func undoToast() -> some View { modifier(UndoToastOverlay()) }
 }
 

@@ -4,29 +4,24 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
-/// What the Reports button opens: the paywall, which previews every report,
-/// until Baby+ is active; then the reports themselves. A purchase made here
-/// turns the sheet into the reports without closing it.
-struct ReportsSheet: View {
-    @Environment(\.dismiss) private var dismiss
+/// Upgrade becomes Reports in place when a purchase or restore unlocks Baby+.
+struct ReportsTabView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var store: StoreService
+    var isVisible = true
+    var showsSnapshot = false
 
     var body: some View {
-        Group {
-            if store.isPro {
-                NavigationStack {
+        NavigationStack {
+            Group {
+                if store.isPro || showsSnapshot {
                     SummaryView()
-                        .toolbar {
-                            ToolbarItem(placement: .confirmationAction) {
-                                Button("Done") { dismiss() }
-                            }
-                        }
+                        .transition(.opacity)
+                } else {
+                    BabyPaywallView(displayCloseButton: false, paywallImpressionID: "baby_reports", closesOnPurchase: false, isVisible: isVisible)
+                        .toolbar(.hidden, for: .navigationBar)
+                        .transition(.opacity)
                 }
-                .transition(.opacity)
-            } else {
-                BabyPaywallView(paywallImpressionID: "baby_reports", closesOnPurchase: false)
-                    .transition(.opacity)
             }
         }
         .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: store.isPro)
@@ -35,7 +30,7 @@ struct ReportsSheet: View {
 
 /// Baby+ reporting, read top to bottom: pick a range, see the day-by-day
 /// averages, the chart behind each one, then hand the summary to the doctor.
-/// Reached through `ReportsSheet` once Baby+ is active. Before that the
+/// Reached through the Reports tab once Baby+ is active. Before that the
 /// paywall shows the same reports as previews (the example page in full when
 /// nothing is logged, App Review 4.3).
 struct SummaryView: View {
