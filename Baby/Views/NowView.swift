@@ -39,13 +39,8 @@ struct NowView: View {
                         }
                         .padding(.vertical, AppTheme.looseSpacing)
                     } else {
-                        // Now fits against the capsule's full reserved height.
-                        fitted(
-                            available: geometry.size.height
-                                - geometry.safeAreaInsets.bottom
-                                - AppTheme.bottomNavigationReservedHeight
-                                - AppTheme.tightSpacing * 2
-                        )
+                        // The tab's safe area already reserves the capsule.
+                        fitted(available: geometry.size.height - AppTheme.tightSpacing * 2)
                             .padding(.vertical, AppTheme.tightSpacing)
                     }
                 }

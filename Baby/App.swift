@@ -316,11 +316,10 @@ struct BabyHomeView: View {
             }
         }
         .toolbar(.hidden, for: .tabBar)
-        .clipped()
-        // Keep the bottom safe area active so the inset resizes every tab.
-        // Only the background extends beneath the home indicator.
+        // Clip only the top, so scrolling stays below the status bar.
+        .clipShape(TopEdgeClip())
         .background { AppTheme.paper.ignoresSafeArea() }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+        .overlay(alignment: .bottom) {
             navigationCapsule
                 .padding(.top, AppTheme.hairSpacing)
                 .padding(.bottom, AppTheme.hairSpacing)
@@ -335,15 +334,18 @@ struct BabyHomeView: View {
     private func screen(_ tab: HomeTab) -> some View {
         switch tab {
         case .log:
-            NavigationStack { NowView(isVisible: selected == .log) }
+            NavigationStack { NowView(isVisible: selected == .log).reservesNavigationCapsule() }
         case .history:
-            NavigationStack { HistoryView() }
+            NavigationStack { HistoryView().reservesNavigationCapsule() }
         case .reports:
             ReportsTabView(isVisible: selected == .reports, showsSnapshot: showsReportSnapshot)
         case .settings:
             NavigationStack(path: $settingsPath) {
                 SettingsView()
-                    .navigationDestination(for: SettingsDestination.self) { _ in FirstWeeksView() }
+                    .reservesNavigationCapsule()
+                    .navigationDestination(for: SettingsDestination.self) { _ in
+                        FirstWeeksView().reservesNavigationCapsule()
+                    }
             }
         }
     }
@@ -371,6 +373,21 @@ struct BabyHomeView: View {
 
     private enum SettingsDestination: Hashable {
         case firstWeeks
+    }
+}
+
+extension View {
+    /// Reserve the floating capsule in this screen's safe area, inside its
+    /// NavigationStack, so lists end above it yet scroll on beneath it.
+    func reservesNavigationCapsule() -> some View {
+        safeAreaPadding(.bottom, AppTheme.bottomNavigationReservedHeight)
+    }
+}
+
+/// Clips the top edge only; the bottom stays open below the frame.
+private struct TopEdgeClip: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path(CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height * 2))
     }
 }
 

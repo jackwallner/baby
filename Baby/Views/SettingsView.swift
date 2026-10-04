@@ -75,7 +75,7 @@ struct SettingsView: View {
 
     private var guidesSection: some View {
         Section("Guides") {
-            NavigationLink { FirstWeeksView() } label: {
+            NavigationLink { FirstWeeksView().reservesNavigationCapsule() } label: {
                 Label("First Weeks", systemImage: "checklist")
             }
             Button { showStainHelper = true } label: {

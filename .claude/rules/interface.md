@@ -33,10 +33,14 @@ from Now's fit so controls and Add an older entry stay above it. Clip the tabs
 so scrolling content stays below the status bar, and hide the system tab bar
 on each tab.
 
-2026-10-03: Keep the tab content inside the bottom safe area so the capsule's
-inset resizes every tab on entry. Extend the paper background under the home
-indicator while preserving that safe area for each NavigationStack, List, Form
-and ScrollView. Now keeps its explicit height fit against the capsule.
+2026-10-04: the capsule floats in an overlay and each tab's root view,
+inside its NavigationStack, reserves it with `reservesNavigationCapsule()`
+(bottom safe-area padding). A safe-area inset on the TabView, or padding outside
+the NavigationStack, does not reach the hosted List, so the last rows ended
+under the capsule; clipping the whole TabView then hid everything behind it.
+Clip only the top edge (`TopEdgeClip`), so lists end above the capsule yet
+scroll on beneath it, and Now fits its own safe-area height. Any new pushed
+screen must call `reservesNavigationCapsule()` too.
 
 The paywall pitches with `ReportPreviews`, three cards (summary page, first
 trend chart, export rows) with one rule: the example is sharp, labelled Example

@@ -23,6 +23,7 @@ struct ReportsTabView: View {
                         .transition(.opacity)
                 }
             }
+            .reservesNavigationCapsule()
         }
         .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: store.isPro)
     }
