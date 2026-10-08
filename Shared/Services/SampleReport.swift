@@ -32,8 +32,10 @@ enum SampleReport {
                 sleepSeconds: sleep[index] * 3600,
                 longestSleepSeconds: longest[index] * 3600,
                 longestFeedGapSeconds: feedGaps[index] * 3600,
+                bottleFeeds: index % 3 == 0 ? 1 : 0,
                 weightGrams: weights[index],
-                stoolColors: index < 2 ? [.green] : [.yellow]
+                stoolColors: index < 2 ? [.green] : [.yellow],
+                partial: index == 7 ? .today : nil
             ))
         }
         return SummaryReport(

@@ -46,8 +46,9 @@ enum PDFReport {
     private static let gutter: CGFloat = 6
 
     private static let allColumns: [Column] = [
-        Column(title: "DATE", width: 46, alignment: .left) {
-            $0.date.formatted(.dateTime.month(.abbreviated).day())
+        Column(title: "DATE", width: 52, alignment: .left) {
+            // The asterisk marks a day the averages leave out; the key says why.
+            $0.date.formatted(.dateTime.month(.abbreviated).day()) + ($0.isComplete ? "" : "*")
         },
         Column(title: "DAY", width: 24, alignment: .right) { $0.dayOfLife.map(String.init) ?? "" },
         Column(title: "FEEDS", width: 38, alignment: .right, kind: .feed) { String($0.feeds) },
@@ -65,7 +66,7 @@ enum PDFReport {
         Column(title: "LONGEST", width: 50, alignment: .right, kind: .sleep) {
             $0.longestSleepSeconds >= 60 ? Format.compactDuration($0.longestSleepSeconds) : ""
         },
-        Column(title: "STOOL", width: 74, alignment: .left, kind: .dirty) {
+        Column(title: "STOOL", width: 68, alignment: .left, kind: .dirty) {
             let colors = Array(Set($0.stoolColors.map(\.label))).sorted()
             return colors.joined(separator: ", ")
         },
@@ -110,7 +111,7 @@ enum PDFReport {
                     rows = rows.dropFirst()
                 }
                 if rows.isEmpty {
-                    y = drawKey(report.tracked, at: y + 8)
+                    y = drawKey(report, at: y + 8)
                     y = drawNotes(report, at: y + 12)
                 }
                 drawFooter(report, page: page, isExample: isExample)
@@ -192,38 +193,59 @@ enum PDFReport {
         return y + 18
     }
 
+    /// One figure per button in use, each with the number a doctor asks about
+    /// next, in rows of three so a detail line has room to be read.
     private static func drawStats(_ report: SummaryReport, at y: CGFloat) -> CGFloat {
-        let all: [(kind: EventKind, value: String, label: String)] = [
-            (.feed, oneDecimal(report.averageFeedsPerDay), "feeds / day"),
-            (.wet, oneDecimal(report.averageWetPerDay), "wet / day"),
-            (.dirty, oneDecimal(report.averageDirtyPerDay), "dirty / day"),
-            (.feed, report.longestFeedGapSeconds >= 60 ? Format.compactDuration(report.longestFeedGapSeconds) : "—", "longest feed gap"),
-            (.sleep, report.longestSleepSeconds >= 60 ? Format.compactDuration(report.longestSleepSeconds) : "—", "longest sleep"),
-            (.weight, weightValue(report), weightLabel(report)),
-        ]
-        let stats = all.filter { report.tracked.contains($0.kind) }.map { ($0.value, $0.label) }
-        let width = (pageSize.width - margin * 2) / CGFloat(stats.count)
+        let stats = stats(for: report)
+        let perRow = stats.count <= 4 ? stats.count : 3
+        let width = (pageSize.width - margin * 2) / CGFloat(max(perRow, 1))
+        let rowHeight: CGFloat = 44
         for (index, stat) in stats.enumerated() {
-            let x = margin + CGFloat(index) * width
-            draw(stat.0, font: Font.statValue, color: Ink.primary,
-                 at: CGPoint(x: x, y: y), width: width - gutter, alignment: .left)
-            draw(stat.1.uppercased(), font: Font.statLabel, color: Ink.secondary,
-                 at: CGPoint(x: x, y: y + 19), width: width - gutter, alignment: .left)
+            let x = margin + CGFloat(index % perRow) * width
+            let top = y + CGFloat(index / perRow) * rowHeight
+            draw(stat.value, font: Font.statValue, color: Ink.primary,
+                 at: CGPoint(x: x, y: top), width: width - gutter, alignment: .left)
+            draw(stat.label.uppercased(), font: Font.statLabel, color: Ink.secondary,
+                 at: CGPoint(x: x, y: top + 19), width: width - gutter, alignment: .left)
+            if let detail = stat.detail {
+                draw(detail, font: Font.statLabel, color: Ink.secondary,
+                     at: CGPoint(x: x, y: top + 29), width: width - gutter, alignment: .left)
+            }
         }
-        let bottom = y + 40
+        var bottom = y + CGFloat((stats.count + perRow - 1) / max(perRow, 1)) * rowHeight
+        draw(report.averagesNote, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: bottom))
+        bottom += 16
         rule(at: bottom)
         return bottom + 16
     }
 
-    private static func weightValue(_ report: SummaryReport) -> String {
-        report.latestWeight.map { Format.grams($0) } ?? "—"
+    private struct Stat {
+        let kind: EventKind
+        let value: String
+        let label: String
+        var detail: String? = nil
     }
 
-    /// The change rides in the label rather than the value, which is how a
-    /// six-tile row stays legible at 86 points each.
-    private static func weightLabel(_ report: SummaryReport) -> String {
-        guard let change = report.weightChangeGrams else { return "weight" }
-        return "weight \(Format.gramsChange(change))"
+    private static func stats(for report: SummaryReport) -> [Stat] {
+        let shortDate = Date.FormatStyle.dateTime.month(.abbreviated).day()
+        var all: [Stat] = [
+            Stat(kind: .feed, value: oneDecimal(report.averageFeedsPerDay), label: "feeds / day",
+                 detail: report.longestFeedGapSeconds >= 60 ? "longest gap \(Format.compactDuration(report.longestFeedGapSeconds))" : nil),
+        ]
+        if report.averageBottleMillilitresPerDay > 0 {
+            all.append(Stat(kind: .feed, value: Format.millilitres(report.averageBottleMillilitresPerDay), label: "bottle / day",
+                            detail: "about \(Format.millilitres(report.averageBottleMillilitresPerFeed)) a bottle"))
+        }
+        all.append(Stat(kind: .wet, value: oneDecimal(report.averageWetPerDay), label: "wet / day",
+                        detail: report.lowestDay(\.wet).map { "lowest day \($0.wet), \($0.date.formatted(shortDate))" }))
+        all.append(Stat(kind: .dirty, value: oneDecimal(report.averageDirtyPerDay), label: "dirty / day",
+                        detail: report.lowestDay(\.dirty).map { "lowest day \($0.dirty), \($0.date.formatted(shortDate))" }))
+        all.append(Stat(kind: .sleep, value: report.averageSleepSeconds >= 60 ? Format.compactDuration(report.averageSleepSeconds) : "—", label: "sleep / day",
+                        detail: report.longestSleepSeconds >= 60 ? "longest stretch \(Format.compactDuration(report.longestSleepSeconds))" : nil))
+        all.append(Stat(kind: .weight, value: report.latestWeight.map { Format.grams($0) } ?? "—",
+                        label: report.latestWeightDate.map { "weight, \($0.formatted(shortDate))" } ?? "weight",
+                        detail: report.weightChangeDescription ?? "no weigh-ins in this range"))
+        return all.filter { report.tracked.contains($0.kind) }
     }
 
     private static func drawTableHeader(_ columns: [Column], at y: CGFloat) -> CGFloat {
@@ -243,13 +265,21 @@ enum PDFReport {
             UIBezierPath(rect: CGRect(x: margin - 4, y: y - 3, width: pageSize.width - margin * 2 + 8, height: 18)).fill()
         }
         var x = margin
-        let empty = day.feeds == 0 && day.wet == 0 && day.dirty == 0 && day.sleepSeconds == 0
+        let empty = !day.hasEntries
         for (index, column) in columns.enumerated() {
             let value = column.value(day)
             let font = index <= 1 ? Font.cellStrong : Font.cell
+            let color: UIColor = if empty && index > 1 || value.isEmpty {
+                Ink.faint
+            } else if !day.isComplete && index > 1 {
+                // A partial day's numbers are real but incomplete: shown,
+                // not weighed.
+                Ink.secondary
+            } else {
+                Ink.primary
+            }
             draw(value.isEmpty && index > 1 ? "·" : value,
-                 font: font,
-                 color: empty && index > 1 ? Ink.faint : (value.isEmpty ? Ink.faint : Ink.primary),
+                 font: font, color: color,
                  at: CGPoint(x: x, y: y), width: column.width - gutter, alignment: column.alignment)
             x += column.width
         }
@@ -290,14 +320,22 @@ enum PDFReport {
              at: CGPoint(x: margin, y: y), width: pageSize.width - margin * 2, alignment: .right)
     }
 
-    /// What the two columns a parent could misread mean, in one line.
-    private static func drawKey(_ tracked: TrackedKinds, at y: CGFloat) -> CGFloat {
+    /// What the columns a parent could misread mean, and what the asterisk is.
+    private static func drawKey(_ report: SummaryReport, at y: CGFloat) -> CGFloat {
+        let tracked = report.tracked
         var key: [String] = []
         if tracked.contains(.feed) { key.append("Gap: longest time between two logged feeds, start to start.") }
         if tracked.contains(.sleep) { key.append("Longest: longest single sleep.") }
         key.append("Only what was logged is counted.")
+        var y = y
         draw(key.joined(separator: " "), font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
-        return y + 12
+        y += 12
+        if report.days.contains(where: { !$0.isComplete }) {
+            draw("* Not in the averages: today so far, the day logging began, or a day with nothing logged.",
+                 font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
+            y += 12
+        }
+        return y
     }
 
     // MARK: - Drawing helpers

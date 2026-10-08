@@ -11,6 +11,9 @@ final class SummaryReportTests: XCTestCase {
     override func setUp() async throws {
         persistence = Persistence(cloudKit: false, inMemory: true)
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.activeChildID)
+        // A UI test can leave a button off in the shared defaults, which would
+        // hide its entries from these reports.
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.hiddenKinds)
         store = EventStore(persistence: persistence)
         store.createChild(name: "Nora", birthDate: calendar.date(byAdding: .day, value: -4, to: .now))
     }
@@ -35,13 +38,83 @@ final class SummaryReportTests: XCTestCase {
         XCTAssertEqual(report.days.first?.dayOfLife, 2)
     }
 
+    private func day(_ back: Int, hour: Int) -> Date {
+        let start = calendar.date(byAdding: .day, value: -back, to: calendar.startOfDay(for: .now))!
+        return start.addingTimeInterval(TimeInterval(hour) * 3600)
+    }
+
     func testAveragesSkipTodayBecauseTodayIsStillBeingFilledIn() {
-        let yesterday = calendar.date(byAdding: .day, value: -1, to: .now)!
-        for _ in 0..<8 { store.log(.feed, at: yesterday) }
+        store.log(.feed, at: day(2, hour: 9)) // the day logging began
+        for hour in 0..<8 { store.log(.feed, at: day(1, hour: hour * 2)) }
         store.log(.feed) // today, one feed so far
-        let report = report(daysBack: 1)
-        XCTAssertEqual(report.totalFeeds, 9)
+        let report = report(daysBack: 2)
+        XCTAssertEqual(report.totalFeeds, 10)
         XCTAssertEqual(report.averageFeedsPerDay, 8, accuracy: 0.001)
+        XCTAssertEqual(report.days.last?.partial, .today)
+        XCTAssertEqual(report.completeDays.map(\.feeds), [8])
+    }
+
+    func testTheDayLoggingBeganIsPartialBecauseItStartedMidDay() {
+        let firstEntry = day(2, hour: 16)
+        store.log(.wet, at: firstEntry)
+        store.log(.feed, at: day(2, hour: 18))
+        for hour in [1, 4, 7, 10, 13, 16, 19, 22] { store.log(.feed, at: day(1, hour: hour)) }
+        let report = report(daysBack: 2)
+        XCTAssertEqual(report.days[0].partial, .loggingBegan(firstEntry))
+        XCTAssertEqual(report.days[0].partial?.label, "from \(Format.time(firstEntry))")
+        XCTAssertNil(report.days[1].partial)
+        XCTAssertEqual(report.averageFeedsPerDay, 8, accuracy: 0.001, "two hours of day one do not make a day")
+        XCTAssertEqual(report.partialDays.count, 2, "the first day and today")
+        XCTAssertTrue(report.averagesNote.hasPrefix("Averages use 1 complete day."), report.averagesNote)
+        XCTAssertTrue(report.averagesNote.contains("logging began \(Format.time(firstEntry))"), report.averagesNote)
+        XCTAssertTrue(report.averagesNote.contains("today (so far)"), report.averagesNote)
+    }
+
+    func testADayWithNothingLoggedIsShownButNotAveraged() {
+        store.log(.feed, at: day(4, hour: 8)) // logging began
+        for hour in [2, 8, 14, 20] { store.log(.feed, at: day(3, hour: hour)) }
+        // Nobody logged two days ago.
+        for hour in [1, 7, 13, 19, 23] { store.log(.feed, at: day(1, hour: hour)) }
+        let report = report(daysBack: 4)
+        XCTAssertEqual(report.days[2].partial, .nothingLogged)
+        XCTAssertEqual(report.days[2].feeds, 0, "the blank row still prints")
+        XCTAssertEqual(report.completeDays.count, 2)
+        XCTAssertEqual(report.averageFeedsPerDay, 4.5, accuracy: 0.001)
+        XCTAssertEqual(report.lowestDay(\.feeds)?.feeds, 4, "the lowest day is a logged day, not the blank one")
+    }
+
+    func testAGapAcrossAnUnloggedDayIsNotAFeedGap() {
+        store.log(.feed, at: day(3, hour: 22))
+        // Nobody logged two days ago.
+        store.log(.feed, at: day(1, hour: 1))
+        store.log(.feed, at: day(1, hour: 6))
+        let report = report(daysBack: 3)
+        XCTAssertEqual(report.days[2].longestFeedGapSeconds, 5 * 3600, accuracy: 1, "the 27-hour gap is a logging hole, not a feed gap")
+        XCTAssertEqual(report.longestFeedGapSeconds, 5 * 3600, accuracy: 1)
+    }
+
+    func testWithoutACompleteDayTheAveragesUseEveryLoggedDay() {
+        for _ in 0..<8 { store.log(.feed, at: day(1, hour: 12)) }
+        store.log(.feed)
+        let report = report(daysBack: 1)
+        XCTAssertFalse(report.hasCompleteDays)
+        XCTAssertEqual(report.averageFeedsPerDay, 4.5, accuracy: 0.001)
+        XCTAssertTrue(report.partialDays.isEmpty, "nothing is 'left out' when every day is in")
+        XCTAssertEqual(report.averagesNote, "No complete day yet, so averages use every day logged so far.")
+    }
+
+    func testBottleFiguresReadPerDayAndPerBottle() {
+        store.log(.feed, at: day(3, hour: 9))
+        for (hour, amount) in [(6, 60.0), (12, 90.0), (18, 60.0)] {
+            let feed = store.log(.feed, side: .bottle, at: day(2, hour: hour))
+            feed?.amount = amount
+        }
+        store.log(.feed, at: day(1, hour: 10)) // breastfed day: no bottle, not in the bottle average
+        store.save()
+        let report = report(daysBack: 3)
+        XCTAssertEqual(report.days[1].bottleFeeds, 3)
+        XCTAssertEqual(report.averageBottleMillilitresPerDay, 210, accuracy: 0.001)
+        XCTAssertEqual(report.averageBottleMillilitresPerFeed, 70, accuracy: 0.001)
     }
 
     func testLongestStretchIsTheLongestSingleSleepNotTheDayTotal() {
@@ -70,6 +143,15 @@ final class SummaryReportTests: XCTestCase {
         XCTAssertEqual(report.firstWeight, 3180)
         XCTAssertEqual(report.latestWeight, 3390)
         XCTAssertEqual(report.weightChangeGrams, 210)
+        XCTAssertEqual(report.weightChangePercent!, 6.6, accuracy: 0.05)
+        XCTAssertTrue(report.weightChangeDescription!.contains("(+6.6%) since"), report.weightChangeDescription!)
+    }
+
+    func testASingleWeighInHasNoChangeToReport() {
+        store.log(.weight)?.amount = 3300
+        store.save()
+        XCTAssertNil(report().weightChangePercent)
+        XCTAssertEqual(report().weightChangeDescription, "One weigh-in")
     }
 
     func testLongestFeedGapReachesBackToTheFeedBeforeTheRange() {
@@ -114,6 +196,7 @@ final class SummaryReportTests: XCTestCase {
         XCTAssertEqual(sample.childName, "Example baby")
         XCTAssertEqual(sample.dayCount, 8)
         XCTAssertGreaterThan(sample.averageFeedsPerDay, 0)
+        XCTAssertEqual(sample.completeDays.count, 7, "the example's today is partial, like a real one")
     }
 
     func testThePDFRendersAPageForBothTheSampleAndTheRealLog() {

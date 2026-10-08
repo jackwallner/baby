@@ -194,30 +194,40 @@ struct SummaryView: View {
                 }
                 .fixedSize(horizontal: false, vertical: true)
             }
-            if report.completeDays.count < report.days.count {
-                Text("Daily averages leave out today, which isn't over yet.")
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.ink3)
-            }
+            Text(report.averagesNote)
+                .font(.caption)
+                .foregroundStyle(AppTheme.ink3)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .accessibilityIdentifier("summaryCard")
     }
 
     private var statTiles: [StatTile] {
         var tiles: [StatTile] = []
+        let shortDate = Date.FormatStyle.dateTime.month(.abbreviated).day()
         if report.tracked.contains(.feed) {
             tiles.append(StatTile(kind: .feed, value: Self.decimal(report.averageFeedsPerDay), unit: "Feeds a day",
                                   detail: report.longestFeedGapSeconds > 0 ? "Longest gap \(Format.compactDuration(report.longestFeedGapSeconds))" : nil))
+            if report.averageBottleMillilitresPerDay > 0 {
+                tiles.append(StatTile(kind: .feed, value: Format.millilitres(report.averageBottleMillilitresPerDay), unit: "Bottle a day",
+                                      detail: "About \(Format.millilitres(report.averageBottleMillilitresPerFeed)) a bottle"))
+            }
         }
         for kind in [EventKind.wet, .dirty] where report.tracked.contains(kind) {
             let average = kind == .wet ? report.averageWetPerDay : report.averageDirtyPerDay
-            let total = kind == .wet ? report.totalWet : report.totalDirty
+            // The lowest day is the one a doctor asks about.
+            let lowest = kind == .wet ? report.lowestDay(\.wet).map { ($0.wet, $0.date) } : report.lowestDay(\.dirty).map { ($0.dirty, $0.date) }
             tiles.append(StatTile(kind: kind, value: Self.decimal(average), unit: "\(kind.label) a day",
-                                  detail: "\(total) in \(Format.count(report.dayCount, "day"))"))
+                                  detail: lowest.map { "Lowest day \($0.0), \($0.1.formatted(shortDate))" }))
         }
         if report.tracked.contains(.sleep) {
             tiles.append(StatTile(kind: .sleep, value: Format.compactDuration(report.averageSleepSeconds), unit: "Sleep a day",
-                                  detail: report.longestSleepSeconds > 0 ? "Longest \(Format.compactDuration(report.longestSleepSeconds))" : nil))
+                                  detail: report.longestSleepSeconds > 0 ? "Longest stretch \(Format.compactDuration(report.longestSleepSeconds))" : nil))
+        }
+        if let weight = report.latestWeight {
+            tiles.append(StatTile(kind: .weight, value: Format.grams(weight),
+                                  unit: report.latestWeightDate.map { "Weight, \($0.formatted(shortDate))" } ?? "Weight",
+                                  detail: report.weightChangeDescription))
         }
         return tiles
     }
@@ -583,6 +593,7 @@ struct ReportChart: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(metric.title)
         .accessibilityValue(Self.takeaway(metric, report: report))
+        .accessibilityHint(report.partialDays.isEmpty ? "" : "Lighter bars are partial days, left out of the average.")
     }
 
     private var chart: some View {
@@ -592,6 +603,7 @@ struct ReportChart: View {
                 ForEach(report.days) { day in
                     BarMark(x: .value("Day", day.date, unit: .day), y: .value("Feeds", day.feeds), width: .ratio(0.6))
                         .foregroundStyle(AppTheme.feed)
+                        .opacity(day.isComplete ? 1 : AppTheme.partialBarOpacity)
                         .clipShape(RoundedRectangle(cornerRadius: AppTheme.cellRadius, style: .continuous))
                 }
                 averageLine(report.averageFeedsPerDay)
@@ -605,6 +617,7 @@ struct ReportChart: View {
                         )
                         .position(by: .value("Kind", kind.label))
                         .foregroundStyle(AppTheme.color(for: kind))
+                        .opacity(day.isComplete ? 1 : AppTheme.partialBarOpacity)
                         .clipShape(RoundedRectangle(cornerRadius: AppTheme.cellRadius, style: .continuous))
                     }
                 }
@@ -612,6 +625,7 @@ struct ReportChart: View {
                 ForEach(report.days) { day in
                     BarMark(x: .value("Day", day.date, unit: .day), y: .value("Hours", day.longestSleepSeconds / 3600), width: .ratio(0.6))
                         .foregroundStyle(AppTheme.sleep)
+                        .opacity(day.isComplete ? 1 : AppTheme.partialBarOpacity)
                         .clipShape(RoundedRectangle(cornerRadius: AppTheme.cellRadius, style: .continuous))
                 }
             }

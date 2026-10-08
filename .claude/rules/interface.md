@@ -86,7 +86,19 @@ daily averages per button with one supporting figure, one card per chart
 (title, a one-sentence takeaway, bars per day with a dashed average line;
 diapers grouped, not stacked), then For the doctor (summary thumbnail row,
 preview and share PDF, CSV row). Ranges never start before the first entry.
-Averages skip today. The paywall preview reuses `ReportChart`.
+The paywall preview reuses `ReportChart`.
+
+Partial days (2026-10-08, Jack: reports should show what doctors ask for and
+leave partial days out). `SummaryReport.Day.partial` marks today, the day the
+log began (first entry of any kind, so an afternoon install is not a day) and
+a day with nothing logged; `completeDays` drives every average, falling back
+to the logged days until the log has a complete one. `averagesNote` says what
+was left out and is printed under the tiles and under the PDF stats; partial
+rows carry an asterisk and lighter ink on the page, lighter bars on the
+charts. Tiles and PDF stats carry the second number a doctor asks: longest
+feed gap, bottle a day with the typical bottle, the lowest wet and dirty day,
+longest sleep stretch, and the weight change in grams and percent since the
+first weigh-in. Never grade any of them against a target (1.4.1).
 
 2026-10-03: The Reports PDF action opens the complete preview first. Its toolbar
 shares the PDF, matching the generate, review, then share flow in Vitals and VO2.

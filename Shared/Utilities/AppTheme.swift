@@ -59,6 +59,8 @@ enum AppTheme {
     static let previewChartHeight: CGFloat = 96
     /// How far a locked preview blurs: the shape of the data, not its numbers.
     static let previewBlur: CGFloat = 6
+    /// A report bar for a day the averages leave out: there, but not weighed.
+    static let partialBarOpacity: Double = 0.45
     static let inviteCodeSize: CGFloat = 200
     static let toastWidth: CGFloat = 520
     /// Clears a pushed screen's back button and History's add-entry menu.
