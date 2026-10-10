@@ -375,7 +375,10 @@ final class LoggingUITests: XCTestCase {
 
         let restore = app.buttons["Restore purchases"]
         let privacy = app.descendants(matching: .any)["Privacy Policy"].firstMatch
-        for _ in 0..<6 where !privacy.isHittable { app.swipeUp() }
+        let capsuleTop = app.buttons["tab.log"].frame.minY
+        // isHittable is already true under the floating capsule, so scroll
+        // until the footer actually clears it.
+        for _ in 0..<6 where !privacy.isHittable || privacy.frame.maxY > capsuleTop { app.swipeUp() }
         XCTAssertTrue(restore.isHittable)
         XCTAssertLessThanOrEqual(restore.frame.maxY, app.buttons["tab.log"].frame.minY)
         XCTAssertTrue(app.descendants(matching: .any)["Terms of Use"].firstMatch.isHittable)
