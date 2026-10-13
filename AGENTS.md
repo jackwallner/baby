@@ -20,7 +20,9 @@ until Baby+ is active, then becomes Reports. No top navigation buttons.
 Everything else lives in Settings: baby, buttons, diaper words, totals,
 appearance, logging together, babies, First Weeks, stain helper, and Baby+
 status. No automatic review prompts, promotional cards, or purchase screen
-during onboarding.
+during onboarding. Ratings: no in-app rating question and no automatic ask
+(App Review 5.6.1); Settings > About has separate "Rate Baby Tracker"
+(write-review link, App Store ID `6811133796`) and "Send Feedback" (mail) rows.
 Onboarding is one screen with two paths: Start a new log (optional name and
 birth date) or Join a shared log (scan or paste an invite). An invitation
 opened before setup shows a joining screen instead of onboarding.

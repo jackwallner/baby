@@ -46,6 +46,7 @@ enum AppStoreReviewLinks {
 enum BabyLinks {
     static let privacyPolicy = URL(string: "https://jackwallner.github.io/baby/privacy-policy.html")!
     static let support = URL(string: "https://jackwallner.github.io/baby/support.html")!
+    static let feedback = URL(string: "mailto:jackwallner@gmail.com?subject=Baby%20Tracker%20feedback")!
     static let standardEULA = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
     static let manageSubscriptions = URL(string: "https://apps.apple.com/account/subscriptions")!
 }
