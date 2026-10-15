@@ -18,8 +18,25 @@ html {
 }
 
 body {
+  position: relative;
   margin: 0;
   color: var(--ink);
+  background: var(--night);
+  font:
+    16px/1.65 ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    sans-serif;
+}
+
+/* Ambient glow sits behind content so the page background stays solid. */
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
     radial-gradient(
       circle at 20% 0%,
@@ -30,14 +47,7 @@ body {
       circle at 80% 16%,
       rgba(158, 123, 255, 0.16),
       transparent 30rem
-    ),
-    var(--night);
-  font:
-    16px/1.65 ui-sans-serif,
-    -apple-system,
-    BlinkMacSystemFont,
-    "SF Pro Text",
-    sans-serif;
+    );
 }
 
 a {
