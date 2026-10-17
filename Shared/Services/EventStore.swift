@@ -86,6 +86,7 @@ final class EventStore: ObservableObject {
     // MARK: - Reading
 
     func reload() {
+        reconcileWidgetCloudWrites()
         children = persistence.allChildren(in: context)
         finishPendingShareImport()
         isAwaitingSharedBaby = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone) != nil
@@ -109,7 +110,48 @@ final class EventStore: ObservableObject {
         summary = NowSummary.make(child: child, events: events)
         revision += 1
         summary.store()
+        publishCloudTargets()
         publish()
+    }
+
+    /// When this process started. The container exports everything a widget
+    /// saved before then, so those queued uploads are no longer needed.
+    private let launchedAt = Date.now
+
+    /// Folds a widget tap's two CloudKit copies (its own direct write and this
+    /// app's export of the local save) into one, and removes entries the
+    /// widget's Undo took back that came back from CloudKit. Only a mirroring
+    /// app can name records, so only it does this.
+    private func reconcileWidgetCloudWrites() {
+        guard persistence.cloudKitEnabled, !persistence.isStandingIn else { return }
+        WidgetCloudSync.dropExported(before: launchedAt)
+        let container = persistence.container
+        var changed = DuplicateEvents.remove(in: context) { container.recordID(for: $0)?.recordName } > 0
+        for event in persistence.events(ids: WidgetCloudSync.undoneIDs(), in: context) {
+            context.delete(event)
+            changed = true
+        }
+        if changed, !persistence.save(context) {
+            logger.error("Could not save the widget duplicate cleanup")
+        }
+    }
+
+    /// Tells the widget where each baby lives in CloudKit and which records
+    /// hold the running timers, so its taps can upload without the app.
+    private func publishCloudTargets() {
+        guard persistence.cloudKitEnabled, !persistence.isStandingIn else { return }
+        let container = persistence.container
+        var targets: [UUID: CloudZoneTarget] = [:]
+        for baby in children {
+            guard let id = baby.id, let recordID = container.recordID(for: baby.objectID) else { continue }
+            targets[id] = CloudZoneTarget(childRecordID: recordID, isShared: persistence.isShared(baby))
+        }
+        var recordNames: [UUID: String] = [:]
+        for event in events where event.isRunning {
+            guard let id = event.id, let recordID = container.recordID(for: event.objectID) else { continue }
+            recordNames[id] = recordID.recordName
+        }
+        WidgetCloudSync.publish(targets: targets, recordNames: recordNames)
     }
 
     /// The diaper words changed: redraw this process and every other surface.

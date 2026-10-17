@@ -41,6 +41,13 @@ enum AppGroup {
         /// one-button widgets' Undo.
         static let widgetUndo = "widgetUndo"
         static let widgetLogResult = "widgetLogResult"
+        /// `WidgetCloudSync`: each baby's CloudKit zone and record, running
+        /// timers' record names (both written by the app), the widget's
+        /// changes waiting to upload, and entries its Undo removed.
+        static let cloudTargets = "cloudTargets"
+        static let cloudRecordNames = "cloudRecordNames"
+        static let widgetCloudOps = "widgetCloudOps"
+        static let undoneEventIDs = "undoneEventIDs"
         /// Widget and complication kinds, for `reloadTimelines(ofKind:)`.
         static let feedingPreference = "feedingPreference"
     }

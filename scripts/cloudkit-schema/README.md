@@ -42,6 +42,24 @@ The Debug executable is
   setup. The invited parent's baby lands in the `.shared` store, so a
   single-store check never touches that half. Allow ten minutes: a cold setup
   takes minutes per store.
+- `--compare-event-layout`: read-only. Finds one `CD_LogEvent` the app
+  exported and checks that `CloudEventWriter` (the widget's direct write)
+  writes the same fields with the same value kinds. Prints field names and
+  kinds only. Run the Release build to check Production.
+- `--verify-direct-write`: the full widget round trip in Development: the
+  widget's record imports into a fresh store, an in-place change imports,
+  the app's own export of the same tap folds away with `DuplicateEvents`, and
+  a delete removes it. Needs the container's own export to run.
+- `--verify-direct-import`: the same proof without waiting on any export:
+  every record is written straight to CloudKit and a fresh store imports it.
+- `--self-test`: the widget sync's local logic on an in-memory store, for a
+  Mac with no free simulator.
+
+Core Data schedules its own CloudKit work as discretionary. Under heavy load
+(a load average in the hundreds) the system defers it indefinitely and the
+`--verify-*` modes time out waiting on export or import with no error, the
+setup stuck in `_saveZone`. That is the Mac, not the app: rerun when it is
+quiet. The widget's direct writes are user-initiated and are not deferred.
 - `--purge-share-zones`: deletes the `com.apple.coredata.cloudkit.share.*` zones
   a failed verification leaves behind. It never touches
   `com.apple.coredata.cloudkit.zone`, where the app's own records live.

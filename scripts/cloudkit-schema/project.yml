@@ -16,6 +16,10 @@ targets:
       - ../../Shared/Models/BabyModel.swift
       - ../../Shared/Utilities/DateHelpers.swift
       - ../../Shared/Services/ShareInvite.swift
+      - ../../Shared/Services/CloudEventWriter.swift
+      - ../../Shared/Services/DuplicateEvents.swift
+      - ../../Shared/Services/AppGroup.swift
+      - ../../Shared/Services/WidgetCloudSync.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby

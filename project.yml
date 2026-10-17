@@ -13,7 +13,7 @@ settings:
     DEVELOPMENT_TEAM: YXG4MP6W39
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "1.3.1"
-    CURRENT_PROJECT_VERSION: "45"
+    CURRENT_PROJECT_VERSION: "47"
     GENERATE_INFOPLIST_FILE: NO
 
 packages:
@@ -79,6 +79,9 @@ targetTemplates:
       - path: Shared/Services/SampleReport.swift
       - path: Shared/Services/AppGroup.swift
       - path: Shared/Services/WidgetUndo.swift
+      - path: Shared/Services/CloudEventWriter.swift
+      - path: Shared/Services/DuplicateEvents.swift
+      - path: Shared/Services/WidgetCloudSync.swift
       - path: Shared/Utilities/AppTheme.swift
       - path: Shared/Utilities/DateHelpers.swift
       - path: Shared/Utilities/Guidance.swift

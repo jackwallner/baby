@@ -43,8 +43,11 @@ beyond that setting, or locking something that shipped free.
   mirroring off, and the app exports any extension writes from persistent
   history on its next run. Widget buttons (`WidgetLogEventIntent`,
   `UndoWidgetLogIntent`) are plain `AppIntent`s that run and save in the widget
-  extension, so Logged / Undo shows at once; the partner, Watch and Live
-  Activity see a widget tap when the app next runs. Controls, Siri and the Live
+  extension, so Logged / Undo shows at once, then upload the same change
+  straight to CloudKit (`WidgetCloudSync`), so the partner's phone and Watch
+  get it without anyone opening the app. This phone's Watch and Live Activity
+  see it when the app next runs, and the app's later export of the same tap is
+  folded away by `DuplicateEvents`. Controls, Siri and the Live
   Activity Stop use `LiveActivityIntent`, so iOS runs them in the app process;
   `EventStore` writes to the mirrored store and republishes the summary.
   CloudKit delivery to a partner is asynchronous.

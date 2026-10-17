@@ -99,6 +99,7 @@ struct LogEventIntent: LiveActivityIntent {
             guard persistence.save(context) else {
                 throw WidgetSaveError(message: "I couldn't save that feed. Please try again.")
             }
+            Self.queueUpload(created: [event], changed: running, child: child)
             if let id = event.id { WidgetUndo(eventID: id, kind: .feed, loggedAt: now, closedIDs: closed, childID: child.id).store() }
             WidgetCenter.shared.reloadAllTimelines()
             return what.feedDialog
@@ -108,6 +109,7 @@ struct LogEventIntent: LiveActivityIntent {
             guard persistence.save(context) else {
                 throw WidgetSaveError(message: "I couldn't save that diaper. Please try again.")
             }
+            Self.queueUpload(created: [event], changed: [], child: child)
             if let id = event.id { WidgetUndo(eventID: id, kind: kind, loggedAt: now, childID: child.id).store() }
             WidgetCenter.shared.reloadAllTimelines()
             return "Logged a \(kind.label.lowercased()) diaper."
@@ -123,6 +125,7 @@ struct LogEventIntent: LiveActivityIntent {
                 guard persistence.save(context) else {
                     throw WidgetSaveError(message: "I couldn't save that wake. Please try again.")
                 }
+                Self.queueUpload(created: [], changed: running, child: child)
                 if let first = running.first, let id = first.id {
                     WidgetUndo(eventID: id, kind: .sleep, loggedAt: now,
                                closedIDs: running.dropFirst().compactMap(\.id),
@@ -135,6 +138,7 @@ struct LogEventIntent: LiveActivityIntent {
             guard persistence.save(context) else {
                 throw WidgetSaveError(message: "I couldn't save that sleep. Please try again.")
             }
+            Self.queueUpload(created: [sleep], changed: [], child: child)
             if let id = sleep.id { WidgetUndo(eventID: id, kind: .sleep, loggedAt: now, childID: child.id).store() }
             WidgetCenter.shared.reloadAllTimelines()
             return "Sleep started."
@@ -143,6 +147,24 @@ struct LogEventIntent: LiveActivityIntent {
         return try log(in: EventStore.shared, at: .now)
 #endif
     }
+#if BABY_WIDGET
+    /// Queues a widget tap's saved changes for `WidgetCloudSync`, which the
+    /// intent then sends. Nothing is queued until the app has published where
+    /// this baby lives in CloudKit; the app's own export covers that case.
+    @MainActor
+    static func queueUpload(created: [LogEvent], changed: [LogEvent], child: Child) {
+        guard let target = WidgetCloudSync.target(for: child.id) else { return }
+        let creates = created.compactMap { event -> WidgetCloudOp? in
+            guard let id = event.id else { return nil }
+            return WidgetCloudOp(action: .create, recordName: id.uuidString, values: CloudEventValues(event), target: target)
+        }
+        let updates = changed.compactMap { event -> WidgetCloudOp? in
+            guard let id = event.id else { return nil }
+            return WidgetCloudOp(action: .update, recordName: WidgetCloudSync.recordName(for: id), values: CloudEventValues(event), target: target)
+        }
+        WidgetCloudSync.enqueue(creates + updates)
+    }
+#endif
 #if !BABY_WIDGET
     @MainActor
     func log(in store: EventStore, at now: Date) throws -> String {
@@ -225,6 +247,11 @@ struct WidgetLogEventIntent: AppIntent {
         guard let choice = LogChoice(rawValue: what) else { throw WidgetSaveError() }
         _ = try LogEventIntent(what: choice, childID: UUID(uuidString: childID)).recordLog()
         logger.info("Widget log saved")
+#if BABY_WIDGET
+        // The partner's phone hears about the tap now, not when this phone
+        // next opens the app.
+        await WidgetCloudSync.flush()
+#endif
         return .result()
     }
 }
@@ -369,15 +396,31 @@ struct UndoWidgetLogIntent: AppIntent {
         let context = persistence.viewContext
         context.refreshAllObjects()
         let found = persistence.events(ids: [undo.eventID] + undo.closedIDs, in: context)
+        let target = WidgetCloudSync.target(for: found.first?.child?.id ?? undo.childID)
+        var ops: [WidgetCloudOp] = []
         for event in found {
-            if event.id == undo.eventID && !undo.reopensTimer {
+            guard let id = event.id else { continue }
+            if id == undo.eventID && !undo.reopensTimer {
                 context.delete(event)
+                if let target {
+                    ops.append(WidgetCloudOp(action: .delete, recordName: WidgetCloudSync.recordName(for: id), values: nil, target: target))
+                }
             } else {
                 event.endedAt = nil
                 event.updatedAt = .now
+                if let target {
+                    ops.append(WidgetCloudOp(action: .update, recordName: WidgetCloudSync.recordName(for: id), values: CloudEventValues(event), target: target))
+                }
             }
         }
         guard persistence.save(context) else { throw WidgetSaveError() }
+        if !undo.reopensTimer {
+            // A copy that already reached CloudKit is removed again if the
+            // delete below cannot reach it.
+            WidgetCloudSync.markUndone(undo.eventID)
+        }
+        WidgetCloudSync.enqueue(ops)
+        await WidgetCloudSync.flush()
         WidgetUndo.clear()
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetLogResult)
 #else

@@ -34,12 +34,26 @@ struct SchemaMain {
             // These two open no store of their own, so they run before the
             // single-store container exists. A stray extra store would show up
             // in the two-store setup check as a third identifier.
+            if CommandLine.arguments.contains("--self-test") {
+                try selfTest()
+                report("BABY_SELF_TEST_PASSED")
+                exit(EXIT_SUCCESS)
+            }
             if CommandLine.arguments.contains("--verify-shared-store") {
                 try await verifyTwoStoreSetup()
                 exit(EXIT_SUCCESS)
             }
             if CommandLine.arguments.contains("--watch-shares") {
                 try await watchShares(in: cloud)
+                exit(EXIT_SUCCESS)
+            }
+            if CommandLine.arguments.contains("--verify-direct-import") {
+                try await verifyDirectImport(in: cloud)
+                report("BABY_DIRECT_IMPORT_VERIFIED_AND_FIXTURE_REMOVED")
+                exit(EXIT_SUCCESS)
+            }
+            if CommandLine.arguments.contains("--compare-event-layout") {
+                try await compareEventLayout(in: cloud)
                 exit(EXIT_SUCCESS)
             }
             if CommandLine.arguments.contains("--purge-share-zones") {
@@ -58,6 +72,11 @@ struct SchemaMain {
             if CommandLine.arguments.contains("--verify-share") {
                 try await verifyShare(using: container, cloud: cloud)
                 report("BABY_SHARE_VERIFIED_AND_FIXTURE_REMOVED")
+                exit(EXIT_SUCCESS)
+            }
+            if CommandLine.arguments.contains("--verify-direct-write") {
+                try await verifyDirectWrite(using: container, cloud: cloud)
+                report("BABY_DIRECT_WRITE_VERIFIED_AND_FIXTURE_REMOVED")
                 exit(EXIT_SUCCESS)
             }
             if CommandLine.arguments.contains("--verify-sync") {
@@ -497,6 +516,374 @@ struct SchemaMain {
         for recordID in recordIDs { try await waitForDeletion(recordID, cloud: cloud) }
     }
 
+    /// Proves the widget's direct CloudKit write: a record built by
+    /// `CloudEventWriter` imports into a fresh store as a real entry of its
+    /// baby, an in-place change to it imports too, the app's own export of the
+    /// same tap is reduced to one copy by `DuplicateEvents`, and deleting the
+    /// record (the widget's Undo) removes the entry.
+    private static func verifyDirectWrite(using source: NSPersistentCloudKitContainer, cloud: CKContainer) async throws {
+        let database = cloud.privateCloudDatabase
+        let child = Child.make(in: source.viewContext, name: "Temporary direct write verification", birthDate: nil)
+        let fixtureID = child.id!
+        let reference = LogEvent.make(in: source.viewContext, child: child, kind: .wet, at: .now)
+        try source.viewContext.save()
+        report("BABY_DIRECT_FIXTURE: \(fixtureID.uuidString)")
+        var cleanup: [CKRecord.ID] = []
+        do {
+            var childRecordID: CKRecord.ID?
+            var referenceRecord: CKRecord?
+            var lastReport = Date.distantPast
+            try await waitUntil(timeout: 1500) {
+                if Date.now.timeIntervalSince(lastReport) > 60 {
+                    lastReport = .now
+                    report("BABY_DIRECT_WAITING_EXPORT: child=\(source.recordID(for: child.objectID)?.recordName ?? "none") event=\(source.recordID(for: reference.objectID)?.recordName ?? "none")")
+                }
+                guard let childID = source.recordID(for: child.objectID),
+                      let eventID = source.recordID(for: reference.objectID) else { return false }
+                do {
+                    _ = try await database.record(for: childID)
+                    referenceRecord = try await database.record(for: eventID)
+                    childRecordID = childID
+                    return true
+                } catch let error as CKError where error.code == .unknownItem || error.code == .zoneNotFound {
+                    return false
+                }
+            }
+            guard let childRecordID, let referenceRecord else { throw SchemaError.syncTimedOut }
+            cleanup.append(childRecordID)
+            let referenceFields = referenceRecord.allKeys().sorted()
+            report("BABY_REFERENCE_FIELDS: " + referenceFields.map { "\($0)=\(type(of: referenceRecord[$0]!))" }.joined(separator: ","))
+            report("BABY_REFERENCE_CHILD: \(String(describing: referenceRecord["CD_child"])) child=\(childRecordID.recordName)")
+
+            // The widget's tap, written straight to CloudKit.
+            let target = CloudZoneTarget(childRecordID: childRecordID, isShared: false)
+            let local = LogEvent.make(in: source.viewContext, child: child, kind: .dirty, at: .now.addingTimeInterval(-60))
+            local.side = nil
+            let values = CloudEventValues(local)
+            let direct = CloudEventWriter.record(for: values, named: values.id.uuidString, in: target)
+            let written = Set(direct.allKeys())
+            let unknown = written.subtracting(referenceFields)
+            report("BABY_DIRECT_FIELDS: \(written.sorted().joined(separator: ","))")
+            guard unknown.isEmpty else { throw SchemaError.inviteNotOpen("fields not in the mirrored record: \(unknown.sorted())") }
+            for key in written {
+                guard let mine = direct[key], let theirs = referenceRecord[key] else { continue }
+                guard valueKind(mine) == valueKind(theirs) else {
+                    throw SchemaError.inviteNotOpen("\(key) is \(type(of: mine)) but the container writes \(type(of: theirs))")
+                }
+            }
+            _ = try await database.modifyRecords(saving: [direct], deleting: [], savePolicy: .allKeys)
+            cleanup.append(direct.recordID)
+            report("BABY_DIRECT_RECORD_SAVED")
+
+            // The app's own export of the same tap (the widget's local save).
+            try source.viewContext.save()
+            var appCopyID: CKRecord.ID?
+            try await waitUntil(timeout: 600) {
+                guard let id = source.recordID(for: local.objectID) else { return false }
+                do {
+                    _ = try await database.record(for: id)
+                    appCopyID = id
+                    return true
+                } catch let error as CKError where error.code == .unknownItem {
+                    return false
+                }
+            }
+            guard let appCopyID else { throw SchemaError.syncTimedOut }
+            cleanup.append(appCopyID)
+            report("BABY_APP_COPY_EXPORTED: \(appCopyID.recordName)")
+
+            // A later change, like a widget ending a sleep it started.
+            let ended = Date.now
+            let fetched = try await database.record(for: direct.recordID)
+            fetched["CD_endedAt"] = ended
+            _ = try await database.modifyRecords(saving: [fetched], deleting: [], savePolicy: .changedKeys)
+            report("BABY_DIRECT_CHANGE_SAVED")
+
+            let destination = try await makeContainer()
+            func imported() throws -> [LogEvent] {
+                let request = NSFetchRequest<LogEvent>(entityName: "LogEvent")
+                request.predicate = NSPredicate(format: "id == %@", values.id as NSUUID)
+                return try destination.viewContext.fetch(request)
+            }
+            try await waitUntil(timeout: 600) { try imported().count == 2 }
+            let copies = try imported()
+            guard copies.allSatisfy({ $0.child?.id == fixtureID && $0.kind == "dirty" }) else {
+                throw SchemaError.inviteNotOpen("imported copies lost their baby or kind")
+            }
+            guard let viaWidget = copies.first(where: { destination.recordID(for: $0.objectID)?.recordName == values.id.uuidString }),
+                  let endedAt = viaWidget.endedAt, abs(endedAt.timeIntervalSince(ended)) < 1 else {
+                throw SchemaError.inviteNotOpen("the direct record or its change did not import")
+            }
+            report("BABY_DIRECT_RECORD_IMPORTED_WITH_CHANGE")
+
+            let removed = DuplicateEvents.remove(in: destination.viewContext) { destination.recordID(for: $0)?.recordName }
+            try destination.viewContext.save()
+            guard removed == 1, try imported().count == 1,
+                  destination.recordID(for: try imported()[0].objectID)?.recordName == values.id.uuidString else {
+                throw SchemaError.inviteNotOpen("duplicate removal kept the wrong copy (removed \(removed))")
+            }
+            try await waitForDeletion(appCopyID, cloud: cloud)
+            report("BABY_DUPLICATE_REMOVED_AND_EXPORTED")
+
+            // The widget's Undo.
+            _ = try await database.modifyRecords(saving: [], deleting: [direct.recordID])
+            let afterUndo = try await makeContainer()
+            try await waitUntil(timeout: 600) {
+                let request = NSFetchRequest<Child>(entityName: "Child")
+                request.predicate = NSPredicate(format: "id == %@", fixtureID as NSUUID)
+                guard let baby = try afterUndo.viewContext.fetch(request).first else { return false }
+                return baby.eventCount == 1
+            }
+            report("BABY_DIRECT_DELETE_IMPORTED")
+        } catch {
+            report("BABY_DIRECT_WRITE_FAILED: \(error)")
+            source.viewContext.delete(child)
+            try? source.viewContext.save()
+            _ = try? await database.modifyRecords(saving: [], deleting: cleanup)
+            throw error
+        }
+        source.viewContext.delete(child)
+        try source.viewContext.save()
+        _ = try? await database.modifyRecords(saving: [], deleting: cleanup)
+        if let childID = cleanup.first { try await waitForDeletion(childID, cloud: cloud) }
+    }
+
+    /// Read-only. Finds one entry the app itself exported, in the private or
+    /// shared database, and checks that `CloudEventWriter` writes the same
+    /// fields with the same value kinds and points at its baby the same way.
+    /// Prints field names and kinds only, never a value.
+    private static func compareEventLayout(in cloud: CKContainer) async throws {
+        for database in [cloud.privateCloudDatabase, cloud.sharedCloudDatabase] {
+            let zones = try await database.allRecordZones()
+            for zone in zones where zone.zoneID.zoneName.hasPrefix("com.apple.coredata.cloudkit") {
+                var token: CKServerChangeToken?
+                var event: CKRecord?
+                var children: Set<String> = []
+                repeat {
+                    let changes = try await database.recordZoneChanges(inZoneWith: zone.zoneID, since: token)
+                    for (_, result) in changes.modificationResultsByID {
+                        guard let record = try? result.get().record else { continue }
+                        if record.recordType == "CD_Child" { children.insert(record.recordID.recordName) }
+                        if record.recordType == CloudEventWriter.recordType, event == nil { event = record }
+                    }
+                    token = changes.changeToken
+                    if !changes.moreComing { break }
+                } while event == nil
+                guard let event else { continue }
+                let scope = database.databaseScope == .shared ? "shared" : "private"
+                let theirs = Dictionary(uniqueKeysWithValues: event.allKeys().map { ($0, valueKind(event[$0]!)) })
+                report("BABY_LAYOUT_SOURCE: \(scope) zone, \(theirs.count) fields")
+                report("BABY_LAYOUT_THEIRS: " + theirs.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }.joined(separator: ","))
+                let childName = event["CD_child"] as? String
+                report("BABY_LAYOUT_CHILD_LINK: \(childName == nil ? "missing" : (children.contains(childName!) ? "string recordName of a CD_Child in the zone" : "string, child not in this zone"))")
+                let target = CloudZoneTarget(childRecordID: CKRecord.ID(recordName: childName ?? "x", zoneID: zone.zoneID), isShared: scope == "shared")
+                var values = CloudEventValues(id: UUID(), kind: "wet", startedAt: .now, endedAt: .now, side: "left", amount: 0, stoolColor: "yellow", note: "n", createdAt: .now, updatedAt: .now)
+                values.amount = 1
+                let mine = CloudEventWriter.record(for: values, named: values.id.uuidString, in: target)
+                var problems: [String] = []
+                for key in mine.allKeys() {
+                    let kind = valueKind(mine[key]!)
+                    if let expected = theirs[key], expected != kind { problems.append("\(key): \(kind) vs \(expected)") }
+                    if theirs[key] == nil, !["CD_endedAt", "CD_side", "CD_stoolColor", "CD_note"].contains(key) {
+                        problems.append("\(key): not on the app's record")
+                    }
+                }
+                let required = Set(theirs.keys).subtracting(mine.allKeys())
+                report("BABY_LAYOUT_ONLY_THEIRS: \(required.sorted().joined(separator: ","))")
+                guard problems.isEmpty else {
+                    report("BABY_LAYOUT_MISMATCH: \(problems.joined(separator: "; "))")
+                    throw SchemaError.inviteNotOpen("layout mismatch")
+                }
+                report("BABY_LAYOUT_MATCHES")
+                return
+            }
+        }
+        report("BABY_LAYOUT_NO_EVENT_FOUND")
+    }
+
+    /// Development only. Writes a temporary baby and two copies of one tap
+    /// straight to CloudKit, the widget's copy through `CloudEventWriter`
+    /// (then changed in place, as when a widget ends a sleep) and a second
+    /// one standing in for the app's later export. A fresh store must import
+    /// both as entries of that baby with the change applied, and
+    /// `DuplicateEvents` must keep the widget's copy. Nothing here waits on
+    /// the container's own export.
+    private static func verifyDirectImport(in cloud: CKContainer) async throws {
+        let database = cloud.privateCloudDatabase
+        let zoneID = CKRecordZone.ID(zoneName: "com.apple.coredata.cloudkit.zone", ownerName: CKCurrentUserDefaultName)
+        _ = try await database.modifyRecordZones(saving: [CKRecordZone(zoneID: zoneID)], deleting: [])
+        let fixtureID = UUID()
+        let child = CKRecord(recordType: "CD_Child", recordID: CKRecord.ID(recordName: UUID().uuidString, zoneID: zoneID))
+        child["CD_entityName"] = "Child"
+        child["CD_id"] = fixtureID.uuidString
+        child["CD_name"] = "Temporary direct import verification"
+        child["CD_createdAt"] = Date.now
+        let target = CloudZoneTarget(childRecordID: child.recordID, isShared: false)
+        let values = CloudEventValues(id: UUID(), kind: "sleep", startedAt: .now.addingTimeInterval(-600), endedAt: nil, side: nil, amount: 0, stoolColor: nil, note: nil, createdAt: .now, updatedAt: .now)
+        let widgetCopy = CloudEventWriter.record(for: values, named: values.id.uuidString, in: target)
+        let appCopy = CloudEventWriter.record(for: values, named: "0000-app-export-" + UUID().uuidString, in: target)
+        let all = [child.recordID, widgetCopy.recordID, appCopy.recordID]
+        report("BABY_DIRECT_IMPORT_FIXTURE: \(fixtureID.uuidString)")
+        do {
+            _ = try await database.modifyRecords(saving: [child, widgetCopy, appCopy], deleting: [], savePolicy: .allKeys)
+            let ended = Date.now
+            let fetched = try await database.record(for: widgetCopy.recordID)
+            var changed = values
+            changed.endedAt = ended
+            changed.updatedAt = ended
+            CloudEventWriter.apply(changed, to: fetched)
+            _ = try await database.modifyRecords(saving: [fetched], deleting: [], savePolicy: .changedKeys)
+            report("BABY_DIRECT_RECORDS_SAVED")
+
+            let destination = try await makeContainer()
+            func copies() throws -> [LogEvent] {
+                let request = NSFetchRequest<LogEvent>(entityName: "LogEvent")
+                request.predicate = NSPredicate(format: "id == %@", values.id as NSUUID)
+                return try destination.viewContext.fetch(request)
+            }
+            var lastReport = Date.distantPast
+            try await waitUntil(timeout: 1500) {
+                let found = try copies()
+                if Date.now.timeIntervalSince(lastReport) > 60 {
+                    lastReport = .now
+                    report("BABY_DIRECT_IMPORT_WAITING: \(found.count) copies")
+                }
+                return found.count == 2 && found.allSatisfy { $0.child != nil }
+            }
+            let found = try copies()
+            guard found.allSatisfy({ $0.child?.id == fixtureID && $0.kind == "sleep" }) else {
+                throw SchemaError.inviteNotOpen("imported entries lost their baby or kind")
+            }
+            guard let widgetEntry = found.first(where: { destination.recordID(for: $0.objectID)?.recordName == values.id.uuidString }),
+                  let endedAt = widgetEntry.endedAt, abs(endedAt.timeIntervalSince(ended)) < 1 else {
+                throw SchemaError.inviteNotOpen("the widget's record or its change did not import")
+            }
+            report("BABY_DIRECT_RECORD_IMPORTED_WITH_CHANGE")
+            let removed = DuplicateEvents.remove(in: destination.viewContext) { destination.recordID(for: $0)?.recordName }
+            try destination.viewContext.save()
+            let left = try copies()
+            guard removed == 1, left.count == 1,
+                  destination.recordID(for: left[0].objectID)?.recordName == values.id.uuidString else {
+                throw SchemaError.inviteNotOpen("duplicate removal kept the wrong copy (removed \(removed))")
+            }
+            report("BABY_DUPLICATE_FOLDED_TO_WIDGET_COPY")
+        } catch {
+            report("BABY_DIRECT_IMPORT_FAILED: \(error)")
+            _ = try? await database.modifyRecords(saving: [], deleting: all)
+            throw error
+        }
+        _ = try await database.modifyRecords(saving: [], deleting: all)
+    }
+
+    /// The widget sync's local logic, mirroring `WidgetCloudSyncTests`, for a
+    /// Mac with no free simulator. Uses an in-memory store and no CloudKit.
+    private static func selfTest() throws {
+        func check(_ condition: Bool, _ what: String) throws {
+            report((condition ? "ok   " : "FAIL ") + what)
+            if !condition { throw SchemaError.inviteNotOpen(what) }
+        }
+        let container = NSPersistentContainer(name: "Baby", managedObjectModel: BabyModel.model)
+        let description = NSPersistentStoreDescription()
+        description.type = NSInMemoryStoreType
+        container.persistentStoreDescriptions = [description]
+        container.loadPersistentStores { _, _ in }
+        let context = container.viewContext
+        let target = CloudZoneTarget(zoneName: "com.apple.coredata.cloudkit.zone", ownerName: CKCurrentUserDefaultName, isShared: false, childRecordName: "child-record")
+        for key in [AppGroup.Key.widgetCloudOps, AppGroup.Key.undoneEventIDs, AppGroup.Key.cloudTargets, AppGroup.Key.cloudRecordNames] {
+            AppGroup.defaults.removeObject(forKey: key)
+        }
+        let child = Child.make(in: context, name: "Nora", birthDate: nil)
+
+        let feed = LogEvent.make(in: context, child: child, kind: .feed, at: .now)
+        feed.side = "left"
+        let values = CloudEventValues(feed)
+        let record = CloudEventWriter.record(for: values, named: values.id.uuidString, in: target)
+        try check(record.recordType == "CD_LogEvent" && record["CD_entityName"] as? String == "LogEvent"
+                  && record["CD_child"] as? String == "child-record" && record["CD_id"] as? String == values.id.uuidString
+                  && record["CD_kind"] as? String == "feed" && record["CD_side"] as? String == "left" && record["CD_endedAt"] == nil,
+                  "record uses the mirrored layout")
+        var shared = target
+        shared.isShared = true
+        try check(CloudEventWriter.database(for: shared, in: CKContainer(identifier: "iCloud.com.jackwallner.baby")).databaseScope == .shared,
+                  "a shared baby writes to the shared database")
+
+        func event(_ id: UUID, updatedAt: Date = .now) -> LogEvent {
+            let e = LogEvent.make(in: context, child: child, kind: .wet, at: .now)
+            e.id = id
+            e.updatedAt = updatedAt
+            return e
+        }
+        let id = UUID()
+        let widgetCopy = event(id)
+        let appCopy = event(id)
+        let other = event(UUID())
+        try context.save()
+        let names = [widgetCopy.objectID: id.uuidString, appCopy.objectID: "0000-app-export", other.objectID: "other"]
+        let removed = DuplicateEvents.remove(in: context) { names[$0] }
+        try check(removed == 1 && appCopy.isDeleted && !widgetCopy.isDeleted && !other.isDeleted, "the widget's copy wins even against a lower name")
+        try context.save()
+
+        let id2 = UUID()
+        let imported = event(id2, updatedAt: .now.addingTimeInterval(-60))
+        let local = event(id2)
+        local.endedAt = .now
+        try context.save()
+        _ = DuplicateEvents.remove(in: context) { $0 == imported.objectID ? "Z-record" : nil }
+        try check(local.isDeleted && imported.endedAt != nil, "an unexported copy loses and its newer edit moves over")
+        try context.save()
+
+        let id3 = UUID()
+        let first = event(id3)
+        let second = event(id3)
+        try context.save()
+        let ranked = [first.objectID: "B", second.objectID: "A"]
+        _ = DuplicateEvents.remove(in: context) { ranked[$0] }
+        try check(first.isDeleted && !second.isDeleted, "the lowest record name wins otherwise")
+        try context.save()
+
+        let sleep = LogEvent.make(in: context, child: child, kind: .sleep, at: .now)
+        let name = sleep.id!.uuidString
+        let start = WidgetCloudOp(action: .create, recordName: name, values: CloudEventValues(sleep), target: target)
+        sleep.endedAt = .now
+        let end = WidgetCloudOp(action: .update, recordName: name, values: CloudEventValues(sleep), target: target)
+        let folded = WidgetCloudSync.fold([start], [end])
+        try check(folded.count == 1 && folded[0].action == .create && folded[0].values?.endedAt != nil, "start then end before upload is one create")
+        let undone = WidgetCloudSync.fold(folded, [WidgetCloudOp(action: .delete, recordName: name, values: nil, target: target)])
+        try check(undone.map(\.action) == [.delete], "add then undo is only a delete")
+
+        let old = WidgetCloudOp(action: .create, recordName: "old", values: nil, target: target, queuedAt: .now.addingTimeInterval(-120))
+        let fresh = WidgetCloudOp(action: .create, recordName: "fresh", values: nil, target: target, queuedAt: .now)
+        WidgetCloudSync.enqueue([old, fresh])
+        WidgetCloudSync.dropExported(before: .now.addingTimeInterval(-60))
+        try check(WidgetCloudSync.pending().map(\.recordName) == ["fresh"], "the app drops uploads it already exported")
+
+        let partners = UUID()
+        let mine = UUID()
+        let baby = UUID()
+        WidgetCloudSync.publish(targets: [baby: target], recordNames: [partners: "core-data-name"])
+        try check(WidgetCloudSync.recordName(for: partners) == "core-data-name" && WidgetCloudSync.recordName(for: mine) == mine.uuidString,
+                  "record names fall back to the entry id")
+        try check(WidgetCloudSync.target(for: baby) == target && WidgetCloudSync.target(for: UUID()) == nil, "targets round-trip per baby")
+
+        let stone = UUID()
+        WidgetCloudSync.markUndone(stone, at: .now.addingTimeInterval(-WidgetCloudSync.tombstoneLifetime - 1))
+        try check(WidgetCloudSync.undoneIDs().isEmpty, "old tombstones expire")
+        WidgetCloudSync.markUndone(stone)
+        try check(WidgetCloudSync.undoneIDs() == [stone], "fresh tombstones stay")
+        for key in [AppGroup.Key.widgetCloudOps, AppGroup.Key.undoneEventIDs, AppGroup.Key.cloudTargets, AppGroup.Key.cloudRecordNames] {
+            AppGroup.defaults.removeObject(forKey: key)
+        }
+    }
+
+    private static func valueKind(_ value: Any) -> String {
+        switch value {
+        case is String: "string"
+        case is Date: "date"
+        case is NSNumber: "number"
+        default: "\(type(of: value))"
+        }
+    }
+
     private static func waitForDeletion(_ recordID: CKRecord.ID, cloud: CKContainer) async throws {
         try await waitUntil {
             do {
@@ -567,5 +954,21 @@ struct SchemaMain {
             defer { lock.unlock() }
             return failures.first
         }
+    }
+}
+
+/// Sample values for the layout check, built without a managed object.
+extension CloudEventValues {
+    init(id: UUID, kind: String?, startedAt: Date?, endedAt: Date?, side: String?, amount: Double, stoolColor: String?, note: String?, createdAt: Date?, updatedAt: Date?) {
+        self.id = id
+        self.kind = kind
+        self.startedAt = startedAt
+        self.endedAt = endedAt
+        self.side = side
+        self.amount = amount
+        self.stoolColor = stoolColor
+        self.note = note
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
     }
 }

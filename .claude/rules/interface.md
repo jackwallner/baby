@@ -172,6 +172,21 @@ with a 4 second delay in the app and the app's reloads removed.
 `WidgetUITests.testPeeButtonConfirmsWhenAppIsNotRunning` checks the tile
 confirms with the app never launched. Controls and Siri stay in the app.
 
+Widget taps also upload straight to CloudKit (2026-10-17, Jack: Elsa's widget
+taps never reached his phone until she opened the app). After the local save
+the widget writes the same change with `CloudEventWriter` in the mirrored
+`CD_LogEvent` layout, which every device's container imports like any other
+export (Apple DTS's suggested route; extensions must not run their own
+`NSPersistentCloudKitContainer`, TN3164). `WidgetCloudSync` queues and sends
+it (short timeouts, so the confirmation waits at most a few seconds); the app
+publishes each baby's zone and record and the running timers' record names to
+the App Group, since the widget cannot ask a container. The app still exports
+the local save later, so every device runs `DuplicateEvents` on reload: the
+copy named after the entry's id wins, then the lowest record name. Undo deletes
+the widget's record and leaves a three-day tombstone. `scripts/cloudkit-schema
+--verify-direct-write` proves the layout, import, change, duplicate fold and
+delete against Development.
+
 Never put `.invalidatableContent()` (or a `contentShape`) on or inside a
 widget `Button(intent:)` (2026-09-29, builds 28 and 29 shipped with it). On
 the simulator the renderer then treats the tap as a plain widget tap: it opens
