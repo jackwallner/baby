@@ -91,10 +91,24 @@ struct DayChartModel: Equatable {
     }
 
     static func make(events: [LogEvent], tracked: TrackedKinds, now: Date = .now, calendar: Calendar = .current) -> DayChartModel {
+        make(firstEntry: events.map(\.start).min(), tracked: tracked, now: now, calendar: calendar) {
+            DayTally.make(events: events, on: $0, now: now, calendar: calendar)
+        }
+    }
+
+    /// From day totals the caller already has, so a render does not walk the
+    /// whole log once per bar.
+    static func make(
+        firstEntry: Date?,
+        tracked: TrackedKinds,
+        now: Date = .now,
+        calendar: Calendar = .current,
+        tally: (Date) -> DayTally
+    ) -> DayChartModel {
         let metric = Metric(tracked: tracked)
-        let days = days(through: now, firstEntry: events.map(\.start).min(), calendar: calendar)
+        let days = days(through: now, firstEntry: firstEntry, calendar: calendar)
         let bars = days.map { day in
-            let tally = DayTally.make(events: events, on: day, now: now, calendar: calendar)
+            let tally = tally(day)
             return Bar(day: day, value: metric.value(tally, tracked: tracked), tally: tally, isToday: calendar.isDate(day, inSameDayAs: now))
         }
         return DayChartModel(metric: metric, bars: bars)
@@ -122,7 +136,7 @@ struct DayJumpTiles: View {
     private func tile(_ day: Date, id: String) -> some View {
         let tally = events.tally(on: day)
         let parts = DayLine.parts(tally, tracked: settings.tracked)
-        let hasEntries = events.events.contains { Calendar.current.isDate($0.start, inSameDayAs: day) }
+        let hasEntries = events.hasEntries(on: day)
         return Button {
             Haptics.selected()
             onJump(day)
@@ -175,7 +189,8 @@ struct DayScrubChart: View {
     @State private var showsPaywall = false
 
     var body: some View {
-        let model = DayChartModel.make(events: events.events, tracked: settings.tracked)
+        // Newest first, so the first entry is the last one.
+        let model = DayChartModel.make(firstEntry: events.events.last?.start, tracked: settings.tracked) { events.tally(on: $0) }
         let isUnlocked = store.isPro || ScreenshotConfig.isEnabled
         VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
             header(model, isUnlocked: isUnlocked)

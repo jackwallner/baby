@@ -70,7 +70,7 @@ final class EventStore: ObservableObject {
             object: persistence.container.persistentStoreCoordinator,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in self?.reload() }
+            Task { @MainActor in self?.scheduleReload() }
         })
         // The log was shut when the process started (a push woke the app on a
         // phone that had not been unlocked yet) and is open now.
@@ -85,7 +85,26 @@ final class EventStore: ObservableObject {
 
     // MARK: - Reading
 
+    /// CloudKit posts a remote change for every batch it imports or exports,
+    /// dozens in a row while a phone catches up. They share one reload a
+    /// moment later instead of each refetching the log on the main thread.
+    private var pendingReload: Task<Void, Never>?
+    static let remoteChangeDelay: Duration = .milliseconds(300)
+
+    private func scheduleReload() {
+        guard pendingReload == nil else { return }
+        pendingReload = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: Self.remoteChangeDelay)
+            guard !Task.isCancelled else { return }
+            self?.reload()
+        }
+    }
+
     func reload() {
+        pendingReload?.cancel()
+        pendingReload = nil
+        tallyCache = [:]
+        dayGroups = nil
         reconcileWidgetCloudWrites()
         children = persistence.allChildren(in: context)
         finishPendingShareImport()
@@ -122,36 +141,82 @@ final class EventStore: ObservableObject {
     /// app's export of the local save) into one, and removes entries the
     /// widget's Undo took back that came back from CloudKit. Only a mirroring
     /// app can name records, so only it does this.
+    ///
+    /// Runs on a background context: naming a record waits on the CloudKit
+    /// mirroring queue, which is busy for seconds while a phone syncs.
+    private var isReconciling = false
+
     private func reconcileWidgetCloudWrites() {
-        guard persistence.cloudKitEnabled, !persistence.isStandingIn else { return }
+        guard persistence.cloudKitEnabled, !persistence.isStandingIn, !isReconciling else { return }
         WidgetCloudSync.dropExported(before: launchedAt)
-        let container = persistence.container
-        var changed = DuplicateEvents.remove(in: context) { container.recordID(for: $0)?.recordName } > 0
-        for event in persistence.events(ids: WidgetCloudSync.undoneIDs(), in: context) {
-            context.delete(event)
-            changed = true
-        }
-        if changed, !persistence.save(context) {
-            logger.error("Could not save the widget duplicate cleanup")
+        let undone = WidgetCloudSync.undoneIDs()
+        let persistence = persistence
+        isReconciling = true
+        Task.detached(priority: .utility) { [weak self] in
+            let context = persistence.newBackgroundContext()
+            let (changed, saved) = context.performAndWait {
+                let container = persistence.container
+                var changed = DuplicateEvents.remove(in: context) { container.recordID(for: $0)?.recordName } > 0
+                for event in persistence.events(ids: undone, in: context) {
+                    context.delete(event)
+                    changed = true
+                }
+                return (changed, !changed || persistence.save(context))
+            }
+            await MainActor.run {
+                guard let self else { return }
+                self.isReconciling = false
+                if !saved { self.logger.error("Could not save the widget duplicate cleanup") }
+                if changed, saved { self.scheduleReload() }
+            }
         }
     }
 
     /// Tells the widget where each baby lives in CloudKit and which records
     /// hold the running timers, so its taps can upload without the app.
+    ///
+    /// Record names come from the mirroring queue, so they are looked up off
+    /// the main thread, and only when the babies or running timers change.
+    private var publishedCloudKey: [NSManagedObjectID]?
+    private var isPublishingCloudTargets = false
+
     private func publishCloudTargets() {
         guard persistence.cloudKitEnabled, !persistence.isStandingIn else { return }
+        let (babies, running) = cloudTargetInputs()
+        let key = babies.map(\.0) + running.map(\.0)
+        guard key != publishedCloudKey, !isPublishingCloudTargets else { return }
+        isPublishingCloudTargets = true
         let container = persistence.container
-        var targets: [UUID: CloudZoneTarget] = [:]
-        for baby in children {
-            guard let id = baby.id, let recordID = container.recordID(for: baby.objectID) else { continue }
-            targets[id] = CloudZoneTarget(childRecordID: recordID, isShared: persistence.isShared(baby))
+        nonisolated(unsafe) let lookup = (babies: babies, running: running)
+        Task.detached(priority: .utility) { [weak self] in
+            var targets: [UUID: CloudZoneTarget] = [:]
+            var resolved = true
+            for (objectID, id, isShared) in lookup.babies {
+                guard let recordID = container.recordID(for: objectID) else { resolved = false; continue }
+                targets[id] = CloudZoneTarget(childRecordID: recordID, isShared: isShared)
+            }
+            var recordNames: [UUID: String] = [:]
+            for (objectID, id) in lookup.running {
+                guard let recordID = container.recordID(for: objectID) else { resolved = false; continue }
+                recordNames[id] = recordID.recordName
+            }
+            WidgetCloudSync.publish(targets: targets, recordNames: recordNames)
+            await MainActor.run {
+                guard let self else { return }
+                self.isPublishingCloudTargets = false
+                // A baby not exported yet has no record: ask again next time.
+                if resolved { self.publishedCloudKey = key }
+                // Something changed while the names were looked up.
+                let (babies, running) = self.cloudTargetInputs()
+                if babies.map(\.0) + running.map(\.0) != key { self.publishCloudTargets() }
+            }
         }
-        var recordNames: [UUID: String] = [:]
-        for event in events where event.isRunning {
-            guard let id = event.id, let recordID = container.recordID(for: event.objectID) else { continue }
-            recordNames[id] = recordID.recordName
-        }
-        WidgetCloudSync.publish(targets: targets, recordNames: recordNames)
+    }
+
+    private func cloudTargetInputs() -> (babies: [(NSManagedObjectID, UUID, Bool)], running: [(NSManagedObjectID, UUID)]) {
+        let babies = children.compactMap { baby in baby.id.map { (baby.objectID, $0, persistence.isShared(baby)) } }
+        let running = events.filter(\.isRunning).compactMap { event in event.id.map { (event.objectID, $0) } }
+        return (babies, running)
     }
 
     /// The diaper words changed: redraw this process and every other surface.
@@ -173,18 +238,38 @@ final class EventStore: ObservableObject {
     private(set) var runningSleep: LogEvent?
     private(set) var runningFeed: LogEvent?
 
+    /// Day totals and day groups, built once per reload: History asks for
+    /// them on every render, and each walk covers the whole log.
+    private var tallyCache: [Date: DayTally] = [:]
+    private var dayGroups: [(day: Date, events: [LogEvent])]?
+
     func tally(on day: Date, now: Date = .now) -> DayTally {
-        DayTally.make(events: events, on: day, now: now)
+        // A running sleep grows by the minute, so it is never cached.
+        guard runningSleep == nil else { return DayTally.make(events: events, on: day, now: now) }
+        let key = Calendar.current.startOfDay(for: day)
+        if let cached = tallyCache[key] { return cached }
+        let tally = DayTally.make(events: events, on: key, now: now)
+        tallyCache[key] = tally
+        return tally
     }
 
     /// Events grouped by local day, newest day first.
     var eventsByDay: [(day: Date, events: [LogEvent])] {
+        if let dayGroups { return dayGroups }
         let calendar = Calendar.current
         var groups: [Date: [LogEvent]] = [:]
         for event in events {
             groups[calendar.startOfDay(for: event.start), default: []].append(event)
         }
-        return groups.keys.sorted(by: >).map { (day: $0, events: groups[$0] ?? []) }
+        let sorted = groups.keys.sorted(by: >).map { (day: $0, events: groups[$0] ?? []) }
+        dayGroups = sorted
+        return sorted
+    }
+
+    /// Whether anything was logged on that day.
+    func hasEntries(on day: Date) -> Bool {
+        let key = Calendar.current.startOfDay(for: day)
+        return eventsByDay.contains { $0.day == key }
     }
 
     // MARK: - Children

@@ -189,14 +189,27 @@ enum Reminders {
 
     // MARK: - Scheduling
 
+    /// What this process last handed to the notification center. Nearly every
+    /// change to the log (a diaper, a sync) leaves the plan as it was.
+    nonisolated(unsafe) private static var lastPlanned: [Planned]?
+
+    /// The widget schedules from its own process, and notifications can be
+    /// allowed in Settings meanwhile, so the next pass hands the plan over again.
+    static func forgetLastSchedule() {
+        lastPlanned = nil
+    }
+
     /// Replaces this phone's pending reminders with the ones the summary and
-    /// the stored choices call for. Cheap enough to run on every change.
+    /// the stored choices call for. Runs on every change, so it skips the
+    /// notification center when nothing it would schedule has moved.
     static func reschedule(summary: NowSummary, birthDate: Date?, now: Date = .now) {
         var planned: [Planned] = []
         if let feed = feedReminder(for: summary, interval: feedInterval, now: now) { planned.append(feed) }
         if checkupRemindersOn {
             planned += checkupReminders(birthDate: birthDate, nextCheckup: nextCheckup, now: now)
         }
+        guard planned != lastPlanned else { return }
+        lastPlanned = planned
         let center = UNUserNotificationCenter.current()
         let keep = Set(planned.map(\.id))
         center.getPendingNotificationRequests { pending in

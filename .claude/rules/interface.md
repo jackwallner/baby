@@ -215,3 +215,13 @@ backfilling yesterday without touching today's totals, Undo, sleep/wake, turning
 SharingTests protects the owner's log and separates invitation failures
 from an intentional stop-sharing action. Real cross-account iCloud sync still
 requires two signed-in devices and a deployed production schema.
+
+Main thread (2026-10-19, Jack: build 49 was "super laggy and a pain to
+load"). `NSPersistentCloudKitContainer.recordID(for:)` and `fetchShares`
+wait on the mirroring queue, which is busy for seconds while a phone syncs:
+never call them from `reload()` or a view body. `EventStore` looks record
+names up on a background task, throttles remote-change reloads to one per
+300 ms, and caches day tallies and day groups per reload, because History
+renders on every change and each walk covers the whole log.
+`Reminders.reschedule` skips the notification center when the plan is
+unchanged.

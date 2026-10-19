@@ -105,6 +105,7 @@ struct BabyApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     guard phase == .active else { return }
                     NightLight.apply(settings.appearance.isNightLight)
+                    Reminders.forgetLastSchedule()
                     events.reload()
                     Task { await sharing.refresh(for: events.child) }
                 }
