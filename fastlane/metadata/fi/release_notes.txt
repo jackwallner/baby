@@ -1,1 +1,1 @@
-Luotettavampi kirjaaminen widgeteistä, selkeämmät vahvistukset ja parempi kumoaminen.
+Syöttömuistutukset kertovat, kummalta puolelta aloittaa. Historia näyttää nyt Tänään ja Eilen ylimpänä, ja Baby+ tuo kaavion, jota vetämällä näet minkä tahansa päivän. Widgeteistä tehdyt kirjaukset näkyvät nyt heti kumppanisi puhelimessa, ja neuvolakäyntiä edeltävänä iltana saat ilmoituksen, että yhteenveto lääkärille on valmis.
