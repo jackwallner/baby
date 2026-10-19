@@ -100,6 +100,7 @@ targets:
       - path: Baby/Views/EventEditorView.swift
       - path: Baby/Views/FirstWeeksView.swift
       - path: Baby/Views/HistoryView.swift
+      - path: Baby/Views/HistoryDays.swift
       - path: Baby/Views/SettingsView.swift
       - path: Baby/Views/SharingView.swift
       - path: Baby/Views/JoinViews.swift

@@ -15,7 +15,13 @@ same logging controls in the same order.
 
 History belongs one tap from home, as a List or a month Calendar (dots
 per kind, tap a day for its entries). The calendar grid is plain stacks: a
-LazyVGrid inside a List cell crashed UICollectionView self-sizing. The Undo
+LazyVGrid inside a List cell crashed UICollectionView self-sizing. Both
+layouts open with free Today and Yesterday tiles (tap scrolls to that day) and
+a 14-day bar chart (`HistoryDays.swift`) that works like Total Calories': drag
+and the header reads the day under the finger, release jumps to it. The chart
+is Baby+; free users see their own bars blurred under a lock that opens the
+paywall on Trends. Jumps scroll to an anchor just below the top (y 0.06), not
+`.top`, which tucked the day header under the collapsing large title. The Undo
 toast is pinned to the top (swipe up to dismiss), so it never lands mid-screen
 over the log controls. First-weeks guidance, sharing and stain help live in
 Settings. No onboarding paywall. Two exceptions to "nothing but logging on

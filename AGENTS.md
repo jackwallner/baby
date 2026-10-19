@@ -113,8 +113,9 @@ Watch app and complication, the Live Activity, logging together, the stain
 helper, every appearance, more than one baby.
 
 Baby+ (`PlusFeature`) is reporting to share with a doctor: sharing or exporting
-the pediatrician PDF, the trends charts, and CSV export. Nothing else may move
-behind it. More than one baby is free.
+the pediatrician PDF, the trends charts (including History's drag-through day
+chart, 2026-10-18), and CSV export. Nothing else may move behind it. More than
+one baby is free; History's Today and Yesterday tiles and the full log are free.
 
 ## Identifiers
 

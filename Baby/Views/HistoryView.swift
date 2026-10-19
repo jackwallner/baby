@@ -1,8 +1,11 @@
 import SwiftUI
 
 /// Every entry, as a list grouped by day or as a month calendar. Each day
-/// carries its totals. Tap a row to edit it, swipe to delete. Never locked.
+/// carries its totals. Tap a row to edit it, swipe to delete. Today and
+/// Yesterday sit one tap away at the top; the day chart under them is Baby+.
+/// The log itself is never locked.
 struct HistoryView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var settings: BabySettings
@@ -10,6 +13,8 @@ struct HistoryView: View {
     @State private var editor: EditorRequest?
     @State private var month = Calendar.current.startOfMonth(for: .now)
     @State private var selectedDay = Calendar.current.startOfDay(for: .now)
+    /// A day picked from the tiles or the chart, for the list to scroll to.
+    @State private var jumpTarget: Date?
 
     enum HistoryLayout: String, CaseIterable {
         case list
@@ -81,28 +86,63 @@ struct HistoryView: View {
         .accessibilityIdentifier("history.layout")
     }
 
-    private var list: some View {
-        List {
-            Section { layoutPicker }
-            ForEach(events.eventsByDay, id: \.day) { group in
-                Section {
-                    ForEach(group.events, id: \.objectID) { event in
-                        eventRow(event)
-                    }
-                } header: {
-                    dayHeader(group.day)
-                }
-                .themedRow()
+    /// Today and Yesterday, then the day chart: the quick ways to a day.
+    private var daysSection: some View {
+        Section {
+            VStack(spacing: AppTheme.spacing) {
+                DayJumpTiles(onJump: jump)
+                DayScrubChart(onJump: jump)
             }
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
         }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
     }
+
+    private func jump(to day: Date) {
+        let day = Calendar.current.startOfDay(for: day)
+        switch layout {
+        case .list:
+            jumpTarget = day
+        case .calendar:
+            month = Calendar.current.startOfMonth(for: day)
+            selectedDay = day
+            jumpTarget = Self.calendarDayAnchor
+        }
+    }
+
+    private var list: some View {
+        ScrollViewReader { proxy in
+            List {
+                Section { layoutPicker }
+                daysSection
+                ForEach(events.eventsByDay, id: \.day) { group in
+                    Section {
+                        ForEach(group.events, id: \.objectID) { event in
+                            eventRow(event)
+                        }
+                    } header: {
+                        // The jump target is the header, so the day's name and
+                        // totals land in view above its entries.
+                        dayHeader(group.day)
+                            .id(group.day)
+                    }
+                    .themedRow()
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .onChange(of: jumpTarget) { _, target in scroll(proxy, to: target) }
+        }
+    }
+
+    /// The calendar's selected-day section, which a jump scrolls to.
+    private static let calendarDayAnchor = Date.distantPast
 
     private var calendar: some View {
         let dayEvents = events.events.filter { Calendar.current.isDate($0.start, inSameDayAs: selectedDay) }
-        return List {
+        return ScrollViewReader { proxy in List {
             Section { layoutPicker }
+            daysSection
             Section {
                 MonthGrid(month: $month, selectedDay: $selectedDay, kindsByDay: kindsByDay, firstMonth: firstMonth)
             }
@@ -122,9 +162,22 @@ struct HistoryView: View {
                 dayHeader(selectedDay)
             }
             .themedRow()
+            .id(Self.calendarDayAnchor)
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
+        .onChange(of: jumpTarget) { _, target in scroll(proxy, to: target) }
+        }
+    }
+
+    private static let jumpAnchor = UnitPoint(x: 0.5, y: 0.06)
+
+    private func scroll(_ proxy: ScrollViewProxy, to target: Date?) {
+        guard let target else { return }
+        // Not .top: the large title collapses as the list moves, and the
+        // header would end under the bar.
+        withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation) { proxy.scrollTo(target, anchor: Self.jumpAnchor) }
+        jumpTarget = nil
     }
 
     /// Which kinds were logged on each day, for the calendar's dots.
@@ -154,17 +207,12 @@ struct HistoryView: View {
     }
 
     private func dayHeader(_ day: Date) -> some View {
-        let tally = events.tally(on: day)
-        let tracked = settings.tracked
-        var parts: [String] = []
-        if tracked.contains(.feed) { parts.append(Format.count(tally.feeds, "feed")) }
-        if tracked.contains(.wet) { parts.append("\(tally.wet) \(EventKind.wet.label.lowercased())") }
-        if tracked.contains(.dirty) { parts.append("\(tally.dirty) \(EventKind.dirty.label.lowercased())") }
-        if tracked.contains(.sleep), tally.sleepSeconds >= 60 { parts.append("\(Format.compactDuration(tally.sleepSeconds)) sleep") }
+        let parts = DayLine.parts(events.tally(on: day), tracked: settings.tracked)
         return VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
             Text(Format.dayTitle(day))
                 .font(.headline)
                 .foregroundStyle(AppTheme.ink)
+                .accessibilityIdentifier("history.dayHeader.\(Format.dayTitle(day))")
             Text(parts.joined(separator: " · "))
                 .font(.caption)
                 .foregroundStyle(AppTheme.ink2)

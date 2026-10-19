@@ -36,10 +36,11 @@ final class LoggingUITests: XCTestCase {
         app.buttons["tab.history"].tap()
         // The layout is remembered between launches.
         app.buttons["List"].tap()
-        // Cell 0 is the List / Calendar picker, then the day header with the
-        // day's totals; the entries follow it.
-        let totals = app.cells.element(boundBy: 1).staticTexts.element(boundBy: 1)
-        let entry = app.cells.element(boundBy: 2)
+        // Cell 0 is the List / Calendar picker, cell 1 the Today / Yesterday
+        // tiles and day chart, then the day header with the day's totals; the
+        // entries follow it.
+        let totals = app.cells.element(boundBy: 2).staticTexts.element(boundBy: 1)
+        let entry = app.cells.element(boundBy: 3)
         XCTAssertTrue(entry.waitForExistence(timeout: 5))
         let originalTotals = totals.label
         attach(app, "history-before-delete")
@@ -63,6 +64,42 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Today"].exists)
         app.buttons["List"].tap()
         XCTAssertFalse(app.buttons["Previous month"].exists)
+    }
+
+    func testYesterdayIsOneTapFromHistory() {
+        let app = launch()
+        app.buttons["tab.history"].tap()
+        let list = app.buttons["List"]
+        XCTAssertTrue(list.waitForExistence(timeout: 5))
+        list.tap()
+        let yesterday = app.buttons["history.jump.yesterday"]
+        XCTAssertTrue(yesterday.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["history.dayChart"].exists)
+
+        let header = app.staticTexts["history.dayHeader.Yesterday"]
+        XCTAssertFalse(header.exists && header.isHittable, "yesterday's entries start below the fold")
+        yesterday.tap()
+        XCTAssertTrue(header.waitForExistence(timeout: 3))
+        XCTAssertTrue(waitUntilHittable(header), "the list scrolled to yesterday")
+
+        for _ in 0..<6 where !app.buttons["Calendar"].isHittable { app.swipeDown() }
+        app.buttons["Calendar"].tap()
+        XCTAssertTrue(yesterday.waitForExistence(timeout: 3))
+        yesterday.tap()
+        XCTAssertTrue(header.waitForExistence(timeout: 3))
+        XCTAssertTrue(waitUntilHittable(header), "the calendar selected yesterday")
+        XCTAssertFalse(app.staticTexts["Nothing logged this day"].exists)
+        for _ in 0..<6 where !app.buttons["List"].isHittable { app.swipeDown() }
+        app.buttons["List"].tap()
+    }
+
+    private func waitUntilHittable(_ element: XCUIElement, timeout: TimeInterval = 3) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if element.exists && element.isHittable { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+        return false
     }
 
     func testHoldingAButtonDoesNotLogUntilSaved() {
@@ -251,7 +288,7 @@ final class LoggingUITests: XCTestCase {
         let app = launch()
         app.buttons["tab.history"].tap()
         app.buttons["List"].tap()
-        let entry = app.cells.element(boundBy: 2)
+        let entry = app.cells.element(boundBy: 3)
         XCTAssertTrue(entry.waitForExistence(timeout: 5))
         entry.tap()
         XCTAssertTrue(app.datePickers["editor.time"].waitForExistence(timeout: 3), "the time wheel is inline")
