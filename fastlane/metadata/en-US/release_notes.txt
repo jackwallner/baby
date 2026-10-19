@@ -1,1 +1,1 @@
-More reliable widget logging, clearer tap confirmations, and improved Undo.
+Feed reminders: pick a gap, from 2 to 4 hours, and get a nudge with the side to start on. Home and the widgets now show which side to start on. A short optional question at setup, and a note the evening before a checkup that your summary for the doctor is ready.

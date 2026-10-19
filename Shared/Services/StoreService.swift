@@ -471,9 +471,21 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     /// has to background the app before reading anything back.
     func syncConversionAttributes() {
         guard isConfigured else { return }
-        let attributes = ConversionDiagnostics.subscriberAttributes
+        var attributes = ConversionDiagnostics.subscriberAttributes
+        if let stage = defaults.string(forKey: Self.setupStageKey) { attributes[Self.setupStageAttribute] = stage }
         guard !attributes.isEmpty else { return }
         Purchases.shared.attribution.setAttributes(attributes)
+    }
+
+    private static let setupStageKey = "setupStage"
+    /// App-specific, so not one of the fleet funnel keys: "expecting" or
+    /// "born", the only answer from setup that leaves the phone. It measures
+    /// how many installs come before the birth.
+    static let setupStageAttribute = "setup_stage"
+
+    func recordSetupStage(expecting: Bool) {
+        defaults.set(expecting ? "expecting" : "born", forKey: Self.setupStageKey)
+        syncConversionAttributes()
     }
 
     #if DEBUG

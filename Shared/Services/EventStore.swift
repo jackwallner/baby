@@ -165,6 +165,7 @@ final class EventStore: ObservableObject {
         WidgetCenter.shared.reloadAllTimelines()
         WatchSyncService.shared.push(summary: summary)
         LiveActivityService.shared.sync(summary: summary)
+        Reminders.reschedule(summary: summary, birthDate: child?.birthDate)
     }
 
     /// Found once per reload rather than on every read: the log buttons ask

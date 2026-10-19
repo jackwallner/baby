@@ -1,10 +1,13 @@
-Ultra simple baby tracking. One tap logs a feed, a pee or poop diaper, or sleep. One glance answers the 3am question: when did the baby last eat, and which side.
+Ultra simple baby tracking. One tap logs a feed, a pee or poop diaper, or sleep. One glance answers the 3am question: when did the baby last eat, and which side to start on.
 
 FOUR BUTTONS THAT NEVER MOVE
 Feed (left, right, bottle), Pee, Poop, Sleep. Prefer Wet and Dirty? One setting renames them. One tap logs it now. A long press fixes the time, the side, the bottle amount or the stool colour. Undo sits in a toast for a few seconds. No confirmation sheets, ever.
 
 WITHOUT OPENING THE APP
 Lock screen and home screen widgets that log with one tap. An Apple Watch app and a complication that shows how long since the last feed. A Live Activity on the lock screen while a feed or a sleep is running. Siri and the Action button.
+
+REMINDERS YOU CHOOSE
+A nudge when the next feed is due, counted from when the last one started, every 2 to 4 hours as you set it, with the side to start on. The evening before a newborn checkup, a note that your summary for the doctor is ready. Both are optional and stay on your phone.
 
 BOTH PARENTS, NO ACCOUNTS
 Log together: your partner, a grandparent or a nanny scans a code from your phone and joins the same log from their own iPhone. You all tap the same four buttons and see the same list, so "did you already change the baby?" answers itself. There is no account to create, and no server of ours in the middle: the records live on your devices and in your own iCloud.
@@ -16,7 +19,7 @@ THE STAIN HELPER
 Tell it once what you have at home, and a blowout, spit-up, breast milk or formula stain gets the steps in order, skipping anything you do not own.
 
 FREE, AND STAYING FREE
-Logging, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, logging together, the stain helper and more than one baby. Nothing you have already logged is ever locked later.
+Logging, feed reminders, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, logging together, the stain helper and more than one baby. Nothing you have already logged is ever locked later.
 
 BABY+, OPTIONAL
 - The pediatrician summary: a one-page PDF since the last visit to share or print, with daily feeds and the longest gap between them, wet and dirty counts, sleep, weights in pounds and ounces or kilograms, and your notes

@@ -102,6 +102,7 @@ struct LogEventIntent: LiveActivityIntent {
             Self.queueUpload(created: [event], changed: running, child: child)
             if let id = event.id { WidgetUndo(eventID: id, kind: .feed, loggedAt: now, closedIDs: closed, childID: child.id).store() }
             WidgetCenter.shared.reloadAllTimelines()
+            Self.rescheduleReminders(for: child, in: context)
             return what.feedDialog
         case .wet, .dirty:
             let kind: EventKind = what == .wet ? .wet : .dirty
@@ -163,6 +164,14 @@ struct LogEventIntent: LiveActivityIntent {
             return WidgetCloudOp(action: .update, recordName: WidgetCloudSync.recordName(for: id), values: CloudEventValues(event), target: target)
         }
         WidgetCloudSync.enqueue(creates + updates)
+    }
+
+    /// The feed reminder counts from the newest feed, which the app would
+    /// only learn on its next run. A tap here moves it now.
+    @MainActor
+    static func rescheduleReminders(for child: Child, in context: NSManagedObjectContext) {
+        let events = Persistence.shared.events(for: child, in: context)
+        Reminders.reschedule(summary: NowSummary.make(child: child, events: events), birthDate: child.birthDate)
     }
 #endif
 #if !BABY_WIDGET
@@ -423,6 +432,9 @@ struct UndoWidgetLogIntent: AppIntent {
         await WidgetCloudSync.flush()
         WidgetUndo.clear()
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetLogResult)
+        if undo.kind == .feed, let child = persistence.activeChild(in: context) {
+            LogEventIntent.rescheduleReminders(for: child, in: context)
+        }
 #else
         try EventStore.shared.performWidgetUndo(eventID: eventID)
 #endif

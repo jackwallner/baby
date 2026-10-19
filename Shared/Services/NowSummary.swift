@@ -48,6 +48,23 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// The side to offer next: the other breast after a breastfeed.
     var suggestedSide: FeedSide { feedSides.last?.next ?? .left }
 
+    /// The breast to start on next: the other one from where the last
+    /// breastfeed ended. A bottle in between does not change it, and nil means
+    /// no recent feed named a breast, so nothing is guessed.
+    var nextBreastSide: FeedSide? {
+        let feeds = [feedSides] + (recent ?? []).filter { $0.kind == .feed }.map { $0.sides ?? [] }
+        for sides in feeds {
+            if let ended = sides.last(where: { $0 != .bottle }) { return ended.next }
+        }
+        return nil
+    }
+
+    /// "Start on Right", between feeds only: mid-feed it answers nothing.
+    var nextSideLine: String? {
+        guard !isFeeding, let side = nextBreastSide else { return nil }
+        return "Start on \(side.label)"
+    }
+
     /// Every side of the last feed, including from summaries that only knew one.
     var feedSides: [FeedSide] { lastFeedSides ?? lastFeedSide.map { [$0] } ?? [] }
 
@@ -121,11 +138,12 @@ struct NowSummary: Codable, Equatable, Sendable {
         }
     }
 
-    /// The lines under the lead: the last diaper under a feed, and a sleep
-    /// that is running.
+    /// The lines under the lead: the breast to start on and the last diaper
+    /// under a feed, and a sleep that is running.
     func supportingLines(now: Date = .now) -> [String] {
         let tracked = tracked
         var lines: [String] = []
+        if leadKind == .feed, let next = nextSideLine { lines.append(next) }
         if leadKind == .feed, tracked.tracksDiapers { lines.append(diaperLine(now: now)) }
         if leadKind != .sleep, tracked.contains(.sleep), let sleep = sleepLine(now: now) { lines.append(sleep) }
         return lines

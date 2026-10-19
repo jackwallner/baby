@@ -30,6 +30,11 @@ struct LogButtons: View {
 
     /// How long the side chips stay after the last tap on them or on Feed.
     static let sideWindow: TimeInterval = 90
+    /// The reminder offer waits this long after the last Feed or side tap, so
+    /// it never lands on a parent mid-choice.
+    static let reminderOfferDelay: TimeInterval = 6
+    @State private var showReminderOffer = false
+    @State private var reminderOfferTask: Task<Void, Never>?
 
     /// The rows the tracked buttons make: Feed, the diaper pair (or the one
     /// diaper button left), Sleep.
@@ -57,6 +62,9 @@ struct LogButtons: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Nothing was logged. Please try again.")
+        }
+        .sheet(isPresented: $showReminderOffer) {
+            FeedReminderOfferView()
         }
     }
 
@@ -151,7 +159,21 @@ struct LogButtons: View {
             return event
         }
         reportSave(event != nil)
-        if event != nil { holdSides() }
+        if event != nil {
+            holdSides()
+            queueReminderOffer()
+        }
+    }
+
+    /// Once per install, a few seconds after a feed: the next feed's reminder.
+    private func queueReminderOffer() {
+        guard ReminderOfferGate.isEnabled, !Reminders.hasOfferedFeedReminder else { return }
+        reminderOfferTask?.cancel()
+        reminderOfferTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(Self.reminderOfferDelay))
+            guard !Task.isCancelled, !Reminders.hasOfferedFeedReminder else { return }
+            showReminderOffer = true
+        }
     }
 
     private func sidesBinding(for event: LogEvent) -> Binding<[FeedSide]> {
@@ -164,6 +186,7 @@ struct LogButtons: View {
                 }
                 if !saved { showSaveError = true }
                 holdSides()
+                if reminderOfferTask != nil { queueReminderOffer() }
             }
         )
     }

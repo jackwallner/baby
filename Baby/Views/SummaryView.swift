@@ -10,6 +10,8 @@ struct ReportsTabView: View {
     @EnvironmentObject private var store: StoreService
     var isVisible = true
     var showsSnapshot = false
+    /// Opened from a checkup note: the pitch leads with the summary it promised.
+    var fromCheckup = false
 
     var body: some View {
         NavigationStack {
@@ -18,9 +20,17 @@ struct ReportsTabView: View {
                     SummaryView()
                         .transition(.opacity)
                 } else {
-                    BabyPaywallView(displayCloseButton: false, paywallImpressionID: "baby_reports", closesOnPurchase: false, isVisible: isVisible)
-                        .toolbar(.hidden, for: .navigationBar)
-                        .transition(.opacity)
+                    BabyPaywallView(
+                        displayCloseButton: false,
+                        paywallImpressionID: fromCheckup ? "baby_checkup" : "baby_reports",
+                        focus: fromCheckup ? .pediatricianSummary : nil,
+                        closesOnPurchase: false,
+                        isVisible: isVisible
+                    )
+                    // A new identity, so the checkup arrival records its own impression.
+                    .id(fromCheckup)
+                    .toolbar(.hidden, for: .navigationBar)
+                    .transition(.opacity)
                 }
             }
             .reservesNavigationCapsule()

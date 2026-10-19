@@ -15,6 +15,7 @@ struct BabyOnboardingView: View {
     @State private var name = ""
     @State private var hasBirthDate = false
     @State private var birthDate = Date.now
+    @State private var feeding: FeedingStyle?
     @State private var showSaveError = false
     @FocusState private var isEditingName: Bool
 
@@ -26,7 +27,7 @@ struct BabyOnboardingView: View {
                     pathChoice
                     if path == .start {
                         babyDetails
-                        Text("Both are optional. Invite your partner or anyone else helping from Settings once you're in.")
+                        Text("All optional. Invite your partner or anyone else helping from Settings once you're in.")
                             .font(.footnote)
                             .foregroundStyle(AppTheme.ink2)
                             .fixedSize(horizontal: false, vertical: true)
@@ -162,17 +163,61 @@ struct BabyOnboardingView: View {
                 .onSubmit { isEditingName = false }
                 .frame(minHeight: 44)
                 .accessibilityIdentifier("onboarding.name")
+            if feeding != .expecting {
+                Divider()
+                Toggle("Add birth date", isOn: $hasBirthDate)
+                if hasBirthDate {
+                    LabeledContent("Birth date") {
+                        DatePicker("Birth date", selection: $birthDate, in: ...Date.now, displayedComponents: .date)
+                            .labelsHidden()
+                            .themedDatePicker()
+                    }
+                }
+            }
             Divider()
-            Toggle("Add birth date", isOn: $hasBirthDate)
-            if hasBirthDate {
-                LabeledContent("Birth date") {
-                    DatePicker("Birth date", selection: $birthDate, in: ...Date.now, displayedComponents: .date)
-                        .labelsHidden()
-                        .themedDatePicker()
+            feedingChoice
+        }
+        .card()
+    }
+
+    /// One optional question. It sets the reminder gap offered after the
+    /// first feed, and nothing else.
+    private var feedingChoice: some View {
+        VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+            Text("How is the baby fed?")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AppTheme.ink)
+            ForEach([[FeedingStyle.breast, .bottle, .both], [.pumped, .expecting]], id: \.self) { row in
+                HStack(spacing: AppTheme.tightSpacing) {
+                    ForEach(row) { style in
+                        feedingChip(style)
+                    }
                 }
             }
         }
-        .card()
+    }
+
+    private func feedingChip(_ style: FeedingStyle) -> some View {
+        let isOn = feeding == style
+        return Button {
+            Haptics.selected()
+            feeding = isOn ? nil : style
+            if feeding == .expecting { hasBirthDate = false }
+        } label: {
+            Text(style.label)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .foregroundStyle(isOn ? AppTheme.paper : AppTheme.ink)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background(isOn ? AppTheme.feed : AppTheme.card, in: AppTheme.buttonShape)
+                .overlay(AppTheme.buttonShape.strokeBorder(isOn ? AppTheme.feed : AppTheme.edge, lineWidth: AppTheme.hairlineWidth))
+                .contentShape(AppTheme.buttonShape)
+        }
+        .pressableCard()
+        .accessibilityLabel(style.label)
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+        .accessibilityIdentifier("onboarding.feeding.\(style.rawValue)")
     }
 
     private func finish() {
@@ -189,6 +234,8 @@ struct BabyOnboardingView: View {
             showSaveError = true
             return
         }
+        Reminders.feedingStyle = feeding
+        StoreService.shared.recordSetupStage(expecting: feeding == .expecting)
         settings.hasCompletedSetup = true
     }
 }

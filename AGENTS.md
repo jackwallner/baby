@@ -23,8 +23,26 @@ status. No automatic review prompts, promotional cards, or purchase screen
 during onboarding. Ratings: no in-app rating question and no automatic ask
 (App Review 5.6.1); Settings > About has separate "Rate Baby Tracker"
 (write-review link, App Store ID `6811133796`) and "Send Feedback" (mail) rows.
-Onboarding is one screen with two paths: Start a new log (optional name and
-birth date) or Join a shared log (scan or paste an invite). An invitation
+Onboarding is one screen with two paths: Start a new log (optional name,
+birth date and "How is the baby fed?", which only picks the reminder gap
+offered first; "Not born yet" hides the birth date) or Join a shared log
+(scan or paste an invite). The only setup answer that leaves the phone is
+the RevenueCat attribute `setup_stage` (`expecting` or `born`), which
+measures how many installs come before the birth.
+
+Reminders (2026-10-18, from the competitor research: 46 of 62 users never
+came back after the first session, and every major competitor has interval
+feed reminders). Local notifications only, this phone only, in
+`Shared/Services/Reminders.swift`: a feed reminder a chosen 2 to 4 hours
+after the last feed started (with the side to start on), and, when the
+parent opts in, a note at 7pm the evening before a checkup (the date they
+entered in Settings, else days 4, 14 and 30 from a known birth date). Both
+are offered once, in a sheet six seconds after a feed is logged, and live in
+Settings > Reminders. The app reschedules on every summary change and the
+widget after its own feed taps. A checkup note opens the Upgrade tab with the
+pediatrician summary first (impression `baby_checkup`), or Reports for
+Baby+. Home, the widgets and the Lock Screen row show "Start on Right"
+between feeds (`NowSummary.nextSideLine`). An invitation
 opened before setup shows a joining screen instead of onboarding.
 
 Never: ads, AI panels or predictions, reordering the buttons or renaming them

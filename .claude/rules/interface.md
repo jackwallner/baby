@@ -18,7 +18,11 @@ per kind, tap a day for its entries). The calendar grid is plain stacks: a
 LazyVGrid inside a List cell crashed UICollectionView self-sizing. The Undo
 toast is pinned to the top (swipe up to dismiss), so it never lands mid-screen
 over the log controls. First-weeks guidance, sharing and stain help live in
-Settings. No onboarding paywall.
+Settings. No onboarding paywall. Two exceptions to "nothing but logging on
+Log" (2026-10-18, Jack approved): the one-time reminder offer sheet after a
+feed, and a checkup note that opens the paywall focused on the pediatrician
+summary. The offer stays out of UI tests (`ReminderOfferGate`: off with
+`-NoCloudKit`, back with `-ShowReminderOffer`).
 
 2026-10-02 (Jack): all navigation belongs in one small translucent bottom
 capsule, like Total Calories, not a full-width bar. Tabs are Log, History,

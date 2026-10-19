@@ -1,6 +1,7 @@
 import CloudKit
 import SwiftUI
 import UIKit
+import UserNotifications
 
 @main
 struct BabyApp: App {
@@ -140,6 +141,12 @@ enum NightLight {
 /// Routes the CloudKit share acceptance to a scene delegate, which is where
 /// iOS delivers it for a SwiftUI app.
 final class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        // Set before launch finishes, so a tap that cold-starts the app is routed.
+        UNUserNotificationCenter.current().delegate = NotificationRouter.shared
+        return true
+    }
+
     func application(
         _ application: UIApplication,
         configurationForConnecting connectingSceneSession: UISceneSession,
@@ -286,6 +293,7 @@ private struct RevenueCatProbeStatusView: View {
 /// Keep each visited screen alive, with one compact capsule for navigation.
 struct BabyHomeView: View {
     @EnvironmentObject private var store: StoreService
+    @ObservedObject private var router = AppRouter.shared
     @State private var selected: HomeTab
     @State private var visited: Set<HomeTab>
     @State private var settingsPath: [SettingsDestination]
@@ -328,6 +336,14 @@ struct BabyHomeView: View {
         }
         .undoToast()
         .tint(AppTheme.accent)
+        .onReceive(router.$checkupRequests) { count in
+            guard count > 0 else { return }
+            visited.insert(.reports)
+            selected = .reports
+        }
+        .onChange(of: selected) { _, tab in
+            if tab != .reports { router.showsCheckupPitch = false }
+        }
     }
 
     @ViewBuilder
@@ -338,7 +354,7 @@ struct BabyHomeView: View {
         case .history:
             NavigationStack { HistoryView().reservesNavigationCapsule() }
         case .reports:
-            ReportsTabView(isVisible: selected == .reports, showsSnapshot: showsReportSnapshot)
+            ReportsTabView(isVisible: selected == .reports, showsSnapshot: showsReportSnapshot, fromCheckup: router.showsCheckupPitch)
         case .settings:
             NavigationStack(path: $settingsPath) {
                 SettingsView()

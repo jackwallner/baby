@@ -508,7 +508,7 @@ private struct NowStatusCard: View {
             case 1: sides[0] == .bottle ? "Bottle" : "\(sides[0].label) breast"
             default: FeedSide.label(for: sides)
             }
-            return [label, Format.time(date)].compactMap { $0 }.joined(separator: " · ")
+            return [label, Format.time(date), summary.nextSideLine].compactMap { $0 }.joined(separator: " · ")
         case .diaper:
             guard let date = summary.lastDiaperAt else { return "Log a first diaper below." }
             return [summary.lastDiaperKind?.label, Format.time(date)].compactMap { $0 }.joined(separator: " · ")
@@ -521,7 +521,7 @@ private struct NowStatusCard: View {
 
     private var accessibilityLine: String {
         switch lead {
-        case .feed: summary.feedLine(now: now)
+        case .feed: [summary.feedLine(now: now), summary.nextSideLine].compactMap { $0 }.joined(separator: ". ")
         case .diaper: summary.diaperLine(now: now)
         case .sleep: summary.awakeLine(now: now)
         }

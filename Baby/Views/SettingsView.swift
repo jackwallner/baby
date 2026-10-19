@@ -24,6 +24,7 @@ struct SettingsView: View {
                 buttonsSection
                 if settings.tracked.tracksDiapers { diaperWordsSection }
                 totalsSection
+                RemindersSection()
                 appearanceSection
                 sharingSection
                 babiesSection
