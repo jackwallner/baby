@@ -149,7 +149,8 @@ struct DayJumpTiles: View {
                     .font(.title3.weight(.bold))
                     .foregroundStyle(hasEntries ? AppTheme.ink : AppTheme.ink3)
                     .monospacedDigit()
-                Text(parts.dropFirst().joined(separator: " · "))
+                // "3h 45m sleep" wraps as one piece, never between its numbers.
+                Text(parts.dropFirst().map { $0.replacingOccurrences(of: " ", with: "\u{00A0}") }.joined(separator: " · "))
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
                     .monospacedDigit()
@@ -287,13 +288,17 @@ struct DayScrubChart: View {
     }
 
     private var lockBadge: some View {
-        Label("Baby+", systemImage: "lock.fill")
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(AppTheme.ink)
-            .padding(.horizontal, AppTheme.tightSpacing)
-            .padding(.vertical, AppTheme.hairSpacing)
-            .background(AppTheme.cardElevated, in: Capsule())
-            .overlay(Capsule().strokeBorder(AppTheme.edge, lineWidth: AppTheme.hairlineWidth))
+        HStack(spacing: AppTheme.hairSpacing) {
+            Image(systemName: "lock.fill")
+            Text("Baby+")
+        }
+        .font(.caption.weight(.semibold))
+        .fixedSize()
+        .foregroundStyle(AppTheme.ink)
+        .padding(.horizontal, AppTheme.tightSpacing)
+        .padding(.vertical, AppTheme.hairSpacing)
+        .background(AppTheme.cardElevated, in: Capsule())
+        .overlay(Capsule().strokeBorder(AppTheme.edge, lineWidth: AppTheme.hairlineWidth))
     }
 
     private func scrubChanged(_ date: Date?) {

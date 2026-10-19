@@ -225,3 +225,8 @@ names up on a background task, throttles remote-change reloads to one per
 renders on every change and each walk covers the whole log.
 `Reminders.reschedule` skips the notification center when the plan is
 unchanged.
+
+History's day cards sit in a List row with zero insets, and the row clips:
+the light theme's offset shadow needs `shadowOffset` of room on the right and
+bottom (build 51 fix, 2026-10-19). Check any card placed in a List row in the
+light theme for a cut shadow before shipping.

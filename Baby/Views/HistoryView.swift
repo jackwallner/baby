@@ -93,6 +93,10 @@ struct HistoryView: View {
                 DayJumpTiles(onJump: jump)
                 DayScrubChart(onJump: jump)
             }
+            // The row clips its content, and the light theme's offset shadow
+            // falls right and down of each card.
+            .padding(.trailing, AppTheme.shadowOffset)
+            .padding(.bottom, AppTheme.shadowOffset)
             .listRowInsets(EdgeInsets())
             .listRowBackground(Color.clear)
         }
