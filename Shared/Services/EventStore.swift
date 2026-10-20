@@ -28,6 +28,10 @@ final class EventStore: ObservableObject {
     /// The baby from an accepted invitation, once it arrives. The app uses it
     /// once to offer folding a separate log into the shared one.
     @Published var arrivedSharedChild: Child?
+    /// When this phone last finished an import from or an export to iCloud.
+    @Published private(set) var lastCloudSync = AppGroup.defaults.object(forKey: AppGroup.Key.lastCloudSync) as? Date
+    /// What is stopping sync, while it is something the parent can fix.
+    @Published private(set) var cloudSyncProblem: CloudSyncProblem?
 
     struct LoggedEvent: Equatable {
         let objectID: NSManagedObjectID
@@ -72,6 +76,23 @@ final class EventStore: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor in self?.scheduleReload() }
         })
+        // Every finished import is a refetch too, so a partner's entries show
+        // the moment they land even if no remote-change notice follows.
+        observers.append(center.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: persistence.container,
+            queue: .main
+        ) { [weak self] note in
+            guard let event = note.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey] as? NSPersistentCloudKitContainer.Event,
+                  let ended = event.endDate, event.type != .setup else { return }
+            let imported = event.type == .import
+            let succeeded = event.succeeded
+            let problem = CloudSyncProblem(event.error)
+            let error = event.error.map { String(describing: $0) }
+            Task { @MainActor in
+                self?.cloudEventEnded(at: ended, imported: imported, succeeded: succeeded, problem: problem, error: error)
+            }
+        })
         // The log was shut when the process started (a push woke the app on a
         // phone that had not been unlocked yet) and is open now.
         observers.append(center.addObserver(
@@ -100,9 +121,24 @@ final class EventStore: ObservableObject {
         }
     }
 
+    private func cloudEventEnded(at date: Date, imported: Bool, succeeded: Bool, problem: CloudSyncProblem?, error: String?) {
+        if succeeded {
+            lastCloudSync = date
+            AppGroup.defaults.set(date, forKey: AppGroup.Key.lastCloudSync)
+            cloudSyncProblem = nil
+            if imported { scheduleReload() }
+        } else {
+            logger.error("CloudKit \(imported ? "import" : "export", privacy: .public) failed: \(error ?? "unknown", privacy: .public)")
+            if let problem { cloudSyncProblem = problem }
+        }
+    }
+
     func reload() {
         pendingReload?.cancel()
         pendingReload = nil
+        // Rows the widget changed from its own process, merged before the
+        // refetch so entries already on screen are not left as they were.
+        persistence.mergeExternalChanges()
         tallyCache = [:]
         dayGroups = nil
         reconcileWidgetCloudWrites()

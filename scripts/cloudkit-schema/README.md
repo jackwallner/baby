@@ -42,6 +42,10 @@ The Debug executable is
   setup. The invited parent's baby lands in the `.shared` store, so a
   single-store check never touches that half. Allow ten minutes: a cold setup
   takes minutes per store.
+- `--audit-events`: read-only. For each Core Data zone, counts babies,
+  entries, widget-written records and ids held by several records, then lists
+  the 25 most recently changed entries with kind, times and who changed them.
+  Prints no names or notes. Run the Release build to read Production.
 - `--compare-event-layout`: read-only. Finds one `CD_LogEvent` the app
   exported and checks that `CloudEventWriter` (the widget's direct write)
   writes the same fields with the same value kinds. Prints field names and

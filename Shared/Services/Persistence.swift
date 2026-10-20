@@ -53,6 +53,11 @@ final class Persistence: @unchecked Sendable {
     private var standIns: [(description: NSPersistentStoreDescription, store: NSPersistentStore)] = []
     private let standInLock = NSLock()
     private var unlockObserver: Any?
+    /// How far this process has read the store's history. The widget saves
+    /// straight to the files from its own process, and no context here hears
+    /// about those saves on its own, so rows already on screen kept their old
+    /// values (a sleep the widget ended still ran) until a relaunch.
+    private var historyToken: NSPersistentHistoryToken?
 
     /// True while a store file could not be opened. Writes are refused, so
     /// nothing a parent logs is written where it would be lost.
@@ -151,6 +156,7 @@ final class Persistence: @unchecked Sendable {
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         container.viewContext.transactionAuthor = Bundle.main.bundleIdentifier
+        historyToken = container.persistentStoreCoordinator.currentPersistentHistoryToken(fromStores: nil)
 
         #if os(iOS)
         if isStandingIn {
@@ -274,6 +280,7 @@ final class Persistence: @unchecked Sendable {
             }
         }
         standInLock.withLock { standIns = stillShut }
+        historyToken = container.persistentStoreCoordinator.currentPersistentHistoryToken(fromStores: nil)
         if stillShut.isEmpty, let unlockObserver {
             NotificationCenter.default.removeObserver(unlockObserver)
             self.unlockObserver = nil
@@ -292,6 +299,41 @@ final class Persistence: @unchecked Sendable {
     }
 
     var viewContext: NSManagedObjectContext { container.viewContext }
+
+    /// Merges what other processes saved since the last call into the view
+    /// context, so rows it already holds show their new values and rows they
+    /// deleted leave. This process's own saves and CloudKit's imports already
+    /// merge through `automaticallyMergesChangesFromParent`. Main thread only.
+    @discardableResult
+    func mergeExternalChanges() -> Int {
+        guard let historyToken, !isStandingIn else { return 0 }
+        let context = container.viewContext
+        let request = NSPersistentHistoryChangeRequest.fetchHistory(after: historyToken)
+        let transactions: [NSPersistentHistoryTransaction]
+        do {
+            let result = try context.execute(request) as? NSPersistentHistoryResult
+            transactions = result?.result as? [NSPersistentHistoryTransaction] ?? []
+        } catch {
+            Self.logger.error("History fetch failed: \(String(describing: error), privacy: .public)")
+            return 0
+        }
+        guard let last = transactions.last else { return 0 }
+        self.historyToken = last.token
+        let own = Bundle.main.bundleIdentifier
+        var merged = 0
+        for transaction in transactions where Self.isExternal(transaction.author, own: own) {
+            context.mergeChanges(fromContextDidSave: transaction.objectIDNotification())
+            merged += 1
+        }
+        return merged
+    }
+
+    /// Another process's save: not this one's, and not CloudKit mirroring's,
+    /// whose imports are merged already.
+    static func isExternal(_ author: String?, own: String?) -> Bool {
+        guard let author else { return true }
+        return author != own && !author.hasPrefix("NSCloudKitMirroringDelegate")
+    }
 
     func newBackgroundContext() -> NSManagedObjectContext {
         let context = container.newBackgroundContext()

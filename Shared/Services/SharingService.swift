@@ -42,17 +42,46 @@ final class SharingService: ObservableObject {
             share = nil
             return
         }
-        do {
-            let shares = try persistence.container.fetchShares(matching: [child.objectID])
-            share = shares[child.objectID]
-        } catch {
+        // Both lookups wait on the CloudKit mirroring queue, which is busy for
+        // seconds right after the app opens, so they run off the main thread
+        // and a newer refresh wins over a slower older one.
+        refreshes += 1
+        let generation = refreshes
+        let objectID = child.objectID
+        let lookup = await Self.lookUpShare(for: objectID, in: persistence.container)
+        guard generation == refreshes else { return }
+        switch lookup {
+        case .found(let found):
+            share = found
+        case .failed(let zoneID):
             // A transient failure must not make a shared log look unshared.
             // Keep the last known share if it belongs to this baby.
-            logger.error("fetchShares failed: \(String(describing: error), privacy: .public)")
-            if share?.recordID.zoneID != persistence.container.recordID(for: child.objectID)?.zoneID {
-                share = nil
-            }
+            if share?.recordID.zoneID != zoneID { share = nil }
         }
+    }
+
+    private var refreshes = 0
+
+    private enum ShareLookup: @unchecked Sendable {
+        case found(CKShare?)
+        /// The lookup failed; the baby's zone, to tell whether the last
+        /// known share is still this baby's.
+        case failed(CKRecordZone.ID?)
+    }
+
+    private nonisolated static func lookUpShare(
+        for objectID: NSManagedObjectID,
+        in container: NSPersistentCloudKitContainer
+    ) async -> ShareLookup {
+        await Task.detached(priority: .userInitiated) {
+            do {
+                return .found(try container.fetchShares(matching: [objectID])[objectID])
+            } catch {
+                Logger(subsystem: AppGroup.subsystem, category: "Sharing")
+                    .error("fetchShares failed: \(String(describing: error), privacy: .public)")
+                return .failed(container.recordID(for: objectID)?.zoneID)
+            }
+        }.value
     }
 
     /// Existing share, or a new one for the baby. The caller presents it.

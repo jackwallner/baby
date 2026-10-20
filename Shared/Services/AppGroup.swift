@@ -48,6 +48,8 @@ enum AppGroup {
         static let cloudRecordNames = "cloudRecordNames"
         static let widgetCloudOps = "widgetCloudOps"
         static let undoneEventIDs = "undoneEventIDs"
+        /// When the app last finished a CloudKit import or export.
+        static let lastCloudSync = "lastCloudSync"
         /// Widget and complication kinds, for `reloadTimelines(ofKind:)`.
         static let feedingPreference = "feedingPreference"
     }

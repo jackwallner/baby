@@ -228,8 +228,27 @@ struct SettingsView: View {
         } header: {
             Text("Log together")
         } footer: {
-            Text("Parents, grandparents and nannies each log from their own iPhone into the same baby's log, privately through iCloud.")
+            VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
+                Text("Parents, grandparents and nannies each log from their own iPhone into the same baby's log, privately through iCloud.")
+                if let problem = events.cloudSyncProblem {
+                    Text(problem.message)
+                        .foregroundStyle(AppTheme.ink)
+                        .accessibilityIdentifier("settings.sync.problem")
+                } else if events.persistence.cloudKitEnabled, let synced = events.lastCloudSync {
+                    TimelineView(.periodic(from: .now, by: 30)) { context in
+                        Text("Synced with iCloud \(Self.syncedPhrase(synced, now: context.date)).")
+                    }
+                    .accessibilityIdentifier("settings.sync.last")
+                }
+            }
         }
+    }
+
+    /// "just now" for the last minute, where "in 0 seconds" or "5 seconds ago"
+    /// would read as noise.
+    static func syncedPhrase(_ date: Date, now: Date) -> String {
+        guard now.timeIntervalSince(date) >= 60 else { return "just now" }
+        return date.formatted(.relative(presentation: .named, unitsStyle: .wide))
     }
 
     private var appearanceSection: some View {

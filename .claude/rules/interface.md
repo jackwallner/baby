@@ -235,6 +235,21 @@ never call them from `reload()` or a view body. `EventStore` looks record
 names up on a background task, throttles remote-change reloads to one per
 300 ms, and caches day tallies and day groups per reload, because History
 renders on every change and each walk covers the whole log.
+
+Freshness (2026-10-20, Jack: "the data gets stale on the device and doesn't
+sync over"). `--audit-events` (read-only, Production) showed CloudKit healthy:
+601 entries, no duplicate ids, both phones' taps uploaded within seconds. The
+lag was on the receiving side. Three fixes: `SharingService.refresh` ran
+`fetchShares` on the main thread on every foreground, the moment the mirror
+imports, so the app froze on old data; it now runs detached and the newest
+refresh wins. The widget saves from its own process and nothing merged those
+saves into the app's view context, so rows on screen kept old values (a sleep
+the widget ended kept running) until relaunch; `Persistence.mergeExternalChanges`
+merges other authors' history on every reload (`SyncFreshnessTests`). Every
+finished CloudKit import now also reloads, and Settings > Log together says
+when the phone last synced, or names a fixable cause (iCloud full, signed
+out). Core Data schedules imports as discretionary work, so a partner's entry
+can still take a moment; there is no public way to force one.
 `Reminders.reschedule` skips the notification center when the plan is
 unchanged.
 

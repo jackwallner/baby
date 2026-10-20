@@ -52,6 +52,10 @@ struct SchemaMain {
                 report("BABY_DIRECT_IMPORT_VERIFIED_AND_FIXTURE_REMOVED")
                 exit(EXIT_SUCCESS)
             }
+            if CommandLine.arguments.contains("--audit-events") {
+                try await auditEvents(in: cloud)
+                exit(EXIT_SUCCESS)
+            }
             if CommandLine.arguments.contains("--compare-event-layout") {
                 try await compareEventLayout(in: cloud)
                 exit(EXIT_SUCCESS)
@@ -652,6 +656,52 @@ struct SchemaMain {
     /// shared database, and checks that `CloudEventWriter` writes the same
     /// fields with the same value kinds and points at its baby the same way.
     /// Prints field names and kinds only, never a value.
+    /// Read-only. Lists what each Core Data zone holds: how many entries,
+    /// how many ids are held by more than one record, and the most recently
+    /// changed entries with who changed them and whether the widget wrote
+    /// them. Prints kinds and times only, never names or notes.
+    private static func auditEvents(in cloud: CKContainer) async throws {
+        let me = try await cloud.userRecordID().recordName
+        report("BABY_AUDIT_ME: \(me.suffix(6))")
+        for database in [cloud.privateCloudDatabase, cloud.sharedCloudDatabase] {
+            let scope = database.databaseScope == .shared ? "shared" : "private"
+            for zone in try await database.allRecordZones() {
+                report("BABY_AUDIT_ZONE: \(scope) \(zone.zoneID.zoneName) owner \(zone.zoneID.ownerName.suffix(6))")
+                guard zone.zoneID.zoneName.hasPrefix("com.apple.coredata.cloudkit") else { continue }
+                var token: CKServerChangeToken?
+                var events: [CKRecord] = []
+                var children = 0
+                var deletions = 0
+                while true {
+                    let changes = try await database.recordZoneChanges(inZoneWith: zone.zoneID, since: token)
+                    for (_, result) in changes.modificationResultsByID {
+                        guard let record = try? result.get().record else { continue }
+                        if record.recordType == "CD_Child" { children += 1 }
+                        if record.recordType == CloudEventWriter.recordType { events.append(record) }
+                    }
+                    deletions += changes.deletions.count
+                    token = changes.changeToken
+                    if !changes.moreComing { break }
+                }
+                let byID = Dictionary(grouping: events) { $0["CD_id"] as? String ?? "" }
+                let repeated = byID.filter { $0.value.count > 1 }
+                let widget = events.filter { $0.recordID.recordName == ($0["CD_id"] as? String) }
+                report("BABY_AUDIT_COUNTS: children \(children), entries \(events.count), widget-written \(widget.count), ids on several records \(repeated.count), deletions \(deletions)")
+                let formatter = ISO8601DateFormatter()
+                formatter.timeZone = .current
+                for record in events.sorted(by: { ($0.modificationDate ?? .distantPast) > ($1.modificationDate ?? .distantPast) }).prefix(25) {
+                    let modified = record.modificationDate.map(formatter.string) ?? "?"
+                    let started = (record["CD_startedAt"] as? Date).map(formatter.string) ?? "?"
+                    let ended = record["CD_endedAt"] == nil ? "open" : "ended"
+                    let by = record.lastModifiedUserRecordID?.recordName.suffix(6) ?? "?"
+                    let writer = record.recordID.recordName == (record["CD_id"] as? String) ? "widget" : "app"
+                    let copies = byID[record["CD_id"] as? String ?? ""]?.count ?? 0
+                    report("BABY_AUDIT_EVENT: modified \(modified) started \(started) \(record["CD_kind"] as? String ?? "?") \(ended) by \(by) \(writer) copies \(copies)")
+                }
+            }
+        }
+    }
+
     private static func compareEventLayout(in cloud: CKContainer) async throws {
         for database in [cloud.privateCloudDatabase, cloud.sharedCloudDatabase] {
             let zones = try await database.allRecordZones()
