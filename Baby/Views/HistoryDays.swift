@@ -160,9 +160,9 @@ struct DayJumpTiles: View {
             .multilineTextAlignment(.leading)
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
             .padding(AppTheme.spacing)
-            .background(AppTheme.cardElevated, in: AppTheme.buttonShape)
-            .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.edge, lineWidth: AppTheme.hairlineWidth))
-            .contentShape(AppTheme.buttonShape)
+            .background(AppTheme.cardElevated, in: AppTheme.cardShape)
+            .graphicBorder()
+            .contentShape(AppTheme.cardShape)
         }
         .buttonStyle(.borderless)
         .disabled(!hasEntries)

@@ -164,9 +164,11 @@ struct FirstWeeksView: View {
             }
         }
         .foregroundStyle(dim ? AppTheme.ink3 : AppTheme.ink)
-        .padding(.horizontal, AppTheme.looseSpacing)
+        .padding(.horizontal, AppTheme.looseSpacing - AppTheme.tightSpacing)
         .padding(.vertical, AppTheme.tightSpacing)
-        .background(state == .today ? AppTheme.cardElevated : Color.clear)
+        // Today's band sits inside the card's outline instead of running into it.
+        .background(state == .today ? AppTheme.cardElevated : Color.clear, in: RoundedRectangle(cornerRadius: AppTheme.tightSpacing, style: .continuous))
+        .padding(.horizontal, AppTheme.tightSpacing)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(dim
             ? "Day \(day), upcoming. Breastfeeding reference: \(range.summary)."

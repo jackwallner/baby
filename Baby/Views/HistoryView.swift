@@ -88,17 +88,18 @@ struct HistoryView: View {
 
     /// Today and Yesterday, then the day chart: the quick ways to a day.
     private var daysSection: some View {
+        // A section header, not a row: an inset-grouped row clips to the
+        // section's larger corner radius, which shaved the cards' outlines at
+        // their outer corners and cut the light theme's offset shadow.
         Section {
+        } header: {
             VStack(spacing: AppTheme.spacing) {
                 DayJumpTiles(onJump: jump)
                 DayScrubChart(onJump: jump)
             }
-            // The row clips its content, and the light theme's offset shadow
-            // falls right and down of each card.
-            .padding(.trailing, AppTheme.shadowOffset)
             .padding(.bottom, AppTheme.shadowOffset)
+            .textCase(nil)
             .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.clear)
         }
     }
 

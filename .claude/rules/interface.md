@@ -226,7 +226,9 @@ renders on every change and each walk covers the whole log.
 `Reminders.reschedule` skips the notification center when the plan is
 unchanged.
 
-History's day cards sit in a List row with zero insets, and the row clips:
-the light theme's offset shadow needs `shadowOffset` of room on the right and
-bottom (build 51 fix, 2026-10-19). Check any card placed in a List row in the
-light theme for a cut shadow before shipping.
+Never put a `graphicBorder` card in an inset-grouped List row: the row clips
+to the section's larger corner radius and shaves the outline off the card's
+outer corners. History's Today/Yesterday tiles and day chart live in a
+section header for that reason (2026-10-19). `GraphicBorder` draws outline
+and shadow as one path (`CardEdge`) over the card; a stroke over a
+continuous-corner fill is not concentric and left light seams.

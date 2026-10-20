@@ -23,13 +23,32 @@ struct GraphicBorder: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
+        let isDark = colorScheme == .dark
         content
-            .background {
-                AppTheme.cardShape
-                    .fill(AppTheme.card)
-                    .shadow(color: AppTheme.shadow, radius: 0, x: AppTheme.shadowOffset, y: AppTheme.shadowOffset)
-            }
-            .overlay(AppTheme.cardShape.strokeBorder(AppTheme.edge, lineWidth: colorScheme == .dark ? AppTheme.hairlineWidth : AppTheme.outlineWidth))
+            .background(AppTheme.card, in: AppTheme.cardShape)
+            .overlay(
+                CardEdge(width: isDark ? AppTheme.hairlineWidth : AppTheme.outlineWidth,
+                         offset: isDark ? 0 : AppTheme.shadowOffset)
+                    .fill(AppTheme.edge)
+            )
+    }
+}
+
+/// Outline and offset shadow as one path drawn over the card. A stroke laid
+/// over a continuous-corner fill is not concentric with it, so the fill pokes
+/// past the stroke at the corners and a light seam shows against the shadow.
+private struct CardEdge: Shape {
+    var width: CGFloat
+    var offset: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let outer = AppTheme.cardShape.path(in: rect)
+        // Stroking the outline itself keeps the width even through the
+        // corners, which an inset continuous corner does not.
+        let band = outer.strokedPath(StrokeStyle(lineWidth: width * 2)).normalized(eoFill: false)
+        let ring = outer.subtracting(outer.subtracting(band))
+        guard offset != 0 else { return ring }
+        return ring.union(outer.offsetBy(dx: offset, dy: offset).subtracting(outer))
     }
 }
 
