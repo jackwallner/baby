@@ -261,6 +261,34 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["feedSide.left"].exists, "a diaper change mid-feed keeps the side row")
     }
 
+    /// A Feed tap, its side, Done and winding the time back change what the
+    /// controls say, never where they are, and the hour strip stays.
+    func testLoggingMovesNothingElseOnTheScreen() {
+        let app = launch()
+        let strip = app.descendants(matching: .any)["hourStrip"]
+        XCTAssertTrue(strip.exists, "the hour strip fits a Pro-sized phone")
+        let ids = ["log.feed", "log.wet", "log.dirty", "log.sleep", "addOlderEntry", "todayTotals", "hourStrip", "nowCard"]
+        func frames() -> [CGRect] { ids.map { app.descendants(matching: .any).matching(identifier: $0).firstMatch.frame } }
+        let before = frames()
+
+        app.buttons["log.feed"].tap()
+        XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 3))
+        attach(app, "feed-side-in-time-slot")
+        XCTAssertEqual(frames(), before, "opening the side moved something")
+        app.buttons["feedSide.left"].tap()
+        XCTAssertEqual(frames(), before, "choosing a side moved something")
+        XCTAssertFalse(app.buttons["logTime.earlier"].exists, "the side row covers the time row")
+
+        app.buttons["feedSide.done"].tap()
+        XCTAssertTrue(app.buttons["logTime.earlier"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["feedSide.left"].exists)
+        app.buttons["logTime.earlier"].tap()
+        XCTAssertTrue(app.buttons["logTime.now"].waitForExistence(timeout: 2))
+        attach(app, "time-wound-back-in-place")
+        XCTAssertEqual(frames(), before, "winding the time back moved something")
+        XCTAssertTrue(strip.exists)
+    }
+
     func testWindingTheClockBackLogsAtThatTimeThenReturnsToNow() {
         let app = launch()
         XCTAssertFalse(app.buttons["logTime.now"].exists)
@@ -391,8 +419,10 @@ final class LoggingUITests: XCTestCase {
         let month = (canGoBack ? Calendar.current.date(byAdding: .month, value: -1, to: .now)! : .now)
             .formatted(.dateTime.month(.wide).year())
         app.buttons["tab.log"].tap()
-        XCTAssertTrue(app.buttons["logTime.now"].exists)
         XCTAssertTrue(app.buttons["feedSide.left"].isSelected)
+        // The side row covers the time row until Done; the time is still wound back.
+        app.buttons["feedSide.done"].tap()
+        XCTAssertTrue(app.buttons["logTime.now"].waitForExistence(timeout: 2))
         app.buttons["tab.history"].tap()
         XCTAssertTrue(app.buttons["Previous month"].exists)
         XCTAssertTrue(app.staticTexts[month].exists, "History keeps the selected month")

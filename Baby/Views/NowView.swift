@@ -11,8 +11,9 @@ struct NowView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var now = Date.now
     @State private var fit = NowFit()
-    @State private var hourStripHeight: CGFloat = 0
+    @State private var strip = StripMetrics()
     @StateObject private var logClock = LogClock()
+    @StateObject private var feedSides = FeedSidePrompt()
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
@@ -27,13 +28,13 @@ struct NowView: View {
                                 TodayTotalsView(now: now)
                                 OlderEntryLink(editor: $editor)
                             }
-                            LoggingControls(height: AppTheme.maxLogButtonHeight, clock: logClock, editor: $editor)
+                            LoggingControls(height: AppTheme.maxLogButtonHeight, clock: logClock, sides: feedSides, editor: $editor)
                         }
                         .padding(.vertical, AppTheme.looseSpacing)
                     } else if dynamicTypeSize.isAccessibilitySize {
                         VStack(alignment: .leading, spacing: AppTheme.spacing) {
                             NowStatusCard(now: now, clock: logClock)
-                            LoggingControls(height: nil, clock: logClock, editor: $editor)
+                            LoggingControls(height: nil, clock: logClock, sides: feedSides, editor: $editor)
                             TodayTotalsView(now: now)
                             OlderEntryLink(editor: $editor)
                         }
@@ -86,34 +87,38 @@ struct NowView: View {
     }
 
     /// A phone: everything on one screen. The buttons take whatever height
-    /// the rest leaves (within a floor and a cap), so they grow on a Pro Max,
-    /// shrink on a small phone, and give way when the side chips open. The
-    /// shortest screen (an SE) drops the hour strip. Past the floor (large
-    /// text), the page scrolls rather than clipping.
+    /// the rest leaves (within a floor and a cap), so they grow on a Pro Max
+    /// and shrink on a small phone. Nothing a tap changes alters a height, so
+    /// the fit holds still while logging. The shortest screen (an SE) drops
+    /// the hour strip. Past the floor (large text), the page scrolls rather
+    /// than clipping.
     private func fitted(available: CGFloat) -> some View {
-        let showsHourStrip = available >= AppTheme.hourStripMinHeight && fit.showsHourStrip
+        let shown = available >= AppTheme.hourStripMinHeight ? fit.strip : .hidden
         // Sections sit 12 apart; the time row and the buttons, one control,
         // sit 8 apart.
         return VStack(alignment: .leading, spacing: AppTheme.spacing) {
             NowStatusCard(now: now, clock: logClock, compact: true)
-            LoggingControls(height: fit.buttonHeight, spacing: AppTheme.tightSpacing, clock: logClock, editor: $editor)
+            LoggingControls(height: fit.buttonHeight, spacing: AppTheme.tightSpacing, clock: logClock, sides: feedSides, editor: $editor)
                 .padding(.bottom, fit.slack)
-            TodayTotalsView(now: now, compact: true, showsHourStrip: showsHourStrip) { height in
-                hourStripHeight = height
+            // The link's 44pt touch area already holds its own gap.
+            VStack(spacing: 0) {
+                TodayTotalsView(now: now, compact: true, strip: shown) { metrics in
+                    strip = metrics
+                }
+                OlderEntryLink(editor: $editor)
             }
-            OlderEntryLink(editor: $editor)
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             // The page as drawn, less the part the last fit decided, is the
             // part that does not stretch.
             let fixed = height - fit.slack - fit.buttonHeight * rows
-            refit(fixed: fixed, available: available, showsHourStrip: showsHourStrip, animated: fit.fixed != nil)
+            refit(fixed: fixed, available: available, drawn: shown, animated: fit.fixed != nil)
         }
         .onChange(of: available) { _, available in
-            if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
+            if let fixed = fit.fixed { refit(fixed: fixed, available: available, drawn: fit.strip, animated: false) }
         }
-        .onChange(of: hourStripHeight) { _, _ in
-            if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
+        .onChange(of: strip) { _, _ in
+            if let fixed = fit.fixed { refit(fixed: fixed, available: available, drawn: fit.strip, animated: false) }
         }
         .frame(minHeight: max(0, available), alignment: .top)
     }
@@ -123,16 +128,19 @@ struct NowView: View {
     }
 
     /// The buttons split what the rest leaves. Slack past the cap goes above
-    /// the totals, so they sit at the bottom of the screen.
-    private func refit(fixed: CGFloat, available: CGFloat, showsHourStrip: Bool, animated: Bool) {
-        let withoutStrip = fixed - (showsHourStrip ? hourStripHeight : 0)
-        let keepsStrip = available >= AppTheme.hourStripMinHeight
-            && withoutStrip + hourStripHeight + AppTheme.minLogButtonHeight * rows <= available
-        let fittedFixed = withoutStrip + (keepsStrip ? hourStripHeight : 0)
+    /// the totals, so they sit at the bottom of the screen. The hour strip
+    /// keeps its hour labels while the buttons can stay above their floor,
+    /// then sheds them, and only then drops (larger text on a Pro).
+    private func refit(fixed: CGFloat, available: CGFloat, drawn: StripStyle, animated: Bool) {
+        let withoutStrip = fixed - strip.height(drawn)
+        let floor = withoutStrip + AppTheme.minLogButtonHeight * rows
+        let style = available < AppTheme.hourStripMinHeight ? .hidden
+            : [StripStyle.full, .compact].first { floor + strip.height($0) <= available } ?? .hidden
+        let fittedFixed = withoutStrip + strip.height(style)
         let share = ((available - fittedFixed) / rows).rounded(.down)
         let height = min(AppTheme.maxLogButtonHeight, max(AppTheme.minLogButtonHeight, share))
-        let next = NowFit(fixed: fittedFixed, buttonHeight: height, slack: max(0, available - fittedFixed - height * rows), showsHourStrip: keepsStrip)
-        guard next.showsHourStrip != fit.showsHourStrip || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
+        let next = NowFit(fixed: fittedFixed, buttonHeight: height, slack: max(0, available - fittedFixed - height * rows), strip: style)
+        guard next.strip != fit.strip || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
             fit.fixed = fittedFixed
             return
         }
@@ -145,29 +153,60 @@ struct NowView: View {
 }
 
 /// The phone layout's last fit: the height that does not stretch (nil until
-/// measured), each button's height, and the slack above the totals.
+/// measured), each button's height, the slack above the totals, and how much
+/// of the hour strip fits.
 private struct NowFit: Equatable {
     var fixed: CGFloat?
     var buttonHeight: CGFloat = AppTheme.logButtonHeight
     var slack: CGFloat = 0
-    var showsHourStrip = true
+    var strip = StripStyle.full
+}
+
+/// The hour strip with its hour labels, without them, or not at all.
+enum StripStyle: Equatable { case full, compact, hidden }
+
+/// The strip's measured height in the totals card (with its gap above it),
+/// and its hour labels' row, so the fit can price each style.
+struct StripMetrics: Equatable {
+    var full: CGFloat = 0
+    var labels: CGFloat = 0
+
+    func height(_ style: StripStyle) -> CGFloat {
+        switch style {
+        case .full: full
+        case .compact: full - labels
+        case .hidden: 0
+        }
+    }
 }
 
 private struct LoggingControls: View {
+    @EnvironmentObject private var events: EventStore
     /// Nil: the scaled default, for accessibility text sizes.
     let height: CGFloat?
     var spacing = AppTheme.spacing
     @ObservedObject var clock: LogClock
+    @ObservedObject var sides: FeedSidePrompt
     @Binding var editor: EditorRequest?
 
     var body: some View {
         VStack(alignment: .leading, spacing: spacing) {
-            LogTimeRow(clock: clock)
-            LogButtons(clock: clock, height: height, spacing: spacing) { kind in
-                editor = EditorRequest(kind: kind, at: clock.chosen)
+            // One slot above the buttons: the log time, or for a while after
+            // a feed its side. The time row keeps the slot's height while the
+            // chips cover it, so a Feed tap moves nothing else.
+            let feed = sides.event(in: events.events)
+            ZStack {
+                LogTimeRow(clock: clock)
+                    .opacity(feed == nil ? 1 : 0)
+                    .allowsHitTesting(feed == nil)
+                    .accessibilityHidden(feed != nil)
+                if let feed {
+                    FeedSideRow(prompt: sides, event: feed)
+                        .transition(.opacity)
+                }
             }
-            if clock.isAdjusted {
-                LogHint(clock: clock)
+            LogButtons(clock: clock, sides: sides, height: height, spacing: spacing) { kind in
+                editor = EditorRequest(kind: kind, at: clock.chosen)
             }
         }
     }
@@ -219,24 +258,31 @@ private struct LogTimeRow: View {
         withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation, change)
     }
 
+    /// Wound back, the row says when it returns to now itself, so winding
+    /// the time adds no line and moves nothing.
     @ViewBuilder
     private var status: some View {
         if clock.isAdjusted {
-            Button {
-                Haptics.selected()
-                animate { clock.reset() }
-            } label: {
-                Label("Now", systemImage: "arrow.uturn.backward")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.accent)
-                    .frame(minHeight: 44)
+            HStack(spacing: AppTheme.tightSpacing) {
+                Button {
+                    Haptics.selected()
+                    animate { clock.reset() }
+                } label: {
+                    Label("Now", systemImage: "arrow.uturn.backward")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppTheme.accent)
+                        .frame(minHeight: 44)
+                }
+                .accessibilityLabel("Back to now")
+                .accessibilityIdentifier("logTime.now")
+                LogCountdown(clock: clock)
             }
-            .accessibilityLabel("Back to now")
-            .accessibilityIdentifier("logTime.now")
         } else {
             Label("Logging at", systemImage: "clock")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(AppTheme.ink2)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .frame(minHeight: 44)
         }
     }
@@ -260,21 +306,21 @@ private struct LogTimeRow: View {
     }
 }
 
-/// Under the buttons while the time is wound back: which time a tap logs at
-/// and when it returns to now.
-private struct LogHint: View {
+/// Beside "Now" while the time is wound back: how long until it returns.
+/// VoiceOver hears the whole sentence, including which time a tap logs at.
+private struct LogCountdown: View {
     @ObservedObject var clock: LogClock
 
     var body: some View {
         if let chosen = clock.chosen, let returnsAt = clock.returnsAt {
             TimelineView(.periodic(from: .now, by: 1)) { context in
-                Text("Taps log at \(LogClock.label(for: chosen, now: context.date)). Back to now in \(Self.countdown(returnsAt.timeIntervalSince(context.date))).")
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.accent)
+                let left = Self.countdown(returnsAt.timeIntervalSince(context.date))
+                Text(left)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(AppTheme.ink2)
                     .monospacedDigit()
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity)
+                    .fixedSize()
+                    .accessibilityLabel("Taps log at \(LogClock.label(for: chosen, now: context.date)). Back to now in \(left).")
                     .accessibilityIdentifier("logHint")
             }
         }
@@ -416,12 +462,12 @@ private struct NowStatusCard: View {
                     // A crossfade: "just now" to "2h 15m ago" is not a number
                     // rolling over, and the numeric roll smeared the letters.
                     .contentTransition(reduceMotion ? .identity : .opacity)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .oneLine(compact)
                 Text(leadDetail)
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.ink2)
                     .contentTransition(reduceMotion ? .identity : .opacity)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .oneLine(compact)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(accessibilityLine)
@@ -447,7 +493,7 @@ private struct NowStatusCard: View {
                         .foregroundStyle(AppTheme.ink2)
                         .monospacedDigit()
                         .contentTransition(reduceMotion ? .identity : .opacity)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .oneLine(compact)
                 }
             }
         }
@@ -501,7 +547,7 @@ private struct NowStatusCard: View {
         switch lead {
         case .feed:
             guard let date = summary.runningFeedStart ?? summary.lastFeedAt else {
-                return "Log a first feed below. We’ll remember the time and side."
+                return "Log a first feed below."
             }
             let sides = summary.isFeeding ? summary.runningSides : summary.feedSides
             let label: String? = switch sides.count {
@@ -528,6 +574,19 @@ private struct NowStatusCard: View {
     }
 }
 
+private extension View {
+    /// On the fitted phone layout a line never wraps: a longer side or time
+    /// after a tap would otherwise add a line and push every button down.
+    @ViewBuilder
+    func oneLine(_ fitted: Bool) -> some View {
+        if fitted {
+            lineLimit(1).minimumScaleFactor(0.75)
+        } else {
+            fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
 /// The day so far, counted from the hour the parent chose in Settings (or
 /// over the last 24 hours): one figure per button, then an hour-by-hour
 /// strip beneath with one row per button.
@@ -538,8 +597,9 @@ private struct TodayTotalsView: View {
     @EnvironmentObject private var settings: BabySettings
     let now: Date
     var compact = false
-    var showsHourStrip = true
-    var onHourStripHeightChange: ((CGFloat) -> Void)?
+    var strip = StripStyle.full
+    var onStripChange: ((StripMetrics) -> Void)?
+    @State private var measured = StripMetrics()
 
     var body: some View {
         let totals = WindowTotals.make(events: events.events, window: settings.totalsWindow, now: now)
@@ -557,16 +617,24 @@ private struct TodayTotalsView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(title): \(totals.line(settings.tracked))")
             .accessibilityIdentifier("todayTotals")
-            if showsHourStrip {
-                HourStrip(totals: totals, kinds: kinds)
-                    .onGeometryChange(for: CGFloat.self) { geometry in
-                        geometry.size.height + (compact ? AppTheme.tightSpacing : AppTheme.spacing)
-                    } action: { height in
-                        onHourStripHeightChange?(height)
-                    }
+            if strip != .hidden {
+                let gap = compact ? AppTheme.tightSpacing : AppTheme.spacing
+                HourStrip(totals: totals, kinds: kinds, showsHours: strip == .full) { labels in
+                    measured.labels = labels
+                }
+                .onGeometryChange(for: CGFloat.self) { geometry in
+                    geometry.size.height + gap
+                } action: { height in
+                    // Measured compact, the labels count at their last
+                    // known height.
+                    measured.full = strip == .full ? height : height + measured.labels
+                }
             }
         }
         .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing)
+        .onChange(of: measured) { _, metrics in
+            onStripChange?(metrics)
+        }
     }
 
     private func stat(_ kind: EventKind, totals: WindowTotals) -> some View {
@@ -605,6 +673,10 @@ private struct TodayTotalsView: View {
 private struct HourStrip: View {
     let totals: WindowTotals
     let kinds: [EventKind]
+    /// Off when Now is short of room: the squares alone still read as a day.
+    var showsHours = true
+    /// The hour labels' row with its gap, as drawn.
+    var onHoursHeight: (CGFloat) -> Void = { _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.cellGap) {
@@ -620,22 +692,27 @@ private struct HourStrip: View {
                     }
                 }
             }
-            HStack(spacing: 0) {
-                ForEach(Array(stride(from: 0, to: WindowTotals.columns, by: 6)), id: \.self) { hour in
-                    Text(totals.gridStart.addingTimeInterval(Double(hour) * 3600).formatted(.dateTime.hour()))
-                        .font(.caption2)
-                        .foregroundStyle(AppTheme.ink3)
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-            .padding(.leading, AppTheme.stripIconWidth + AppTheme.cellGap)
-            .padding(.top, AppTheme.hairSpacing)
+            if showsHours { hours }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Hour by hour")
         .accessibilityValue(spokenSummary)
         .accessibilityIdentifier("hourStrip")
+    }
+
+    private var hours: some View {
+        HStack(spacing: 0) {
+            ForEach(Array(stride(from: 0, to: WindowTotals.columns, by: 6)), id: \.self) { hour in
+                Text(totals.gridStart.addingTimeInterval(Double(hour) * 3600).formatted(.dateTime.hour()))
+                    .font(.caption2)
+                    .foregroundStyle(AppTheme.ink3)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(.leading, AppTheme.stripIconWidth + AppTheme.cellGap)
+        .padding(.top, AppTheme.hairSpacing)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height + AppTheme.cellGap } action: { onHoursHeight($0) }
     }
 
     private func fill(kind: EventKind, hour: Int) -> Color {

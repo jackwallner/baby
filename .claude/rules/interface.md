@@ -71,22 +71,34 @@ a control, the Action button or Siri answers that the button is off.
 Motion (2026-09-29): every tap, Undo, side chip and log-time change runs in
 one `withAnimation` transaction. Subview `.animation(_:value:)` modifiers
 animated one subtree while its siblings jumped, which drew the hint and the
-totals over each other. The side chips fade into space the Feed card grows
-(clipped, so they never slide over Feed); the hero time crossfades rather
-than using the numeric roll, which smeared "just now". Totals are a card: one
-figure per button with a kind dot, and the hour strip uses the same dots. Name and birth date are optional; never guess a birth date
+totals over each other. The hero time crossfades rather than using the
+numeric roll, which smeared "just now".
+
+Nothing moves (2026-10-20, Jack: a Feed tap should not move the other
+buttons or parts of the flow). A tap changes what Now says, never a height.
+After Feed, the side chips (with Done) crossfade into the "Logging at" row's
+slot above the buttons, and the time row keeps the slot's height under them
+(`FeedSidePrompt`, `FeedSideRow`); they used to grow the Feed card, which
+shrank every button and could drop the hour strip on an iPhone 18 Pro. The
+wound-back countdown sits beside "Now" in the time row instead of a line under
+the buttons. On the fitted layout the status card's lines never wrap
+(`oneLine`). `testLoggingMovesNothingElseOnTheScreen` pins every other
+control's frame across a Feed tap, a side, Done and a wind-back.
+
+Totals are a card: one figure per button with a kind dot, and the hour strip
+uses the same dots. Name and birth date are optional; never guess a birth date
 for someone who did not choose one.
 
 One screen (2026-09-30, Jack: "dynamically fit on one screen without having
 to scroll"). On a phone, Now measures itself (`NowFit`): everything but the
 log buttons is a fixed height, and the buttons split what the screen leaves,
 between `minLogButtonHeight` and `maxLogButtonHeight`; slack past the cap sits
-above the totals. Opening the side chips shrinks the buttons instead of pushing
-the page. Sections sit 12 apart; the time row and the buttons, one control,
-8. There is no idle "Tap to log now" hint (Jack: not needed); only the
-wound-back countdown shows under the buttons. Under `hourStripMinHeight` (an
-SE), or when the side chips and minimum button heights need its space, the
-hour strip drops. Accessibility sizes and iPad keep
+above the totals. Sections sit 12 apart; the time row and the buttons, one
+control, 8. There is no idle "Tap to log now" hint (Jack: not needed). When minimum
+button heights need its space, the hour strip first sheds its hour labels
+(`StripStyle.compact`; an 18 Pro at XL and XXL text) and only then drops; under
+`hourStripMinHeight` (an SE) it drops. "Add an older entry" sits right under
+the totals with no section gap, since its 44pt touch area holds its own. Accessibility sizes and iPad keep
 the scrolling layouts.
 
 Reports (2026-09-30, Jack: the old page "doesn't display things in an easy
@@ -120,14 +132,14 @@ version 1.1, because parents install on day three and want the first days in.
 
 2026-09-28 (Jack): Feed is one button. A tap logs a feed with no side;
 then a "Side" row of Left / Right / Bottle chips opens
-under it for 90 seconds and edits that feed (multi-select, stored in tap
+above the buttons for 90 seconds (or until Done) and edits that feed (multi-select, stored in tap
 order in the existing `side` string as `right,left`, so no schema change and
 older builds still read single sides). The widget's Feed and the plain Siri
 Feed log no side either; the Watch keeps its L / R / Bottle taps. A "Logging
 at" row above the buttons winds the log time back (minus and plus step the
 five-minute grid, the time opens a wheel); taps log at that time and it
-returns to now 60 seconds after the last touch, with a countdown under the
-buttons. The editor's time is an inline wheel (a compact picker's popover
+returns to now 60 seconds after the last touch, with a countdown beside
+"Now". The editor's time is an inline wheel (a compact picker's popover
 covered Save); existing entries autosave with Done only, new entries still
 need Log. Totals count from a day-start hour or the last 24 hours (Settings >
 Daily totals, `TotalsWindow`), with a four-row hourly strip beneath

@@ -13,10 +13,8 @@ struct LogButtons: View {
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var settings: BabySettings
     @ObservedObject var clock: LogClock
+    @ObservedObject var sides: FeedSidePrompt
     @State private var showSaveError = false
-    /// The feed the side chips edit: the one Feed just logged.
-    @State private var sideTarget: NSManagedObjectID?
-    @State private var sideTimeout: Task<Void, Never>?
     @ScaledMetric(relativeTo: .title3) private var buttonHeight = AppTheme.logButtonHeight
     /// Each button's height, fitted to the screen; nil uses the scaled default.
     var height: CGFloat? = nil
@@ -27,14 +25,6 @@ struct LogButtons: View {
     private var labelPadding: CGFloat {
         height == nil ? AppTheme.tightSpacing : AppTheme.hairSpacing
     }
-
-    /// How long the side chips stay after the last tap on them or on Feed.
-    static let sideWindow: TimeInterval = 90
-    /// The reminder offer waits this long after the last Feed or side tap, so
-    /// it never lands on a parent mid-choice.
-    static let reminderOfferDelay: TimeInterval = 6
-    @State private var showReminderOffer = false
-    @State private var reminderOfferTask: Task<Void, Never>?
 
     /// The rows the tracked buttons make: Feed, the diaper pair (or the one
     /// diaper button left), Sleep.
@@ -47,13 +37,9 @@ struct LogButtons: View {
     var body: some View {
         VStack(spacing: spacing) {
             ForEach(Self.rows(for: settings.tracked), id: \.self) { row in
-                if row == [.feed] {
-                    feedCard
-                } else {
-                    (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: spacing)) : AnyLayout(HStackLayout(spacing: spacing))) {
-                        ForEach(row, id: \.self) { kind in
-                            button(for: kind)
-                        }
+                (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: spacing)) : AnyLayout(HStackLayout(spacing: spacing))) {
+                    ForEach(row, id: \.self) { kind in
+                        button(for: kind)
                     }
                 }
             }
@@ -63,7 +49,7 @@ struct LogButtons: View {
         } message: {
             Text("Nothing was logged. Please try again.")
         }
-        .sheet(isPresented: $showReminderOffer) {
+        .sheet(isPresented: $sides.showReminderOffer) {
             FeedReminderOfferView()
         }
     }
@@ -71,6 +57,15 @@ struct LogButtons: View {
     @ViewBuilder
     private func button(for kind: EventKind) -> some View {
         switch kind {
+        case .feed:
+            // One tap logs a feed. The side is a second, optional step that
+            // opens above the buttons once the feed is safely logged, so the
+            // quick path never waits on a choice.
+            kindButton(.feed, label: "Feed") { at in
+                guard let event = events.log(.feed, at: at) else { return false }
+                sides.open(event.objectID)
+                return true
+            }
         case .sleep:
             kindButton(.sleep, label: events.runningSleep == nil ? "Sleep" : "Wake") { at in
                 if events.runningSleep != nil {
@@ -83,124 +78,19 @@ struct LogButtons: View {
         }
     }
 
+    private func hint(for kind: EventKind) -> String {
+        switch kind {
+        case .feed: "Logs a feed. You can add a side after. Hold to change the time or add details."
+        case .sleep: "Starts or ends sleep. Hold to log an earlier sleep."
+        default: "Logs a diaper. Hold to add details."
+        }
+    }
+
     /// Every tap changes the card, the totals and the toast together: one
     /// transaction, so nothing on the screen moves on its own schedule.
     private func animate<T>(_ change: () -> T) -> T {
         withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation, change)
     }
-
-    // MARK: - Feed
-
-    /// One tap logs a feed. The side is a second, optional step that opens
-    /// under the button once the feed is safely logged, so the quick path
-    /// never waits on a choice.
-    private var feedCard: some View {
-        VStack(spacing: 0) {
-            Button(action: logFeed) {
-                HStack(spacing: AppTheme.tightSpacing) {
-                    CareGraphic(kind: .feed)
-                    Text("Feed")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(AppTheme.ink)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, labelPadding)
-                .frame(minHeight: height ?? buttonHeight)
-                .contentShape(Rectangle())
-            }
-            .pressableCard()
-            .highPriorityGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in
-                Haptics.selected()
-                onEdit(.feed)
-            })
-            .accessibilityLabel("Feed")
-            .accessibilityIdentifier("log.feed")
-            .accessibilityHint("Logs a feed. You can add a side after. Hold to change the time or add details.")
-            .accessibilityAction(named: "Add details") { onEdit(.feed) }
-
-            if let target = targetFeed {
-                // One row, label beside the chips, so opening it costs the
-                // buttons as little height as it can.
-                (dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
-                    : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))) {
-                    Text("Side")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(AppTheme.ink2)
-                        .fixedSize()
-                        .accessibilityLabel("Add a side, optional")
-                    FeedSideChips(selection: sidesBinding(for: target))
-                }
-                .padding(.horizontal, AppTheme.spacing)
-                .padding(.bottom, AppTheme.tightSpacing)
-                // The card grows and the row fades up into the new space; on
-                // the way out it fades first, so chips never slide over Feed.
-                .transition(reduceMotion ? .opacity : .asymmetric(
-                    insertion: .opacity.combined(with: .offset(y: -AppTheme.tightSpacing)),
-                    removal: .opacity
-                ))
-            }
-        }
-        .background(AppTheme.fill(for: .feed), in: AppTheme.buttonShape)
-        .clipShape(AppTheme.buttonShape)
-        .graphicBorder()
-    }
-
-    private var targetFeed: LogEvent? {
-        guard let sideTarget else { return nil }
-        return events.events.first { $0.objectID == sideTarget }
-    }
-
-    private func logFeed() {
-        let at = clock.time()
-        let event = animate {
-            let event = events.log(.feed, at: at)
-            if let event { sideTarget = event.objectID }
-            return event
-        }
-        reportSave(event != nil)
-        if event != nil {
-            holdSides()
-            queueReminderOffer()
-        }
-    }
-
-    /// Once per install, a few seconds after a feed: the next feed's reminder.
-    private func queueReminderOffer() {
-        guard ReminderOfferGate.isEnabled, !Reminders.hasOfferedFeedReminder else { return }
-        reminderOfferTask?.cancel()
-        reminderOfferTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(Self.reminderOfferDelay))
-            guard !Task.isCancelled, !Reminders.hasOfferedFeedReminder else { return }
-            showReminderOffer = true
-        }
-    }
-
-    private func sidesBinding(for event: LogEvent) -> Binding<[FeedSide]> {
-        Binding(
-            get: { event.feedSides },
-            set: { sides in
-                let saved = animate {
-                    event.feedSides = sides
-                    return events.save()
-                }
-                if !saved { showSaveError = true }
-                holdSides()
-                if reminderOfferTask != nil { queueReminderOffer() }
-            }
-        )
-    }
-
-    private func holdSides() {
-        sideTimeout?.cancel()
-        sideTimeout = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(Self.sideWindow))
-            guard !Task.isCancelled else { return }
-            animate { sideTarget = nil }
-        }
-    }
-
-    // MARK: - Diapers and sleep
 
     private func reportSave(_ saved: Bool) {
         if saved {
@@ -255,8 +145,131 @@ struct LogButtons: View {
         })
         .accessibilityLabel(label)
         .accessibilityIdentifier("log.\(kind.rawValue)")
-        .accessibilityHint(kind == .sleep ? "Starts or ends sleep. Hold to log an earlier sleep." : "Logs a diaper. Hold to add details.")
+        .accessibilityHint(hint(for: kind))
         .accessibilityAction(named: "Add details") { onEdit(kind) }
+    }
+}
+
+/// What follows a Feed tap: the feed the side chips edit, how long they stay,
+/// and the one-time reminder offer, which waits for the parent to finish.
+@MainActor
+final class FeedSidePrompt: ObservableObject {
+    /// How long the side chips stay after the last tap on them or on Feed.
+    static let window: TimeInterval = 90
+    /// The reminder offer waits this long after the last Feed or side tap, so
+    /// it never lands on a parent mid-choice.
+    static let reminderOfferDelay: TimeInterval = 6
+
+    @Published private(set) var target: NSManagedObjectID?
+    @Published var showReminderOffer = false
+    private var timeout: Task<Void, Never>?
+    private var reminderOffer: Task<Void, Never>?
+
+    /// The feed the chips edit, while it still exists (Undo removes it).
+    func event(in events: [LogEvent]) -> LogEvent? {
+        guard let target else { return nil }
+        return events.first { $0.objectID == target }
+    }
+
+    /// Feed just logged: offer its side.
+    func open(_ id: NSManagedObjectID) {
+        target = id
+        hold()
+        queueReminderOffer()
+    }
+
+    /// A side tap: another full window, and the offer waits again.
+    func touched() {
+        hold()
+        if reminderOffer != nil { queueReminderOffer() }
+    }
+
+    func close() {
+        timeout?.cancel()
+        target = nil
+    }
+
+    private func hold() {
+        timeout?.cancel()
+        timeout = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(Self.window))
+            guard !Task.isCancelled else { return }
+            withAnimation(UIAccessibility.isReduceMotionEnabled ? nil : AppTheme.feedbackAnimation) {
+                self?.target = nil
+            }
+        }
+    }
+
+    /// Once per install, a few seconds after a feed: the next feed's reminder.
+    private func queueReminderOffer() {
+        guard ReminderOfferGate.isEnabled, !Reminders.hasOfferedFeedReminder else { return }
+        reminderOffer?.cancel()
+        reminderOffer = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(Self.reminderOfferDelay))
+            guard !Task.isCancelled, !Reminders.hasOfferedFeedReminder else { return }
+            self?.showReminderOffer = true
+        }
+    }
+}
+
+/// After a Feed tap, in the log-time row's place and at its height: which
+/// side that feed was. Nothing else on the screen moves when it opens.
+struct FeedSideRow: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @EnvironmentObject private var events: EventStore
+    @ObservedObject var prompt: FeedSidePrompt
+    let event: LogEvent
+    @State private var showSaveError = false
+
+    var body: some View {
+        (dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
+            : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))) {
+            Text("Side")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(AppTheme.ink2)
+                .fixedSize()
+                .accessibilityLabel("Add a side, optional")
+            FeedSideChips(selection: selection)
+            Button("Done") {
+                Haptics.selected()
+                animate { prompt.close() }
+            }
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(AppTheme.accent)
+            .frame(minWidth: 44, minHeight: 44)
+            .fixedSize()
+            .accessibilityLabel("Done adding a side")
+            .accessibilityIdentifier("feedSide.done")
+        }
+        .padding(.horizontal, AppTheme.spacing)
+        .padding(.vertical, AppTheme.hairSpacing)
+        .background(AppTheme.fill(for: .feed), in: AppTheme.buttonShape)
+        .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.edge, lineWidth: AppTheme.hairlineWidth))
+        .alert("Couldn't save this side", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("The feed is logged. Please try the side again.")
+        }
+    }
+
+    private func animate<T>(_ change: () -> T) -> T {
+        withAnimation(reduceMotion ? nil : AppTheme.feedbackAnimation, change)
+    }
+
+    private var selection: Binding<[FeedSide]> {
+        Binding(
+            get: { event.feedSides },
+            set: { sides in
+                let saved = animate {
+                    event.feedSides = sides
+                    return events.save()
+                }
+                if !saved { showSaveError = true }
+                prompt.touched()
+            }
+        )
     }
 }
 
@@ -292,6 +305,8 @@ struct FeedSideChips: View {
                 }
                 Text(side.label)
                     .font(.subheadline.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundStyle(isOn ? AppTheme.paper : AppTheme.ink)
             .frame(maxWidth: .infinity, minHeight: 44)
