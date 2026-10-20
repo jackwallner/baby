@@ -135,6 +135,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jackwallner.baby
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIcon-A AppIcon-B AppIcon-C"
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         PRODUCT_NAME: Baby
         INFOPLIST_FILE: Baby/Info.plist
         CODE_SIGN_ENTITLEMENTS: Baby/Baby.entitlements
