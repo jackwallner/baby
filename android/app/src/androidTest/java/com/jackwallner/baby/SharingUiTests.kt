@@ -103,7 +103,8 @@ class SharingUiTests {
         val code = graph.sharing.inviteCode!!
         rule.onNodeWithTag("sharing.code").assertTextContains(InviteCode.display(code))
         rule.onNodeWithText("No one has joined yet. Once they enter the code, their name appears here.").assertExists()
-        rule.onNodeWithText("Sam (you)").assertExists()
+        // The member list arrives from the server just after the code.
+        rule.waitUntil(20_000) { rule.onAllNodes(hasText("Sam (you)")).fetchSemanticsNodes().isNotEmpty() }
         assertTrue(graph.sharing.isOn)
         assertTrue(graph.sharing.isOwner)
 
