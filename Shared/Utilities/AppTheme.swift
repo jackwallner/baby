@@ -126,7 +126,7 @@ enum AppTheme {
     static let inkUIColor = UIColor(light: .init(0.11, 0.10, 0.09), dark: .init(0.95, 0.94, 0.92), night: .init(0.86, 0.68, 0.52))
     static let ink = Color(uiColor: inkUIColor)
     static let ink2 = Color(light: .init(0.42, 0.40, 0.38), dark: .init(0.68, 0.66, 0.63), night: .init(0.64, 0.49, 0.37))
-    static let ink3 = Color(light: .init(0.43, 0.41, 0.39), dark: .init(0.62, 0.60, 0.58), night: .init(0.56, 0.43, 0.33))
+    static let ink3 = Color(light: .init(0.43, 0.41, 0.39), dark: .init(0.62, 0.60, 0.58), night: .init(0.61, 0.47, 0.36))
     /// Kind colours. Amber, blue, brown, indigo: distinct at a glance and at 3am.
     /// Night light swaps blue and indigo for warm-shifted slate and mauve.
     static let feed = Color(light: .init(0.58, 0.35, 0.10), dark: .init(0.95, 0.68, 0.30), night: .init(0.84, 0.56, 0.26))

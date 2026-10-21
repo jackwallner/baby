@@ -297,3 +297,16 @@ outer corners. History's Today/Yesterday tiles and day chart live in a
 section header for that reason (2026-10-19). `GraphicBorder` draws outline
 and shadow as one path (`CardEdge`) over the card; a stroke over a
 continuous-corner fill is not concentric and left light seams.
+
+Persona pass (2026-10-21, four reviews: bottle and mixed feeding, night
+shift, second parent, first-time parent). The editor keeps a saved length to
+the second unless Length itself changes (it used to round every edited
+feed's end to whole minutes), clears the amount when Bottle is deselected,
+and starts a new bottle at the last bottle's amount. A Wake with the time
+wound back past the sleep's start ends the sleep now instead of at zero
+length. A participant's invite screen leaves out the joined list (their copy
+of the share does not list the others), and a joined person with no name
+shows as "Someone". Settings says "Join a shared log", the words the invite
+code uses. First Weeks shows a dash, not zeros, for days before the first
+entry. Night light `ink3` was lifted to 4.5:1 on cards. Left for Jack:
+the totals default, the side row, wind-back and Undo timings, and units.

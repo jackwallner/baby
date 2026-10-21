@@ -301,8 +301,8 @@ struct SummaryReport: Equatable, Sendable {
         for event in events.sorted(by: { $0.start < $1.start }) {
             let start = event.start
             let duration = event.duration.map { String(Int(($0 / 60).rounded())) } ?? ""
-            let amount = event.eventKind == .feed && event.amount > 0 ? String(Int(event.amount)) : ""
-            let weight = event.eventKind == .weight && event.amount > 0 ? String(Int(event.amount)) : ""
+            let amount = event.eventKind == .feed && event.amount > 0 ? String(Int(event.amount.rounded())) : ""
+            let weight = event.eventKind == .weight && event.amount > 0 ? String(Int(event.amount.rounded())) : ""
             let fields = [
                 childName,
                 start.formatted(.iso8601.year().month().day()),

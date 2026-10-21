@@ -33,11 +33,16 @@ struct EventEditorView: View {
     /// Long enough for a wheel to settle and a word to be typed.
     static let autosaveDelay: Duration = .milliseconds(600)
 
+    /// The saved length, so an edit that leaves Length alone keeps it to the
+    /// second instead of rounding it to the stepper's minutes.
+    private let savedSeconds: TimeInterval
+
     init(request: EditorRequest) {
         self.request = request
         let existing = request.existing
         _kind = State(initialValue: existing?.eventKind ?? request.kind)
         let seconds = existing?.duration ?? 0
+        savedSeconds = seconds
         _draft = State(initialValue: Draft(
             startedAt: existing?.startedAt ?? request.at ?? .now,
             sides: existing?.feedSides ?? [],
@@ -58,6 +63,15 @@ struct EventEditorView: View {
             .filter { $0.eventKind == .weight && $0.amount > 0 }
             .max { $0.start < $1.start }?
             .amount ?? 3400
+    }
+
+    /// Choosing Bottle starts the amount at the last bottle's, the usual
+    /// size, rather than at zero.
+    private var lastBottleAmount: Double? {
+        events.events
+            .filter { $0.eventKind == .feed && $0.feedSides.contains(.bottle) && $0.amount > 0 }
+            .max { $0.start < $1.start }?
+            .amount
     }
 
     var body: some View {
@@ -166,6 +180,10 @@ struct EventEditorView: View {
         .onAppear {
             if isNew, kind == .weight, draft.amount <= 0 { draft.amount = startingWeight }
         }
+        .onChange(of: draft.sides) { old, new in
+            guard new.contains(.bottle), !old.contains(.bottle), draft.amount <= 0, let lastBottleAmount else { return }
+            draft.amount = lastBottleAmount
+        }
         .onChange(of: draft) { _, _ in scheduleSave() }
         .onDisappear {
             // Swiped away mid-edit: keep what was changed.
@@ -254,10 +272,13 @@ struct EventEditorView: View {
         }
         set(\.startedAt, draft.startedAt)
         if kind == .feed, event.feedSides != draft.sides { event.feedSides = draft.sides }
-        if kind == .feed || kind == .weight { set(\.amount, draft.amount) }
+        if kind == .feed { set(\.amount, draft.sides.contains(.bottle) ? draft.amount : 0) }
+        if kind == .weight { set(\.amount, draft.amount) }
         if kind == .dirty { set(\.stoolColor, draft.stool?.rawValue) }
         if kind.canRun {
-            let ended: Date? = draft.isTimed ? nil : draft.startedAt.addingTimeInterval(Double(draft.durationMinutes) * 60)
+            let length = draft.durationMinutes == Int((savedSeconds / 60).rounded()) && savedSeconds > 0
+                ? savedSeconds : Double(draft.durationMinutes) * 60
+            let ended: Date? = draft.isTimed ? nil : draft.startedAt.addingTimeInterval(length)
             set(\.endedAt, ended)
         }
         let trimmed = draft.note.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -221,7 +221,7 @@ struct SettingsView: View {
             Button {
                 showJoin = true
             } label: {
-                Label("Join someone else's log", systemImage: "camera.viewfinder")
+                Label("Join a shared log", systemImage: "camera.viewfinder")
             }
             .foregroundStyle(AppTheme.accent)
             .accessibilityIdentifier("settings.partner.join")

@@ -365,6 +365,16 @@ final class EventStoreTests: XCTestCase {
         XCTAssertEqual(store.child?.displayName, "Nora")
     }
 
+    /// A Wake logged with the time wound back past the sleep's start ends it
+    /// now, rather than as a sleep of no length.
+    func testWakeWoundBackBeforeTheSleepStartEndsItNow() throws {
+        store.toggleSleep(at: Date.now.addingTimeInterval(-600))
+        store.toggleSleep(at: Date.now.addingTimeInterval(-1800))
+        XCTAssertNil(store.runningSleep)
+        let sleep = try XCTUnwrap(store.events.first { $0.eventKind == .sleep })
+        XCTAssertGreaterThan(try XCTUnwrap(sleep.duration), 590)
+    }
+
     func testUndoOfBackdatedWakeReopensSleep() {
         let start = Date.now.addingTimeInterval(-7200)
         store.startTimed(.sleep, at: start)

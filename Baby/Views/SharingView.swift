@@ -253,7 +253,7 @@ private struct InviteView: View {
                         .foregroundStyle(AppTheme.ink)
                         .fixedSize(horizontal: false, vertical: true)
                     codeCard
-                    joinedCard
+                    if isOwner { joinedCard }
                     JoinSteps(child: child)
                     AccessNote(isOwner: isOwner)
                 }
@@ -313,7 +313,7 @@ private struct InviteView: View {
                     .foregroundStyle(AppTheme.ink2)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                ForEach(joined, id: \.self) { name in
+                ForEach(Array(joined.enumerated()), id: \.offset) { _, name in
                     Label(name, systemImage: "person.fill.checkmark")
                         .font(.body.weight(.medium))
                         .foregroundStyle(AppTheme.ink)

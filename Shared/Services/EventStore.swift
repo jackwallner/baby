@@ -505,7 +505,9 @@ final class EventStore: ObservableObject {
         let running = events.filter { $0.eventKind == kind && $0.isRunning }
         guard let newest = running.first else { return false }
         for event in running {
-            event.endedAt = max(date, event.start)
+            // A log time wound back past the start would end it before it
+            // began; end it now instead.
+            event.endedAt = date >= event.start ? date : max(.now, event.start)
             event.updatedAt = .now
         }
         guard persistence.save(context) else {

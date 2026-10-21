@@ -69,7 +69,7 @@ struct FeedReminderOfferView: View {
                     .font(.title2.weight(.bold))
                     .foregroundStyle(AppTheme.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("A nudge on this phone, counted from when the last feed started, with the side to start on.")
+                Text("A nudge on this phone, counted from when the last feed started, with the side to start on if you breastfeed.")
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.ink2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -79,7 +79,9 @@ struct FeedReminderOfferView: View {
                 VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
                     Text("Before checkups too")
                         .font(.subheadline.weight(.semibold))
-                    Text("The evening before a newborn visit, a note that your summary for the doctor is ready.")
+                    Text(events.child?.birthDate == nil && Reminders.nextCheckup == nil
+                        ? "The evening before a newborn visit. Add the birth date or the visit date in Settings > Reminders."
+                        : "The evening before a newborn visit, a note that your summary for the doctor is ready.")
                         .font(.footnote)
                         .foregroundStyle(AppTheme.ink2)
                         .fixedSize(horizontal: false, vertical: true)

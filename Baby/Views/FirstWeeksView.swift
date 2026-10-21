@@ -90,13 +90,17 @@ struct FirstWeeksView: View {
 
     private func table(birthDate: Date) -> some View {
         let today = DateHelpers.dayOfLife(birthDate: birthDate, on: now) ?? 0
+        // Days before the first entry were not logged, so they show a dash
+        // rather than a zero that reads like a day with no diapers.
+        let logBegan = events.events.map(\.start).min().map { Calendar.current.startOfDay(for: $0) }
         return VStack(spacing: 0) {
             if !dynamicTypeSize.isAccessibilitySize { header }
             ForEach(1...Guidance.tallyDays, id: \.self) { day in
                 let date = DateHelpers.date(forDayOfLife: day, birthDate: birthDate)
                 let tally = events.tally(on: date, now: now)
                 let range = Guidance.range(forDayOfLife: day)
-                let state: RowState = day < today ? .past : (day == today ? .today : .future)
+                let unlogged = logBegan.map { date < $0 } ?? true
+                let state: RowState = day > today ? .future : (day == today ? .today : (unlogged ? .unlogged : .past))
                 row(day: day, date: date, tally: tally, range: range, state: state)
                 if day < Guidance.tallyDays {
                     Divider().overlay(AppTheme.cardElevated)
@@ -109,7 +113,7 @@ struct FirstWeeksView: View {
         .accessibilityIdentifier("tallyTable")
     }
 
-    private enum RowState { case past, today, future }
+    private enum RowState { case past, today, future, unlogged }
 
     private var header: some View {
         HStack(spacing: AppTheme.tightSpacing) {
@@ -126,7 +130,7 @@ struct FirstWeeksView: View {
     }
 
     private func row(day: Int, date: Date, tally: DayTally, range: Guidance.DayRange, state: RowState) -> some View {
-        let dim = state == .future
+        let dim = state == .future || state == .unlogged
         return VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
             if dynamicTypeSize.isAccessibilitySize {
                 VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
@@ -171,7 +175,7 @@ struct FirstWeeksView: View {
         .padding(.horizontal, AppTheme.tightSpacing)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(dim
-            ? "Day \(day), upcoming. Breastfeeding reference: \(range.summary)."
+            ? "Day \(day), \(state == .future ? "upcoming" : "not logged"). Breastfeeding reference: \(range.summary)."
             : "Day \(day): \(loggedLine(tally)) logged. Breastfeeding reference: \(range.summary).")
     }
 

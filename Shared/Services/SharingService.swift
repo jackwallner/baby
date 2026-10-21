@@ -221,7 +221,7 @@ final class SharingService: ObservableObject {
         isAcceptingInvitation = false
         if let error {
             logger.error("acceptShareInvitations failed: \(String(describing: error), privacy: .public)")
-            invitationError = "Check your internet connection and that iCloud is signed in, then open the invitation again. Your existing log is safe."
+            invitationError = "That invite couldn't be opened. Check your connection and that iCloud is signed in, or ask for a new link if sharing was stopped. Your existing log is safe."
             return
         }
         invitationError = nil
@@ -233,7 +233,7 @@ final class SharingService: ObservableObject {
         guard let share else { return [] }
         return share.participants
             .filter { $0.role != .owner && $0.acceptanceStatus == .accepted }
-            .compactMap(Self.displayName)
+            .map { Self.displayName($0) ?? "Someone" }
     }
 
     /// The person who started a log this account joined.
