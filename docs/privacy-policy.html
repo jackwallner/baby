@@ -19,19 +19,21 @@
         </div>
       </nav>
       <main class="legal">
-        <div class="eyebrow">Effective September 11, 2026</div>
+        <div class="eyebrow">Effective October 21, 2026</div>
         <h1>Privacy Policy</h1>
         <p>
           Baby Tracker keeps your baby's records on your devices and in your
-          own iCloud account. We do not operate an account system, sell
+          own iCloud account. On Android, an optional shared log uses Google
+          Firebase, described below. We do not operate an account system, sell
           personal information, show ads, or use advertising trackers.
         </p>
 
         <h2>What you log</h2>
         <p>
           Feeds, diapers, sleep, and any notes you add are stored on your
-          device. They are not sent to our servers, because there are none,
-          and they are not sent to RevenueCat or advertisers.
+          device. Unless you turn on logging together on Android (below), they
+          are not sent to any server we operate, and they are never sent to
+          RevenueCat or advertisers.
         </p>
 
         <h2>Logging together</h2>
@@ -68,16 +70,43 @@
         <p>
           The Android app keeps the log in the app's private storage on your
           phone. Android's own backup may copy it to your Google account if you
-          have device backup turned on; we never receive it. Logging together
-          is not available on Android. Google Play processes purchases, and
-          RevenueCat receives the same purchase information described above.
-          Reminders are scheduled locally on the phone.
+          have device backup turned on; we never receive it. Google Play
+          processes purchases, and RevenueCat receives the same purchase
+          information described above. Reminders are scheduled locally on the
+          phone.
+        </p>
+
+        <h2>Logging together on Android</h2>
+        <p>
+          Logging together on Android is off until you choose to start or join
+          a shared log. When you do, you sign in with Google, and Google
+          Firebase (Firebase Authentication and Cloud Firestore, operated by
+          Google for us) stores your name, email address and a user id from
+          your Google account, plus a copy of every baby and entry on your
+          phone: names, birth dates, feeds, sides, bottle amounts, diapers,
+          stool colours, sleep, weights and notes. Everyone in the shared log
+          can see and edit them, and only they can: our security rules refuse
+          everyone else. Other members see your first name. An invite is a
+          short code or link that lets anyone holding it join for seven days,
+          so share it only with people you trust. Data is encrypted in transit.
+          We do not use it for anything else, and Firebase does not show ads or
+          run analytics in this app. An iPhone cannot join an Android shared
+          log yet.
+        </p>
+        <p>
+          Leaving a shared log deletes your Google sign-in from the sharing
+          service and your membership; the log stays on your phone. When the
+          last person leaves, every baby and entry in the shared log is deleted
+          from Firebase. See
+          <a href="delete-account.html">how to delete your sharing data</a>,
+          including by email.
         </p>
 
         <h2>Data deletion</h2>
         <p>
           You can delete any entry in the app, stop sharing to remove a
-          partner's access, and delete the app to remove local data. Purchase
+          partner's access, leave an Android shared log to delete your sharing
+          sign-in, and delete the app to remove local data. Purchase
           records remain subject to Apple's policies.
         </p>
 

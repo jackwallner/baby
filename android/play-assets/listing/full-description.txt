@@ -9,6 +9,9 @@ Wind the log time back in five-minute steps and the next tap logs at that time. 
 REMINDERS YOU CHOOSE
 A nudge when the next feed is due, counted from when the last one started, every 2 to 4 hours as you set it, with the side to start on. The evening before a newborn checkup, a note that your summary for the doctor is ready. Both are optional and stay on your phone.
 
+LOG TOGETHER
+Invite your partner, a grandparent or a nanny with a short code or a link. Everyone logs from their own Android phone into the same log, and every phone shows the latest feed. It uses a Google sign-in, works offline and catches up when the signal returns. Logging together with an iPhone is not available yet.
+
 THE FIRST WEEKS
 The tally sheet the hospital sends home, as a screen: your logged diapers by day of life, beside a breastfeeding reference for the first two weeks from NHS Healthier Together, with the "call your pediatrician if" lines under it. The reference is general guidance, not a target or a verdict about your baby.
 
@@ -16,7 +19,7 @@ THE STAIN HELPER
 Tell it once what you have at home, and a blowout, spit-up, breast milk or formula stain gets the steps in order, skipping anything you do not own.
 
 FREE, AND STAYING FREE
-Logging, feed reminders, the first-weeks tally, full history, the stain helper, every appearance including a warm Night light for dark rooms, and more than one baby. Nothing you have already logged is ever locked later.
+Logging, logging together, feed reminders, the first-weeks tally, full history, the stain helper, every appearance including a warm Night light for dark rooms, and more than one baby. Nothing you have already logged is ever locked later.
 
 BABY+, OPTIONAL
 - The pediatrician summary: a PDF of the days since the last visit to share or print, with daily feeds and the longest gap between them, wet and dirty counts, sleep, weights and your notes
@@ -25,7 +28,7 @@ BABY+, OPTIONAL
 
 Baby+ is available as a monthly or yearly subscription, or as a one-time lifetime purchase that never renews. New subscribers may get a free trial. Subscriptions renew automatically until cancelled; manage or cancel them in Google Play under Payments and subscriptions. Prices are shown in the app before you buy and vary by region.
 
-NO ADS, NO AI, NO ACCOUNT
-No ads of any kind, no AI panels or predictions, and no account to create. Your log stays on your phone.
+NO ADS, NO AI, NO ACCOUNT TO START
+No ads of any kind and no AI panels or predictions. You never need an account: your log stays on your phone unless you turn on Log together, which keeps the shared log in Google Firebase for the people you invite.
 
 Baby Tracker is a log, not medical advice. It does not diagnose, treat or assess your baby, and it is not a medical device. Call your pediatrician with any concern.

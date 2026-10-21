@@ -2,6 +2,7 @@
 paths:
   - "android/**"
   - "scripts/android-golden/**"
+  - "firebase/**"
 ---
 
 # Baby Tracker Android
@@ -45,16 +46,36 @@ platform allows. First built 2026-10-20 on jmbp2 (fleet run
 
 ## Deliberate differences from iOS
 
-- **No logging together.** CloudKit sharing has no Android equivalent and the
-  app has no server. Android has one onboarding path (Start a new log) and no
-  Log together section. Decision needed from Jack before any cross-platform
-  sharing: a backend (for example Supabase, with accounts or invite tokens)
-  or leaving Android single-device. Do not invent one.
+- **Log together uses Firebase, not CloudKit** (Jack, 2026-10-20). Firebase
+  Auth with Google sign-in (Credential Manager) and Cloud Firestore, Spark
+  plan only: never enable billing or Blaze. One Firestore family per shared
+  log holds every baby on the phones in it (iOS shares per baby); joining
+  adds the joiner's own babies too. Android to Android only in v1: an iPhone
+  partner cannot join yet, and every sharing screen says so. Schema, rules,
+  Console steps and the iOS path are in `firebase/README.md`.
+  - `SharingService` (Firebase), `CredentialSignIn`, pure rules in
+    `model/Sync.kt` (`SyncDiff` stamps and diffs, `SyncMerge` newest
+    `updatedAt` wins with tombstones, `SyncDocs` field maps, `InviteCode`).
+    `EventStore.isShared` stamps every change; `onCommit` hands it to the
+    service; `applyRemote` merges without echoing. Undo's snapshot is rebased
+    on arriving rows, except the rows the action touched.
+  - Local only is the default. No `android/app/google-services.json` (git
+    ignored, read by Gradle without the Google Services plugin) means
+    sharing is hidden; `validateReleaseConfiguration` fails release builds
+    without it or without a web OAuth client in it.
+  - Leaving deletes the member doc and the Firebase Auth user (Play account
+    deletion); the last member out deletes the family. Removal by the owner
+    withdraws this phone's open invite.
+  - Onboarding has iOS's two paths (Start a new log, Join a shared log) only
+    when sharing is available. Invite links:
+    `https://jackwallner.github.io/baby/join.html#CODE` (page in `docs/`) and
+    `babytracker://join/CODE`.
 - No widgets, Watch, Live Activity, controls or Siri in v1 (Glance and Wear OS
   are separate projects).
 - Storage is one JSON file (`files/baby-log.json`, written atomically), not
   Core Data. Android backup may copy it to the user's Google account; the
-  privacy policy says so.
+  privacy policy says so. With Log together on, Firestore's offline cache is
+  a second copy and the JSON file stays the app's source for the screen.
 - CSV `date` column is the local calendar day. iOS formats it with
   `.iso8601.year().month().day()`, which is UTC, so an evening entry in the
   Americas lands on the next day there. That is an iOS bug worth fixing
@@ -83,12 +104,26 @@ ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest -Pkotlin.c
   Stop it with `adb -s emulator-5554 emu kill`.
 - Connected tests use the orchestrator with `clearPackageData`, so each test
   starts at onboarding.
+- Log together tests need the Firebase Local Emulator Suite (JDK 21 at
+  `~/jdks/temurin-21` on PATH for firebase-tools, JDK 17 for Gradle). Rules:
+  `cd firebase && npm ci && npx firebase-tools emulators:exec --project
+  demo-baby --only firestore 'npm test'`. Connected: wrap the Gradle command
+  in `npx firebase-tools emulators:exec --project demo-baby --only
+  auth,firestore "..."` and add
+  `-Pandroid.testInstrumentationRunnerArguments.firebaseEmulator=10.0.2.2`;
+  without it `SharingSyncTests` and the emulator `SharingUiTests` report as
+  skipped. Two phones run in one process (`SharingEmulator.Phone`).
 - Debug launch extras (`DebugLaunchOptions`, debug source set only):
   `--ez seed true` (day-three newborn log), `--ez empty true` (reviewer
   no-data path), `--ei tab 0..3` (Log, History, Upgrade/Reports, Settings),
   `--es appearance light|dark|night|system`, `--ez plus true|false` (local
   Baby+ override), `--ez screenshot true` (no reminder offer, no paywall
-  impressions).
+  impressions), `--es firebaseEmulator 10.0.2.2 --es shareName Jack` (Log
+  together on the emulators with a fake Google sign-in).
+  `firebase/scripts/join-as.mjs CODE Maya` joins as a second caregiver.
+- jmbp (Intel, x86_64 AVD, SwiftShader) records at about 9.5 fps in motion
+  windows: native 60 fps cannot be proven there. Motion review belongs on the
+  Air.
 
 ## Release preparation and remaining Play steps
 
@@ -104,14 +139,23 @@ ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest -Pkotlin.c
    offering packages, put the `goog_` key in the Air's `local.properties`,
    and register the app with rc-clean (`~/.rc-clean/apps.json`, android block
    with `filter_platform: android`).
-4. Policy forms from actual behaviour: Data safety (no data collected by the
-   developer; purchase history and an app user id go to RevenueCat for
-   purchases; no location, contacts, health records sync), Health apps
-   declaration (baby care log, not a medical device), ads: none, target
-   audience: adults (parents), content rating questionnaire, app access: no
-   login needed.
-5. Signed AAB and internal track upload are the Air release worker's job
+4. Firebase (Jack, Chrome): follow `firebase/README.md` Console setup: a
+   Spark project, Android app with the upload and Play signing SHA-1s,
+   Google sign-in on, Firestore in production mode, deploy
+   `firebase/firestore.rules`, then put `google-services.json` at
+   `android/app/` on the Air before the release build. Optional:
+   `assetlinks.json` in the `jackwallner.github.io` repo so invite links open
+   the app directly.
+5. Policy forms from actual behaviour: `android/play-assets/data-safety.md`
+   (Log together collects name, email, user id and the baby log, optional,
+   encrypted in transit, deletable in app and at
+   `https://jackwallner.github.io/baby/delete-account.html`; purchases go
+   to RevenueCat), Health apps declaration (baby care log, not a medical
+   device), ads: none, target audience: adults (parents), content rating
+   questionnaire, app access: no login needed (Google sign-in optional).
+6. Signed AAB and internal track upload are the Air release worker's job
    (upload key stays on the Air). Then licence-tester purchase and restore,
    pre-launch report, and production only when Jack asks.
 
-Last verified Play state: no Play app exists (2026-10-20).
+Last verified Play state: no Play app exists (2026-10-20). No Firebase
+project exists yet (2026-10-21); everything was verified on the emulators.

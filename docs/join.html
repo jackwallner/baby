@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Join a shared log | Baby Tracker</title>
+    <meta name="description" content="Open a Baby Tracker invite to log feeds, diapers and sleep together.">
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/png" sizes="256x256" href="icon_256.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <nav>
+        <a class="brand" href="index.html">Baby Tracker</a>
+        <div class="nav-links">
+          <a href="support.html">Support</a><a href="privacy-policy.html">Privacy</a>
+        </div>
+      </nav>
+      <main class="legal">
+        <div class="eyebrow">Log together</div>
+        <h1>You're invited to a shared baby log</h1>
+        <p id="code-line" hidden>Your invite code is <strong id="code"></strong>.</p>
+        <p><a id="open" class="button" href="#">Open in Baby Tracker</a></p>
+        <h2>On Android</h2>
+        <p>
+          Install Baby Tracker from
+          <a href="https://play.google.com/store/apps/details?id=com.jackwallner.baby">Google Play</a>
+          (it's free), choose Join a shared log, and enter the code above. If
+          the app is already installed, the button above opens it with the code
+          filled in.
+        </p>
+        <h2>On iPhone</h2>
+        <p>
+          An iPhone can't join a log started on Android yet. iPhone owners can
+          log together with other iPhones from Settings in the iPhone app.
+        </p>
+      </main>
+      <footer>
+        <span>© 2026 Jack Wallner</span
+        ><span
+          ><a href="index.html">Home</a> · <a href="privacy-policy.html">Privacy</a></span
+        >
+      </footer>
+    </div>
+    <script>
+      // The code travels in the fragment, so it never reaches a server log.
+      const code = location.hash.slice(1).toUpperCase().replace(/[^0-9A-Z]/g, '');
+      if (/^[2-9A-HJ-NP-Z]{8}$/.test(code)) {
+        document.getElementById('code').textContent = code.slice(0, 4) + '-' + code.slice(4);
+        document.getElementById('code-line').hidden = false;
+        const play = encodeURIComponent('https://play.google.com/store/apps/details?id=com.jackwallner.baby');
+        document.getElementById('open').href =
+          'intent://join/' + code + '#Intent;scheme=babytracker;package=com.jackwallner.baby;S.browser_fallback_url=' + play + ';end';
+      } else {
+        document.getElementById('open').href = 'https://play.google.com/store/apps/details?id=com.jackwallner.baby';
+      }
+    </script>
+  </body>
+</html>
