@@ -308,6 +308,11 @@ final class Persistence: @unchecked Sendable {
     func mergeExternalChanges() -> Int {
         guard let historyToken, !isStandingIn else { return 0 }
         let context = container.viewContext
+        // Taken before the fetch, because CloudKit's imports never match the
+        // filter below: moving only to the last match left the token behind
+        // them, and every reload scanned the whole backlog again. A save that
+        // lands between the two is merged twice, which changes nothing.
+        let current = container.persistentStoreCoordinator.currentPersistentHistoryToken(fromStores: nil)
         let request = NSPersistentHistoryChangeRequest.fetchHistory(after: historyToken)
         // Filtered in the store: a phone catching up on CloudKit writes
         // thousands of import transactions, and none of them need reading here.
@@ -326,8 +331,7 @@ final class Persistence: @unchecked Sendable {
             Self.logger.error("History fetch failed: \(String(describing: error), privacy: .public)")
             return 0
         }
-        guard let last = transactions.last else { return 0 }
-        self.historyToken = last.token
+        self.historyToken = current ?? transactions.last?.token ?? historyToken
         let own = Bundle.main.bundleIdentifier
         var merged = 0
         for transaction in transactions where Self.isExternal(transaction.author, own: own) {

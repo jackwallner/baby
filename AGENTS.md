@@ -41,8 +41,8 @@ are offered once, in a sheet six seconds after a feed is logged, and live in
 Settings > Reminders. The app reschedules on every summary change and the
 widget after its own feed taps. A checkup note opens the Upgrade tab with the
 pediatrician summary first (impression `baby_checkup`), or Reports for
-Baby+. Home, the widgets and the Lock Screen row show "Start on Right"
-between feeds (`NowSummary.nextSideLine`). An invitation
+Baby+. Home shows "Start on Right"
+between feeds (`NowSummary.nextSideLine`); the widgets do not (2026-10-20). An invitation
 opened before setup shows a joining screen instead of onboarding.
 
 Never: ads, AI panels or predictions, reordering the buttons or renaming them

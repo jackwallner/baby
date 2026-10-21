@@ -140,12 +140,11 @@ struct NowSummary: Codable, Equatable, Sendable {
         }
     }
 
-    /// The lines under the lead: the breast to start on and the last diaper
-    /// under a feed, and a sleep that is running.
+    /// The widgets' lines under the lead: the last diaper under a feed, and a
+    /// sleep that is running. Which side to start on stays on Home.
     func supportingLines(now: Date = .now) -> [String] {
         let tracked = tracked
         var lines: [String] = []
-        if leadKind == .feed, let next = nextSideLine { lines.append(next) }
         if leadKind == .feed, tracked.tracksDiapers { lines.append(diaperLine(now: now)) }
         if leadKind != .sleep, tracked.contains(.sleep), let sleep = sleepLine(now: now) { lines.append(sleep) }
         return lines
@@ -251,6 +250,13 @@ struct NowSummary: Codable, Equatable, Sendable {
         guard let data = AppGroup.defaults.data(forKey: AppGroup.Key.nowSummary),
               let summary = try? JSONDecoder().decode(NowSummary.self, from: data) else { return .empty }
         return summary
+    }
+
+    /// Equal apart from when it was made: the same thing to show.
+    func sameContent(as other: NowSummary) -> Bool {
+        var other = other
+        other.generatedAt = generatedAt
+        return self == other
     }
 
     func store() {

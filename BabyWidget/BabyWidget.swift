@@ -129,15 +129,11 @@ struct BabyNowWidgetView: View {
                 .foregroundStyle(AppTheme.ink)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
-            if s.leadKind == .feed, let next = s.nextSideLine {
-                Text(next).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.feed).lineLimit(1)
-            }
             if s.leadKind == .feed, s.tracked.tracksDiapers {
                 Text(s.diaperLine(now: entry.date))
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
-                    // The side line took one; the small tile has no more.
-                    .lineLimit(s.nextSideLine == nil ? 2 : 1)
+                    .lineLimit(2)
             }
             if s.leadKind != .sleep, s.tracked.contains(.sleep), let sleep = s.sleepLine(now: entry.date) {
                 Text(sleep).font(.caption).foregroundStyle(AppTheme.sleep).lineLimit(1)

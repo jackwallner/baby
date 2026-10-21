@@ -96,6 +96,25 @@ final class EventStore: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor in self?.reload() }
         })
+        // Only a change to an entry or a baby in this context can change what
+        // the log shows, so a quiet remote-change reload skips the redraw.
+        observers.append(center.addObserver(
+            forName: .NSManagedObjectContextObjectsDidChange,
+            object: persistence.viewContext,
+            queue: .main
+        ) { [weak self] note in
+            guard Self.touchesTheLog(note) else { return }
+            MainActor.assumeIsolated { self?.contextChanged = true }
+        })
+    }
+
+    private var contextChanged = true
+
+    private nonisolated static func touchesTheLog(_ note: Notification) -> Bool {
+        let keys = [NSInsertedObjectsKey, NSUpdatedObjectsKey, NSDeletedObjectsKey, NSRefreshedObjectsKey, NSInvalidatedObjectsKey]
+        return keys.contains { key in
+            (note.userInfo?[key] as? Set<NSManagedObject>)?.contains { $0 is LogEvent || $0 is Child } ?? false
+        } || note.userInfo?[NSInvalidatedAllObjectsKey] != nil
     }
 
     // MARK: - Reading
@@ -111,7 +130,7 @@ final class EventStore: ObservableObject {
         pendingReload = Task { @MainActor [weak self] in
             try? await Task.sleep(for: Self.remoteChangeDelay)
             guard !Task.isCancelled else { return }
-            self?.reload()
+            self?.refresh(force: false)
         }
     }
 
@@ -128,19 +147,24 @@ final class EventStore: ObservableObject {
         if activity == .import, event.succeeded { scheduleReload() }
     }
 
-    func reload() {
+    func reload() { refresh(force: true) }
+
+    /// Refetches the log. CloudKit posts a remote change for every export of
+    /// this phone's own taps and for batches that touch nothing on screen, so
+    /// an unforced refresh that finds the same log redraws nothing and leaves
+    /// the widgets, the Watch and their budgets alone.
+    func refresh(force: Bool) {
         pendingReload?.cancel()
         pendingReload = nil
         // Rows the widget changed from its own process, merged before the
         // refetch so entries already on screen are not left as they were.
         persistence.mergeExternalChanges()
-        tallyCache = [:]
-        dayGroups = nil
         reconcileWidgetCloudWrites()
-        children = persistence.allChildren(in: context)
-        finishPendingShareImport()
-        isAwaitingSharedBaby = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone) != nil
-        child = persistence.activeChild(in: context)
+        let children = persistence.allChildren(in: context)
+        finishPendingShareImport(among: children)
+        let awaiting = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone) != nil
+        let child = persistence.activeChild(in: context)
+        var events: [LogEvent] = []
         if let child {
             // A removed or not-yet-imported selection can fall back to a
             // stored baby. Keep the widget's identity in step with that choice.
@@ -148,20 +172,42 @@ final class EventStore: ObservableObject {
                AppGroup.defaults.string(forKey: AppGroup.Key.activeChildID) != id {
                 AppGroup.defaults.set(id, forKey: AppGroup.Key.activeChildID)
             }
-            // A turned-off button's entries stay stored but leave every
-            // surface that reads the log, until it is turned back on.
-            let tracked = TrackedKinds.current
-            events = persistence.events(for: child, in: context).filter { tracked.contains($0.eventKind) }
-        } else {
-            events = []
+            events = Self.shown(persistence.events(for: child, in: context))
         }
+        let summary = NowSummary.make(child: child, events: events)
+        let same = !contextChanged && children == self.children && child == self.child
+            && events == self.events && awaiting == isAwaitingSharedBaby && summary.sameContent(as: self.summary)
+        guard force || !same else { return }
+        contextChanged = false
+        tallyCache = [:]
+        dayGroups = nil
+        self.children = children
+        isAwaitingSharedBaby = awaiting
+        self.child = child
+        self.events = events
         runningSleep = events.first { $0.eventKind == .sleep && $0.isRunning }
         runningFeed = events.first { $0.eventKind == .feed && $0.isRunning }
-        summary = NowSummary.make(child: child, events: events)
+        let summaryChanged = !summary.sameContent(as: self.summary)
+        self.summary = summary
         revision += 1
         summary.store()
         publishCloudTargets()
-        publish()
+        if summaryChanged || !hasPublished { publish() }
+    }
+
+    private var hasPublished = false
+
+    /// The entries surfaces show: a turned-off button's entries stay stored
+    /// but leave until it is turned back on, and a widget tap's second
+    /// CloudKit copy shows once while the cleanup that deletes it runs, so
+    /// a partner's totals never count one feed twice for a moment.
+    static func shown(_ fetched: [LogEvent], tracked: TrackedKinds = .current) -> [LogEvent] {
+        var seen: Set<UUID> = []
+        return fetched.filter { event in
+            guard tracked.contains(event.eventKind) else { return false }
+            guard let id = event.id else { return true }
+            return seen.insert(id).inserted
+        }
     }
 
     /// When this process started. The container exports everything a widget
@@ -268,6 +314,7 @@ final class EventStore: ObservableObject {
 
     /// Pushes the fresh summary to every other surface.
     private func publish() {
+        hasPublished = true
         WidgetCenter.shared.reloadAllTimelines()
         WatchSyncService.shared.push(summary: summary)
         LiveActivityService.shared.sync(summary: summary)
@@ -351,7 +398,7 @@ final class EventStore: ObservableObject {
         reload()
     }
 
-    private func finishPendingShareImport() {
+    private func finishPendingShareImport(among children: [Child]) {
         guard let pending = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone),
               let name = pending["name"] as? String, let owner = pending["owner"] as? String else { return }
         let zoneID = CKRecordZone.ID(zoneName: name, ownerName: owner)
@@ -501,6 +548,11 @@ final class EventStore: ObservableObject {
         let kind = event.eventKind
         let detail = event.detailText
         let objectID = event.objectID
+        // A widget tap's second CloudKit copy, hidden from the log, goes too,
+        // or it would take this one's place until the cleanup ran.
+        for twin in persistence.events(ids: event.id.map { [$0] } ?? [], in: context) where twin.child == event.child {
+            context.delete(twin)
+        }
         context.delete(event)
         guard persistence.save(context) else {
             reload()

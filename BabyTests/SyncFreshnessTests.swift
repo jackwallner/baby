@@ -67,6 +67,48 @@ final class SyncFreshnessTests: XCTestCase {
         XCTAssertEqual(app.events.first?.feedSide, .right)
     }
 
+    /// Every tap was followed by CloudKit's remote-change notices for its own
+    /// save and export, and each one redrew every screen and reloaded the
+    /// widgets and the Watch, a hitch just after the tap.
+    func testARefreshThatFindsTheSameLogRedrawsNothing() {
+        let (app, _) = makeAppAndWidget()
+        app.log(.wet)
+        let revision = app.revision
+        app.refresh(force: false)
+        XCTAssertEqual(app.revision, revision, "an export of this phone's own tap changes nothing on screen")
+    }
+
+    func testAPartnersEntryStillRedrawsOnARemoteRefresh() throws {
+        let (app, widget) = makeAppAndWidget()
+        let revision = app.revision
+        let context = widget.viewContext
+        let child = try XCTUnwrap(widget.activeChild(in: context))
+        _ = widget.insert(kind: .wet, at: .now, side: nil, ended: nil, for: child, in: context)
+        XCTAssertTrue(widget.save(context))
+        app.refresh(force: false)
+        XCTAssertGreaterThan(app.revision, revision)
+        XCTAssertEqual(app.events.map(\.eventKind), [.wet])
+    }
+
+    /// A widget tap reaches the partner twice (the widget's own upload and
+    /// the app's export) until the cleanup deletes one.
+    func testATwoCopyEntryShowsAndDeletesAsOne() throws {
+        let (app, widget) = makeAppAndWidget()
+        let context = widget.viewContext
+        let child = try XCTUnwrap(widget.activeChild(in: context))
+        let id = UUID()
+        for _ in 0..<2 {
+            widget.insert(kind: .feed, at: .now, side: .left, ended: .now, for: child, in: context).id = id
+        }
+        XCTAssertTrue(widget.save(context))
+        app.reload()
+        XCTAssertEqual(app.events.count, 1)
+        XCTAssertEqual(app.summary.todayFeeds, 1)
+
+        app.delete(try XCTUnwrap(app.events.first))
+        XCTAssertTrue(app.events.isEmpty, "the hidden copy does not take the deleted one's place")
+    }
+
     func testOnlyOtherProcessesSavesAreMergedFromHistory() {
         let own = "com.jackwallner.baby"
         XCTAssertTrue(Persistence.isExternal("com.jackwallner.baby.widget", own: own))

@@ -264,6 +264,19 @@ time row and the next tap still logs then.
 `Reminders.reschedule` skips the notification center when the plan is
 unchanged.
 
+Two-partner pass (2026-10-20, Jack: "a little laggy and glitchy"). Each tap
+was followed by two to four more full reloads, one per remote-change notice
+for its own save and export, and each redrew every screen and reloaded the
+widgets and the Watch. Remote-change reloads are now `refresh(force: false)`:
+they refetch, and redraw only when the log, the babies, the summary or an
+entry in the view context changed (`NSManagedObjectContextObjectsDidChange`);
+widgets and the Watch reload only when the summary's content changed. A
+widget tap's two CloudKit copies show as one (`EventStore.shown`) until the
+cleanup deletes one, so the partner's totals never count it twice, and
+deleting the shown copy deletes its twin. The history token moves past
+CloudKit's imports, which the filter skips, so each reload no longer rescans
+them. The widgets no longer say "Start on"; Home and the feed reminder do.
+
 Never put a `graphicBorder` card in an inset-grouped List row: the row clips
 to the section's larger corner radius and shaves the outline off the card's
 outer corners. History's Today/Yesterday tiles and day chart live in a

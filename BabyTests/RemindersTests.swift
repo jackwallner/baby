@@ -54,9 +54,9 @@ final class RemindersTests: XCTestCase {
         XCTAssertNil(s.nextSideLine)
     }
 
-    func testWidgetLinesLeadWithTheSideUnderAFeed() {
+    func testWidgetsLeaveTheSideToHome() {
         let lines = summary(fedMinutesAgo: 30, sides: [.left]).supportingLines(now: now)
-        XCTAssertEqual(lines.first, "Start on Right")
+        XCTAssertFalse(lines.contains("Start on Right"))
     }
 
     // MARK: - Feed reminder
