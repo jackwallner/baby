@@ -10,8 +10,16 @@ struct BabyOnboardingView: View {
 
     @EnvironmentObject private var settings: BabySettings
     @EnvironmentObject private var events: EventStore
-    @StateObject private var joinModel = JoinLogModel()
-    @State private var path = Path.start
+    /// Owned by the root, which swaps this screen out while an invitation is
+    /// accepted: a failed join comes back to the Join path with its message.
+    @ObservedObject var joinModel: JoinLogModel
+    @State private var path: Path
+
+    init(joinModel: JoinLogModel) {
+        self.joinModel = joinModel
+        let failed = if case .failed = joinModel.phase { true } else { false }
+        _path = State(initialValue: failed ? .join : .start)
+    }
     @State private var name = ""
     @State private var hasBirthDate = false
     @State private var birthDate = Date.now
@@ -63,6 +71,8 @@ struct BabyOnboardingView: View {
         .padding(AppTheme.margin)
         .background(AppTheme.paper)
         .tint(AppTheme.accent)
+        // Back from waiting on a baby that never came: a fresh start.
+        .onAppear { if joinModel.phase == .joined { joinModel.reset() } }
         .alert("Couldn't save setup", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
         } message: {

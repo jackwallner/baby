@@ -116,8 +116,12 @@ struct EventEditorView: View {
                         }
                     }
                     if kind == .sleep, !draft.isTimed {
-                        Section("Sleep") {
+                        Section {
                             Stepper("Length: \(Format.compactDuration(Double(draft.durationMinutes) * 60))", value: $draft.durationMinutes, in: 0...1440, step: 5)
+                        } header: {
+                            Text("Sleep")
+                        } footer: {
+                            if isNew, draft.durationMinutes == 0 { Text("Set how long the sleep lasted, then Log.") }
                         }
                     }
                     if kind == .weight {
@@ -166,6 +170,8 @@ struct EventEditorView: View {
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Log") { logNew() }
                             .fontWeight(.semibold)
+                            // A sleep of no length is not a sleep: set how long first.
+                            .disabled(kind == .sleep && !draft.isTimed && draft.durationMinutes == 0)
                     }
                 } else {
                     ToolbarItem(placement: .confirmationAction) {

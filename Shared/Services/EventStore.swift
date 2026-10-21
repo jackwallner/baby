@@ -3,6 +3,7 @@ import Combine
 import CoreData
 import Foundation
 import os
+import UIKit
 import WidgetKit
 
 /// The app's one door to the log: every tap, edit, undo and delete goes
@@ -399,7 +400,8 @@ final class EventStore: ObservableObject {
     }
 
     private func finishPendingShareImport(among children: [Child]) {
-        guard let pending = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone),
+        guard let pending = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone)
+                ?? AppGroup.defaults.dictionary(forKey: AppGroup.Key.lateSharedZone),
               let name = pending["name"] as? String, let owner = pending["owner"] as? String else { return }
         let zoneID = CKRecordZone.ID(zoneName: name, ownerName: owner)
         guard let shared = children.first(where: { persistence.isShared($0) && sharedZoneID($0) == zoneID }),
@@ -408,12 +410,16 @@ final class EventStore: ObservableObject {
         // a parent's other profiles just because they have no entries yet.
         AppGroup.defaults.set(id.uuidString, forKey: AppGroup.Key.activeChildID)
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.pendingSharedZone)
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.lateSharedZone)
         arrivedSharedChild = shared
     }
 
-    /// The person gave up waiting for an invitation's baby. Nothing is deleted;
-    /// if the baby turns up later it simply appears in the list.
+    /// The person gave up waiting for an invitation's baby. Nothing is deleted,
+    /// and the baby still opens when it turns up, with the offer to bring in
+    /// what was logged meanwhile, so the shared log is never left unseen.
     func stopWaitingForSharedBaby() {
+        let pending = AppGroup.defaults.dictionary(forKey: AppGroup.Key.pendingSharedZone)
+        AppGroup.defaults.set(pending, forKey: AppGroup.Key.lateSharedZone)
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.pendingSharedZone)
         reload()
     }
@@ -590,7 +596,9 @@ final class EventStore: ObservableObject {
         lastLogged = logged
         undoTask?.cancel()
         undoTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(Self.undoWindow))
+            // VoiceOver has to travel to the toast at the top first.
+            let window = Self.undoWindow * (UIAccessibility.isVoiceOverRunning ? 4 : 1)
+            try? await Task.sleep(for: .seconds(window))
             guard !Task.isCancelled else { return }
             self?.lastLogged = nil
         }

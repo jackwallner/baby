@@ -71,6 +71,7 @@ struct BabyPaywallView: View {
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.ink2)
             Spacer()
+            plainDisclosure
             legalFooter
         }
         .padding(AppTheme.margin)
@@ -94,6 +95,7 @@ struct BabyPaywallView: View {
                 .foregroundStyle(AppTheme.accent)
                 .frame(minHeight: 44)
             Spacer()
+            plainDisclosure
             legalFooter
         }
         .padding(AppTheme.margin)
@@ -294,6 +296,15 @@ struct BabyPaywallView: View {
 
     private static let hedge = "Baby Tracker is a log, not medical advice."
 
+    /// Loading and failure still say how Baby+ bills (App Review 3.1.2).
+    private var plainDisclosure: some View {
+        Text(disclosureText)
+            .font(.caption2)
+            .foregroundStyle(AppTheme.ink2)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
     private var legalFooter: some View {
         VStack(spacing: AppTheme.hairSpacing) {
             Button {
@@ -302,8 +313,9 @@ struct BabyPaywallView: View {
                 Task {
                     await store.restore()
                     isRestoring = false
-                    if !store.isPro {
-                        restoreMessage = store.errorMessage ?? "No active Baby+ purchase was found for this Apple ID."
+                    // A failed restore's own error already shows above.
+                    if !store.isPro, store.errorMessage == nil {
+                        restoreMessage = "No active Baby+ purchase was found for this Apple ID."
                     }
                 }
             } label: {

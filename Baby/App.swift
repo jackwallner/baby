@@ -179,6 +179,7 @@ final class SceneDelegate: NSObject, UIWindowSceneDelegate {
 }
 
 private struct RootView: View {
+    @StateObject private var onboardingJoin = JoinLogModel()
     @EnvironmentObject private var settings: BabySettings
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var sharing: SharingService
@@ -192,12 +193,12 @@ private struct RootView: View {
             } else if isJoiningFirstLog {
                 JoiningSharedLogView()
             } else if !settings.hasCompletedSetup && !hasSharedChild && !ScreenshotConfig.isEnabled {
-                BabyOnboardingView()
+                BabyOnboardingView(joinModel: onboardingJoin)
             } else if events.child == nil && !ScreenshotConfig.isEnabled {
                 // Setup finished but the baby is gone (a stopped share, a restore
                 // from a backup): ask for the baby again rather than logging into
                 // nothing.
-                BabyOnboardingView()
+                BabyOnboardingView(joinModel: onboardingJoin)
             } else {
                 BabyHomeView(initialScreen: Self.screenshotTab ?? 0)
             }
@@ -210,10 +211,8 @@ private struct RootView: View {
             )
         ) {
             Button("Move \(Format.count(separateLogCount, "entry", "entries"))") {
-                if let shared = events.arrivedSharedChild {
-                    for separate in events.separateLogs(besides: shared) {
-                        events.moveEvents(from: separate, into: shared)
-                    }
+                if let shared = events.arrivedSharedChild, let separateLog {
+                    events.moveEvents(from: separateLog, into: shared)
                 }
                 events.arrivedSharedChild = nil
             }
@@ -244,10 +243,16 @@ private struct RootView: View {
         return !settings.hasCompletedSetup || events.child == nil
     }
 
-    private var separateLogCount: Int {
-        guard let shared = events.arrivedSharedChild else { return 0 }
-        return events.separateLogs(besides: shared).reduce(0) { $0 + $1.eventCount }
+    /// The one log started on this phone before joining. With more than one
+    /// (twins, say) none is offered: merging would fold a second baby into
+    /// the shared one.
+    private var separateLog: Child? {
+        guard let shared = events.arrivedSharedChild else { return nil }
+        let logs = events.separateLogs(besides: shared)
+        return logs.count == 1 ? logs[0] : nil
     }
+
+    private var separateLogCount: Int { separateLog?.eventCount ?? 0 }
 
     static var startTab: Int? {
         #if DEBUG

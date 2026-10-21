@@ -326,6 +326,11 @@ struct SummaryView: View {
             }
             .buttonStyle(PrimaryButtonStyle())
             .accessibilityIdentifier("summary.previewAndSharePDF")
+        } else if store.isPro, !isExample {
+            // The page is still being drawn.
+            Button {} label: { Text("Preparing the PDF…") }
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(true)
         } else if store.isPro {
             Button {} label: { Text("Log something to make your own") }
                 .buttonStyle(PrimaryButtonStyle())

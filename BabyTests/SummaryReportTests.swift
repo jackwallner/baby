@@ -154,6 +154,20 @@ final class SummaryReportTests: XCTestCase {
         XCTAssertEqual(report().weightChangeDescription, "One weigh-in")
     }
 
+    func testADaysWeightIsItsLastWeighIn() {
+        store.log(.weight, at: day(1, hour: 8))?.amount = 3300
+        store.log(.weight, at: day(1, hour: 14))?.amount = 3350
+        store.save()
+        XCTAssertEqual(report().latestWeight, 3350, "the clinic reading after the home one")
+    }
+
+    func testTwoEqualWeighInsAreNoChange() {
+        store.log(.weight, at: day(2, hour: 9))?.amount = 3300
+        store.log(.weight, at: day(1, hour: 9))?.amount = 3300
+        store.save()
+        XCTAssertTrue(report().weightChangeDescription?.hasPrefix("No change since") == true, report().weightChangeDescription ?? "nil")
+    }
+
     func testLongestFeedGapReachesBackToTheFeedBeforeTheRange() {
         let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: .now))!
         store.log(.feed, at: yesterday.addingTimeInterval(-2 * 3600)) // 10pm the night before the range

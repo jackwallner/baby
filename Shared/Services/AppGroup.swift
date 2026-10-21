@@ -23,6 +23,8 @@ enum AppGroup {
         static let hasCompletedSetup = "hasCompletedSetup"
         static let activeChildID = "activeChildID"
         static let pendingSharedZone = "pendingSharedZone"
+        /// An invitation's zone after the person stopped waiting for it.
+        static let lateSharedZone = "lateSharedZone"
         static let appearance = "appearance"
         static let diaperWords = "diaperWords"
         /// `TrackedKinds`: the buttons this family turned off.

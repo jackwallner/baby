@@ -214,6 +214,9 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
             #endif
             return
         }
+        // Loading from the first moment, so a slow status check never shows
+        // "Couldn't load plans" before the plans were even asked for.
+        isLoadingProducts = true
         Task {
             await refreshStatus()
             await loadOffering(forceRefresh: forceRefresh)
@@ -388,6 +391,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     func purchase(_ package: Package) async -> PurchaseState? {
         guard isConfigured else { return nil }
         isLoading = true
+        errorMessage = nil
         defer { isLoading = false }
         let startedTrial = isEligibleForIntroOffer(package)
         do {

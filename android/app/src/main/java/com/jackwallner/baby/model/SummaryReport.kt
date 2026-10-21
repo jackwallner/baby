@@ -106,6 +106,7 @@ data class SummaryReport(
     val firstWeight: Double? get() = days.firstNotNullOfOrNull { it.weightGrams }
     val latestWeight: Double? get() = days.lastOrNull { it.weightGrams != null }?.weightGrams
     val firstWeightDate: Long? get() = days.firstOrNull { it.weightGrams != null }?.date
+    val latestWeightDate: Long? get() = days.lastOrNull { it.weightGrams != null }?.date
 
     val weightChangeGrams: Double?
         get() {
@@ -126,7 +127,13 @@ data class SummaryReport(
         val change = weightChangeGrams
         val percent = weightChangePercent
         val since = firstWeightDate
-        if (change == null || percent == null || since == null) return if (latestWeight == null) null else "One weigh-in"
+        if (change == null || percent == null || since == null) {
+            if (latestWeight == null) return null
+            // Two days that read the same are no change, not one weigh-in.
+            val first = firstWeightDate
+            if (first != null && latestWeightDate != first) return "No change since ${Format.monthDay(first, zone, locale)}"
+            return "One weigh-in"
+        }
         val sign = if (percent > 0) "+" else "−"
         return "${Format.gramsChange(change, imperial)} ($sign${Format.oneDecimal(abs(percent))}%) since ${Format.monthDay(since, zone, locale)}"
     }
@@ -209,7 +216,7 @@ data class SummaryReport(
                     longestSleepSeconds = longest,
                     longestFeedGapSeconds = feedGaps.filter { it.first in cursor until dayEnd }.maxOfOrNull { it.second } ?: 0.0,
                     bottleFeeds = inDay.count { it.kind == EventKind.FEED && FeedSide.BOTTLE in it.feedSides && it.amount > 0 },
-                    weightGrams = inDay.filter { it.kind == EventKind.WEIGHT && it.amount > 0 }.map { it.amount }.lastOrNull(),
+                    weightGrams = inDay.filter { it.kind == EventKind.WEIGHT && it.amount > 0 }.maxByOrNull { it.start }?.amount,
                     stoolColors = inDay.mapNotNull { if (it.kind == EventKind.DIRTY) it.stool else null },
                 )
                 day = when {

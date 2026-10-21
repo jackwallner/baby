@@ -33,6 +33,7 @@ struct BabyLiveActivity: Widget {
                 }
             } compactLeading: {
                 Image(systemName: symbol(context)).foregroundStyle(color(context))
+                    .accessibilityLabel(title(context))
             } compactTrailing: {
                 elapsed(context)
                     .font(.caption2.weight(.semibold))
@@ -40,6 +41,7 @@ struct BabyLiveActivity: Widget {
                     .frame(maxWidth: 48)
             } minimal: {
                 Image(systemName: symbol(context)).foregroundStyle(color(context))
+                    .accessibilityLabel(title(context))
             }
         }
     }

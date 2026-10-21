@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// The small vocabulary every screen is built from, so no view invents its own
 /// card, button or press state.
@@ -147,6 +148,17 @@ struct SectionLabel: View {
     }
 }
 
+/// Spoken confirmations. A tap's toast sits at the top of the screen, far
+/// from where VoiceOver's focus is, so what changed is also said aloud.
+enum VoiceOver {
+    static var isRunning: Bool { UIAccessibility.isVoiceOverRunning }
+
+    static func say(_ text: String) {
+        guard isRunning else { return }
+        AccessibilityNotification.Announcement(text).post()
+    }
+}
+
 extension View {
     /// Undo stays above the controls, clearing back and add-entry buttons.
     /// Applied once around all tabs so History deletion can be undone too.
@@ -192,6 +204,10 @@ private struct UndoToastOverlay: ViewModifier {
                 }
                 .animation(reduceMotion ? nil : AppTheme.feedbackAnimation, value: events.lastLogged)
             }
+            .onChange(of: events.lastLogged) { _, logged in
+                guard let logged else { return }
+                VoiceOver.say("\(UndoToast(logged: logged, undo: {}).title). Undo is at the top of the screen.")
+            }
             .alert("Couldn't undo this entry", isPresented: $showUndoError) {
                 Button("OK", role: .cancel) {}
             } message: {
@@ -227,7 +243,7 @@ struct UndoToast: View {
             Button("Undo", action: undo)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AppTheme.accent)
-                .frame(minHeight: 44)
+                .frame(minWidth: 44, minHeight: 44)
         }
         .padding(.leading, AppTheme.spacing)
         .padding(.trailing, AppTheme.spacing)
@@ -238,7 +254,7 @@ struct UndoToast: View {
     }
 
     /// Short, in the buttons' own words: the toast sits between two bar buttons.
-    private var title: String {
+    var title: String {
         if logged.deleted != nil {
             let base: String = switch logged.kind {
             case .feed: "Deleted feed"

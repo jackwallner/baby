@@ -295,6 +295,9 @@ private struct LogTimeRow: View {
         Button {
             Haptics.selected()
             animate(action)
+            VoiceOver.say(clock.isAdjusted
+                ? "Logging at \(clock.time().formatted(date: .omitted, time: .shortened))"
+                : "Logging now")
         } label: {
             Image(systemName: symbol)
                 .font(.body.weight(.bold))
@@ -415,6 +418,7 @@ final class LogClock: ObservableObject {
             try? await Task.sleep(for: .seconds(Self.hold))
             guard !Task.isCancelled else { return }
             self?.reset()
+            VoiceOver.say("Back to logging now")
         }
     }
 }
@@ -728,15 +732,27 @@ private struct HourStrip: View {
         return AppTheme.color(for: kind).opacity(strength)
     }
 
-    /// "Feed: 2 AM, 5 AM. Pee: 3 AM." Hours with at least one entry.
+    /// "Feed: 2 AM, 5 AM. Sleep: 9 PM to 1 AM." Hours with at least one
+    /// entry, runs of hours read as one span.
     private var spokenSummary: String {
-        kinds.compactMap { kind -> String? in
-            let hours = (totals.hours[kind] ?? []).enumerated().filter { $0.element > 0 }.map {
-                totals.gridStart.addingTimeInterval(Double($0.offset) * 3600).formatted(.dateTime.hour())
+        let parts = kinds.compactMap { kind -> String? in
+            let filled = (totals.hours[kind] ?? []).enumerated().filter { $0.element > 0 }.map(\.offset)
+            guard !filled.isEmpty else { return nil }
+            var spans: [String] = []
+            var start = filled[0]
+            for (index, hour) in filled.enumerated() {
+                let next = index + 1 < filled.count ? filled[index + 1] : nil
+                guard next != hour + 1 else { continue }
+                spans.append(start == hour ? label(hour) : "\(label(start)) to \(label(hour + 1))")
+                start = next ?? hour
             }
-            return hours.isEmpty ? nil : "\(kind.label): \(hours.joined(separator: ", "))"
+            return "\(kind.label): \(spans.joined(separator: ", "))"
         }
-        .joined(separator: ". ")
+        return parts.isEmpty ? "Nothing logged yet" : parts.joined(separator: ". ")
+    }
+
+    private func label(_ hour: Int) -> String {
+        totals.gridStart.addingTimeInterval(Double(hour) * 3600).formatted(.dateTime.hour())
     }
 }
 

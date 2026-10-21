@@ -64,6 +64,39 @@ struct FeedReminderOfferView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
+            // Scrolls at large text sizes, so the two buttons stay on screen.
+            ScrollView {
+                choices
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            VStack(spacing: AppTheme.tightSpacing) {
+                Button(isAsking ? "Turning on…" : "Turn on reminders") { accept() }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .disabled(isAsking)
+                    .accessibilityIdentifier("reminderOffer.accept")
+                Button("Not now") { decline() }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink2)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .accessibilityIdentifier("reminderOffer.decline")
+            }
+        }
+        .padding(AppTheme.margin)
+        .padding(.top, AppTheme.tightSpacing)
+        .background(AppTheme.paper.ignoresSafeArea())
+        .tint(AppTheme.accent)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
+        .onAppear {
+            Reminders.hasOfferedFeedReminder = true
+            // Someone helping with a log they joined rarely takes the baby
+            // to checkups; the parents' phones carry those notes.
+            if let child = events.child, events.persistence.isShared(child) { checkups = false }
+        }
+    }
+
+    private var choices: some View {
+        VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
             VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
                 Text("Remind you about the next feed?")
                     .font(.title2.weight(.bold))
@@ -88,26 +121,7 @@ struct FeedReminderOfferView: View {
                 }
             }
             .accessibilityIdentifier("reminderOffer.checkups")
-            Spacer(minLength: 0)
-            VStack(spacing: AppTheme.tightSpacing) {
-                Button(isAsking ? "Turning on…" : "Turn on reminders") { accept() }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .disabled(isAsking)
-                    .accessibilityIdentifier("reminderOffer.accept")
-                Button("Not now") { decline() }
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.ink2)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .accessibilityIdentifier("reminderOffer.decline")
-            }
         }
-        .padding(AppTheme.margin)
-        .padding(.top, AppTheme.tightSpacing)
-        .background(AppTheme.paper.ignoresSafeArea())
-        .tint(AppTheme.accent)
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
-        .onAppear { Reminders.hasOfferedFeedReminder = true }
     }
 
     private func accept() {

@@ -310,3 +310,27 @@ shows as "Someone". Settings says "Join a shared log", the words the invite
 code uses. First Weeks shows a dash, not zeros, for days before the first
 entry. Night light `ink3` was lifted to 4.5:1 on cards. Left for Jack:
 the totals default, the side row, wind-back and Undo timings, and units.
+
+Second persona pass (2026-10-21: grandparent helper, twins, doctor visit
+with Baby+, VoiceOver at 3am). Joining: onboarding's `JoinLogModel` lives in
+`RootView`, because accepting swaps onboarding out, and a failed paste used
+to come back to a blank start screen; it now returns to Join with its
+message. "Start my own log instead" keeps the zone as `lateSharedZone`, so
+the baby still opens when it arrives, with the offer to bring in what was
+logged meanwhile; that offer moves a log only when exactly one other log
+exists (twins are never folded together). The waiting screen and the
+reminder offer scroll at large text. The scanner says when the camera is off
+or the code is not an invite. `SharingService` clears the last baby's share
+on a switch, so Log together never shows (or reopens) another baby's invite.
+A new sleep from the editor cannot be logged at zero length. Reports: a
+day's weight is its last weigh-in, two equal weigh-ins read "No change
+since", the PDF moves the key and notes to a new page instead of the footer,
+and a day with nothing logged prints dots, not zeros. The paywall's loading
+and failure states carry the billing disclosure (3.1.2), loading shows from
+the first moment, and a purchase clears the last error. VoiceOver: each log,
+Undo and wind-back is announced, Undo stays four times longer while
+VoiceOver runs, Sleep reads how long the baby has slept, the hour strip
+reads spans ("9 PM to 1 AM") or "Nothing logged yet", and the Dynamic
+Island icons are labelled. Left alone: the 10pt tab capsule labels (fixed
+for the one-screen fit), the Watch's 38pt Sleep row, a baby name on widget
+faces, per-baby reminders, and deleting a baby.

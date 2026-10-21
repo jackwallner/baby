@@ -145,7 +145,12 @@ struct SummaryReport: Equatable, Sendable {
     /// the range, as grams and as the share a newborn's loss is judged by.
     var weightChangeDescription: String? {
         guard let change = weightChangeGrams, let percent = weightChangePercent, let since = firstWeightDate else {
-            return latestWeight == nil ? nil : "One weigh-in"
+            guard latestWeight != nil else { return nil }
+            // Two days that read the same are no change, not one weigh-in.
+            if let since = firstWeightDate, latestWeightDate != since {
+                return "No change since \(since.formatted(.dateTime.month(.abbreviated).day()))"
+            }
+            return "One weigh-in"
         }
         let sign = percent > 0 ? "+" : "−"
         let share = "\(sign)\(abs(percent).formatted(.number.precision(.fractionLength(1))))%"
@@ -260,7 +265,8 @@ struct SummaryReport: Equatable, Sendable {
                 longestSleepSeconds: longest,
                 longestFeedGapSeconds: feedGaps.filter { $0.at >= cursor && $0.at < dayEnd }.map(\.seconds).max() ?? 0,
                 bottleFeeds: inDay.filter { $0.eventKind == .feed && $0.feedSides.contains(.bottle) && $0.amount > 0 }.count,
-                weightGrams: inDay.filter { $0.eventKind == .weight && $0.amount > 0 }.map(\.amount).last,
+                // The day's last weigh-in: a clinic reading after a home one.
+                weightGrams: inDay.filter { $0.eventKind == .weight && $0.amount > 0 }.max { $0.start < $1.start }?.amount,
                 stoolColors: inDay.compactMap { $0.eventKind == .dirty ? $0.stool : nil }
             )
             if cursor >= today {

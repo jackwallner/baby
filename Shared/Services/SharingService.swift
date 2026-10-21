@@ -16,6 +16,8 @@ final class SharingService: ObservableObject {
     static let shared = SharingService(persistence: .shared, events: .shared)
 
     @Published private(set) var share: CKShare?
+    /// The baby `share` was looked up for.
+    private var shareChildID: NSManagedObjectID?
     @Published private(set) var iCloudAvailable = false
     @Published var invitationError: String?
     /// True while iCloud is accepting an invitation, before the baby imports.
@@ -47,6 +49,13 @@ final class SharingService: ObservableObject {
         guard let child, persistence.cloudKitEnabled else {
             share = nil
             return
+        }
+        // After a switch, the last baby's share must not stand in for this
+        // one's while the lookup runs: Log together would show the wrong
+        // people, and its sheet would reopen that invite.
+        if child.objectID != shareChildID {
+            share = nil
+            shareChildID = child.objectID
         }
         // Both lookups wait on the CloudKit mirroring queue, which is busy for
         // seconds right after the app opens, so they run off the main thread.

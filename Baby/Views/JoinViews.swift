@@ -35,6 +35,11 @@ final class JoinLogModel: ObservableObject {
         }
     }
 
+    func reset() {
+        link = ""
+        phase = .idle
+    }
+
     /// A scanned code joins straight away; there is nothing left to confirm.
     func scanned(_ payload: String, using sharing: SharingService) async {
         link = payload
@@ -213,8 +218,35 @@ struct JoiningSharedLogView: View {
     @State private var isTakingLong = false
 
     var body: some View {
+        VStack(spacing: AppTheme.spacing) {
+            // Scrolls at large text sizes, so the way out below stays on screen.
+            GeometryReader { proxy in
+                ScrollView {
+                    waiting
+                        .frame(maxWidth: .infinity, minHeight: proxy.size.height)
+                }
+                .scrollBounceBehavior(.basedOnSize)
+            }
+            if isTakingLong {
+                Button("Start my own log instead") { events.stopWaitingForSharedBaby() }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("joining.giveUp")
+            }
+        }
+        .frame(maxWidth: AppTheme.contentWidth)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(AppTheme.margin)
+        .background(AppTheme.paper)
+        .task {
+            try? await Task.sleep(for: .seconds(ProcessInfo.processInfo.arguments.contains("-FastJoinTimeout") ? 1 : 60))
+            isTakingLong = true
+        }
+    }
+
+    private var waiting: some View {
         VStack(spacing: AppTheme.looseSpacing) {
-            Spacer(minLength: 0)
             SharedLogGraphic()
             ProgressView()
                 .tint(AppTheme.accent)
@@ -235,22 +267,6 @@ struct JoiningSharedLogView: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            Spacer(minLength: 0)
-            if isTakingLong {
-                Button("Start my own log instead") { events.stopWaitingForSharedBaby() }
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AppTheme.accent)
-                    .frame(minHeight: 44)
-                    .accessibilityIdentifier("joining.giveUp")
-            }
-        }
-        .frame(maxWidth: AppTheme.contentWidth)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(AppTheme.margin)
-        .background(AppTheme.paper)
-        .task {
-            try? await Task.sleep(for: .seconds(ProcessInfo.processInfo.arguments.contains("-FastJoinTimeout") ? 1 : 60))
-            isTakingLong = true
         }
     }
 }
@@ -258,16 +274,19 @@ struct JoiningSharedLogView: View {
 /// Live camera scanning for the invite QR code, inside the app.
 struct InviteScannerScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var problem: InviteScanner.Problem?
     let found: (String) -> Void
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            InviteScanner(found: found)
+            InviteScanner(found: found) { problem = $0 }
                 .ignoresSafeArea()
             VStack(spacing: AppTheme.spacing) {
-                Text("Point at the code on their phone")
+                Text(problem?.message ?? "Point at the code on their phone")
                     .font(.headline)
                     .foregroundStyle(AppTheme.ink)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                 Button("Cancel") { dismiss() }
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(AppTheme.accent)
@@ -283,7 +302,20 @@ struct InviteScannerScreen: View {
 }
 
 struct InviteScanner: UIViewControllerRepresentable {
+    enum Problem: Equatable {
+        case cameraOff
+        case notAnInvite
+
+        var message: String {
+            switch self {
+            case .cameraOff: "The camera is off for Baby Tracker. Cancel, then paste the link instead."
+            case .notAnInvite: "That code isn't a Baby Tracker invite. Scan the one in their Log together screen."
+            }
+        }
+    }
+
     let found: (String) -> Void
+    let problem: (Problem) -> Void
 
     @MainActor static var isAvailable: Bool {
         #if DEBUG
@@ -304,26 +336,39 @@ struct InviteScanner: UIViewControllerRepresentable {
 
     func updateUIViewController(_ scanner: DataScannerViewController, context: Context) {
         guard !scanner.isScanning else { return }
-        try? scanner.startScanning()
+        do {
+            try scanner.startScanning()
+        } catch {
+            // Camera access was declined, or the camera is in use.
+            Task { @MainActor in problem(.cameraOff) }
+        }
     }
 
-    func makeCoordinator() -> Coordinator { Coordinator(found: found) }
+    func makeCoordinator() -> Coordinator { Coordinator(found: found, problem: problem) }
 
     @MainActor
     final class Coordinator: NSObject, DataScannerViewControllerDelegate {
         private let found: (String) -> Void
+        private let problem: (Problem) -> Void
         private var didFind = false
 
-        init(found: @escaping (String) -> Void) {
+        init(found: @escaping (String) -> Void, problem: @escaping (Problem) -> Void) {
             self.found = found
+            self.problem = problem
+        }
+
+        func dataScanner(_ dataScanner: DataScannerViewController, becameUnavailableWithError error: DataScannerViewController.ScanningUnavailable) {
+            problem(.cameraOff)
         }
 
         func dataScanner(_ dataScanner: DataScannerViewController, didAdd addedItems: [RecognizedItem], allItems: [RecognizedItem]) {
             guard !didFind else { return }
             for item in addedItems {
-                guard case .barcode(let barcode) = item,
-                      let payload = barcode.payloadStringValue,
-                      ShareInvite.url(in: payload) != nil else { continue }
+                guard case .barcode(let barcode) = item, let payload = barcode.payloadStringValue else { continue }
+                guard ShareInvite.url(in: payload) != nil else {
+                    problem(.notAnInvite)
+                    continue
+                }
                 didFind = true
                 dataScanner.stopScanning()
                 found(payload)

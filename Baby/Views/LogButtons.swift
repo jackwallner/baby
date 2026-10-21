@@ -144,6 +144,7 @@ struct LogButtons: View {
             onEdit(kind)
         })
         .accessibilityLabel(label)
+        .accessibilityValue(kind == .sleep ? events.summary.sleepLine() ?? "" : "")
         .accessibilityIdentifier("log.\(kind.rawValue)")
         .accessibilityHint(hint(for: kind))
         .accessibilityAction(named: "Add details") { onEdit(kind) }

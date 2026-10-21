@@ -111,6 +111,15 @@ enum PDFReport {
                     rows = rows.dropFirst()
                 }
                 if rows.isEmpty {
+                    // The key and the notes' first lines move to a new page
+                    // rather than run into the footer.
+                    let needed: CGFloat = 32 + (report.notes.isEmpty ? 0 : 56)
+                    if y + needed > pageSize.height - margin - 40 {
+                        drawFooter(report, page: page, isExample: isExample)
+                        page += 1
+                        context.beginPage()
+                        y = margin
+                    }
                     y = drawKey(report, at: y + 8)
                     y = drawNotes(report, at: y + 12)
                 }
@@ -278,7 +287,8 @@ enum PDFReport {
             } else {
                 Ink.primary
             }
-            draw(value.isEmpty && index > 1 ? "·" : value,
+            // A day with nothing logged reads as a dot, never as 0 diapers.
+            draw((value.isEmpty || empty && column.title != "WEIGHT") && index > 1 ? "·" : value,
                  font: font, color: color,
                  at: CGPoint(x: x, y: y), width: column.width - gutter, alignment: column.alignment)
             x += column.width

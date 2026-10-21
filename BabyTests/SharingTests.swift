@@ -8,11 +8,13 @@ import XCTest
 final class SharingTests: XCTestCase {
     override func setUp() async throws {
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.pendingSharedZone)
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.lateSharedZone)
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.activeChildID)
     }
 
     override func tearDown() async throws {
         AppGroup.defaults.removeObject(forKey: AppGroup.Key.pendingSharedZone)
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.lateSharedZone)
     }
 
     func testAcceptedInviteWaitsForItsBabyAcrossRestartWithoutDeletingProfiles() throws {
@@ -190,6 +192,7 @@ final class SharingTests: XCTestCase {
 
         XCTAssertFalse(events.isAwaitingSharedBaby)
         XCTAssertNil(AppGroup.defaults.object(forKey: AppGroup.Key.pendingSharedZone))
+        XCTAssertNotNil(AppGroup.defaults.object(forKey: AppGroup.Key.lateSharedZone), "the baby still opens when it arrives")
     }
 
     func testEntriesLoggedBeforeJoiningMoveIntoTheSharedBaby() throws {
