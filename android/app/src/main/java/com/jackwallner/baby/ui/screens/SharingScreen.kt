@@ -256,8 +256,7 @@ private fun CodeCard(code: String?, expires: Long, busy: Boolean, onRetry: () ->
             style = MaterialTheme.typography.displaySmall.copy(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold),
             color = palette.ink,
             modifier = Modifier
-                .background(palette.codePaper, Tokens.shape)
-                .padding(horizontal = Tokens.loose, vertical = Tokens.spacing)
+                .padding(vertical = Tokens.tight)
                 .testTag("sharing.code")
                 .semantics { contentDescription = "Invite code ${code.toCharArray().joinToString(" ")}" },
         )

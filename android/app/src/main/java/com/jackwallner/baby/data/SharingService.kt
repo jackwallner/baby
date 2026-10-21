@@ -191,6 +191,8 @@ class SharingService(
         batch.set(family(id).collection("members").document(user.uid), memberFields(user, "owner", null))
         online { batch.commit().await() }
         becomeMember(id, owner = true)
+        // The invite first, so it isn't queued behind a long log's upload. The page retries if it fails.
+        runCatching { invite() }
         push(SyncDiff.everything(events.state))
         attach(id)
     }
