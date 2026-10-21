@@ -56,12 +56,14 @@ import com.jackwallner.baby.model.LogEvent
 import com.jackwallner.baby.ui.screens.EventEditor
 import com.jackwallner.baby.ui.screens.FirstWeeksScreen
 import com.jackwallner.baby.ui.screens.HistoryScreen
+import com.jackwallner.baby.ui.screens.JoinScreen
 import com.jackwallner.baby.ui.screens.LogScreen
 import com.jackwallner.baby.ui.screens.OnboardingScreen
 import com.jackwallner.baby.ui.screens.PaywallScreen
 import com.jackwallner.baby.ui.screens.RemindersScreen
 import com.jackwallner.baby.ui.screens.ReportsScreen
 import com.jackwallner.baby.ui.screens.SettingsScreen
+import com.jackwallner.baby.ui.screens.SharingScreen
 import com.jackwallner.baby.ui.screens.StainHelperScreen
 import com.jackwallner.baby.ui.theme.LocalPalette
 import com.jackwallner.baby.ui.theme.Tokens
@@ -71,7 +73,7 @@ data class EditorRequest(val event: LogEvent? = null, val kind: EventKind = Even
 
 enum class Tab { LOG, HISTORY, UPGRADE, SETTINGS }
 
-enum class SettingsPage { ROOT, FIRST_WEEKS, STAIN, REMINDERS }
+enum class SettingsPage { ROOT, FIRST_WEEKS, STAIN, REMINDERS, SHARING, JOIN }
 
 /** Height the floating capsule reserves at the bottom of every tab. */
 val CapsuleReserve = Tokens.tabHeight + Tokens.hair * 4 + 8.dp
@@ -92,6 +94,13 @@ fun Root(graph: AppGraph, pendingTab: Int?, consumedTab: () -> Unit) {
         pendingTab?.let { tab = Tab.entries.getOrElse(it) { Tab.LOG } }
         consumedTab()
     }
+    // An opened invite link goes to Join (the code is filled in there).
+    LaunchedEffect(graph.sharing.pendingCode) {
+        if (graph.sharing.pendingCode != null && graph.sharing.isAvailable) {
+            tab = Tab.SETTINGS
+            settingsPage = SettingsPage.JOIN
+        }
+    }
     BackHandler(enabled = tab != Tab.LOG || settingsPage != SettingsPage.ROOT) {
         if (tab == Tab.SETTINGS && settingsPage != SettingsPage.ROOT) settingsPage = SettingsPage.ROOT else tab = Tab.LOG
     }
@@ -106,6 +115,8 @@ fun Root(graph: AppGraph, pendingTab: Int?, consumedTab: () -> Unit) {
                     SettingsPage.FIRST_WEEKS -> FirstWeeksScreen(onBack = { settingsPage = SettingsPage.ROOT })
                     SettingsPage.STAIN -> StainHelperScreen(onBack = { settingsPage = SettingsPage.ROOT })
                     SettingsPage.REMINDERS -> RemindersScreen(onBack = { settingsPage = SettingsPage.ROOT })
+                    SettingsPage.SHARING -> SharingScreen(onBack = { settingsPage = SettingsPage.ROOT })
+                    SettingsPage.JOIN -> JoinScreen(onBack = { settingsPage = SettingsPage.ROOT }, onJoined = { settingsPage = SettingsPage.SHARING })
                 }
             }
         }

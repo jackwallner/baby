@@ -84,7 +84,7 @@ import java.time.ZoneId
 import kotlinx.coroutines.launch
 
 @Composable
-private fun Page(title: String, onBack: (() -> Unit)? = null, tag: String, content: @Composable ColumnScope.() -> Unit) {
+internal fun Page(title: String, onBack: (() -> Unit)? = null, tag: String, content: @Composable ColumnScope.() -> Unit) {
     val palette = LocalPalette.current
     if (onBack != null) BackHandler(onBack = onBack)
     Column(
@@ -148,6 +148,7 @@ fun SettingsScreen(open: (SettingsPage) -> Unit, onSeePlus: () -> Unit) {
             RowDivider()
             NavRow("Add a baby", tag = "settings.addBaby") { addingBaby = true }
         }
+        LogTogetherGroup(open)
         Group(
             header = "Buttons",
             footer = "A button that is off leaves the home screen, History and reports. What was logged with it is kept, and comes back if you turn it on again.",

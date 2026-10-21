@@ -29,6 +29,7 @@ data class LogState(
                     put("birthDate", c.birthDate ?: JSONObject.NULL)
                     put("createdAt", c.createdAt)
                     put("lastVisitAt", c.lastVisitAt ?: JSONObject.NULL)
+                    put("updatedAt", c.updatedAt)
                 })
             }
         })
@@ -59,7 +60,9 @@ data class LogState(
             val children = root.optJSONArray("children")?.let { array ->
                 (0 until array.length()).map { i ->
                     val c = array.getJSONObject(i)
-                    Child(c.getString("id"), c.stringOrNull("name"), c.longOrNull("birthDate"), c.getLong("createdAt"), c.longOrNull("lastVisitAt"))
+                    val createdAt = c.getLong("createdAt")
+                    Child(c.getString("id"), c.stringOrNull("name"), c.longOrNull("birthDate"), createdAt, c.longOrNull("lastVisitAt"),
+                        c.longOrNull("updatedAt") ?: createdAt)
                 }
             } ?: emptyList()
             val events = root.optJSONArray("events")?.let { array ->

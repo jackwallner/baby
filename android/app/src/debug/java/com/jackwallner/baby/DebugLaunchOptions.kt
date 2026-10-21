@@ -21,11 +21,17 @@ import java.time.ZoneId
  * `empty` (`-EmptyLog`) clears it for the reviewer's no-data path, `tab`
  * (`-StartTab`) opens Log, History, Upgrade/Reports or Settings, `plus`
  * turns the local Baby+ override on or off, and `screenshot` hides the
- * reminder offer and records no paywall impressions.
+ * reminder offer and records no paywall impressions. `firebaseEmulator`
+ * (a host, 10.0.2.2 from an emulator) points Log together at the Firebase
+ * Local Emulator Suite with a fake Google sign-in named `shareName`.
  */
 object DebugLaunchOptions {
     fun apply(graph: AppGraph, intent: Intent?): Int? {
         val extras = intent?.extras ?: return null
+        extras.getString("firebaseEmulator")?.let { host ->
+            graph.sharing.useEmulator(host, extras.getString("shareName") ?: "Sam")
+            graph.sharing.resume()
+        }
         extras.getString("appearance")?.let { graph.settings.updateAppearance(Appearance.fromRaw(it)) }
         if (extras.containsKey("plus")) graph.settings.updateDebugPlus(extras.getBoolean("plus"))
         if (extras.getBoolean("screenshot")) {

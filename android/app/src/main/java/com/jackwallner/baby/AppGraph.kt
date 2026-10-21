@@ -5,6 +5,7 @@ import android.content.Context
 import com.jackwallner.baby.data.AppSettings
 import com.jackwallner.baby.data.EventStore
 import com.jackwallner.baby.data.Reminders
+import com.jackwallner.baby.data.SharingService
 import com.jackwallner.baby.data.StoreService
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +20,8 @@ class AppGraph(context: Context) {
     val reminders = Reminders(context.applicationContext, prefs, settings)
     val events = EventStore(File(context.filesDir, "baby-log.json"), settings, scope)
     val store = StoreService(context.applicationContext, settings)
+    /** Log together: off (local only) unless this phone started or joined a shared log. */
+    val sharing = SharingService(context.applicationContext, prefs, events)
 
     /** Debug screenshot runs hide the reminder offer and record no impressions. */
     var screenshotMode = false
@@ -27,6 +30,7 @@ class AppGraph(context: Context) {
         events.onPublish = { summary, child -> reminders.reschedule(summary, child) }
         settings.onChange = { events.refresh() }
         events.refresh()
+        sharing.resume()
     }
 }
 

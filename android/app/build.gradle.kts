@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 import java.util.Properties
 
 plugins {
@@ -17,8 +18,42 @@ val uploadKeyAlias = localProperties.getProperty("PLAY_UPLOAD_KEY_ALIAS", "")
 val uploadStorePassword = localProperties.getProperty("PLAY_UPLOAD_STORE_PASSWORD", "")
 val uploadKeyPassword = localProperties.getProperty("PLAY_UPLOAD_KEY_PASSWORD", uploadStorePassword)
 
+/**
+ * Log together (Firebase) reads the Console's google-services.json without the
+ * Google Services plugin, so the app still builds without it: sharing is then
+ * hidden. The file is ignored by git (android/app/google-services.json).
+ */
+data class FirebaseValues(val apiKey: String, val appId: String, val projectId: String, val senderId: String, val webClientId: String)
+
+@Suppress("UNCHECKED_CAST")
+fun readFirebase(file: File, packageName: String): FirebaseValues? {
+    if (!file.isFile) return null
+    val root = JsonSlurper().parse(file) as Map<String, Any?>
+    val project = root["project_info"] as? Map<String, Any?> ?: return null
+    val clients = root["client"] as? List<Map<String, Any?>> ?: return null
+    val client = clients.firstOrNull {
+        ((it["client_info"] as? Map<String, Any?>)?.get("android_client_info") as? Map<String, Any?>)?.get("package_name") == packageName
+    } ?: return null
+    val appId = (client["client_info"] as Map<String, Any?>)["mobilesdk_app_id"] as? String ?: return null
+    val apiKey = (client["api_key"] as? List<Map<String, Any?>>)?.firstOrNull()?.get("current_key") as? String ?: return null
+    // The web client (type 3) is the audience Google sign-in tokens are issued for.
+    val oauth = (client["oauth_client"] as? List<Map<String, Any?>>).orEmpty() +
+        (((client["services"] as? Map<String, Any?>)?.get("appinvite_service") as? Map<String, Any?>)?.get("other_platform_oauth_client") as? List<Map<String, Any?>>).orEmpty()
+    val webClientId = oauth.firstOrNull { it["client_type"].toString() == "3" }?.get("client_id") as? String ?: ""
+    return FirebaseValues(apiKey, appId, project["project_id"] as? String ?: return null, project["project_number"]?.toString() ?: "", webClientId)
+}
+
+val googleServicesFile = file("google-services.json")
+val firebase = readFirebase(googleServicesFile, "com.jackwallner.baby")
+
 val validateReleaseConfiguration = tasks.register("validateReleaseConfiguration") {
     doLast {
+        check(firebase != null) {
+            "Put the Firebase Console's google-services.json (Android app com.jackwallner.baby) at android/app/google-services.json before a release build; Log together needs it."
+        }
+        check(firebase!!.webClientId.isNotBlank()) {
+            "google-services.json has no web OAuth client: enable Google sign-in in Firebase Authentication and add the upload and Play signing SHA-1s, then download it again."
+        }
         check(playKey.startsWith("goog_")) { "Set REVENUECAT_PLAY_KEY in android/local.properties before a release build." }
         check(uploadKeyStore.isNotBlank() && rootProject.file(uploadKeyStore).isFile) {
             "Set PLAY_UPLOAD_KEYSTORE to the external upload keystore before a release build."
@@ -43,6 +78,11 @@ android {
         // Every connected test starts from a clean install: no setup, no log.
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
         buildConfigField("String", "REVENUECAT_API_KEY", "\"$testKey\"")
+        buildConfigField("String", "FIREBASE_API_KEY", "\"${firebase?.apiKey.orEmpty()}\"")
+        buildConfigField("String", "FIREBASE_APP_ID", "\"${firebase?.appId.orEmpty()}\"")
+        buildConfigField("String", "FIREBASE_PROJECT_ID", "\"${firebase?.projectId.orEmpty()}\"")
+        buildConfigField("String", "FIREBASE_SENDER_ID", "\"${firebase?.senderId.orEmpty()}\"")
+        buildConfigField("String", "FIREBASE_WEB_CLIENT_ID", "\"${firebase?.webClientId.orEmpty()}\"")
     }
 
     buildFeatures {
@@ -116,6 +156,14 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("com.revenuecat.purchases:purchases:10.23.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
+    // Log together: Firebase Auth (Google sign-in through Credential Manager) and Firestore.
+    implementation(platform("com.google.firebase:firebase-bom:35.0.2"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("androidx.credentials:credentials:1.6.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.2.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     androidTestImplementation(platform("androidx.compose:compose-bom:2026.06.01"))
