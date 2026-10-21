@@ -40,11 +40,8 @@ struct NowView: View {
                         }
                         .padding(.vertical, AppTheme.looseSpacing)
                     } else {
-                        // The tab's safe area reserves the capsule. The reader
-                        // can extend under it (the scroll view insets for it),
-                        // so the page fits what is left between the insets.
-                        let visible = geometry.size.height - geometry.safeAreaInsets.top - geometry.safeAreaInsets.bottom
-                        fitted(available: visible - AppTheme.tightSpacing * 2)
+                        // The tab's safe area already reserves the capsule.
+                        fitted(available: geometry.size.height - AppTheme.tightSpacing * 2)
                             .padding(.vertical, AppTheme.tightSpacing)
                     }
                 }
@@ -96,23 +93,20 @@ struct NowView: View {
     /// text), the page scrolls rather than clipping.
     private func fitted(available: CGFloat) -> some View {
         let showsHourStrip = available >= AppTheme.hourStripMinHeight && fit.showsHourStrip
-        // Sections sit 12 apart; the time row and the buttons, one control,
-        // sit 8 apart.
-        return VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            NowStatusCard(now: now, clock: logClock, compact: true)
+        // Sections sit 12 apart (8 when tight); the time row and the buttons,
+        // one control, sit 8 apart.
+        return VStack(alignment: .leading, spacing: fit.isTight ? AppTheme.tightSpacing : AppTheme.spacing) {
+            NowStatusCard(now: now, clock: logClock, compact: true, tight: fit.isTight)
             LoggingControls(height: fit.buttonHeight, spacing: AppTheme.tightSpacing, clock: logClock, editor: $editor)
                 .padding(.bottom, fit.slack)
-            TodayTotalsView(now: now, compact: true, showsHourStrip: showsHourStrip) { height in
+            TodayTotalsView(now: now, compact: true, tight: fit.isTight, showsHourStrip: showsHourStrip) { height in
                 hourStripHeight = height
             }
             OlderEntryLink(editor: $editor)
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { olderLinkHeight = $0 }
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-            // The page as drawn, less the part the last fit decided, is the
-            // part that does not stretch.
-            let fixed = height - fit.slack - fit.buttonHeight * rows
-            refit(fixed: fixed, available: available, showsHourStrip: showsHourStrip, animated: fit.fixed != nil)
+            refit(fixed: fit.fixed(drawn: height, rows: rows), available: available, showsHourStrip: showsHourStrip, animated: fit.fixed != nil)
         }
         .onChange(of: available) { _, available in
             if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
@@ -130,25 +124,14 @@ struct NowView: View {
         CGFloat(max(1, LogButtons.rows(for: settings.tracked).count))
     }
 
-    /// The buttons split what the rest leaves. Slack past the cap goes above
-    /// the totals, so they sit at the bottom of the screen.
     private func refit(fixed: CGFloat, available: CGFloat, showsHourStrip: Bool, animated: Bool) {
-        let withoutStrip = fixed - (showsHourStrip ? hourStripHeight : 0)
-        let keepsStrip = available >= AppTheme.hourStripMinHeight
-            && withoutStrip + hourStripHeight + AppTheme.minLogButtonHeight * rows <= available
-        let fittedFixed = withoutStrip + (keepsStrip ? hourStripHeight : 0)
-        // Shorter still (the iPhone Duo's outer display, or one pane of it
-        // unfolded): Add an older entry scrolls into view instead, and the
-        // buttons share the rest down to the minimum tap target, so the
-        // capsule never sits on the totals.
-        let fitsLink = fittedFixed + AppTheme.minLogButtonHeight * rows <= available
-        let budget = fitsLink ? fittedFixed : fittedFixed - olderLinkHeight - AppTheme.spacing
-        let minimum = fitsLink ? AppTheme.minLogButtonHeight : AppTheme.tightLogButtonHeight
-        let share = ((available - budget) / rows).rounded(.down)
-        let height = min(AppTheme.maxLogButtonHeight, max(minimum, share))
-        let next = NowFit(fixed: fittedFixed, buttonHeight: height, slack: max(0, available - budget - height * rows), showsHourStrip: keepsStrip)
-        guard next.showsHourStrip != fit.showsHourStrip || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
-            fit.fixed = fittedFixed
+        let next = NowFit.make(
+            fixed: fixed, available: available, rows: rows,
+            hourStrip: hourStripHeight, showsHourStrip: showsHourStrip, olderLink: olderLinkHeight
+        )
+        guard next.showsHourStrip != fit.showsHourStrip || next.isTight != fit.isTight
+            || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
+            fit.fixed = next.fixed
             return
         }
         // The first fit lands before anything draws; later ones (the side
@@ -159,13 +142,56 @@ struct NowView: View {
     }
 }
 
-/// The phone layout's last fit: the height that does not stretch (nil until
-/// measured), each button's height, and the slack above the totals.
-private struct NowFit: Equatable {
+/// The phone layout's last fit: the height that does not stretch (as the
+/// roomy layout draws it; nil until measured), each button's height, the
+/// slack above the totals, and whether the page had to go tight.
+struct NowFit: Equatable {
     var fixed: CGFloat?
     var buttonHeight: CGFloat = AppTheme.logButtonHeight
     var slack: CGFloat = 0
     var showsHourStrip = true
+    var isTight = false
+
+    /// What tight takes off: the three section gaps go from 12 to 8, and
+    /// both cards lose 4 top and bottom (never at the sides, so no line
+    /// rewraps and the measured height stays true to this sum).
+    static let tightSaving = (AppTheme.spacing - AppTheme.tightSpacing) * 3
+        + (AppTheme.compactCardPadding - AppTheme.tightCardPadding) * 4
+
+    /// The page as drawn under this fit, less the part this fit decided, is
+    /// the part that does not stretch.
+    func fixed(drawn height: CGFloat, rows: CGFloat) -> CGFloat {
+        height - slack - buttonHeight * rows + (isTight ? Self.tightSaving : 0)
+    }
+
+    /// The buttons split what the rest leaves. Slack past the cap goes above
+    /// the totals, so they sit at the bottom of the screen. Shorter still
+    /// (the iPhone Duo's outer display, or one pane of it unfolded), the page
+    /// goes tight: tighter cards and gaps, Add an older entry scrolls into
+    /// view, and the buttons share the rest down to the minimum tap target,
+    /// so the capsule never sits on the totals.
+    static func make(
+        fixed: CGFloat, available: CGFloat, rows: CGFloat,
+        hourStrip: CGFloat, showsHourStrip: Bool, olderLink: CGFloat
+    ) -> NowFit {
+        let withoutStrip = fixed - (showsHourStrip ? hourStrip : 0)
+        let keepsStrip = available >= AppTheme.hourStripMinHeight
+            && withoutStrip + hourStrip + AppTheme.minLogButtonHeight * rows <= available
+        let fittedFixed = withoutStrip + (keepsStrip ? hourStrip : 0)
+        let isTight = fittedFixed + AppTheme.minLogButtonHeight * rows > available
+        let budget = isTight ? fittedFixed - tightSaving - olderLink - AppTheme.tightSpacing : fittedFixed
+        let share = ((available - budget) / rows).rounded(.down)
+        // Tight never grows the buttons past the roomy floor: the room goes
+        // above the totals instead, so going tight only ever shrinks them.
+        let height = isTight
+            ? min(AppTheme.minLogButtonHeight, max(AppTheme.tightLogButtonHeight, share))
+            : min(AppTheme.maxLogButtonHeight, max(AppTheme.minLogButtonHeight, share))
+        return NowFit(
+            fixed: fittedFixed, buttonHeight: height,
+            slack: max(0, available - budget - height * rows),
+            showsHourStrip: keepsStrip, isTight: isTight
+        )
+    }
 }
 
 private struct LoggingControls: View {
@@ -398,6 +424,8 @@ private struct NowStatusCard: View {
     @ObservedObject var clock: LogClock
     /// A phone fitting one screen: a tighter card.
     var compact = false
+    /// The shortest pages (the iPhone Duo): tighter still.
+    var tight = false
 
     private enum Lead { case feed, diaper, sleep }
 
@@ -466,7 +494,7 @@ private struct NowStatusCard: View {
                 }
             }
         }
-        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing)
+        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing, verticalPadding: tight ? AppTheme.tightCardPadding : nil)
         .accessibilityIdentifier("nowCard")
         .alert("Couldn't finish this feed", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
@@ -553,6 +581,7 @@ private struct TodayTotalsView: View {
     @EnvironmentObject private var settings: BabySettings
     let now: Date
     var compact = false
+    var tight = false
     var showsHourStrip = true
     var onHourStripHeightChange: ((CGFloat) -> Void)?
 
@@ -581,7 +610,7 @@ private struct TodayTotalsView: View {
                     }
             }
         }
-        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing)
+        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing, verticalPadding: tight ? AppTheme.tightCardPadding : nil)
     }
 
     private func stat(_ kind: EventKind, totals: WindowTotals) -> some View {

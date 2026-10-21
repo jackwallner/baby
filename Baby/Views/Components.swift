@@ -6,10 +6,13 @@ import SwiftUI
 struct CardBackground: ViewModifier {
     var elevated = false
     var padding = AppTheme.looseSpacing
+    /// Nil: the same as the sides.
+    var verticalPadding: CGFloat? = nil
 
     func body(content: Content) -> some View {
         content
-            .padding(padding)
+            .padding(.horizontal, padding)
+            .padding(.vertical, verticalPadding ?? padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(elevated ? AppTheme.cardElevated : AppTheme.card, in: AppTheme.cardShape)
             .graphicBorder()
@@ -69,8 +72,8 @@ extension View {
         modifier(NightLightMultiply())
     }
 
-    func card(elevated: Bool = false, padding: CGFloat = AppTheme.looseSpacing) -> some View {
-        modifier(CardBackground(elevated: elevated, padding: padding))
+    func card(elevated: Bool = false, padding: CGFloat = AppTheme.looseSpacing, verticalPadding: CGFloat? = nil) -> some View {
+        modifier(CardBackground(elevated: elevated, padding: padding, verticalPadding: verticalPadding))
     }
 
     /// A card or row that answers back under the finger.

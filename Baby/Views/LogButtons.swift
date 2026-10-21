@@ -28,6 +28,13 @@ struct LogButtons: View {
         height == nil ? AppTheme.tightSpacing : AppTheme.hairSpacing
     }
 
+    /// The graphic gives way inside the shortest fitted button, so a 44pt
+    /// button really is 44pt.
+    private var graphicSize: CGFloat {
+        guard let height else { return AppTheme.graphicSize }
+        return min(AppTheme.graphicSize, height - labelPadding * 2)
+    }
+
     /// How long the side chips stay after the last tap on them or on Feed.
     static let sideWindow: TimeInterval = 90
     /// The reminder offer waits this long after the last Feed or side tap, so
@@ -98,7 +105,7 @@ struct LogButtons: View {
         VStack(spacing: 0) {
             Button(action: logFeed) {
                 HStack(spacing: AppTheme.tightSpacing) {
-                    CareGraphic(kind: .feed)
+                    CareGraphic(kind: .feed, size: graphicSize)
                     Text("Feed")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(AppTheme.ink)
@@ -222,10 +229,10 @@ struct LogButtons: View {
                     Image(systemName: "sun.max.fill")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(AppTheme.sleep)
-                        .frame(width: AppTheme.graphicSize, height: AppTheme.graphicSize)
+                        .frame(width: graphicSize, height: graphicSize)
                         .accessibilityHidden(true)
                 } else {
-                    CareGraphic(kind: kind)
+                    CareGraphic(kind: kind, size: graphicSize)
                 }
                 VStack(spacing: AppTheme.hairSpacing) {
                     Text(label)

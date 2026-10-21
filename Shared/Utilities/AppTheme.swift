@@ -32,6 +32,9 @@ enum AppTheme {
     static let tightLogButtonHeight: CGFloat = 44
     /// Now's cards on a phone, where the page fits one screen.
     static let compactCardPadding: CGFloat = 16
+    /// Now's cards top and bottom when even the shortest buttons leave too
+    /// little room.
+    static let tightCardPadding: CGFloat = 12
     /// Below this much page height (an SE), Now drops the hour strip.
     static let hourStripMinHeight: CGFloat = 620
     static let outlineWidth: CGFloat = 2
@@ -185,6 +188,7 @@ enum AppTheme {
 struct CareGraphic: View {
     let kind: EventKind
     var side: FeedSide? = nil
+    var size = AppTheme.graphicSize
 
     var body: some View {
         ZStack {
@@ -202,7 +206,7 @@ struct CareGraphic: View {
                     .padding(AppTheme.tightSpacing)
             }
         }
-        .frame(width: AppTheme.graphicSize, height: AppTheme.graphicSize)
+        .frame(width: size, height: size)
         .accessibilityHidden(true)
     }
 }
