@@ -1,0 +1,6132 @@
+{
+  "birth" : 1791544320,
+  "checkups" : [
+    {
+      "body" : "Newborn visits come often in the first month. Your summary for the doctor is ready.",
+      "date" : 1791770400,
+      "id" : "baby.checkup.day4",
+      "title" : "Checkup coming up?"
+    },
+    {
+      "body" : "Newborn visits come often in the first month. Your summary for the doctor is ready.",
+      "date" : 1792634400,
+      "id" : "baby.checkup.day14",
+      "title" : "Checkup coming up?"
+    },
+    {
+      "body" : "Newborn visits come often in the first month. Your summary for the doctor is ready.",
+      "date" : 1794020400,
+      "id" : "baby.checkup.day30",
+      "title" : "Checkup coming up?"
+    }
+  ],
+  "childName" : "Elsa",
+  "csv" : "baby,date,time,kind,side,amount_ml,weight_g,stool_color,duration_min,note,logged_at\nElsa,2026-10-10,2:05 PM,weight,,,3300,,,Hospital scale,2026-10-10T21:05:00Z\nElsa,2026-10-10,2:20 PM,feed,left,,,,25,,2026-10-10T21:20:00Z\nElsa,2026-10-10,4:00 PM,wet,,,,,,,2026-10-10T23:00:00Z\nElsa,2026-10-11,6:10 PM,dirty,,,,black,,,2026-10-11T01:10:00Z\nElsa,2026-10-11,7:00 PM,feed,right+left,,,,0,,2026-10-11T02:00:00Z\nElsa,2026-10-11,10:30 PM,sleep,,,,,165,,2026-10-11T05:30:00Z\nElsa,2026-10-11,2:00 AM,feed,left,,,,0,,2026-10-11T09:00:00Z\nElsa,2026-10-11,3:05 AM,wet,,,,,,,2026-10-11T10:05:00Z\nElsa,2026-10-11,5:10 AM,feed,right,,,,0,,2026-10-11T12:10:00Z\nElsa,2026-10-11,8:00 AM,feed,bottle,60,,,0,,2026-10-11T15:00:00Z\nElsa,2026-10-11,9:05 AM,wet,,,,,,,2026-10-11T16:05:00Z\nElsa,2026-10-11,10:00 AM,dirty,,,,green,,\"Seemed fussy, \"\"a lot\"\" of gas\",2026-10-11T17:00:00Z\nElsa,2026-10-11,11:30 AM,feed,left+right,,,,0,,2026-10-11T18:30:00Z\nElsa,2026-10-11,12:00 PM,sleep,,,,,90,,2026-10-11T19:00:00Z\nElsa,2026-10-11,1:00 PM,sleep,,,,,60,,2026-10-11T20:00:00Z\nElsa,2026-10-11,1:05 PM,wet,,,,,,,2026-10-11T20:05:00Z\nElsa,2026-10-11,2:45 PM,feed,,,,,0,,2026-10-11T21:45:00Z\nElsa,2026-10-12,5:05 PM,wet,,,,,,,2026-10-12T00:05:00Z\nElsa,2026-10-12,6:00 PM,feed,bottle,60,,,0,,2026-10-12T01:00:00Z\nElsa,2026-10-12,8:00 PM,dirty,,,,yellow,,,2026-10-12T03:00:00Z\nElsa,2026-10-12,9:20 PM,feed,right,,,,0,,2026-10-12T04:20:00Z\nElsa,2026-10-12,11:00 PM,sleep,,,,,220,,2026-10-12T06:00:00Z\nElsa,2026-10-13,1:00 AM,feed,left,,,,0,,2026-10-13T08:00:00Z\nElsa,2026-10-13,2:15 AM,wet,,,,,,,2026-10-13T09:15:00Z\nElsa,2026-10-13,4:30 AM,feed,left,,,,0,,2026-10-13T11:30:00Z\nElsa,2026-10-13,6:15 AM,wet,,,,,,,2026-10-13T13:15:00Z\nElsa,2026-10-13,7:45 AM,feed,left,,,,0,,2026-10-13T14:45:00Z\nElsa,2026-10-13,9:00 AM,dirty,,,,yellow,,,2026-10-13T16:00:00Z\nElsa,2026-10-13,10:00 AM,weight,,,3450,,,,2026-10-13T17:00:00Z\nElsa,2026-10-13,10:15 AM,wet,,,,,,,2026-10-13T17:15:00Z\nElsa,2026-10-13,12:00 PM,feed,left,,,,0,,2026-10-13T19:00:00Z\nElsa,2026-10-13,1:00 PM,sleep,,,,,180,,2026-10-13T20:00:00Z\nElsa,2026-10-13,2:15 PM,wet,,,,,,,2026-10-13T21:15:00Z\nElsa,2026-10-13,4:10 PM,feed,left,,,,0,,2026-10-13T23:10:00Z\nElsa,2026-10-14,6:15 PM,wet,,,,,,,2026-10-14T01:15:00Z\nElsa,2026-10-14,8:30 PM,feed,left,,,,0,,2026-10-14T03:30:00Z\nElsa,2026-10-14,10:15 PM,wet,,,,,,,2026-10-14T05:15:00Z\nElsa,2026-10-14,11:50 PM,feed,left,,,,0,,2026-10-14T06:50:00Z\nElsa,2026-10-14,3:00 AM,feed,right,,,,0,,2026-10-14T10:00:00Z\nElsa,2026-10-14,5:40 AM,wet,,,,,,,2026-10-14T12:40:00Z\nElsa,2026-10-14,7:00 AM,feed,left+bottle,45,,,35,,2026-10-14T14:00:00Z\nElsa,2026-10-14,9:00 AM,sleep,,,,,80,,2026-10-14T16:00:00Z\nElsa,2026-10-14,11:00 AM,dirty,,,,brown,,,2026-10-14T18:00:00Z\nElsa,2026-10-14,1:10 PM,feed,bottle,,,,0,,2026-10-14T20:10:00Z\nElsa,2026-10-14,1:55 PM,wet,,,,,,,2026-10-14T20:55:00Z\nElsa,2026-10-14,2:05 PM,sleep,,,,,,,2026-10-14T21:05:00Z\n",
+  "enteredCheckup" : [
+    {
+      "body" : "Your summary for the doctor is ready: feeds, diapers, sleep and weight since the last visit.",
+      "date" : 1792461600,
+      "id" : "baby.checkup.entered",
+      "title" : "Checkup tomorrow"
+    }
+  ],
+  "events" : [
+    {
+      "amount" : 3300,
+      "id" : "00000000-0000-0000-0000-000000000001",
+      "kind" : "weight",
+      "note" : "Hospital scale",
+      "start" : 1791666300
+    },
+    {
+      "amount" : 0,
+      "end" : 1791668700,
+      "id" : "00000000-0000-0000-0000-000000000002",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791667200
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000003",
+      "kind" : "wet",
+      "start" : 1791673200
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000004",
+      "kind" : "dirty",
+      "start" : 1791681000,
+      "stool" : "black"
+    },
+    {
+      "amount" : 0,
+      "end" : 1791684000,
+      "id" : "00000000-0000-0000-0000-000000000005",
+      "kind" : "feed",
+      "side" : "right,left",
+      "start" : 1791684000
+    },
+    {
+      "amount" : 0,
+      "end" : 1791706500,
+      "id" : "00000000-0000-0000-0000-000000000006",
+      "kind" : "sleep",
+      "start" : 1791696600
+    },
+    {
+      "amount" : 0,
+      "end" : 1791709200,
+      "id" : "00000000-0000-0000-0000-000000000007",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791709200
+    },
+    {
+      "amount" : 0,
+      "end" : 1791720600,
+      "id" : "00000000-0000-0000-0000-000000000008",
+      "kind" : "feed",
+      "side" : "right",
+      "start" : 1791720600
+    },
+    {
+      "amount" : 60,
+      "end" : 1791730800,
+      "id" : "00000000-0000-0000-0000-000000000009",
+      "kind" : "feed",
+      "side" : "bottle",
+      "start" : 1791730800
+    },
+    {
+      "amount" : 0,
+      "end" : 1791743400,
+      "id" : "00000000-0000-0000-0000-000000000010",
+      "kind" : "feed",
+      "side" : "left,right",
+      "start" : 1791743400
+    },
+    {
+      "amount" : 0,
+      "end" : 1791755100,
+      "id" : "00000000-0000-0000-0000-000000000011",
+      "kind" : "feed",
+      "start" : 1791755100
+    },
+    {
+      "amount" : 60,
+      "end" : 1791766800,
+      "id" : "00000000-0000-0000-0000-000000000012",
+      "kind" : "feed",
+      "side" : "bottle",
+      "start" : 1791766800
+    },
+    {
+      "amount" : 0,
+      "end" : 1791778800,
+      "id" : "00000000-0000-0000-0000-000000000013",
+      "kind" : "feed",
+      "side" : "right",
+      "start" : 1791778800
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000014",
+      "kind" : "wet",
+      "start" : 1791713100
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000015",
+      "kind" : "wet",
+      "start" : 1791734700
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000016",
+      "kind" : "wet",
+      "start" : 1791749100
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000017",
+      "kind" : "wet",
+      "start" : 1791763500
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000018",
+      "kind" : "dirty",
+      "note" : "Seemed fussy, \"a lot\" of gas",
+      "start" : 1791738000,
+      "stool" : "green"
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000019",
+      "kind" : "dirty",
+      "start" : 1791774000,
+      "stool" : "yellow"
+    },
+    {
+      "amount" : 0,
+      "end" : 1791750600,
+      "id" : "00000000-0000-0000-0000-000000000020",
+      "kind" : "sleep",
+      "start" : 1791745200
+    },
+    {
+      "amount" : 0,
+      "end" : 1791752400,
+      "id" : "00000000-0000-0000-0000-000000000021",
+      "kind" : "sleep",
+      "start" : 1791748800
+    },
+    {
+      "amount" : 0,
+      "end" : 1791798000,
+      "id" : "00000000-0000-0000-0000-000000000022",
+      "kind" : "sleep",
+      "start" : 1791784800
+    },
+    {
+      "amount" : 0,
+      "end" : 1791878400,
+      "id" : "00000000-0000-0000-0000-000000000023",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791878400
+    },
+    {
+      "amount" : 0,
+      "end" : 1791891000,
+      "id" : "00000000-0000-0000-0000-000000000024",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791891000
+    },
+    {
+      "amount" : 0,
+      "end" : 1791902700,
+      "id" : "00000000-0000-0000-0000-000000000025",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791902700
+    },
+    {
+      "amount" : 0,
+      "end" : 1791918000,
+      "id" : "00000000-0000-0000-0000-000000000026",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791918000
+    },
+    {
+      "amount" : 0,
+      "end" : 1791933000,
+      "id" : "00000000-0000-0000-0000-000000000027",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791933000
+    },
+    {
+      "amount" : 0,
+      "end" : 1791948600,
+      "id" : "00000000-0000-0000-0000-000000000028",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791948600
+    },
+    {
+      "amount" : 0,
+      "end" : 1791960600,
+      "id" : "00000000-0000-0000-0000-000000000029",
+      "kind" : "feed",
+      "side" : "left",
+      "start" : 1791960600
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000030",
+      "kind" : "wet",
+      "start" : 1791882900
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000031",
+      "kind" : "wet",
+      "start" : 1791897300
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000032",
+      "kind" : "wet",
+      "start" : 1791911700
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000033",
+      "kind" : "wet",
+      "start" : 1791926100
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000034",
+      "kind" : "wet",
+      "start" : 1791940500
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000035",
+      "kind" : "wet",
+      "start" : 1791954900
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000036",
+      "kind" : "dirty",
+      "start" : 1791907200,
+      "stool" : "yellow"
+    },
+    {
+      "amount" : 3450,
+      "id" : "00000000-0000-0000-0000-000000000037",
+      "kind" : "weight",
+      "start" : 1791910800
+    },
+    {
+      "amount" : 0,
+      "end" : 1791932400,
+      "id" : "00000000-0000-0000-0000-000000000038",
+      "kind" : "sleep",
+      "start" : 1791921600
+    },
+    {
+      "amount" : 0,
+      "end" : 1791972000,
+      "id" : "00000000-0000-0000-0000-000000000039",
+      "kind" : "feed",
+      "side" : "right",
+      "start" : 1791972000
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000040",
+      "kind" : "wet",
+      "start" : 1791981600
+    },
+    {
+      "amount" : 45,
+      "end" : 1791988500,
+      "id" : "00000000-0000-0000-0000-000000000041",
+      "kind" : "feed",
+      "side" : "left,bottle",
+      "start" : 1791986400
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000042",
+      "kind" : "dirty",
+      "start" : 1792000800,
+      "stool" : "brown"
+    },
+    {
+      "amount" : 0,
+      "end" : 1791998400,
+      "id" : "00000000-0000-0000-0000-000000000043",
+      "kind" : "sleep",
+      "start" : 1791993600
+    },
+    {
+      "amount" : 0,
+      "end" : 1792008600,
+      "id" : "00000000-0000-0000-0000-000000000044",
+      "kind" : "feed",
+      "side" : "bottle",
+      "start" : 1792008600
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000045",
+      "kind" : "wet",
+      "start" : 1792011300
+    },
+    {
+      "amount" : 0,
+      "id" : "00000000-0000-0000-0000-000000000046",
+      "kind" : "sleep",
+      "start" : 1792011900
+    }
+  ],
+  "feedReminders" : [
+    {
+      "body" : null,
+      "date" : null,
+      "label" : "Off",
+      "minutes" : 0,
+      "title" : null
+    },
+    {
+      "body" : null,
+      "date" : null,
+      "label" : "2 hours",
+      "minutes" : 120,
+      "title" : null
+    },
+    {
+      "body" : "Last feed started at 1:10 PM. Start on Right.",
+      "date" : 1792017600,
+      "label" : "2½ hours",
+      "minutes" : 150,
+      "title" : "2½ hours since Elsa's last feed"
+    },
+    {
+      "body" : "Last feed started at 1:10 PM. Start on Right.",
+      "date" : 1792019400,
+      "label" : "3 hours",
+      "minutes" : 180,
+      "title" : "3 hours since Elsa's last feed"
+    },
+    {
+      "body" : "Last feed started at 1:10 PM. Start on Right.",
+      "date" : 1792021200,
+      "label" : "3½ hours",
+      "minutes" : 210,
+      "title" : "3½ hours since Elsa's last feed"
+    },
+    {
+      "body" : "Last feed started at 1:10 PM. Start on Right.",
+      "date" : 1792023000,
+      "label" : "4 hours",
+      "minutes" : 240,
+      "title" : "4 hours since Elsa's last feed"
+    }
+  ],
+  "format" : {
+    "asleep" : [
+      {
+        "s" : 0,
+        "v" : "Asleep just now"
+      },
+      {
+        "s" : 59,
+        "v" : "Asleep just now"
+      },
+      {
+        "s" : 60,
+        "v" : "Asleep 1m"
+      },
+      {
+        "s" : 61,
+        "v" : "Asleep 1m"
+      },
+      {
+        "s" : 3599,
+        "v" : "Asleep 59m"
+      },
+      {
+        "s" : 3600,
+        "v" : "Asleep 1h"
+      },
+      {
+        "s" : 3660,
+        "v" : "Asleep 1h 1m"
+      },
+      {
+        "s" : 7980,
+        "v" : "Asleep 2h 13m"
+      },
+      {
+        "s" : 86399,
+        "v" : "Asleep 23h 59m"
+      },
+      {
+        "s" : 86400,
+        "v" : "Asleep 1d"
+      },
+      {
+        "s" : 90000,
+        "v" : "Asleep 1d 1h"
+      },
+      {
+        "s" : 200000,
+        "v" : "Asleep 2d 7h"
+      }
+    ],
+    "compact" : [
+      {
+        "s" : 0,
+        "v" : "0m"
+      },
+      {
+        "s" : 59,
+        "v" : "0m"
+      },
+      {
+        "s" : 60,
+        "v" : "1m"
+      },
+      {
+        "s" : 61,
+        "v" : "1m"
+      },
+      {
+        "s" : 3599,
+        "v" : "59m"
+      },
+      {
+        "s" : 3600,
+        "v" : "1h"
+      },
+      {
+        "s" : 3660,
+        "v" : "1h 1m"
+      },
+      {
+        "s" : 7980,
+        "v" : "2h 13m"
+      },
+      {
+        "s" : 86399,
+        "v" : "23h 59m"
+      },
+      {
+        "s" : 86400,
+        "v" : "1d"
+      },
+      {
+        "s" : 90000,
+        "v" : "1d 1h"
+      },
+      {
+        "s" : 200000,
+        "v" : "2d 7h"
+      }
+    ],
+    "duration" : [
+      {
+        "s" : 0,
+        "v" : "under a minute"
+      },
+      {
+        "s" : 59,
+        "v" : "under a minute"
+      },
+      {
+        "s" : 60,
+        "v" : "1m"
+      },
+      {
+        "s" : 61,
+        "v" : "1m"
+      },
+      {
+        "s" : 3599,
+        "v" : "59m"
+      },
+      {
+        "s" : 3600,
+        "v" : "1h"
+      },
+      {
+        "s" : 3660,
+        "v" : "1h 1m"
+      },
+      {
+        "s" : 7980,
+        "v" : "2h 13m"
+      },
+      {
+        "s" : 86399,
+        "v" : "23h 59m"
+      },
+      {
+        "s" : 86400,
+        "v" : "1d"
+      },
+      {
+        "s" : 90000,
+        "v" : "1d 1h"
+      },
+      {
+        "s" : 200000,
+        "v" : "2d 7h"
+      }
+    ],
+    "grams" : [
+      {
+        "imperial" : "6 lb 8 oz",
+        "metric" : "2.95 kg",
+        "v" : 2950
+      },
+      {
+        "imperial" : "7 lb 4.5 oz",
+        "metric" : "3.30 kg",
+        "v" : 3300
+      },
+      {
+        "imperial" : "7 lb 9.5 oz",
+        "metric" : "3.45 kg",
+        "v" : 3450
+      },
+      {
+        "imperial" : "8 lb 13 oz",
+        "metric" : "4.00 kg",
+        "v" : 3999
+      },
+      {
+        "imperial" : "9 lb 4.5 oz",
+        "metric" : "4.21 kg",
+        "v" : 4210
+      }
+    ],
+    "gramsChange" : [
+      {
+        "imperial" : "−7.5 oz",
+        "metric" : "−210 g",
+        "v" : -210
+      },
+      {
+        "imperial" : "−0 oz",
+        "metric" : "−5 g",
+        "v" : -5
+      },
+      {
+        "imperial" : "+0 oz",
+        "metric" : "+0 g",
+        "v" : 0.40000000000000002
+      },
+      {
+        "imperial" : "+5.5 oz",
+        "metric" : "+150 g",
+        "v" : 150
+      },
+      {
+        "imperial" : "+11 oz",
+        "metric" : "+312 g",
+        "v" : 312
+      }
+    ],
+    "ml" : [
+      {
+        "imperial" : "0 oz",
+        "metric" : "0 ml",
+        "v" : 0
+      },
+      {
+        "imperial" : "1 oz",
+        "metric" : "30 ml",
+        "v" : 30
+      },
+      {
+        "imperial" : "1.5 oz",
+        "metric" : "45 ml",
+        "v" : 45
+      },
+      {
+        "imperial" : "2 oz",
+        "metric" : "59 ml",
+        "v" : 59.100000000000001
+      },
+      {
+        "imperial" : "2 oz",
+        "metric" : "60 ml",
+        "v" : 60
+      },
+      {
+        "imperial" : "3 oz",
+        "metric" : "89 ml",
+        "v" : 88.700000000000003
+      },
+      {
+        "imperial" : "4 oz",
+        "metric" : "120 ml",
+        "v" : 120
+      },
+      {
+        "imperial" : "8 oz",
+        "metric" : "240 ml",
+        "v" : 240
+      }
+    ]
+  },
+  "guidance" : [
+    {
+      "day" : 0,
+      "dirty" : 1,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 1,
+      "stool" : "black and tarry (meconium)",
+      "summary" : "1+ wet · 1+ dirty · 8 to 12 feeds",
+      "wet" : 1
+    },
+    {
+      "day" : 1,
+      "dirty" : 1,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 1,
+      "stool" : "black and tarry (meconium)",
+      "summary" : "1+ wet · 1+ dirty · 8 to 12 feeds",
+      "wet" : 1
+    },
+    {
+      "day" : 2,
+      "dirty" : 1,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 2,
+      "stool" : "black to dark green",
+      "summary" : "2+ wet · 1+ dirty · 8 to 12 feeds",
+      "wet" : 2
+    },
+    {
+      "day" : 3,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 3,
+      "stool" : "brown, green or yellow",
+      "summary" : "3+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 3
+    },
+    {
+      "day" : 4,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 4,
+      "stool" : "brown, green or yellow",
+      "summary" : "4+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 4
+    },
+    {
+      "day" : 5,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 5,
+      "stool" : "yellow and loose",
+      "summary" : "5+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 5
+    },
+    {
+      "day" : 6,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 6,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 7,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 7,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 8,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 8,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 9,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 9,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 10,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 10,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 11,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 11,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 12,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 12,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 13,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 13,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 14,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 14,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 15,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 15,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    },
+    {
+      "day" : 16,
+      "dirty" : 2,
+      "feedsMax" : 12,
+      "feedsMin" : 8,
+      "outDay" : 16,
+      "stool" : "yellow and loose",
+      "summary" : "6+ wet · 2+ dirty · 8 to 12 feeds",
+      "wet" : 6
+    }
+  ],
+  "guidanceText" : {
+    "callIf" : [
+      "Your baby has fewer wet diapers than usual, feeds poorly, or you are worried about feeding or weight gain.",
+      "Your newborn has not passed the first dark stool within 48 hours of birth.",
+      "Your baby is difficult to wake for feeds: seek medical advice right away.",
+      "Pink or brick-red diaper staining continues, or you notice blood in the urine or stool.",
+      "At 3 months or younger, a rectal temperature of 100.4°F (38°C) or higher needs an immediate call, even if your baby seems well."
+    ],
+    "disclaimer" : "Baby Tracker is a log, not medical advice. It does not diagnose, treat or assess your baby. Typical ranges are general guidance; call your pediatrician with any concern.",
+    "referenceScope" : "A breastfeeding reference for the first two weeks, not a target for every baby. Formula or mixed feeding can have different patterns. Follow your pediatrician's feeding plan. Counts include only what you log.",
+    "sourceLine" : "Diaper reference: NHS Healthier Together breastfeeding guidance. Fever and newborn care: American Academy of Pediatrics. Your pediatrician's advice comes first."
+  },
+  "headlines" : [
+    {
+      "buttons" : [
+        "feed",
+        "wet",
+        "dirty",
+        "sleep"
+      ],
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+
+      ]
+    },
+    {
+      "buttons" : [
+        "wet",
+        "dirty",
+        "sleep"
+      ],
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "feed"
+      ]
+    },
+    {
+      "buttons" : [
+        "feed",
+        "dirty",
+        "sleep"
+      ],
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "wet"
+      ]
+    },
+    {
+      "buttons" : [
+        "dirty",
+        "sleep"
+      ],
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "feed",
+        "wet"
+      ]
+    },
+    {
+      "buttons" : [
+        "feed",
+        "wet",
+        "sleep"
+      ],
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "dirty"
+      ]
+    },
+    {
+      "buttons" : [
+        "wet",
+        "sleep"
+      ],
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "dirty",
+        "feed"
+      ]
+    },
+    {
+      "buttons" : [
+        "feed",
+        "sleep"
+      ],
+      "headline" : "Feeds and sleep",
+      "hidden" : [
+        "dirty",
+        "wet"
+      ]
+    },
+    {
+      "buttons" : [
+        "sleep"
+      ],
+      "headline" : "Sleep",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "wet"
+      ]
+    },
+    {
+      "buttons" : [
+        "feed",
+        "wet",
+        "dirty"
+      ],
+      "headline" : "Feeds and diapers",
+      "hidden" : [
+        "sleep"
+      ]
+    },
+    {
+      "buttons" : [
+        "wet",
+        "dirty"
+      ],
+      "headline" : "Diapers",
+      "hidden" : [
+        "feed",
+        "sleep"
+      ]
+    },
+    {
+      "buttons" : [
+        "feed",
+        "dirty"
+      ],
+      "headline" : "Feeds and diapers",
+      "hidden" : [
+        "sleep",
+        "wet"
+      ]
+    },
+    {
+      "buttons" : [
+        "dirty"
+      ],
+      "headline" : "Diapers",
+      "hidden" : [
+        "feed",
+        "sleep",
+        "wet"
+      ]
+    },
+    {
+      "buttons" : [
+        "feed",
+        "wet"
+      ],
+      "headline" : "Feeds and diapers",
+      "hidden" : [
+        "dirty",
+        "sleep"
+      ]
+    },
+    {
+      "buttons" : [
+        "wet"
+      ],
+      "headline" : "Diapers",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "sleep"
+      ]
+    },
+    {
+      "buttons" : [
+        "feed"
+      ],
+      "headline" : "Feeds",
+      "hidden" : [
+        "dirty",
+        "sleep",
+        "wet"
+      ]
+    },
+    {
+      "buttons" : [
+        "feed",
+        "wet",
+        "dirty",
+        "sleep"
+      ],
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "sleep",
+        "wet"
+      ]
+    }
+  ],
+  "now" : 1792017000,
+  "reports" : [
+    {
+      "from" : 1791475200,
+      "hidden" : [
+
+      ],
+      "report" : {
+        "averageDirty" : 1,
+        "averageFeeds" : 4.666666666666667,
+        "averageSleep" : 11900,
+        "averagesNote" : "Averages use 3 complete days. 4 partial or unlogged days left out.",
+        "averageWet" : 3.3333333333333335,
+        "bottlePerDay" : 120,
+        "bottlePerFeed" : 55,
+        "days" : [
+          {
+            "bottle" : 0,
+            "bottleFeeds" : 0,
+            "date" : 1791442800,
+            "dayOfLife" : null,
+            "dirty" : 0,
+            "feeds" : 0,
+            "gap" : 0,
+            "longestSleep" : 0,
+            "partial" : "not logged",
+            "sleep" : 0,
+            "stools" : [
+
+            ],
+            "weight" : null,
+            "wet" : 0
+          },
+          {
+            "bottle" : 0,
+            "bottleFeeds" : 0,
+            "date" : 1791529200,
+            "dayOfLife" : 1,
+            "dirty" : 0,
+            "feeds" : 0,
+            "gap" : 0,
+            "longestSleep" : 0,
+            "partial" : "not logged",
+            "sleep" : 0,
+            "stools" : [
+
+            ],
+            "weight" : null,
+            "wet" : 0
+          },
+          {
+            "bottle" : 0,
+            "bottleFeeds" : 0,
+            "date" : 1791615600,
+            "dayOfLife" : 2,
+            "dirty" : 1,
+            "feeds" : 2,
+            "gap" : 16800,
+            "longestSleep" : 9900,
+            "partial" : "from 2:05 PM",
+            "sleep" : 5400,
+            "stools" : [
+              "black"
+            ],
+            "weight" : 3300,
+            "wet" : 1
+          },
+          {
+            "bottle" : 120,
+            "bottleFeeds" : 2,
+            "date" : 1791702000,
+            "dayOfLife" : 3,
+            "dirty" : 2,
+            "feeds" : 7,
+            "gap" : 25200,
+            "longestSleep" : 13200,
+            "partial" : null,
+            "sleep" : 15300,
+            "stools" : [
+              "yellow",
+              "green"
+            ],
+            "weight" : null,
+            "wet" : 4
+          },
+          {
+            "bottle" : 0,
+            "bottleFeeds" : 0,
+            "date" : 1791788400,
+            "dayOfLife" : 4,
+            "dirty" : 0,
+            "feeds" : 0,
+            "gap" : 0,
+            "longestSleep" : 0,
+            "partial" : null,
+            "sleep" : 9600,
+            "stools" : [
+
+            ],
+            "weight" : null,
+            "wet" : 0
+          },
+          {
+            "bottle" : 0,
+            "bottleFeeds" : 0,
+            "date" : 1791874800,
+            "dayOfLife" : 5,
+            "dirty" : 1,
+            "feeds" : 7,
+            "gap" : 15600,
+            "longestSleep" : 10800,
+            "partial" : null,
+            "sleep" : 10800,
+            "stools" : [
+              "yellow"
+            ],
+            "weight" : 3450,
+            "wet" : 6
+          },
+          {
+            "bottle" : 45,
+            "bottleFeeds" : 1,
+            "date" : 1791961200,
+            "dayOfLife" : 6,
+            "dirty" : 1,
+            "feeds" : 3,
+            "gap" : 22200,
+            "longestSleep" : 5100,
+            "partial" : "so far",
+            "sleep" : 9900,
+            "stools" : [
+              "brown"
+            ],
+            "weight" : null,
+            "wet" : 2
+          }
+        ],
+        "end" : 1791961200,
+        "longestGap" : 25200,
+        "longestSleep" : 13200,
+        "lowestWetDay" : 1791788400,
+        "notes" : [
+          {
+            "date" : 1791666300,
+            "text" : "Weight: Hospital scale"
+          },
+          {
+            "date" : 1791738000,
+            "text" : "Dirty: Seemed fussy, \"a lot\" of gas"
+          }
+        ],
+        "rangeLabel" : "Oct 8, 2026 to Oct 14, 2026",
+        "start" : 1791442800,
+        "weightChange" : "+5.5 oz (+4.5%) since Oct 10",
+        "weightChangeMetric" : "+150 g"
+      },
+      "to" : 1792017000
+    },
+    {
+      "from" : 1791702000,
+      "hidden" : [
+        "sleep"
+      ],
+      "report" : {
+        "averageDirty" : 1.5,
+        "averageFeeds" : 7,
+        "averageSleep" : 0,
+        "averagesNote" : "Averages use 2 complete days. 1 day with nothing logged is left out.",
+        "averageWet" : 5,
+        "bottlePerDay" : 120,
+        "bottlePerFeed" : 60,
+        "days" : [
+          {
+            "bottle" : 120,
+            "bottleFeeds" : 2,
+            "date" : 1791702000,
+            "dayOfLife" : 3,
+            "dirty" : 2,
+            "feeds" : 7,
+            "gap" : 25200,
+            "longestSleep" : 0,
+            "partial" : null,
+            "sleep" : 0,
+            "stools" : [
+              "yellow",
+              "green"
+            ],
+            "weight" : null,
+            "wet" : 4
+          },
+          {
+            "bottle" : 0,
+            "bottleFeeds" : 0,
+            "date" : 1791788400,
+            "dayOfLife" : 4,
+            "dirty" : 0,
+            "feeds" : 0,
+            "gap" : 0,
+            "longestSleep" : 0,
+            "partial" : "not logged",
+            "sleep" : 0,
+            "stools" : [
+
+            ],
+            "weight" : null,
+            "wet" : 0
+          },
+          {
+            "bottle" : 0,
+            "bottleFeeds" : 0,
+            "date" : 1791874800,
+            "dayOfLife" : 5,
+            "dirty" : 1,
+            "feeds" : 7,
+            "gap" : 15600,
+            "longestSleep" : 0,
+            "partial" : null,
+            "sleep" : 0,
+            "stools" : [
+              "yellow"
+            ],
+            "weight" : 3450,
+            "wet" : 6
+          }
+        ],
+        "end" : 1791874800,
+        "longestGap" : 25200,
+        "longestSleep" : 0,
+        "lowestWetDay" : 1791702000,
+        "notes" : [
+          {
+            "date" : 1791738000,
+            "text" : "Dirty: Seemed fussy, \"a lot\" of gas"
+          }
+        ],
+        "rangeLabel" : "Oct 11, 2026 to Oct 13, 2026",
+        "start" : 1791702000,
+        "weightChange" : "One weigh-in",
+        "weightChangeMetric" : null
+      },
+      "to" : 1791874800
+    }
+  ],
+  "stainRules" : {
+    "careLabel" : "Check the care label first, and never put two products on the fabric in the same step. Rinse in between.",
+    "never" : "No chlorine bleach on baby clothes here, and never mix hydrogen peroxide or vinegar with anything else."
+  },
+  "stains" : [
+    {
+      "firstMove" : "Get it off the skin first, then peel the clothes downward if you can, not over the head.",
+      "label" : "Blowout",
+      "missing" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide"
+      ],
+      "owned" : [
+
+      ],
+      "stain" : "blowout",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Get it off the skin first, then peel the clothes downward if you can, not over the head.",
+      "label" : "Blowout",
+      "missing" : [
+
+      ],
+      "owned" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "blowout",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : "Whites and colourfast fabrics only. Test a hidden seam first.",
+          "detail" : "Dab it on, wait ten minutes, rinse cold. Rinse off any earlier product before this one.",
+          "supply" : "hydrogenPeroxide",
+          "title" : "Dab hydrogen peroxide"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Get it off the skin first, then peel the clothes downward if you can, not over the head.",
+      "label" : "Blowout",
+      "missing" : [
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide"
+      ],
+      "owned" : [
+        "dishSoap"
+      ],
+      "stain" : "blowout",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Get it off the skin first, then peel the clothes downward if you can, not over the head.",
+      "label" : "Blowout",
+      "missing" : [
+        "dishSoap",
+        "hydrogenPeroxide"
+      ],
+      "owned" : [
+        "detergent",
+        "oxygenBleach"
+      ],
+      "stain" : "blowout",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Get it off the skin first, then peel the clothes downward if you can, not over the head.",
+      "label" : "Blowout",
+      "missing" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach"
+      ],
+      "owned" : [
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "blowout",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : "Whites and colourfast fabrics only. Test a hidden seam first.",
+          "detail" : "Dab it on, wait ten minutes, rinse cold. Rinse off any earlier product before this one.",
+          "supply" : "hydrogenPeroxide",
+          "title" : "Dab hydrogen peroxide"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Lift the solids off with the edge of a wipe. Don't rub.",
+      "label" : "Poop",
+      "missing" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide"
+      ],
+      "owned" : [
+
+      ],
+      "stain" : "poop",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Lift the solids off with the edge of a wipe. Don't rub.",
+      "label" : "Poop",
+      "missing" : [
+
+      ],
+      "owned" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "poop",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : "Whites and colourfast fabrics only. Test a hidden seam first.",
+          "detail" : "Dab it on, wait ten minutes, rinse cold. Rinse off any earlier product before this one.",
+          "supply" : "hydrogenPeroxide",
+          "title" : "Dab hydrogen peroxide"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Lift the solids off with the edge of a wipe. Don't rub.",
+      "label" : "Poop",
+      "missing" : [
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide"
+      ],
+      "owned" : [
+        "dishSoap"
+      ],
+      "stain" : "poop",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Lift the solids off with the edge of a wipe. Don't rub.",
+      "label" : "Poop",
+      "missing" : [
+        "dishSoap",
+        "hydrogenPeroxide"
+      ],
+      "owned" : [
+        "detergent",
+        "oxygenBleach"
+      ],
+      "stain" : "poop",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Lift the solids off with the edge of a wipe. Don't rub.",
+      "label" : "Poop",
+      "missing" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach"
+      ],
+      "owned" : [
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "poop",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : "Whites and colourfast fabrics only. Test a hidden seam first.",
+          "detail" : "Dab it on, wait ten minutes, rinse cold. Rinse off any earlier product before this one.",
+          "supply" : "hydrogenPeroxide",
+          "title" : "Dab hydrogen peroxide"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Blot, don't rub. Rubbing pushes it into the weave.",
+      "label" : "Spit-up",
+      "missing" : [
+        "dishSoap",
+        "detergent",
+        "bakingSoda",
+        "oxygenBleach"
+      ],
+      "owned" : [
+
+      ],
+      "stain" : "spitUp",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Blot, don't rub. Rubbing pushes it into the weave.",
+      "label" : "Spit-up",
+      "missing" : [
+
+      ],
+      "owned" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "spitUp",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : null,
+          "detail" : "A spoon of baking soda with a little water, spread on, thirty minutes, brush off. Again: smell, not stain.",
+          "supply" : "bakingSoda",
+          "title" : "Baking soda paste for the smell"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Blot, don't rub. Rubbing pushes it into the weave.",
+      "label" : "Spit-up",
+      "missing" : [
+        "detergent",
+        "bakingSoda",
+        "oxygenBleach"
+      ],
+      "owned" : [
+        "dishSoap"
+      ],
+      "stain" : "spitUp",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Blot, don't rub. Rubbing pushes it into the weave.",
+      "label" : "Spit-up",
+      "missing" : [
+        "dishSoap",
+        "bakingSoda"
+      ],
+      "owned" : [
+        "detergent",
+        "oxygenBleach"
+      ],
+      "stain" : "spitUp",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Blot, don't rub. Rubbing pushes it into the weave.",
+      "label" : "Spit-up",
+      "missing" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach"
+      ],
+      "owned" : [
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "spitUp",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "A spoon of baking soda with a little water, spread on, thirty minutes, brush off. Again: smell, not stain.",
+          "supply" : "bakingSoda",
+          "title" : "Baking soda paste for the smell"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried milk is a different job.",
+      "label" : "Breast milk",
+      "missing" : [
+        "detergent",
+        "dishSoap",
+        "oxygenBleach"
+      ],
+      "owned" : [
+
+      ],
+      "stain" : "breastMilk",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried milk is a different job.",
+      "label" : "Breast milk",
+      "missing" : [
+
+      ],
+      "owned" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "breastMilk",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried milk is a different job.",
+      "label" : "Breast milk",
+      "missing" : [
+        "detergent",
+        "oxygenBleach"
+      ],
+      "owned" : [
+        "dishSoap"
+      ],
+      "stain" : "breastMilk",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried milk is a different job.",
+      "label" : "Breast milk",
+      "missing" : [
+        "dishSoap"
+      ],
+      "owned" : [
+        "detergent",
+        "oxygenBleach"
+      ],
+      "stain" : "breastMilk",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried milk is a different job.",
+      "label" : "Breast milk",
+      "missing" : [
+        "detergent",
+        "dishSoap",
+        "oxygenBleach"
+      ],
+      "owned" : [
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "breastMilk",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+          "supply" : null,
+          "title" : "Lay it in the sun, still damp"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried formula is a different job.",
+      "label" : "Formula",
+      "missing" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach",
+        "whiteVinegar"
+      ],
+      "owned" : [
+
+      ],
+      "stain" : "formula",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried formula is a different job.",
+      "label" : "Formula",
+      "missing" : [
+
+      ],
+      "owned" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach",
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "formula",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : "On its own, in clean water. Never alongside peroxide or bleach.",
+          "detail" : "One part white vinegar to four parts cool water, thirty minutes, then rinse. This is for the smell that survives the wash, not for the mark.",
+          "supply" : "whiteVinegar",
+          "title" : "Soak for the sour smell"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried formula is a different job.",
+      "label" : "Formula",
+      "missing" : [
+        "detergent",
+        "oxygenBleach",
+        "whiteVinegar"
+      ],
+      "owned" : [
+        "dishSoap"
+      ],
+      "stain" : "formula",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+          "supply" : "dishSoap",
+          "title" : "A drop of dish soap"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried formula is a different job.",
+      "label" : "Formula",
+      "missing" : [
+        "dishSoap",
+        "whiteVinegar"
+      ],
+      "owned" : [
+        "detergent",
+        "oxygenBleach"
+      ],
+      "stain" : "formula",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : null,
+          "detail" : "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+          "supply" : "detergent",
+          "title" : "Rub in a little detergent"
+        },
+        {
+          "caution" : "Colour-safe, but check the label for wool and silk.",
+          "detail" : "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
+          "supply" : "oxygenBleach",
+          "title" : "Soak in oxygen bleach"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    },
+    {
+      "firstMove" : "Rinse it now if you can. Dried formula is a different job.",
+      "label" : "Formula",
+      "missing" : [
+        "dishSoap",
+        "detergent",
+        "oxygenBleach"
+      ],
+      "owned" : [
+        "hydrogenPeroxide",
+        "whiteVinegar",
+        "bakingSoda"
+      ],
+      "stain" : "formula",
+      "steps" : [
+        {
+          "caution" : null,
+          "detail" : "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+          "supply" : null,
+          "title" : "Cold water, from the back"
+        },
+        {
+          "caution" : "On its own, in clean water. Never alongside peroxide or bleach.",
+          "detail" : "One part white vinegar to four parts cool water, thirty minutes, then rinse. This is for the smell that survives the wash, not for the mark.",
+          "supply" : "whiteVinegar",
+          "title" : "Soak for the sour smell"
+        },
+        {
+          "caution" : null,
+          "detail" : "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+          "supply" : null,
+          "title" : "Wash, then look before it dries"
+        }
+      ]
+    }
+  ],
+  "summaries" : [
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Feed · Bottle",
+          "Poop",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Pee",
+          "Feed · Right"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Pee",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 3,
+        "todayLine" : "3 feeds · 2 pee · 1 poop",
+        "todayWet" : 2
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 3,
+        "futureFrom" : 16,
+        "gridStart" : 1791961200,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "3 feeds · 2 pee · 1 poop · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 2
+      },
+      "tracked" : "all",
+      "window" : 0,
+      "windowTitle" : "Today",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Feed · Bottle",
+          "Poop",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Pee",
+          "Feed · Right"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Pee",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 2,
+        "todayLine" : "2 feeds · 1 pee · 1 poop",
+        "todayWet" : 1
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 2,
+        "futureFrom" : 10,
+        "gridStart" : 1791982800,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2 feeds · 1 pee · 1 poop · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 1
+      },
+      "tracked" : "all",
+      "window" : 6,
+      "windowTitle" : "Since 6 AM",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Feed · Bottle",
+          "Poop",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Pee",
+          "Feed · Right"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Pee",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 6,
+        "todayLine" : "6 feeds · 4 pee · 1 poop",
+        "todayWet" : 4
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 6,
+        "futureFrom" : 24,
+        "gridStart" : 1791932400,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5
+          ],
+          "wet" : [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "line" : "6 feeds · 4 pee · 1 poop · 3h 15m sleep",
+        "sleepSeconds" : 11700,
+        "wet" : 4
+      },
+      "tracked" : "all",
+      "window" : -1,
+      "windowTitle" : "Last 24 hours",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "feed"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 35m",
+        "leadLine" : "Last diaper 1h 35m ago · Pee",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Poop",
+          "Sleep · 1h 20m",
+          "Pee",
+          "Pee",
+          "Pee",
+          "Pee"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 0,
+        "todayLine" : "2 pee · 1 poop",
+        "todayWet" : 2
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 0,
+        "futureFrom" : 16,
+        "gridStart" : 1791961200,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2 pee · 1 poop · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 2
+      },
+      "tracked" : "noFeed",
+      "window" : 0,
+      "windowTitle" : "Today",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "feed"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 35m",
+        "leadLine" : "Last diaper 1h 35m ago · Pee",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Poop",
+          "Sleep · 1h 20m",
+          "Pee",
+          "Pee",
+          "Pee",
+          "Pee"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 0,
+        "todayLine" : "1 pee · 1 poop",
+        "todayWet" : 1
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 0,
+        "futureFrom" : 10,
+        "gridStart" : 1791982800,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "1 pee · 1 poop · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 1
+      },
+      "tracked" : "noFeed",
+      "window" : 6,
+      "windowTitle" : "Since 6 AM",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "feed"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 35m",
+        "leadLine" : "Last diaper 1h 35m ago · Pee",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Poop",
+          "Sleep · 1h 20m",
+          "Pee",
+          "Pee",
+          "Pee",
+          "Pee"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 0,
+        "todayLine" : "4 pee · 1 poop",
+        "todayWet" : 4
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 0,
+        "futureFrom" : 24,
+        "gridStart" : 1791932400,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5
+          ],
+          "wet" : [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "line" : "4 pee · 1 poop · 3h 15m sleep",
+        "sleepSeconds" : 11700,
+        "wet" : 4
+      },
+      "tracked" : "noFeed",
+      "window" : -1,
+      "windowTitle" : "Last 24 hours",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Sleep",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "wet"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "No diaper logged yet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 25m",
+        "leadLine" : "Asleep 1h 25m",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Sleep · 1h 20m",
+          "Sleep · 3h",
+          "Sleep · 3h 40m",
+          "Sleep · 1h",
+          "Sleep · 1h 30m",
+          "Sleep · 2h 45m"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 0,
+        "todayLine" : "",
+        "todayWet" : 0
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 0,
+        "futureFrom" : 16,
+        "gridStart" : 1791961200,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 0
+      },
+      "tracked" : "sleepOnly",
+      "window" : 0,
+      "windowTitle" : "Today",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Sleep",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "wet"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "No diaper logged yet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 25m",
+        "leadLine" : "Asleep 1h 25m",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Sleep · 1h 20m",
+          "Sleep · 3h",
+          "Sleep · 3h 40m",
+          "Sleep · 1h",
+          "Sleep · 1h 30m",
+          "Sleep · 2h 45m"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 0,
+        "todayLine" : "",
+        "todayWet" : 0
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 0,
+        "futureFrom" : 10,
+        "gridStart" : 1791982800,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 0
+      },
+      "tracked" : "sleepOnly",
+      "window" : 6,
+      "windowTitle" : "Since 6 AM",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Sleep",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "wet"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "No diaper logged yet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 25m",
+        "leadLine" : "Asleep 1h 25m",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Sleep · 1h 20m",
+          "Sleep · 3h",
+          "Sleep · 3h 40m",
+          "Sleep · 1h",
+          "Sleep · 1h 30m",
+          "Sleep · 2h 45m"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 0,
+        "todayLine" : "",
+        "todayWet" : 0
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 0,
+        "futureFrom" : 24,
+        "gridStart" : 1791932400,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "3h 15m sleep",
+        "sleepSeconds" : 11700,
+        "wet" : 0
+      },
+      "tracked" : "sleepOnly",
+      "window" : -1,
+      "windowTitle" : "Last 24 hours",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "dirty"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Feed · Bottle",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Pee",
+          "Feed · Right",
+          "Feed · Left"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Pee",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 3,
+        "todayLine" : "3 feeds · 2 pee",
+        "todayWet" : 2
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 3,
+        "futureFrom" : 16,
+        "gridStart" : 1791961200,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "3 feeds · 2 pee · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 2
+      },
+      "tracked" : "noDirty",
+      "window" : 0,
+      "windowTitle" : "Today",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "dirty"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Feed · Bottle",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Pee",
+          "Feed · Right",
+          "Feed · Left"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Pee",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 2,
+        "todayLine" : "2 feeds · 1 pee",
+        "todayWet" : 1
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 2,
+        "futureFrom" : 10,
+        "gridStart" : 1791982800,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2 feeds · 1 pee · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 1
+      },
+      "tracked" : "noDirty",
+      "window" : 6,
+      "windowTitle" : "Since 6 AM",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "dirty"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Pee",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Pee",
+          "Feed · Bottle",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Pee",
+          "Feed · Right",
+          "Feed · Left"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Pee",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 6,
+        "todayLine" : "6 feeds · 4 pee",
+        "todayWet" : 4
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 6,
+        "futureFrom" : 24,
+        "gridStart" : 1791932400,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5
+          ],
+          "wet" : [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "line" : "6 feeds · 4 pee · 3h 15m sleep",
+        "sleepSeconds" : 11700,
+        "wet" : 4
+      },
+      "tracked" : "noDirty",
+      "window" : -1,
+      "windowTitle" : "Last 24 hours",
+      "words" : "peePoop"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Feed · Bottle",
+          "Dirty",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Wet",
+          "Feed · Right"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Wet",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 3,
+        "todayLine" : "3 feeds · 2 wet · 1 dirty",
+        "todayWet" : 2
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 3,
+        "futureFrom" : 16,
+        "gridStart" : 1791961200,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "3 feeds · 2 wet · 1 dirty · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 2
+      },
+      "tracked" : "all",
+      "window" : 0,
+      "windowTitle" : "Today",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Feed · Bottle",
+          "Dirty",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Wet",
+          "Feed · Right"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Wet",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 2,
+        "todayLine" : "2 feeds · 1 wet · 1 dirty",
+        "todayWet" : 1
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 2,
+        "futureFrom" : 10,
+        "gridStart" : 1791982800,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2 feeds · 1 wet · 1 dirty · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 1
+      },
+      "tracked" : "all",
+      "window" : 6,
+      "windowTitle" : "Since 6 AM",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Feed · Bottle",
+          "Dirty",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Wet",
+          "Feed · Right"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Wet",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 6,
+        "todayLine" : "6 feeds · 4 wet · 1 dirty",
+        "todayWet" : 4
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 6,
+        "futureFrom" : 24,
+        "gridStart" : 1791932400,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5
+          ],
+          "wet" : [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "line" : "6 feeds · 4 wet · 1 dirty · 3h 15m sleep",
+        "sleepSeconds" : 11700,
+        "wet" : 4
+      },
+      "tracked" : "all",
+      "window" : -1,
+      "windowTitle" : "Last 24 hours",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "feed"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 35m",
+        "leadLine" : "Last diaper 1h 35m ago · Wet",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Dirty",
+          "Sleep · 1h 20m",
+          "Wet",
+          "Wet",
+          "Wet",
+          "Wet"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 0,
+        "todayLine" : "2 wet · 1 dirty",
+        "todayWet" : 2
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 0,
+        "futureFrom" : 16,
+        "gridStart" : 1791961200,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2 wet · 1 dirty · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 2
+      },
+      "tracked" : "noFeed",
+      "window" : 0,
+      "windowTitle" : "Today",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "feed"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 35m",
+        "leadLine" : "Last diaper 1h 35m ago · Wet",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Dirty",
+          "Sleep · 1h 20m",
+          "Wet",
+          "Wet",
+          "Wet",
+          "Wet"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 0,
+        "todayLine" : "1 wet · 1 dirty",
+        "todayWet" : 1
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 0,
+        "futureFrom" : 10,
+        "gridStart" : 1791982800,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "1 wet · 1 dirty · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 1
+      },
+      "tracked" : "noFeed",
+      "window" : 6,
+      "windowTitle" : "Since 6 AM",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Diapers and sleep",
+      "hidden" : [
+        "feed"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 35m",
+        "leadLine" : "Last diaper 1h 35m ago · Wet",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Dirty",
+          "Sleep · 1h 20m",
+          "Wet",
+          "Wet",
+          "Wet",
+          "Wet"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 1,
+        "todayFeeds" : 0,
+        "todayLine" : "4 wet · 1 dirty",
+        "todayWet" : 4
+      },
+      "totals" : {
+        "dirty" : 1,
+        "feeds" : 0,
+        "futureFrom" : 24,
+        "gridStart" : 1791932400,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5
+          ],
+          "wet" : [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "line" : "4 wet · 1 dirty · 3h 15m sleep",
+        "sleepSeconds" : 11700,
+        "wet" : 4
+      },
+      "tracked" : "noFeed",
+      "window" : -1,
+      "windowTitle" : "Last 24 hours",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Sleep",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "wet"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "No diaper logged yet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 25m",
+        "leadLine" : "Asleep 1h 25m",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Sleep · 1h 20m",
+          "Sleep · 3h",
+          "Sleep · 3h 40m",
+          "Sleep · 1h",
+          "Sleep · 1h 30m",
+          "Sleep · 2h 45m"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 0,
+        "todayLine" : "",
+        "todayWet" : 0
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 0,
+        "futureFrom" : 16,
+        "gridStart" : 1791961200,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 0
+      },
+      "tracked" : "sleepOnly",
+      "window" : 0,
+      "windowTitle" : "Today",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Sleep",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "wet"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "No diaper logged yet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 25m",
+        "leadLine" : "Asleep 1h 25m",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Sleep · 1h 20m",
+          "Sleep · 3h",
+          "Sleep · 3h 40m",
+          "Sleep · 1h",
+          "Sleep · 1h 30m",
+          "Sleep · 2h 45m"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 0,
+        "todayLine" : "",
+        "todayWet" : 0
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 0,
+        "futureFrom" : 10,
+        "gridStart" : 1791982800,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 0
+      },
+      "tracked" : "sleepOnly",
+      "window" : 6,
+      "windowTitle" : "Since 6 AM",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Sleep",
+      "hidden" : [
+        "dirty",
+        "feed",
+        "wet"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "No diaper logged yet",
+        "feedLine" : "No feed logged yet",
+        "lastFeedAt" : null,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "1h 25m",
+        "leadLine" : "Asleep 1h 25m",
+        "nextSideLine" : null,
+        "recentTitles" : [
+          "Asleep",
+          "Sleep · 1h 20m",
+          "Sleep · 3h",
+          "Sleep · 3h 40m",
+          "Sleep · 1h",
+          "Sleep · 1h 30m",
+          "Sleep · 2h 45m"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 0,
+        "todayLine" : "",
+        "todayWet" : 0
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 0,
+        "futureFrom" : 24,
+        "gridStart" : 1791932400,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "3h 15m sleep",
+        "sleepSeconds" : 11700,
+        "wet" : 0
+      },
+      "tracked" : "sleepOnly",
+      "window" : -1,
+      "windowTitle" : "Last 24 hours",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "dirty"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Feed · Bottle",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Wet",
+          "Feed · Right",
+          "Feed · Left"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Wet",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 3,
+        "todayLine" : "3 feeds · 2 wet",
+        "todayWet" : 2
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 3,
+        "futureFrom" : 16,
+        "gridStart" : 1791961200,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "3 feeds · 2 wet · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 2
+      },
+      "tracked" : "noDirty",
+      "window" : 0,
+      "windowTitle" : "Today",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "dirty"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Feed · Bottle",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Wet",
+          "Feed · Right",
+          "Feed · Left"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Wet",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 2,
+        "todayLine" : "2 feeds · 1 wet",
+        "todayWet" : 1
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 2,
+        "futureFrom" : 10,
+        "gridStart" : 1791982800,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "wet" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "line" : "2 feeds · 1 wet · 2h 45m sleep",
+        "sleepSeconds" : 9900,
+        "wet" : 1
+      },
+      "tracked" : "noDirty",
+      "window" : 6,
+      "windowTitle" : "Since 6 AM",
+      "words" : "wetDirty"
+    },
+    {
+      "headline" : "Feeds, diapers and sleep",
+      "hidden" : [
+        "dirty"
+      ],
+      "summary" : {
+        "awakeLine" : "Asleep 1h 25m",
+        "dayOfLife" : 6,
+        "diaperLine" : "Last diaper 1h 35m ago · Wet",
+        "feedLine" : "Fed 2h 20m ago · Bottle",
+        "lastFeedAt" : 1792008600,
+        "lastWokeAt" : 1791998400,
+        "leadElapsed" : "2h 20m",
+        "leadLine" : "Fed 2h 20m ago · Bottle",
+        "nextSideLine" : "Start on Right",
+        "recentTitles" : [
+          "Asleep",
+          "Wet",
+          "Feed · Bottle",
+          "Sleep · 1h 20m",
+          "Feed · Left + Bottle · 35m",
+          "Wet",
+          "Feed · Right",
+          "Feed · Left"
+        ],
+        "runningSleepStart" : 1792011900,
+        "sleepLine" : "Asleep 1h 25m",
+        "supportingLines" : [
+          "Start on Right",
+          "Last diaper 1h 35m ago · Wet",
+          "Asleep 1h 25m"
+        ],
+        "todayDirty" : 0,
+        "todayFeeds" : 6,
+        "todayLine" : "6 feeds · 4 wet",
+        "todayWet" : 4
+      },
+      "totals" : {
+        "dirty" : 0,
+        "feeds" : 6,
+        "futureFrom" : 24,
+        "gridStart" : 1791932400,
+        "hours" : {
+          "dirty" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "feed" : [
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          "sleep" : [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0.33333333333333331,
+            0,
+            0,
+            0,
+            0.91666666666666663,
+            0.5
+          ],
+          "wet" : [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "line" : "6 feeds · 4 wet · 3h 15m sleep",
+        "sleepSeconds" : 11700,
+        "wet" : 4
+      },
+      "tracked" : "noDirty",
+      "window" : -1,
+      "windowTitle" : "Last 24 hours",
+      "words" : "wetDirty"
+    }
+  ],
+  "supplies" : [
+    {
+      "hint" : "The blue kind by the sink.",
+      "id" : "dishSoap",
+      "label" : "Dish soap"
+    },
+    {
+      "hint" : "Most have enzymes, which is what breaks milk and poop down.",
+      "id" : "detergent",
+      "label" : "Laundry detergent"
+    },
+    {
+      "hint" : "Colour-safe powder. Not chlorine bleach.",
+      "id" : "oxygenBleach",
+      "label" : "Oxygen bleach (OxiClean)"
+    },
+    {
+      "hint" : "The brown bottle from the medicine cabinet.",
+      "id" : "hydrogenPeroxide",
+      "label" : "Hydrogen peroxide 3%"
+    },
+    {
+      "hint" : "For the sour-milk smell.",
+      "id" : "whiteVinegar",
+      "label" : "White vinegar"
+    },
+    {
+      "hint" : "For smell, not for the stain.",
+      "id" : "bakingSoda",
+      "label" : "Baking soda"
+    }
+  ],
+  "tallies" : [
+    {
+      "bottle" : 0,
+      "day" : 9,
+      "dirty" : 0,
+      "feeds" : 0,
+      "sleepSeconds" : 0,
+      "wet" : 0
+    },
+    {
+      "bottle" : 0,
+      "day" : 10,
+      "dirty" : 1,
+      "feeds" : 2,
+      "sleepSeconds" : 5400,
+      "wet" : 1
+    },
+    {
+      "bottle" : 120,
+      "day" : 11,
+      "dirty" : 2,
+      "feeds" : 7,
+      "sleepSeconds" : 15300,
+      "wet" : 4
+    },
+    {
+      "bottle" : 0,
+      "day" : 12,
+      "dirty" : 0,
+      "feeds" : 0,
+      "sleepSeconds" : 9600,
+      "wet" : 0
+    },
+    {
+      "bottle" : 0,
+      "day" : 13,
+      "dirty" : 1,
+      "feeds" : 7,
+      "sleepSeconds" : 10800,
+      "wet" : 6
+    },
+    {
+      "bottle" : 45,
+      "day" : 14,
+      "dirty" : 1,
+      "feeds" : 3,
+      "sleepSeconds" : 9900,
+      "wet" : 2
+    },
+    {
+      "bottle" : 0,
+      "day" : 15,
+      "dirty" : 0,
+      "feeds" : 0,
+      "sleepSeconds" : 0,
+      "wet" : 0
+    }
+  ],
+  "zone" : "America\/Los_Angeles"
+}
