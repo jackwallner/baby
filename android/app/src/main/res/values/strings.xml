@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Baby Tracker</string>
+    <string name="reminder_channel">Feed and checkup reminders</string>
+</resources>

@@ -1,0 +1,9 @@
+sdk.dir=/path/to/Android/sdk
+# RevenueCat Test Store app appf48b1dd074 public key (test_...), for Debug.
+REVENUECAT_TEST_KEY=
+# RevenueCat Play app public key (goog_...), for Release. No Play app exists in proj0b545ae2 yet.
+REVENUECAT_PLAY_KEY=
+PLAY_UPLOAD_KEYSTORE=
+PLAY_UPLOAD_KEY_ALIAS=upload
+PLAY_UPLOAD_STORE_PASSWORD=
+PLAY_UPLOAD_KEY_PASSWORD=

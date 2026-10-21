@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The log (files/baby-log.json) and settings follow Android's own backup,
+     which is the only copy off the phone: there is no server. Exported PDFs
+     and CSVs in the cache are never backed up. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="file" path="baby-log.json" />
+        <include domain="sharedpref" path="baby.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="file" path="baby-log.json" />
+        <include domain="sharedpref" path="baby.xml" />
+    </device-transfer>
+</data-extraction-rules>
