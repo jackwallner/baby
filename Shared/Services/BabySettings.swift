@@ -64,6 +64,15 @@ final class BabySettings: ObservableObject {
         }
     }
 
+    /// Breast, bottle or both. The summary carries it to the Watch.
+    @Published var feedTypes: FeedTypes {
+        didSet {
+            guard feedTypes != oldValue else { return }
+            feedTypes.store()
+            EventStore.shared.reload()
+        }
+    }
+
     /// When the totals under the log buttons start counting. The summary the
     /// widgets and the Watch read is rebuilt with it.
     @Published var totalsWindow: TotalsWindow {
@@ -87,9 +96,11 @@ final class BabySettings: ObservableObject {
         // Seeded runs start with every button, whatever a previous run left.
         if ProcessInfo.processInfo.arguments.contains("-SeedScreenshotData") {
             AppGroup.defaults.removeObject(forKey: AppGroup.Key.hiddenKinds)
+            AppGroup.defaults.removeObject(forKey: AppGroup.Key.hiddenFeedTypes)
         }
         #endif
         tracked = .current
+        feedTypes = .current
         totalsWindow = .current
         #if DEBUG
         // `-Appearance night` pins a palette for captures and UI tests.

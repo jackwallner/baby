@@ -349,7 +349,7 @@ struct BabyHomeView: View {
                 .padding(.horizontal, AppTheme.margin)
                 .frame(height: AppTheme.bottomNavigationReservedHeight)
         }
-        .undoToast()
+        .undoToast(clearsBarButtons: selected != .log)
         .tint(AppTheme.accent)
         .onReceive(router.$checkupRequests) { count in
             guard count > 0 else { return }

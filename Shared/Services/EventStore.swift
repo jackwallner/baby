@@ -46,6 +46,8 @@ final class EventStore: ObservableObject {
         var closedTimers: [NSManagedObjectID] = []
         /// Set when the action was a delete; Undo puts the entry back.
         var deleted: DeletedEvent?
+        /// The diapers the All button logged with this feed, undone with it.
+        var alsoLogged: [NSManagedObjectID] = []
     }
 
     /// Everything needed to put a deleted entry back as it was.
@@ -478,7 +480,9 @@ final class EventStore: ObservableObject {
         // A completed feed logged during a running one means the running feed
         // is over, otherwise Now would keep saying "Feeding" for the older row.
         let closed = kind == .feed ? closeRunning(.feed, at: date) : []
-        let event = persistence.insert(kind: kind, at: date, side: kind == .feed ? side : nil, ended: kind == .feed ? date : nil, for: child, in: context)
+        // A bottle-only family's bare Feed is a bottle.
+        let side = kind == .feed ? side ?? FeedTypes.current.tapSide : nil
+        let event = persistence.insert(kind: kind, at: date, side: side, ended: kind == .feed ? date : nil, for: child, in: context)
         configure?(event)
         guard persistence.save(context) else {
             reload()
@@ -487,6 +491,24 @@ final class EventStore: ObservableObject {
         rememberForUndo(event, closedTimers: closed)
         reload()
         return event
+    }
+
+    /// The All button: a feed and both diapers at one time, saved together and
+    /// undone together. Returns the feed, whose side the chips then set.
+    @discardableResult
+    func logAll(at date: Date = .now) -> LogEvent? {
+        guard let child else { return nil }
+        let closed = closeRunning(.feed, at: date)
+        let feed = persistence.insert(kind: .feed, at: date, side: FeedTypes.current.tapSide, ended: date, for: child, in: context)
+        let diapers = [EventKind.wet, .dirty].map { persistence.insert(kind: $0, at: date, for: child, in: context) }
+        guard persistence.save(context) else {
+            reload()
+            return nil
+        }
+        remember(LoggedEvent(objectID: feed.objectID, kind: .feed, detail: feed.detailText, at: .now, eventAt: date,
+                             closedTimers: closed, alsoLogged: diapers.map(\.objectID)))
+        reload()
+        return feed
     }
 
     /// Starts a timed feed or sleep. A running one of the same kind ends first,
@@ -641,6 +663,10 @@ final class EventStore: ObservableObject {
                 guard let closed = try? context.existingObject(with: id) as? LogEvent else { continue }
                 closed.endedAt = nil
                 closed.updatedAt = .now
+            }
+            for id in lastLogged.alsoLogged {
+                guard let diaper = try? context.existingObject(with: id) as? LogEvent else { continue }
+                context.delete(diaper)
             }
         }
         guard persistence.save(context) else {

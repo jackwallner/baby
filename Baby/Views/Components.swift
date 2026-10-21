@@ -160,14 +160,16 @@ enum VoiceOver {
 }
 
 extension View {
-    /// Undo stays above the controls, clearing back and add-entry buttons.
-    /// Applied once around all tabs so History deletion can be undone too.
-    func undoToast() -> some View { modifier(UndoToastOverlay()) }
+    /// Undo stays above the controls. Applied once around all tabs so History
+    /// deletion can be undone too. Where a screen has bar buttons (back, add
+    /// entry) it insets to clear them; Log has none, so it uses the margins.
+    func undoToast(clearsBarButtons: Bool) -> some View { modifier(UndoToastOverlay(clearsBarButtons: clearsBarButtons)) }
 }
 
 private struct UndoToastOverlay: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var events: EventStore
+    let clearsBarButtons: Bool
     @State private var showUndoError = false
 
     /// One transaction for everything Undo changes: the toast folds away
@@ -189,8 +191,8 @@ private struct UndoToastOverlay: ViewModifier {
                     if let logged = events.lastLogged {
                         UndoToast(logged: logged, undo: undo)
                             .frame(maxWidth: AppTheme.toastWidth)
-                            .padding(.leading, AppTheme.toastLeadingInset)
-                            .padding(.trailing, AppTheme.toastTrailingInset)
+                            .padding(.leading, clearsBarButtons ? AppTheme.toastLeadingInset : AppTheme.margin)
+                            .padding(.trailing, clearsBarButtons ? AppTheme.toastTrailingInset : AppTheme.margin)
                             .gesture(DragGesture(minimumDistance: AppTheme.tightSpacing).onEnded { value in
                                 if value.translation.height < 0 { events.dismissUndo() }
                             })
@@ -258,7 +260,7 @@ struct UndoToast: View {
         logged.kind == .sleep && !logged.reopensTimer && logged.detail != nil && logged.detail != "Asleep"
     }
 
-    /// Short, in the buttons' own words: the toast sits between two bar buttons.
+    /// Short, in the buttons' own words: the toast can sit between two bar buttons.
     var title: String {
         if logged.deleted != nil {
             let base: String = switch logged.kind {
@@ -269,6 +271,9 @@ struct UndoToast: View {
             }
             guard let detail = logged.detail, !detail.isEmpty else { return base }
             return "\(base) · \(detail)"
+        }
+        if !logged.alsoLogged.isEmpty {
+            return "Logged feed, \(EventKind.wet.label.lowercased()) and \(EventKind.dirty.label.lowercased())" + backdated
         }
         let base: String = switch logged.kind {
         case .feed: "Logged feed"

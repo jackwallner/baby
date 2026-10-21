@@ -46,6 +46,8 @@ platform allows. First built 2026-10-20 on jmbp2 (fleet run
 
 ## Deliberate differences from iOS
 
+- **Not ported yet (2026-10-21):** iOS's All button, Settings > Feed types
+  and the side chips inside the Feed button. Port them with parity tests.
 - **Log together uses Firebase, not CloudKit** (Jack, 2026-10-20). Firebase
   Auth with Google sign-in (Credential Manager) and Cloud Firestore, Spark
   plan only: never enable billing or Blaze. One Firestore family per shared

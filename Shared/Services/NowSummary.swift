@@ -37,6 +37,9 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// The buttons turned off on the phone, so the Watch hides them too.
     /// Optional for summaries from older builds, which tracked everything.
     var hiddenKinds: [EventKind]?
+    /// The feed types turned off (breast as `left`, or `bottle`), for the
+    /// Watch's feed buttons. Optional for summaries from older builds.
+    var hiddenFeedTypes: [FeedSide]?
     /// The newest entries, newest first, for the Watch's Today list and for
     /// taking back a wrist tap. Optional for summaries from older builds.
     var recent: [RecentEntry]?
@@ -46,13 +49,14 @@ struct NowSummary: Codable, Equatable, Sendable {
     static let recentLimit = 24
 
     /// The side to offer next: the other breast after a breastfeed.
-    var suggestedSide: FeedSide { feedSides.last?.next ?? .left }
+    var suggestedSide: FeedSide { feedTypes.breast ? feedSides.last?.next ?? .left : .bottle }
 
     /// The breast to start on next: the other one from where the last
     /// breastfeed ended. A bottle in between does not change it. Nil when no
     /// recent feed named a breast, or when the newest breastfeed has no side
     /// yet: an older feed's side would only be a guess.
     var nextBreastSide: FeedSide? {
+        guard feedTypes.breast else { return nil }
         let feeds = [feedSides] + (recent ?? []).filter { $0.kind == .feed }.map { $0.sides ?? [] }
         for sides in feeds {
             if let ended = sides.last(where: { $0 != .bottle }) { return ended.next }
@@ -83,6 +87,7 @@ struct NowSummary: Codable, Equatable, Sendable {
     }
 
     var tracked: TrackedKinds { TrackedKinds(hidden: Set(hiddenKinds ?? [])) }
+    var feedTypes: FeedTypes { FeedTypes(hidden: Set(hiddenFeedTypes ?? [])) }
 
     var isSleeping: Bool { runningSleepStart != nil }
     var isFeeding: Bool { runningFeedStart != nil }
@@ -186,12 +191,14 @@ struct NowSummary: Codable, Equatable, Sendable {
         now: Date = .now,
         calendar: Calendar = .current,
         window: TotalsWindow = .current,
-        tracked: TrackedKinds = .current
+        tracked: TrackedKinds = .current,
+        feedTypes: FeedTypes = .current
     ) -> NowSummary {
         var summary = NowSummary()
         summary.generatedAt = now
         summary.totalsWindow = window.storedValue
         summary.hiddenKinds = tracked.hidden.isEmpty ? nil : TrackedKinds.buttons.filter { !tracked.contains($0) }
+        summary.hiddenFeedTypes = feedTypes == .all ? nil : feedTypes.hidden
         guard let child else { return summary }
         let events = events.filter { tracked.contains($0.eventKind) }
         let today = window.interval(at: now, calendar: calendar)

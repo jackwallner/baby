@@ -45,7 +45,7 @@ struct EventEditorView: View {
         savedSeconds = seconds
         _draft = State(initialValue: Draft(
             startedAt: existing?.startedAt ?? request.at ?? .now,
-            sides: existing?.feedSides ?? [],
+            sides: existing?.feedSides ?? FeedTypes.current.tapSide.map { [$0] } ?? [],
             durationMinutes: Int((seconds / 60).rounded()),
             amount: existing?.amount ?? 0,
             stool: existing?.stool,
@@ -185,6 +185,7 @@ struct EventEditorView: View {
         }
         .onAppear {
             if isNew, kind == .weight, draft.amount <= 0 { draft.amount = startingWeight }
+            if isNew, draft.sides.contains(.bottle), draft.amount <= 0, let lastBottleAmount { draft.amount = lastBottleAmount }
         }
         .onChange(of: draft.sides) { old, new in
             guard new.contains(.bottle), !old.contains(.bottle), draft.amount <= 0, let lastBottleAmount else { return }

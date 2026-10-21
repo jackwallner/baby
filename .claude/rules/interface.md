@@ -357,6 +357,19 @@ backdated Wake before the sleep began ends it now. The phone retries the
 Live Activity on every foreground (iOS refuses a background start), and
 never pushes the empty pre-unlock stand-in to the Watch. Night light dims
 the full PDF preview. Settings' By day keeps the chosen day start after
-trying Last 24 hours. Left for Jack: a bottle-only Feed row, partial bottle
-amounts in reports, per-kind widget Undo, a Watch "updated" line, and the
-widget's reach to this phone's own Watch.
+trying Last 24 hours. Left for Jack: partial bottle amounts in reports,
+per-kind widget Undo, a Watch "updated" line, and the widget's reach to this
+phone's own Watch.
+
+Feed row (Jack, 2026-10-21). The side chips open inside the Feed button's
+own frame (a hidden Feed keeps the size), so the log time row never hides
+and nothing else moves (`testLoggingMovesNothingElseOnTheScreen` pins the
+side row to Feed's frame). A narrow All (`allButtonWidth`) beside Feed logs
+a feed, a pee and a poop at the log time in one save (`EventStore.logAll`);
+one Undo takes all three back (`LoggedEvent.alsoLogged`). All shows only
+while Feed, Pee and Poop are all on. Settings > Feed types (`FeedTypes`,
+App Group `hiddenFeedTypes`, at least one stays on) limits the chips, the
+editor and the Watch to breast, bottle or both; bottle alone makes every
+bare Feed (app, widget, Siri) a bottle with no chips, and drops "Start on".
+The Undo toast uses the margins on Log, which has no bar buttons, and
+insets past them on every other tab.

@@ -6,7 +6,7 @@ import SwiftUI
 /// Settings and the rest keep their order. The diaper pair reads Pee and
 /// Poop, or Wet and Dirty. A tap logs at the log clock's time (now, unless
 /// the parent wound it back); a long press opens the editor with that kind
-/// pre-filled.
+/// pre-filled. A narrow All beside Feed logs a feed and both diapers at once.
 struct LogButtons: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -41,6 +41,7 @@ struct LogButtons: View {
                     ForEach(row, id: \.self) { kind in
                         button(for: kind)
                     }
+                    if row == [.feed], showsAll { allButton }
                 }
             }
         }
@@ -59,12 +60,23 @@ struct LogButtons: View {
         switch kind {
         case .feed:
             // One tap logs a feed. The side is a second, optional step that
-            // opens above the buttons once the feed is safely logged, so the
-            // quick path never waits on a choice.
-            kindButton(.feed, label: "Feed") { at in
-                guard let event = events.log(.feed, at: at) else { return false }
-                sides.open(event.objectID)
-                return true
+            // opens inside the Feed button once the feed is safely logged, so
+            // the quick path never waits on a choice and nothing else moves.
+            // The hidden button keeps the frame the chips fill.
+            let feed = sides.event(in: events.events)
+            ZStack {
+                kindButton(.feed, label: "Feed") { at in
+                    guard let event = events.log(.feed, at: at) else { return false }
+                    sides.open(event.objectID, offersSide: settings.feedTypes.breast)
+                    return true
+                }
+                .opacity(feed == nil ? 1 : 0)
+                .allowsHitTesting(feed == nil)
+                .accessibilityHidden(feed != nil)
+                if let feed {
+                    FeedSideRow(prompt: sides, event: feed)
+                        .transition(.opacity)
+                }
             }
         case .sleep:
             kindButton(.sleep, label: events.runningSleep == nil ? "Sleep" : "Wake") { at in
@@ -76,6 +88,48 @@ struct LogButtons: View {
         default:
             kindButton(kind, label: kind.label) { events.log(kind, at: $0) != nil }
         }
+    }
+
+    /// All needs all three of its buttons on.
+    private var showsAll: Bool {
+        [EventKind.feed, .wet, .dirty].allSatisfy(settings.tracked.contains)
+    }
+
+    private var allLabel: String {
+        "Feed, \(EventKind.wet.label.lowercased()) and \(EventKind.dirty.label.lowercased())"
+    }
+
+    private var allButton: some View {
+        Button {
+            let at = clock.time()
+            reportSave(animate {
+                guard let feed = events.logAll(at: at) else { return false }
+                sides.open(feed.objectID, offersSide: settings.feedTypes.breast)
+                return true
+            })
+        } label: {
+            VStack(spacing: AppTheme.hairSpacing) {
+                HStack(spacing: AppTheme.hairSpacing) {
+                    ForEach([EventKind.feed, .wet, .dirty], id: \.self) { kind in
+                        KindDot(kind: kind, size: AppTheme.legendDotSize)
+                    }
+                }
+                Text("All")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(AppTheme.ink)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, labelPadding)
+            .frame(minHeight: height ?? buttonHeight)
+            .background(AppTheme.card, in: AppTheme.buttonShape)
+            .graphicBorder()
+            .contentShape(AppTheme.buttonShape)
+        }
+        .pressableCard()
+        .frame(width: dynamicTypeSize.isAccessibilitySize ? nil : AppTheme.allButtonWidth)
+        .accessibilityLabel(allLabel)
+        .accessibilityHint("Logs all three at once. You can add a side after.")
+        .accessibilityIdentifier("log.all")
     }
 
     private func hint(for kind: EventKind) -> String {
@@ -172,10 +226,15 @@ final class FeedSidePrompt: ObservableObject {
         return events.first { $0.objectID == target }
     }
 
-    /// Feed just logged: offer its side.
-    func open(_ id: NSManagedObjectID) {
-        target = id
-        hold()
+    /// Feed just logged: offer its side, unless the family only bottle feeds
+    /// and the feed already says Bottle.
+    func open(_ id: NSManagedObjectID, offersSide: Bool = true) {
+        if offersSide {
+            target = id
+            hold()
+        } else {
+            close()
+        }
         queueReminderOffer()
     }
 
@@ -213,30 +272,20 @@ final class FeedSidePrompt: ObservableObject {
     }
 }
 
-/// After a Feed tap, in the log-time row's place and at its height: which
-/// side that feed was. Nothing else on the screen moves when it opens.
+/// After a Feed tap, inside the Feed button's frame: which side that feed
+/// was. The log time above stays put, and nothing else on the screen moves.
 struct FeedSideRow: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
     @ObservedObject var prompt: FeedSidePrompt
     let event: LogEvent
-    /// The wound-back time the buttons log at. The row covers the time row,
-    /// so it carries that time and its outline: the next tap is not "now".
-    var loggingAt: Date?
     @State private var showSaveError = false
 
     var body: some View {
         (dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
+            ? AnyLayout(VStackLayout(spacing: AppTheme.tightSpacing))
             : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))) {
-            Text(loggingAt.map { $0.formatted(date: .omitted, time: .shortened) } ?? "Side")
-                .font(.subheadline.weight(loggingAt == nil ? .medium : .semibold))
-                .foregroundStyle(loggingAt == nil ? AppTheme.ink2 : AppTheme.accent)
-                .monospacedDigit()
-                .fixedSize()
-                .accessibilityLabel(loggingAt.map { "Taps log at \($0.formatted(date: .omitted, time: .shortened)). Add a side, optional" } ?? "Add a side, optional")
-                .accessibilityIdentifier("feedSide.time")
             FeedSideChips(selection: selection)
             Button("Done") {
                 Haptics.selected()
@@ -249,13 +298,14 @@ struct FeedSideRow: View {
             .accessibilityLabel("Done adding a side")
             .accessibilityIdentifier("feedSide.done")
         }
-        .padding(.horizontal, AppTheme.spacing)
+        .padding(.horizontal, AppTheme.tightSpacing)
         .padding(.vertical, AppTheme.hairSpacing)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Feed logged. Add a side, optional")
+        .accessibilityIdentifier("feedSide.row")
         .background(AppTheme.fill(for: .feed), in: AppTheme.buttonShape)
-        .overlay(AppTheme.buttonShape.strokeBorder(
-            loggingAt == nil ? AppTheme.edge : AppTheme.accent,
-            lineWidth: AppTheme.hairlineWidth
-        ))
+        .graphicBorder()
         .alert("Couldn't save this side", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -283,14 +333,16 @@ struct FeedSideRow: View {
 }
 
 /// Left, Right, Bottle: any, all or none, in the order tapped (that order is
-/// the feed's order, "right then left"). Shared by Now and the editor.
+/// the feed's order, "right then left"). Shared by Now and the editor. Only
+/// the feed types turned on in Settings, plus any side the entry already has.
 struct FeedSideChips: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Binding var selection: [FeedSide]
+    var offered = FeedTypes.current.sides
 
     var body: some View {
         (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: AppTheme.tightSpacing)) : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))) {
-            ForEach(FeedSide.allCases, id: \.self) { side in
+            ForEach(FeedSide.allCases.filter { offered.contains($0) || selection.contains($0) }, id: \.self) { side in
                 chip(side)
             }
         }

@@ -30,7 +30,7 @@ struct WatchLogGrid: View {
         VStack(spacing: AppTheme.hairSpacing) {
             if tracked.contains(.feed) {
                 HStack(spacing: AppTheme.hairSpacing) {
-                    ForEach(FeedSide.allCases, id: \.self) { side in
+                    ForEach(summary.feedTypes.sides, id: \.self) { side in
                         feedButton(side)
                     }
                 }

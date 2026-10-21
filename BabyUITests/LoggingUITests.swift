@@ -261,6 +261,25 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["feedSide.left"].exists, "a diaper change mid-feed keeps the side row")
     }
 
+    /// All logs a feed and both diapers in one tap; one Undo takes all three back.
+    func testAllLogsFeedAndBothDiapersWithOneUndo() {
+        let app = launch()
+        let originalTally = tally(app)
+        let ids = ["log.wet", "log.dirty", "log.sleep", "log.all", "todayTotals", "nowCard"]
+        func frames() -> [CGRect] { ids.map { app.descendants(matching: .any).matching(identifier: $0).firstMatch.frame } }
+        let before = frames()
+        app.buttons["log.all"].tap()
+        let toast = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Logged feed, pee and poop'")).firstMatch
+        XCTAssertTrue(toast.waitForExistence(timeout: 3))
+        XCTAssertNotEqual(tally(app), originalTally)
+        XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 3), "the side is offered after All too")
+        XCTAssertEqual(frames(), before, "All moved something")
+        attach(app, "all-logged")
+        app.buttons["Undo"].tap()
+        XCTAssertFalse(app.buttons["feedSide.left"].waitForExistence(timeout: 1))
+        XCTAssertEqual(tally(app), originalTally, "Undo took all three back")
+    }
+
     /// A Feed tap, its side, Done and winding the time back change what the
     /// controls say, never where they are, and the hour strip stays.
     func testLoggingMovesNothingElseOnTheScreen() {
@@ -271,13 +290,22 @@ final class LoggingUITests: XCTestCase {
         func frames() -> [CGRect] { ids.map { app.descendants(matching: .any).matching(identifier: $0).firstMatch.frame } }
         let before = frames()
 
+        // The side opens inside the Feed button's own frame; the time row stays.
+        func others() -> [CGRect] { ids.dropFirst().map { app.descendants(matching: .any).matching(identifier: $0).firstMatch.frame } }
+        let feedFrame = before[0]
+        let othersBefore = others()
+        let timeRow = app.buttons["logTime.earlier"].frame
         app.buttons["log.feed"].tap()
         XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 3))
-        attach(app, "feed-side-in-time-slot")
-        XCTAssertEqual(frames(), before, "opening the side moved something")
+        attach(app, "feed-side-in-feed-button")
+        XCTAssertEqual(others(), othersBefore, "opening the side moved something")
+        let sideRow = app.descendants(matching: .any)["feedSide.row"].frame
+        XCTAssertEqual(sideRow.midY, feedFrame.midY, accuracy: 1, "the side row sits where Feed was")
+        XCTAssertLessThanOrEqual(sideRow.height, feedFrame.height + 1, "the side row fits inside Feed's frame")
         app.buttons["feedSide.left"].tap()
-        XCTAssertEqual(frames(), before, "choosing a side moved something")
-        XCTAssertFalse(app.buttons["logTime.earlier"].exists, "the side row covers the time row")
+        XCTAssertEqual(others(), othersBefore, "choosing a side moved something")
+        XCTAssertEqual(app.buttons["logTime.earlier"].frame, timeRow, "the time row stays put and usable")
+        XCTAssertTrue(app.buttons["log.all"].isHittable)
 
         app.buttons["feedSide.done"].tap()
         XCTAssertTrue(app.buttons["logTime.earlier"].waitForExistence(timeout: 2))
@@ -307,12 +335,10 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(stamped.exists || toast.exists, "the toast names the wound-back time")
         XCTAssertTrue(app.buttons["logTime.now"].exists, "the chosen time stays for the next tap")
 
-        // The side row covers the time row after Feed, so it carries the
-        // wound-back time: the next tap still logs then, not now.
+        // The side opens inside Feed, so the wound-back time stays in view.
         app.buttons["log.feed"].tap()
-        let sideTime = app.staticTexts["feedSide.time"]
-        XCTAssertTrue(sideTime.waitForExistence(timeout: 3))
-        XCTAssertTrue(sideTime.label.hasPrefix("Taps log at"), sideTime.label)
+        XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["logTime.now"].exists, "the time row stays while the side is open")
         app.buttons["feedSide.done"].tap()
 
         app.buttons["logTime.now"].tap()
@@ -402,6 +428,8 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.buttons["Done"].exists)
         let diaperWord = app.buttons["Pee and Poop"]
+        // Feed types sits above it, so it can start just below the fold.
+        for _ in 0..<3 where !diaperWord.isHittable { app.swipeUp() }
         XCTAssertTrue(diaperWord.waitForExistence(timeout: 3))
         XCTAssertTrue(diaperWord.isHittable)
         attach(app, "compact-navigation-settings")
@@ -428,9 +456,9 @@ final class LoggingUITests: XCTestCase {
             .formatted(.dateTime.month(.wide).year())
         app.buttons["tab.log"].tap()
         XCTAssertTrue(app.buttons["feedSide.left"].isSelected)
-        // The side row covers the time row until Done; the time is still wound back.
+        // The time is still wound back.
+        XCTAssertTrue(app.buttons["logTime.now"].exists)
         app.buttons["feedSide.done"].tap()
-        XCTAssertTrue(app.buttons["logTime.now"].waitForExistence(timeout: 2))
         app.buttons["tab.history"].tap()
         XCTAssertTrue(app.buttons["Previous month"].exists)
         XCTAssertTrue(app.staticTexts[month].exists, "History keeps the selected month")

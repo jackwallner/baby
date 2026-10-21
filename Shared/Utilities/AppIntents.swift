@@ -87,7 +87,7 @@ struct LogEventIntent: LiveActivityIntent {
         }
         switch what {
         case .feed, .feedLeft, .feedRight, .bottle:
-            let side = what.feedSide
+            let side = what.feedSide ?? FeedTypes.current.tapSide
             // A completed feed ends any feed timer still running, as in the app.
             let running = persistence.runningEvents(.feed, for: child, in: context)
             for event in running {

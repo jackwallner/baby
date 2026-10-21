@@ -10,7 +10,9 @@ The everyday app is one screen: last feed and side, last diaper, Feed / Pee /
 Poop / Sleep controls, and daily totals. Any of the four buttons can be turned
 off in Settings > Buttons (`TrackedKinds`, at least one stays); an off
 button leaves Now, History, reports, widgets and the Watch, and its entries
-come back when it is turned on. The diaper pair can read Wet / Dirty instead
+come back when it is turned on. A narrow All beside Feed logs a feed, a pee
+and a poop with one Undo, and Settings > Feed types limits feeds to breast,
+bottle or both (`FeedTypes`). The diaper pair can read Wet / Dirty instead
 (Settings > Diaper words, `DiaperWords`); reports for a doctor always say wet
 and dirty. A compact translucent bottom capsule holds Log, History,
 Upgrade / Reports and Settings. Upgrade shows the paywall with report previews

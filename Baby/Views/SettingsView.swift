@@ -23,6 +23,7 @@ struct SettingsView: View {
             Group {
                 babySection
                 buttonsSection
+                if settings.tracked.contains(.feed) { feedTypesSection }
                 if settings.tracked.tracksDiapers { diaperWordsSection }
                 totalsSection
                 RemindersSection()
@@ -103,6 +104,31 @@ struct SettingsView: View {
             Text("Buttons")
         } footer: {
             Text("A button that is off leaves the home screen, widgets, Watch, History and reports. What was logged with it is kept, and comes back if you turn it on again.")
+        }
+    }
+
+    /// Breast, bottle or both. The Feed side choices follow; with bottle
+    /// alone a Feed tap is a bottle and asks nothing.
+    private var feedTypesSection: some View {
+        Section {
+            Toggle("Breast (Left and Right)", isOn: Binding(
+                get: { settings.feedTypes.breast },
+                set: { settings.feedTypes = FeedTypes(breast: $0, bottle: settings.feedTypes.bottle) }
+            ))
+            .disabled(!settings.feedTypes.bottle)
+            .accessibilityIdentifier("feedType.breast")
+            Toggle("Bottle", isOn: Binding(
+                get: { settings.feedTypes.bottle },
+                set: { settings.feedTypes = FeedTypes(breast: settings.feedTypes.breast, bottle: $0) }
+            ))
+            .disabled(!settings.feedTypes.breast)
+            .accessibilityIdentifier("feedType.bottle")
+        } header: {
+            Text("Feed types")
+        } footer: {
+            Text(settings.feedTypes.breast
+                 ? "The sides offered after a Feed tap. Feeds already logged keep theirs."
+                 : "Every Feed tap logs a bottle. Feeds already logged keep their sides.")
         }
     }
 

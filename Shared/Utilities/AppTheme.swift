@@ -42,6 +42,8 @@ enum AppTheme {
     static let ctaHeight: CGFloat = 52
     /// A floating navigation capsule, with four 48pt touch targets.
     static let tabWidth: CGFloat = 72
+    /// The narrow All button beside Feed.
+    static let allButtonWidth: CGFloat = 72
     static let tabHeight: CGFloat = 48
     static var bottomNavigationReservedHeight: CGFloat {
         tabHeight + hairSpacing * 4

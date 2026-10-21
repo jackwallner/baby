@@ -45,3 +45,42 @@ struct TrackedKinds: Equatable, Sendable {
         AppGroup.defaults.set(hidden.map(\.rawValue).sorted(), forKey: AppGroup.Key.hiddenKinds)
     }
 }
+
+/// Which feeds this family gives: breast (Left and Right), bottle, or both.
+/// With only one, the Feed button needs no side question: a bottle-only
+/// family's tap is a bottle. Stored in the App Group for the widgets, and
+/// carried to the Watch with the summary.
+struct FeedTypes: Equatable, Sendable {
+    var breast: Bool
+    var bottle: Bool
+
+    static let all = FeedTypes(breast: true, bottle: true)
+
+    static var current: FeedTypes {
+        let raw = AppGroup.defaults.stringArray(forKey: AppGroup.Key.hiddenFeedTypes) ?? []
+        return FeedTypes(hidden: Set(raw.compactMap(FeedSide.init(rawValue:))))
+    }
+
+    init(breast: Bool, bottle: Bool) {
+        // At least one type always stays.
+        self.breast = breast || !bottle
+        self.bottle = bottle
+    }
+
+    init(hidden: Set<FeedSide>) {
+        self.init(breast: !hidden.contains(.left), bottle: !hidden.contains(.bottle))
+    }
+
+    /// The side choices shown, in order.
+    var sides: [FeedSide] { (breast ? [.left, .right] : []) + (bottle ? [.bottle] : []) }
+
+    /// The side a bare Feed tap logs: Bottle for a bottle-only family, else
+    /// none (which breast is the parent's answer, after the tap).
+    var tapSide: FeedSide? { breast ? nil : .bottle }
+
+    var hidden: [FeedSide] { FeedSide.allCases.filter { !sides.contains($0) } }
+
+    func store() {
+        AppGroup.defaults.set(hidden.map(\.rawValue), forKey: AppGroup.Key.hiddenFeedTypes)
+    }
+}

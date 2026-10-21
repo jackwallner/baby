@@ -185,7 +185,6 @@ struct StripMetrics: Equatable {
 }
 
 private struct LoggingControls: View {
-    @EnvironmentObject private var events: EventStore
     /// Nil: the scaled default, for accessibility text sizes.
     let height: CGFloat?
     var spacing = AppTheme.spacing
@@ -195,20 +194,9 @@ private struct LoggingControls: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: spacing) {
-            // One slot above the buttons: the log time, or for a while after
-            // a feed its side. The time row keeps the slot's height while the
-            // chips cover it, so a Feed tap moves nothing else.
-            let feed = sides.event(in: events.events)
-            ZStack {
-                LogTimeRow(clock: clock)
-                    .opacity(feed == nil ? 1 : 0)
-                    .allowsHitTesting(feed == nil)
-                    .accessibilityHidden(feed != nil)
-                if let feed {
-                    FeedSideRow(prompt: sides, event: feed, loggingAt: clock.chosen)
-                        .transition(.opacity)
-                }
-            }
+            // The log time stays above the buttons; a feed's side opens
+            // inside the Feed button.
+            LogTimeRow(clock: clock)
             LogButtons(clock: clock, sides: sides, height: height, spacing: spacing) { kind in
                 editor = EditorRequest(kind: kind, at: clock.chosen)
             }

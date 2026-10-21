@@ -108,6 +108,25 @@ final class EventStoreTests: XCTestCase {
         XCTAssertTrue(store.summary.feedLine().hasPrefix("Feeding · Right"))
     }
 
+    func testAllLogsAFeedAndBothDiapersAndOneUndoRemovesThem() {
+        let at = Date.now.addingTimeInterval(-600)
+        XCTAssertNotNil(store.logAll(at: at))
+        XCTAssertEqual(Set(store.events.map(\.eventKind)), [.feed, .wet, .dirty])
+        XCTAssertTrue(store.events.allSatisfy { abs($0.start.timeIntervalSince(at)) < 1 })
+        XCTAssertEqual(store.lastLogged?.alsoLogged.count, 2)
+        XCTAssertTrue(store.undoLast())
+        XCTAssertTrue(store.events.isEmpty, "one Undo takes all three back")
+    }
+
+    func testBottleOnlyFeedTapLogsABottle() {
+        FeedTypes(breast: false, bottle: true).store()
+        defer { FeedTypes.all.store() }
+        store.log(.feed)
+        XCTAssertEqual(store.events[0].feedSides, [.bottle])
+        XCTAssertEqual(store.summary.feedTypes.sides, [.bottle])
+        XCTAssertEqual(FeedTypes(breast: false, bottle: false), FeedTypes(breast: true, bottle: false), "one type always stays on")
+    }
+
     func testUndoRemovesTheLastTapAndReopensAStop() {
         store.log(.wet)
         XCTAssertNotNil(store.lastLogged)
