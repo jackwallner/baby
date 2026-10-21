@@ -164,7 +164,7 @@ fun NavRow(title: String, icon: ImageVector? = null, detail: String? = null, tag
 }
 
 @Composable
-fun ToggleRow(title: String, checked: Boolean, tag: String? = null, leading: (@Composable () -> Unit)? = null, onChange: (Boolean) -> Unit) {
+fun ToggleRow(title: String, checked: Boolean, tag: String? = null, inset: androidx.compose.ui.unit.Dp = Tokens.loose, leading: (@Composable () -> Unit)? = null, onChange: (Boolean) -> Unit) {
     val palette = LocalPalette.current
     Row(
         Modifier
@@ -173,7 +173,7 @@ fun ToggleRow(title: String, checked: Boolean, tag: String? = null, leading: (@C
             .clickable(role = Role.Switch) { onChange(!checked) }
             .semantics { contentDescription = title }
             .then(if (tag != null) Modifier.testTag(tag) else Modifier)
-            .padding(horizontal = Tokens.loose, vertical = Tokens.hair),
+            .padding(horizontal = inset, vertical = Tokens.hair),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leading != null) {

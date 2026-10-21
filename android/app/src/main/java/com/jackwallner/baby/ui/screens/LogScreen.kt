@@ -305,7 +305,9 @@ private fun ColumnScope.LogButtons(
         }
     }
     for (row in rows) {
-        val rowModifier = if (fixedHeight != null) Modifier.fillMaxWidth() else Modifier.fillMaxWidth().weight(1f, fill = true)
+        // Open side chips take their room from every button, not just Feed.
+        val weight = if (row == listOf(EventKind.FEED) && sideTarget != null) 1.8f else 1f
+        val rowModifier = if (fixedHeight != null) Modifier.fillMaxWidth() else Modifier.fillMaxWidth().weight(weight, fill = true)
         Row(rowModifier.heightIn(max = Tokens.maxLogButtonHeight + if (row == listOf(EventKind.FEED) && sideTarget != null) 64.dp else 0.dp), horizontalArrangement = Arrangement.spacedBy(Tokens.tight)) {
             for (kind in row) {
                 val buttonModifier = Modifier.weight(1f).let { if (fixedHeight != null) it.heightIn(min = fixedHeight) else it.fillMaxHeight() }
@@ -557,7 +559,7 @@ private fun FeedReminderOffer(onDone: () -> Unit) {
                         Chip(it.shortLabel, choice == it, tag = "offer.${it.minutes}") { choice = it }
                     }
                 }
-                com.jackwallner.baby.ui.ToggleRow("Before checkups too", checkups, tag = "offer.checkups") { checkups = it }
+                com.jackwallner.baby.ui.ToggleRow("Before checkups too", checkups, tag = "offer.checkups", inset = 0.dp) { checkups = it }
                 Text("The evening before a newborn visit, a note that your summary for the doctor is ready.", color = palette.ink2, style = MaterialTheme.typography.bodySmall)
             }
         },

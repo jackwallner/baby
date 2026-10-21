@@ -96,7 +96,7 @@ fun Root(graph: AppGraph, pendingTab: Int?, consumedTab: () -> Unit) {
         if (tab == Tab.SETTINGS && settingsPage != SettingsPage.ROOT) settingsPage = SettingsPage.ROOT else tab = Tab.LOG
     }
     Box(Modifier.fillMaxSize().background(palette.paper)) {
-        Box(Modifier.fillMaxSize().statusBarsPadding()) {
+        Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
             when (tab) {
                 Tab.LOG -> LogScreen(onEdit = { editor = it })
                 Tab.HISTORY -> HistoryScreen(onEdit = { editor = it }, onUnlock = { tab = Tab.UPGRADE })

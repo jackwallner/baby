@@ -70,6 +70,14 @@ object DebugLaunchOptions {
         add(EventKind.WEIGHT, at(1, 9, 0), amount = 3310.0)
         // Today, relative to now so the hero line always reads the same.
         val hour = 3_600_000L
+        // Earlier today, every three hours, so no day in the seed has a false overnight gap.
+        listOf(1, 4, 7, 10, 13, 16).forEachIndexed { i, h ->
+            val at = at(0, h, 30)
+            if (at < now - 7 * hour) {
+                add(EventKind.FEED, at, end = at + 20 * 60_000L, side = if (i % 2 == 0) "right" else "left")
+                add(EventKind.WET, at + 40 * 60_000L)
+            }
+        }
         add(EventKind.FEED, now - 6 * hour - 20 * 60_000, side = "left")
         add(EventKind.WET, now - 5 * hour)
         add(EventKind.FEED, now - 4 * hour - 10 * 60_000, end = now - 3 * hour - 45 * 60_000, side = "right,left")

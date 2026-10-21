@@ -261,7 +261,7 @@ private fun PreviewCard(title: String, content: @Composable () -> Unit) {
             Text(title, style = MaterialTheme.typography.labelLarge, color = palette.ink, modifier = Modifier.weight(1f))
             Text("Example", style = MaterialTheme.typography.labelSmall, color = palette.ink2)
         }
-        Box(Modifier.fillMaxWidth().height(110.dp)) { content() }
+        Box(Modifier.fillMaxWidth().height(136.dp)) { content() }
     }
 }
 

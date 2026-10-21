@@ -45,7 +45,7 @@ class LoggingFlowTests {
         rule.onNodeWithTag("onboarding.feeding.bottle").performScrollTo().performClick()
         onboard()
         rule.onNodeWithTag("babyName").assertTextContains("Elsa")
-        rule.onNodeWithTag("leadTime").assertTextContains("A fresh start")
+        rule.onNodeWithTag("leadTime", useUnmergedTree = true).assertTextContains("A fresh start")
         assertEquals("Elsa", graph.events.child?.name)
     }
 
@@ -53,7 +53,7 @@ class LoggingFlowTests {
     fun aDiaperTapLogsAndUndoTakesItBack() {
         onboard()
         rule.onNodeWithTag("log.wet").performClick()
-        rule.onNodeWithTag("undoToast").assertTextContains("Pee logged", substring = true)
+        rule.onNodeWithText("Pee logged").assertIsDisplayed()
         rule.onNodeWithTag("diaperLine").assertTextContains("Last diaper just now · Pee")
         assertEquals(1, graph.events.events.size)
         rule.onNodeWithTag("undo").performClick()
@@ -66,12 +66,14 @@ class LoggingFlowTests {
     fun aFeedTapOpensOptionalSidesAndTheReminderOffer() {
         onboard()
         rule.onNodeWithTag("log.feed").performClick()
-        rule.onNodeWithTag("leadTime").assertTextContains("just now")
+        rule.onNodeWithTag("leadTime", useUnmergedTree = true).assertTextContains("just now")
         rule.onNodeWithTag("feedSide.left").performClick()
         rule.waitForIdle()
-        rule.onNodeWithTag("leadDetail").assertTextContains("Left breast", substring = true)
-        rule.onNodeWithTag("leadDetail").assertTextContains("Start on Right", substring = true)
+        rule.onNodeWithTag("leadDetail", useUnmergedTree = true).assertTextContains("Left breast", substring = true)
+        rule.onNodeWithTag("leadDetail", useUnmergedTree = true).assertTextContains("Start on Right", substring = true)
         // The one-time reminder offer arrives six seconds after the feed.
+        // Effect delays run on the test's virtual clock, so move it past the six seconds.
+        rule.mainClock.advanceTimeBy(7_000)
         rule.waitUntil(10_000) { rule.onAllNodes(hasTestTag("offer.decline")).fetchSemanticsNodes().isNotEmpty() }
         rule.onNodeWithTag("offer.decline").performClick()
         assertTrue(graph.settings.hasOfferedFeedReminder)
@@ -150,7 +152,7 @@ class LoggingFlowTests {
         rule.onNodeWithTag("callCard").performScrollTo().assertExists()
         rule.onNodeWithTag("back").performClick()
         rule.onNodeWithTag("settings.stain").performScrollTo().performClick()
-        rule.onNodeWithText("Cold water, from the back").performScrollTo().assertExists()
+        rule.onNodeWithText("Cold water, from the back", substring = true).performScrollTo().assertExists()
     }
 
     @Test
