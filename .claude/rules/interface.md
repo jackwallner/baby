@@ -277,6 +277,20 @@ deleting the shown copy deletes its twin. The history token moves past
 CloudKit's imports, which the filter skips, so each reload no longer rescans
 them. The widgets no longer say "Start on"; Home and the feed reminder do.
 
+Two phones on simulators (2026-10-21, Jack: "can you sim test two phones?").
+Pool simulators have no Apple ID and agents may not sign one in, so
+`SimPartnerRelay` (DEBUG, `-SimRelay <folder> <name>`) stands in for iCloud:
+each phone writes its saves from persistent history to a folder on the Mac,
+and imports the partner's as a background save under the mirroring author,
+so the receiving path is the app's own. `scripts/two-phone-sim.sh` builds and
+launches both; each phone logs what it sent, received and redrew.
+`TwoPhoneTests` runs the same relay in-process. First run: every change
+crossed in the 2 s delay plus about 0.35 s (the remote-change throttle), each
+change redrew each phone once, both phones always agreed, the side row stayed
+open while a partner's entry landed, and a phone reopened after four partner
+taps showed them in one redraw. Apple's own delivery (push and discretionary
+import) is the part this cannot measure.
+
 Never put a `graphicBorder` card in an inset-grouped List row: the row clips
 to the section's larger corner radius and shaves the outline off the card's
 outer corners. History's Today/Yesterday tiles and day chart live in a

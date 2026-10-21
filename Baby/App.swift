@@ -99,6 +99,10 @@ struct BabyApp: App {
                         settings.hasCompletedSetup = true
                         ScreenshotFixtures.seed(into: events)
                     }
+                    if ProcessInfo.processInfo.arguments.contains("-SimRelay") {
+                        settings.hasCompletedSetup = true
+                        SimPartnerRelay.startIfAsked(events: events)
+                    }
                     #endif
                     await sharing.refresh(for: events.child)
                 }

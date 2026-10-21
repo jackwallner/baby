@@ -95,7 +95,9 @@ final class EventStoreTests: XCTestCase {
         store.toggleSleep()
         XCTAssertNil(store.runningSleep)
         XCTAssertEqual(Int((store.events[0].duration ?? 0) / 60), 60)
-        XCTAssertEqual(Int(store.tally(on: .now).sleepSeconds / 60), 60)
+        // Just after midnight the hour straddles two days; together they hold it.
+        let yesterday = Date.now.addingTimeInterval(-86400)
+        XCTAssertEqual(Int((store.tally(on: .now).sleepSeconds + store.tally(on: yesterday).sleepSeconds) / 60), 60)
     }
 
     func testStartingASecondTimedFeedEndsTheFirst() {

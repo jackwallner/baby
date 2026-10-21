@@ -125,6 +125,7 @@ targets:
       - path: Shared/Services/LiveActivityService.swift
       - path: Shared/Services/SharingService.swift
       - path: Shared/Services/CloudSyncStatus.swift
+      - path: Shared/Services/SimPartnerRelay.swift
       - path: Shared/Services/ShareInvite.swift
       - path: Shared/Models/BabyActivityAttributes.swift
       - path: Shared/Utilities/AppIntents.swift
