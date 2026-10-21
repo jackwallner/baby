@@ -220,17 +220,22 @@ struct FeedSideRow: View {
     @EnvironmentObject private var events: EventStore
     @ObservedObject var prompt: FeedSidePrompt
     let event: LogEvent
+    /// The wound-back time the buttons log at. The row covers the time row,
+    /// so it carries that time and its outline: the next tap is not "now".
+    var loggingAt: Date?
     @State private var showSaveError = false
 
     var body: some View {
         (dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
             : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))) {
-            Text("Side")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(AppTheme.ink2)
+            Text(loggingAt.map { $0.formatted(date: .omitted, time: .shortened) } ?? "Side")
+                .font(.subheadline.weight(loggingAt == nil ? .medium : .semibold))
+                .foregroundStyle(loggingAt == nil ? AppTheme.ink2 : AppTheme.accent)
+                .monospacedDigit()
                 .fixedSize()
-                .accessibilityLabel("Add a side, optional")
+                .accessibilityLabel(loggingAt.map { "Taps log at \($0.formatted(date: .omitted, time: .shortened)). Add a side, optional" } ?? "Add a side, optional")
+                .accessibilityIdentifier("feedSide.time")
             FeedSideChips(selection: selection)
             Button("Done") {
                 Haptics.selected()
@@ -246,7 +251,10 @@ struct FeedSideRow: View {
         .padding(.horizontal, AppTheme.spacing)
         .padding(.vertical, AppTheme.hairSpacing)
         .background(AppTheme.fill(for: .feed), in: AppTheme.buttonShape)
-        .overlay(AppTheme.buttonShape.strokeBorder(AppTheme.edge, lineWidth: AppTheme.hairlineWidth))
+        .overlay(AppTheme.buttonShape.strokeBorder(
+            loggingAt == nil ? AppTheme.edge : AppTheme.accent,
+            lineWidth: AppTheme.hairlineWidth
+        ))
         .alert("Couldn't save this side", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
         } message: {

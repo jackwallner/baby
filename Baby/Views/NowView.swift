@@ -72,6 +72,10 @@ struct NowView: View {
         .onChange(of: events.events.count) { _, _ in
             now = .now
         }
+        // The chips edit one baby's feed; another baby's Now starts clean.
+        .onChange(of: events.child?.objectID) { _, _ in
+            feedSides.close()
+        }
         .onChange(of: scenePhase) { _, phase in
             // Back from a long nap: the elapsed time must be right on first sight.
             if phase == .active {
@@ -201,7 +205,7 @@ private struct LoggingControls: View {
                     .allowsHitTesting(feed == nil)
                     .accessibilityHidden(feed != nil)
                 if let feed {
-                    FeedSideRow(prompt: sides, event: feed)
+                    FeedSideRow(prompt: sides, event: feed, loggingAt: clock.chosen)
                         .transition(.opacity)
                 }
             }

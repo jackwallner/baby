@@ -49,12 +49,14 @@ struct NowSummary: Codable, Equatable, Sendable {
     var suggestedSide: FeedSide { feedSides.last?.next ?? .left }
 
     /// The breast to start on next: the other one from where the last
-    /// breastfeed ended. A bottle in between does not change it, and nil means
-    /// no recent feed named a breast, so nothing is guessed.
+    /// breastfeed ended. A bottle in between does not change it. Nil when no
+    /// recent feed named a breast, or when the newest breastfeed has no side
+    /// yet: an older feed's side would only be a guess.
     var nextBreastSide: FeedSide? {
         let feeds = [feedSides] + (recent ?? []).filter { $0.kind == .feed }.map { $0.sides ?? [] }
         for sides in feeds {
             if let ended = sides.last(where: { $0 != .bottle }) { return ended.next }
+            if sides.isEmpty { return nil }
         }
         return nil
     }

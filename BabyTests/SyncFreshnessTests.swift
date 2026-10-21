@@ -85,8 +85,47 @@ final class SyncFreshnessTests: XCTestCase {
             CKPartialErrorsByItemIDKey: [CKRecord.ID(recordName: "a"): CKError(.quotaExceeded)],
         ])
         XCTAssertEqual(CloudSyncProblem(partial), .iCloudFull)
+        XCTAssertEqual(
+            CloudSyncProblem(NSError(domain: NSCocoaErrorDomain, code: CloudSyncProblem.noAccountCode)),
+            .signedOut,
+            "a phone with no iCloud account fails setup with a Cocoa error"
+        )
         XCTAssertNil(CloudSyncProblem(CKError(.networkUnavailable)), "CloudKit retries a dropped connection itself")
         XCTAssertNil(CloudSyncProblem(nil))
+    }
+
+    private func syncState() -> CloudSyncState {
+        let defaults = UserDefaults(suiteName: "SyncFreshnessTests-\(UUID().uuidString)")!
+        return CloudSyncState(defaults: defaults)
+    }
+
+    func testDownloadsDoNotHideAFullICloud() {
+        let sync = syncState()
+        let start = Date.now
+        sync.ended(.export, at: start, succeeded: false, error: CKError(.quotaExceeded))
+        sync.ended(.import, at: start.addingTimeInterval(60), succeeded: true, error: nil)
+        XCTAssertEqual(sync.problem, .iCloudFull, "the partner's entries still arrive while this phone's cannot leave")
+        sync.ended(.export, at: start.addingTimeInterval(120), succeeded: true, error: nil)
+        XCTAssertNil(sync.problem, "an upload proves there is room again")
+    }
+
+    func testSigningInClearsTheSignedOutLine() {
+        let sync = syncState()
+        sync.ended(.setup, at: .now, succeeded: false, error: NSError(domain: NSCocoaErrorDomain, code: CloudSyncProblem.noAccountCode))
+        XCTAssertEqual(sync.problem, .signedOut)
+        XCTAssertNil(sync.lastSynced, "a setup is not a sync")
+        sync.ended(.setup, at: .now, succeeded: true, error: nil)
+        XCTAssertNil(sync.problem)
+    }
+
+    func testTheSyncTimeMovesAtMostEveryHalfMinute() {
+        let sync = syncState()
+        let start = Date.now
+        sync.ended(.import, at: start, succeeded: true, error: nil)
+        sync.ended(.export, at: start.addingTimeInterval(5), succeeded: true, error: nil)
+        XCTAssertEqual(sync.lastSynced, start, "a catching-up phone's dozens of events redraw nothing")
+        sync.ended(.export, at: start.addingTimeInterval(40), succeeded: true, error: nil)
+        XCTAssertEqual(sync.lastSynced, start.addingTimeInterval(40))
     }
 
     func testTheSyncLineSaysJustNowForTheFirstMinute() {

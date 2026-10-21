@@ -309,6 +309,15 @@ final class Persistence: @unchecked Sendable {
         guard let historyToken, !isStandingIn else { return 0 }
         let context = container.viewContext
         let request = NSPersistentHistoryChangeRequest.fetchHistory(after: historyToken)
+        // Filtered in the store: a phone catching up on CloudKit writes
+        // thousands of import transactions, and none of them need reading here.
+        if let external = NSPersistentHistoryTransaction.fetchRequest {
+            external.predicate = NSPredicate(
+                format: "author == nil OR (author != %@ AND NOT (author BEGINSWITH %@))",
+                Bundle.main.bundleIdentifier ?? "", Self.mirroringAuthorPrefix
+            )
+            request.fetchRequest = external
+        }
         let transactions: [NSPersistentHistoryTransaction]
         do {
             let result = try context.execute(request) as? NSPersistentHistoryResult
@@ -332,8 +341,10 @@ final class Persistence: @unchecked Sendable {
     /// whose imports are merged already.
     static func isExternal(_ author: String?, own: String?) -> Bool {
         guard let author else { return true }
-        return author != own && !author.hasPrefix("NSCloudKitMirroringDelegate")
+        return author != own && !author.hasPrefix(mirroringAuthorPrefix)
     }
+
+    private static let mirroringAuthorPrefix = "NSCloudKitMirroringDelegate"
 
     func newBackgroundContext() -> NSManagedObjectContext {
         let context = container.newBackgroundContext()

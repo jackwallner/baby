@@ -250,6 +250,17 @@ finished CloudKit import now also reloads, and Settings > Log together says
 when the phone last synced, or names a fixable cause (iCloud full, signed
 out). Core Data schedules imports as discretionary work, so a partner's entry
 can still take a moment; there is no public way to force one.
+
+Audit follow-ups (2026-10-20). Sync status lives in `CloudSyncState`, its own
+object watched only by Settings' line, because a catching-up phone posts
+dozens of CloudKit events and each `@Published` write on `EventStore` redrew
+Now. Only an export clears "iCloud full" (downloads go on while uploads
+cannot), and a phone with no account shows "signed out" from Core Data's
+setup error 134400. A reload that lands while duplicate cleanup runs queues
+one more pass. "Start on" says nothing when the newest breastfeed has no side
+yet, rather than guess from an older one. After Feed with the time wound back,
+the side row shows that time in the wound-back outline, since it covers the
+time row and the next tap still logs then.
 `Reminders.reschedule` skips the notification center when the plan is
 unchanged.
 

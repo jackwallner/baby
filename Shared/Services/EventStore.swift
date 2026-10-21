@@ -28,10 +28,9 @@ final class EventStore: ObservableObject {
     /// The baby from an accepted invitation, once it arrives. The app uses it
     /// once to offer folding a separate log into the shared one.
     @Published var arrivedSharedChild: Child?
-    /// When this phone last finished an import from or an export to iCloud.
-    @Published private(set) var lastCloudSync = AppGroup.defaults.object(forKey: AppGroup.Key.lastCloudSync) as? Date
-    /// What is stopping sync, while it is something the parent can fix.
-    @Published private(set) var cloudSyncProblem: CloudSyncProblem?
+    /// When this phone last synced, and what is stopping it. Not published
+    /// from here, so CloudKit's stream of events never redraws Now.
+    let sync = CloudSyncState()
 
     struct LoggedEvent: Equatable {
         let objectID: NSManagedObjectID
@@ -84,14 +83,9 @@ final class EventStore: ObservableObject {
             queue: .main
         ) { [weak self] note in
             guard let event = note.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey] as? NSPersistentCloudKitContainer.Event,
-                  let ended = event.endDate, event.type != .setup else { return }
-            let imported = event.type == .import
-            let succeeded = event.succeeded
-            let problem = CloudSyncProblem(event.error)
-            let error = event.error.map { String(describing: $0) }
-            Task { @MainActor in
-                self?.cloudEventEnded(at: ended, imported: imported, succeeded: succeeded, problem: problem, error: error)
-            }
+                  let ended = event.endDate else { return }
+            // Delivered on the main queue, as asked above.
+            MainActor.assumeIsolated { self?.cloudEventEnded(event, at: ended) }
         })
         // The log was shut when the process started (a push woke the app on a
         // phone that had not been unlocked yet) and is open now.
@@ -121,16 +115,17 @@ final class EventStore: ObservableObject {
         }
     }
 
-    private func cloudEventEnded(at date: Date, imported: Bool, succeeded: Bool, problem: CloudSyncProblem?, error: String?) {
-        if succeeded {
-            lastCloudSync = date
-            AppGroup.defaults.set(date, forKey: AppGroup.Key.lastCloudSync)
-            cloudSyncProblem = nil
-            if imported { scheduleReload() }
-        } else {
-            logger.error("CloudKit \(imported ? "import" : "export", privacy: .public) failed: \(error ?? "unknown", privacy: .public)")
-            if let problem { cloudSyncProblem = problem }
+    private func cloudEventEnded(_ event: NSPersistentCloudKitContainer.Event, at date: Date) {
+        let activity: CloudSyncState.Activity = switch event.type {
+        case .import: .import
+        case .export: .export
+        default: .setup
         }
+        if !event.succeeded {
+            logger.error("CloudKit \(String(describing: activity), privacy: .public) failed: \(String(describing: event.error), privacy: .public)")
+        }
+        sync.ended(activity, at: date, succeeded: event.succeeded, error: event.error)
+        if activity == .import, event.succeeded { scheduleReload() }
     }
 
     func reload() {
@@ -181,9 +176,16 @@ final class EventStore: ObservableObject {
     /// Runs on a background context: naming a record waits on the CloudKit
     /// mirroring queue, which is busy for seconds while a phone syncs.
     private var isReconciling = false
+    /// A reload came while a pass was running, after its fetch, so the
+    /// copies it brought would wait for some later reload. Run once more.
+    private var needsReconcile = false
 
     private func reconcileWidgetCloudWrites() {
-        guard persistence.cloudKitEnabled, !persistence.isStandingIn, !isReconciling else { return }
+        guard persistence.cloudKitEnabled, !persistence.isStandingIn else { return }
+        guard !isReconciling else {
+            needsReconcile = true
+            return
+        }
         WidgetCloudSync.dropExported(before: launchedAt)
         let undone = WidgetCloudSync.undoneIDs()
         let persistence = persistence
@@ -203,7 +205,10 @@ final class EventStore: ObservableObject {
                 guard let self else { return }
                 self.isReconciling = false
                 if !saved { self.logger.error("Could not save the widget duplicate cleanup") }
-                if changed, saved { self.scheduleReload() }
+                if (changed && saved) || self.needsReconcile {
+                    self.needsReconcile = false
+                    self.scheduleReload()
+                }
             }
         }
     }
@@ -223,7 +228,7 @@ final class EventStore: ObservableObject {
         guard key != publishedCloudKey, !isPublishingCloudTargets else { return }
         isPublishingCloudTargets = true
         let container = persistence.container
-        nonisolated(unsafe) let lookup = (babies: babies, running: running)
+        let lookup = (babies: babies, running: running)
         Task.detached(priority: .utility) { [weak self] in
             var targets: [UUID: CloudZoneTarget] = [:]
             var resolved = true

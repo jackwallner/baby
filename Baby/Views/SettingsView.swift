@@ -230,25 +230,11 @@ struct SettingsView: View {
         } footer: {
             VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
                 Text("Parents, grandparents and nannies each log from their own iPhone into the same baby's log, privately through iCloud.")
-                if let problem = events.cloudSyncProblem {
-                    Text(problem.message)
-                        .foregroundStyle(AppTheme.ink)
-                        .accessibilityIdentifier("settings.sync.problem")
-                } else if events.persistence.cloudKitEnabled, let synced = events.lastCloudSync {
-                    TimelineView(.periodic(from: .now, by: 30)) { context in
-                        Text("Synced with iCloud \(Self.syncedPhrase(synced, now: context.date)).")
-                    }
-                    .accessibilityIdentifier("settings.sync.last")
+                if !ScreenshotConfig.isEnabled {
+                    SyncStatusLine(sync: events.sync, mirrors: events.persistence.cloudKitEnabled)
                 }
             }
         }
-    }
-
-    /// "just now" for the last minute, where "in 0 seconds" or "5 seconds ago"
-    /// would read as noise.
-    static func syncedPhrase(_ date: Date, now: Date) -> String {
-        guard now.timeIntervalSince(date) >= 60 else { return "just now" }
-        return date.formatted(.relative(presentation: .named, unitsStyle: .wide))
     }
 
     private var appearanceSection: some View {
@@ -363,5 +349,34 @@ struct SettingsView: View {
                 .font(.caption)
                 .foregroundStyle(AppTheme.ink2)
         }
+    }
+}
+
+/// When this phone last synced with iCloud, or what is stopping it. Watches
+/// the sync state itself, so only this line redraws as CloudKit works.
+private struct SyncStatusLine: View {
+    @ObservedObject var sync: CloudSyncState
+    let mirrors: Bool
+
+    var body: some View {
+        if let problem = sync.problem {
+            Text(problem.message)
+                .foregroundStyle(AppTheme.ink)
+                .accessibilityIdentifier("settings.sync.problem")
+        } else if mirrors, let synced = sync.lastSynced {
+            TimelineView(.periodic(from: .now, by: 30)) { context in
+                Text("Synced with iCloud \(SettingsView.syncedPhrase(synced, now: context.date)).")
+            }
+            .accessibilityIdentifier("settings.sync.last")
+        }
+    }
+}
+
+extension SettingsView {
+    /// "just now" for the last minute, where "in 0 seconds" or "5 seconds ago"
+    /// would read as noise.
+    static func syncedPhrase(_ date: Date, now: Date) -> String {
+        guard now.timeIntervalSince(date) >= 60 else { return "just now" }
+        return date.formatted(.relative(presentation: .named, unitsStyle: .wide))
     }
 }

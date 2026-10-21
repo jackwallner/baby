@@ -307,6 +307,14 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(stamped.exists || toast.exists, "the toast names the wound-back time")
         XCTAssertTrue(app.buttons["logTime.now"].exists, "the chosen time stays for the next tap")
 
+        // The side row covers the time row after Feed, so it carries the
+        // wound-back time: the next tap still logs then, not now.
+        app.buttons["log.feed"].tap()
+        let sideTime = app.staticTexts["feedSide.time"]
+        XCTAssertTrue(sideTime.waitForExistence(timeout: 3))
+        XCTAssertTrue(sideTime.label.hasPrefix("Taps log at"), sideTime.label)
+        app.buttons["feedSide.done"].tap()
+
         app.buttons["logTime.now"].tap()
         XCTAssertFalse(app.buttons["logTime.now"].exists)
         XCTAssertFalse(app.staticTexts["logHint"].exists, "the countdown goes with the wound-back time")

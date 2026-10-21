@@ -41,6 +41,13 @@ final class RemindersTests: XCTestCase {
         XCTAssertNil(summary(fedMinutesAgo: nil).nextSideLine)
     }
 
+    func testAFeedWithNoSideYetGivesNoHint() {
+        // 8:00 Left, then an 11:00 Feed tap with no side picked: Right would
+        // be a guess from the older feed.
+        let s = summary(fedMinutesAgo: 10, sides: [], recent: [feed(10, []), feed(190, [.left])])
+        XCTAssertNil(s.nextBreastSide)
+    }
+
     func testTheHintHidesWhileAFeedRuns() {
         var s = summary(fedMinutesAgo: 5, sides: [.left])
         s.runningFeedStart = now.addingTimeInterval(-300)

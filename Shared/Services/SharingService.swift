@@ -37,16 +37,19 @@ final class SharingService: ObservableObject {
     func isSharedChild(_ child: Child) -> Bool { persistence.isShared(child) }
 
     func refresh(for child: Child?) async {
-        iCloudAvailable = (try? await ckContainer.accountStatus()) == .available
+        // Opening the app and switching babies both refresh, and the lookups
+        // below can take seconds: only the newest refresh may write.
+        refreshes += 1
+        let generation = refreshes
+        let available = (try? await ckContainer.accountStatus()) == .available
+        guard generation == refreshes else { return }
+        iCloudAvailable = available
         guard let child, persistence.cloudKitEnabled else {
             share = nil
             return
         }
         // Both lookups wait on the CloudKit mirroring queue, which is busy for
-        // seconds right after the app opens, so they run off the main thread
-        // and a newer refresh wins over a slower older one.
-        refreshes += 1
-        let generation = refreshes
+        // seconds right after the app opens, so they run off the main thread.
         let objectID = child.objectID
         let lookup = await Self.lookUpShare(for: objectID, in: persistence.container)
         guard generation == refreshes else { return }
