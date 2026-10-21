@@ -38,8 +38,19 @@ class EventStore(
     private val scope: CoroutineScope,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
-    /** What the undo toast says, and the log as it was before the action. */
-    data class Logged(val kind: EventKind, val message: String, val detail: String?, val before: LogState, val eventId: String?)
+    /**
+     * What the undo toast says, the log as it was before the action, and the
+     * rows the action touched (which rows from the shared log never overwrite
+     * in [before]).
+     */
+    data class Logged(
+        val kind: EventKind,
+        val message: String,
+        val detail: String?,
+        val before: LogState,
+        val eventId: String?,
+        val touched: Set<String> = emptySet(),
+    )
 
     var state by mutableStateOf(load())
         private set
@@ -113,7 +124,10 @@ class EventStore(
      */
     fun applyRemote(children: List<RemoteChild>, entries: List<RemoteEntry>) {
         if (children.isEmpty() && entries.isEmpty()) return
-        lastLogged?.let { lastLogged = it.copy(before = SyncMerge.merge(it.before, children, entries)) }
+        lastLogged?.let { logged ->
+            val others = entries.filter { it.event.id !in logged.touched }
+            lastLogged = logged.copy(before = SyncMerge.merge(logged.before, children.filter { it.child.id !in logged.touched }, others))
+        }
         persist(SyncMerge.merge(state, children, entries), share = false)
     }
 
@@ -151,7 +165,9 @@ class EventStore(
     // MARK: Logging
 
     private fun remember(kind: EventKind, message: String, detail: String?, before: LogState, eventId: String?) {
-        lastLogged = Logged(kind, message, detail, before, eventId)
+        val changes = SyncDiff.changes(before, state, 0)
+        val touched = changes.entries.map { it.event.id }.toSet() + changes.children.map { it.child.id }
+        lastLogged = Logged(kind, message, detail, before, eventId, touched)
         undoJob?.cancel()
         undoJob = scope.launch {
             delay(UNDO_WINDOW_MS)

@@ -3,6 +3,7 @@ package com.jackwallner.baby.data
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -86,7 +87,7 @@ class SharingService(
     private val events: EventStore,
     private val appName: String = FirebaseApp.DEFAULT_APP_NAME,
 ) {
-    var config: SharingConfig? = SharingConfig.fromBuild()
+    var config by mutableStateOf(SharingConfig.fromBuild())
         private set
     val isAvailable: Boolean get() = config != null
 
@@ -136,6 +137,12 @@ class SharingService(
             val id = UUID.randomUUID().toString().take(12)
             """{"sub":"$id","email":"$id@example.com","email_verified":true,"name":"$testName"}"""
         }
+    }
+
+    /** Tests: cut this phone off from the shared log and back, as a dead signal would. */
+    @VisibleForTesting
+    suspend fun setNetwork(on: Boolean) {
+        if (on) db.enableNetwork().await() else db.disableNetwork().await()
     }
 
     private fun firebase(): FirebaseApp {

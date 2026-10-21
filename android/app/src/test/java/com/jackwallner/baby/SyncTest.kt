@@ -191,6 +191,18 @@ class SyncTest {
     }
 
     @Test
+    fun undoStillTakesBackATapWhoseOwnEchoCameBack() {
+        val events = store()
+        events.isShared = true
+        events.createChild("Elsa", null)
+        val wet = events.log(EventKind.WET)!!
+        // The server confirms this phone's own write inside the undo window.
+        events.applyRemote(emptyList(), listOf(RemoteEntry(events.events.single { it.id == wet.id })))
+        assertTrue(events.undoLast())
+        assertTrue(events.events.isEmpty())
+    }
+
+    @Test
     fun undoAfterADeleteSendsTheEntryBackNewerThanItsTombstone() {
         val events = store()
         events.isShared = true
