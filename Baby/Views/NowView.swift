@@ -40,8 +40,11 @@ struct NowView: View {
                         }
                         .padding(.vertical, AppTheme.looseSpacing)
                     } else {
-                        // The tab's safe area already reserves the capsule.
-                        fitted(available: geometry.size.height - AppTheme.tightSpacing * 2)
+                        // The tab's safe area reserves the capsule. The reader
+                        // can extend under it (the scroll view insets for it),
+                        // so the page fits what is left between the insets.
+                        let visible = geometry.size.height - geometry.safeAreaInsets.top - geometry.safeAreaInsets.bottom
+                        fitted(available: visible - AppTheme.tightSpacing * 2)
                             .padding(.vertical, AppTheme.tightSpacing)
                     }
                 }

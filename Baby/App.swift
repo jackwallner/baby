@@ -1,4 +1,5 @@
 import CloudKit
+import Combine
 import SwiftUI
 import UIKit
 import UserNotifications
@@ -380,7 +381,7 @@ struct BabyHomeView: View {
             if tab != .reports { router.showsCheckupPitch = false }
         }
         #if DEBUG
-        .task { if DuoTour.isEnabled { await runDuoTour() } }
+        .onReceive(DuoTour.ticks) { advanceDuoTour(at: $0) }
         #endif
     }
 
@@ -450,9 +451,18 @@ struct BabyHomeView: View {
 /// `-DuoTour` walks the main screens on a timer for the iPhone Duo captures
 /// and recordings, which can only screenshot on a schedule. On the way it
 /// logs a wet diaper 9 s in (after gh-sim's inner relaunch has started
-/// recording), so a recording shows a real tap reach both panes.
+/// recording), so a recording shows a real tap reach both panes. The stop
+/// comes from the time since launch, so a view that restarts resumes it.
+@MainActor
 enum DuoTour {
     static var isEnabled: Bool { ProcessInfo.processInfo.arguments.contains("-DuoTour") }
+    static let launched = Date.now
+    static let diaperDelay: TimeInterval = 9
+    static var hasLoggedDiaper = false
+
+    static let ticks: AnyPublisher<Date, Never> = isEnabled
+        ? Timer.publish(every: 0.5, on: .main, in: .common).autoconnect().eraseToAnyPublisher()
+        : Empty<Date, Never>().eraseToAnyPublisher()
 
     enum Stop {
         case log, history, reports, firstWeeks, settings, nightLog
@@ -460,42 +470,49 @@ enum DuoTour {
 
     /// Each stop and how long it stays, in seconds. Captures oversample
     /// these, so every stop gets at least one settled frame.
-    static let stops: [(Stop, Int)] = [
+    static let stops: [(Stop, TimeInterval)] = [
         (.log, 22), (.history, 12), (.reports, 12), (.firstWeeks, 12),
-        (.settings, 12), (.nightLog, 12), (.log, 600),
+        (.settings, 12), (.nightLog, 12), (.log, .infinity),
     ]
+
+    /// The stop at this many seconds after launch. Unfolded, History has its
+    /// own pane, so its stop is skipped there.
+    static func stop(at elapsed: TimeInterval, isSplit: Bool) -> Stop {
+        var end: TimeInterval = 0
+        for (stop, seconds) in stops where !(stop == .history && isSplit) {
+            end += seconds
+            if elapsed < end { return stop }
+        }
+        return .log
+    }
 }
 
 extension BabyHomeView {
-    fileprivate func runDuoTour() async {
-        let settings = BabySettings.shared
-        settings.appearance = .system
-        UserDefaults.standard.set(HistoryView.HistoryLayout.list.rawValue, forKey: "historyLayout")
-        for (index, (stop, seconds)) in DuoTour.stops.enumerated() {
-            // Unfolded, History already has its pane.
-            if stop == .history, split != nil { continue }
-            settings.appearance = stop == .nightLog ? .night : .system
-            UserDefaults.standard.set(
-                (stop == .firstWeeks ? HistoryView.HistoryLayout.calendar : .list).rawValue,
-                forKey: "historyLayout"
-            )
-            let tab: HomeTab = switch stop {
-            case .log, .nightLog: .log
-            case .history: .history
-            case .reports: .reports
-            case .firstWeeks, .settings: .settings
-            }
+    fileprivate func advanceDuoTour(at date: Date) {
+        let elapsed = date.timeIntervalSince(DuoTour.launched)
+        if elapsed >= DuoTour.diaperDelay, !DuoTour.hasLoggedDiaper {
+            DuoTour.hasLoggedDiaper = true
+            withAnimation(AppTheme.feedbackAnimation) { _ = EventStore.shared.log(.wet) }
+        }
+        let stop = DuoTour.stop(at: elapsed, isSplit: split != nil)
+        let appearance: AppAppearance = stop == .nightLog ? .night : .system
+        if BabySettings.shared.appearance != appearance { BabySettings.shared.appearance = appearance }
+        let layout: HistoryView.HistoryLayout = stop == .firstWeeks ? .calendar : .list
+        if UserDefaults.standard.string(forKey: "historyLayout") != layout.rawValue {
+            UserDefaults.standard.set(layout.rawValue, forKey: "historyLayout")
+        }
+        let tab: HomeTab = switch stop {
+        case .log, .nightLog: .log
+        case .history: .history
+        case .reports: .reports
+        case .firstWeeks, .settings: .settings
+        }
+        let path: [SettingsDestination] = stop == .firstWeeks ? [.firstWeeks] : []
+        if selected != tab {
             visited.insert(tab)
             selected = tab
-            settingsPath = stop == .firstWeeks ? [.firstWeeks] : []
-            if index == 0 {
-                try? await Task.sleep(for: .seconds(9))
-                withAnimation(AppTheme.feedbackAnimation) { _ = EventStore.shared.log(.wet) }
-                try? await Task.sleep(for: .seconds(seconds - 9))
-            } else {
-                try? await Task.sleep(for: .seconds(seconds))
-            }
         }
+        if settingsPath != path { settingsPath = path }
     }
 }
 #endif
