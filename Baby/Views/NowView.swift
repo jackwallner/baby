@@ -452,18 +452,16 @@ private struct NowStatusCard: View {
             }
             VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
                 Text(leadTime)
-                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
                     .foregroundStyle(AppTheme.ink)
                     .monospacedDigit()
                     // A crossfade: "just now" to "2h 15m ago" is not a number
                     // rolling over, and the numeric roll smeared the letters.
                     .contentTransition(reduceMotion ? .identity : .opacity)
-                    .oneLine(compact)
+                    .oneLine(compact, font: .system(.largeTitle, design: .rounded, weight: .bold))
                 Text(leadDetail)
-                    .font(.subheadline)
                     .foregroundStyle(AppTheme.ink2)
                     .contentTransition(reduceMotion ? .identity : .opacity)
-                    .oneLine(compact)
+                    .oneLine(compact, font: .subheadline)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(accessibilityLine)
@@ -481,15 +479,18 @@ private struct NowStatusCard: View {
             if lead == .feed, settings.tracked.tracksDiapers {
                 Divider().overlay(AppTheme.cardElevated)
                 HStack(spacing: AppTheme.tightSpacing) {
+                    // The text sets the line's height: the drop and the
+                    // diaper glyphs differ, and a taller one would refit the
+                    // screen on a diaper tap.
                     Image(systemName: diaperKind.symbolName)
                         .foregroundStyle(AppTheme.color(for: diaperKind))
+                        .frame(height: 0)
                         .accessibilityHidden(true)
                     Text(summary.diaperLine(now: now))
-                        .font(.subheadline)
                         .foregroundStyle(AppTheme.ink2)
                         .monospacedDigit()
                         .contentTransition(reduceMotion ? .identity : .opacity)
-                        .oneLine(compact)
+                        .oneLine(compact, font: .subheadline)
                 }
             }
         }
@@ -571,14 +572,21 @@ private struct NowStatusCard: View {
 }
 
 private extension View {
-    /// On the fitted phone layout a line never wraps: a longer side or time
-    /// after a tap would otherwise add a line and push every button down.
+    /// On the fitted phone layout a line never wraps or changes height: a
+    /// longer time after a tap shrinks to fit inside one full-size line, which
+    /// holds the height, so nothing refits and no button moves.
     @ViewBuilder
-    func oneLine(_ fitted: Bool) -> some View {
+    func oneLine(_ fitted: Bool, font: Font) -> some View {
         if fitted {
-            lineLimit(1).minimumScaleFactor(0.75)
+            Text(verbatim: "0")
+                .font(font)
+                .hidden()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .overlay(alignment: .leading) {
+                    self.font(font).lineLimit(1).minimumScaleFactor(0.75)
+                }
         } else {
-            fixedSize(horizontal: false, vertical: true)
+            self.font(font).fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -635,14 +643,24 @@ private struct TodayTotalsView: View {
 
     private func stat(_ kind: EventKind, totals: WindowTotals) -> some View {
         let value = kind == .sleep ? Format.compactDuration(totals.sleepSeconds) : "\(totals.count(kind))"
+        let font = Font.system(.title3, design: .rounded, weight: .bold)
         return VStack(alignment: .leading, spacing: 0) {
-            Text(value)
-                .font(.system(.title3, design: .rounded, weight: .bold))
-                .foregroundStyle(AppTheme.ink)
-                .monospacedDigit()
-                .contentTransition(reduceMotion ? .identity : .numericText())
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            // One line at full size holds the height, so a long sleep total
+            // can shrink to fit and a count animating in never resizes the row
+            // (which would refit the whole screen).
+            Text(verbatim: "0")
+                .font(font)
+                .hidden()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .overlay(alignment: .leading) {
+                    Text(value)
+                        .font(font)
+                        .foregroundStyle(AppTheme.ink)
+                        .monospacedDigit()
+                        .contentTransition(reduceMotion ? .identity : .numericText())
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
             HStack(spacing: AppTheme.hairSpacing) {
                 KindDot(kind: kind, size: AppTheme.legendDotSize)
                 Text(unit(kind, count: totals.count(kind)))

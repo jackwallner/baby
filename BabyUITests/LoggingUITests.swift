@@ -219,6 +219,31 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["log.sleep"].waitForExistence(timeout: 3))
     }
 
+    /// With Sleep off the two rows grow into the space; a tap still moves nothing.
+    func testTapsMoveNothingWithSleepOff() {
+        let app = launch()
+        app.buttons["tab.settings"].tap()
+        let sleep = app.switches["track.sleep"]
+        XCTAssertTrue(sleep.waitForExistence(timeout: 3))
+        sleep.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        app.buttons["tab.log"].tap()
+        XCTAssertFalse(app.buttons["log.sleep"].waitForExistence(timeout: 2))
+        let ids = ["nowCard", "logTime.earlier", "log.all", "log.wet", "log.dirty", "todayTotals", "addOlderEntry"]
+        func frames() -> [String] { ids.map { "\($0) \(app.descendants(matching: .any).matching(identifier: $0).firstMatch.frame)" } }
+        let before = frames()
+        attach(app, "sleep-off-before")
+        app.buttons["log.all"].tap()
+        XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 3))
+        attach(app, "sleep-off-after-all")
+        XCTAssertEqual(frames(), before, "All moved something with Sleep off")
+        app.buttons["feedSide.done"].tap()
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 3))
+        XCTAssertEqual(frames(), before, "Done moved something with Sleep off")
+        app.buttons["log.feed"].tap()
+        XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 3))
+        XCTAssertEqual(frames(), before, "Feed moved something with Sleep off")
+    }
+
     func testOptionalSetupGoesStraightToLogging() {
         let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
         app.launchArguments = ["-NoCloudKit", "-hasCompletedSetup", "NO"]

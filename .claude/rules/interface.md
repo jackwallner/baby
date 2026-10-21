@@ -373,3 +373,10 @@ editor and the Watch to breast, bottle or both; bottle alone makes every
 bare Feed (app, widget, Siri) a bottle with no chips, and drops "Start on".
 The Undo toast uses the margins on Log, which has no bar buttons, and
 insets past them on every other tab.
+
+Fit drift (build 61, Jack's phone with Sleep off): a fitted line that may
+shrink to fit (`minimumScaleFactor`) re-measured shorter after a tap's
+number animation, so the totals row lost 7pt and the whole screen refit.
+Every fitted line now sits inside a hidden full-size "0" that holds its
+height (`oneLine(_:font:)`, the totals' counts), and the diaper glyph has no
+height of its own. `testTapsMoveNothingWithSleepOff` pins it.
