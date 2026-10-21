@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <rect width="1024" height="500" fill="#F5F0E8"/>
+  <text x="72" y="215" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="68" font-weight="700" fill="#3A2F26">Baby Tracker</text>
+  <text x="72" y="290" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="36" fill="#6B5B4D">One tap logs a feed, a diaper</text>
+  <text x="72" y="338" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="36" fill="#6B5B4D">or sleep. One glance answers</text>
+  <text x="72" y="386" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="36" fill="#6B5B4D">when and which side.</text>
+  <rect x="660" y="100" width="150" height="150" rx="46" fill="#E0A040"/>
+  <rect x="838" y="100" width="150" height="150" rx="46" fill="#4A8AE0"/>
+  <rect x="660" y="274" width="150" height="150" rx="46" fill="#9A7350"/>
+  <rect x="838" y="274" width="150" height="150" rx="46" fill="#6E6AD8"/>
+</svg>

@@ -129,10 +129,10 @@ ANDROID_SERIAL=emulator-5554 fm-gradle :app:connectedDebugAndroidTest -Pkotlin.c
 ## Release preparation and remaining Play steps
 
 1. Create the Play app `com.jackwallner.baby` in the E3 Apps account (Console,
-   needs Jack's Chrome). Listing text is in `android/play-assets/listing/`,
-   icon `android/play-assets/icon-512.png`. Still needed: a 1024 x 500 feature
-   graphic and four 1080 x 1920 phone screenshots composited from real
-   captures.
+   needs Jack's Chrome). Listing text, feature graphic and screenshots are in `android/play-assets/` (see its README),
+   icon `android/play-assets/icon-512.png`. Done: the 1024 x 500 feature
+   graphic and five 1080 x 2160 phone screenshots captured from real
+   debug-build screens.
 2. Create the three products above, review Play's generated local prices
    against the iOS PPP plan, then activate.
 3. Add a Play app to RevenueCat `proj0b545ae2` (needs the Play service account,
