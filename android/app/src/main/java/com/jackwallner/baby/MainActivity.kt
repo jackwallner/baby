@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
         InviteCode.parse(intent.dataString)?.let { graph.sharing.pendingCode = it }
     }
 
-    override fun onNewIntent(intent: Intent) {
+    public override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         routeTab(intent)?.let { pendingTab = it }
         takeInvite(intent)

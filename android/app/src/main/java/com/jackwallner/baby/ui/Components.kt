@@ -202,7 +202,7 @@ fun ValueRow(title: String, value: String, tag: String? = null, onClick: (() -> 
         Modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
-            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier.semantics(mergeDescendants = true) {})
             .then(if (tag != null) Modifier.testTag(tag) else Modifier)
             .padding(horizontal = Tokens.loose, vertical = Tokens.tight),
         verticalAlignment = Alignment.CenterVertically,
