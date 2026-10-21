@@ -88,14 +88,15 @@ platform allows. First built 2026-10-20 on jmbp2 (fleet run
   Apple's standard EULA, which does not apply on Play).
 - Reduce Motion is the system "Remove animations" setting (animator scale 0).
 
-## Build and test on a Pro (never on the Air)
+## Build and test (fleet machines, never on the Air)
+
+Run Gradle from `android/` through `fm-gradle` (see `android-dev`), not `./gradlew`:
 
 ```sh
-export JAVA_HOME=~/jdks/temurin-17/Contents/Home ANDROID_HOME=~/Library/Android/sdk
 cd android
-./gradlew :app:testDebugUnitTest -Pkotlin.compiler.execution.strategy=in-process
-./gradlew :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug -Pkotlin.compiler.execution.strategy=in-process
-ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest -Pkotlin.compiler.execution.strategy=in-process
+fm-gradle :app:testDebugUnitTest -Pkotlin.compiler.execution.strategy=in-process
+fm-gradle :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug -Pkotlin.compiler.execution.strategy=in-process
+ANDROID_SERIAL=emulator-5554 fm-gradle :app:connectedDebugAndroidTest -Pkotlin.compiler.execution.strategy=in-process
 ```
 
 - jmbp2 has 8 GB: stop Gradle (`./gradlew --stop`) before booting

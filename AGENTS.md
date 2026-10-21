@@ -123,7 +123,7 @@ one baby is free; History's Today and Yesterday tiles and the full log are free.
   `.watch.widget`, tests `.tests`, UI tests `.uitests`.
 - App Group `group.com.jackwallner.baby`, iCloud container
   `iCloud.com.jackwallner.baby`.
-- App Store Connect app **`6811133796`**, version 1.0.
+- App Store Connect app **`6811133796`**.
 - RevenueCat project `proj0b545ae2`, entitlement lookup key **`baby`**, display
   name `Baby+`, public SDK key `appl_qiLuKnhdneTEYzRYOtaovXNgZRa`. The `sk_`
   key, the Test Store key and `ASC_REVIEW_PHONE` live in `~/.baby_credentials`,
