@@ -103,7 +103,7 @@ fun OnboardingScreen() {
                 )
                 if (!expecting) {
                     Column(Modifier.fillMaxWidth()) {
-                        ToggleRow("Add birth date", hasBirthDate, tag = "onboarding.birthToggle") { hasBirthDate = it }
+                        ToggleRow("Add birth date", hasBirthDate, tag = "onboarding.birthToggle", inset = 0.dp()) { hasBirthDate = it }
                         if (hasBirthDate) {
                             TextAction("Birth date: ${Format.monthDayYear(LocalDate.ofEpochDay(birthDate).atStartOfDay(zone).toInstant().toEpochMilli(), zone)}", tag = "onboarding.birthDate") { picking = true }
                         }

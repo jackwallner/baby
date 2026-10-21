@@ -1,0 +1,1 @@
+First Android release: one-tap logging for feeds, diapers and sleep, reminders, First Weeks, the stain helper and optional Baby+ reports.
