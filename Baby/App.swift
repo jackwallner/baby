@@ -449,7 +449,8 @@ struct BabyHomeView: View {
 #if DEBUG
 /// `-DuoTour` walks the main screens on a timer for the iPhone Duo captures
 /// and recordings, which can only screenshot on a schedule. On the way it
-/// logs a wet diaper, so a recording shows a real tap reach both panes.
+/// logs a wet diaper 9 s in (after gh-sim's inner relaunch has started
+/// recording), so a recording shows a real tap reach both panes.
 enum DuoTour {
     static var isEnabled: Bool { ProcessInfo.processInfo.arguments.contains("-DuoTour") }
 
@@ -460,7 +461,7 @@ enum DuoTour {
     /// Each stop and how long it stays, in seconds. Captures oversample
     /// these, so every stop gets at least one settled frame.
     static let stops: [(Stop, Int)] = [
-        (.log, 20), (.history, 12), (.reports, 12), (.firstWeeks, 12),
+        (.log, 22), (.history, 12), (.reports, 12), (.firstWeeks, 12),
         (.settings, 12), (.nightLog, 12), (.log, 600),
     ]
 }
@@ -488,9 +489,9 @@ extension BabyHomeView {
             selected = tab
             settingsPath = stop == .firstWeeks ? [.firstWeeks] : []
             if index == 0 {
-                try? await Task.sleep(for: .seconds(6))
+                try? await Task.sleep(for: .seconds(9))
                 withAnimation(AppTheme.feedbackAnimation) { _ = EventStore.shared.log(.wet) }
-                try? await Task.sleep(for: .seconds(seconds - 6))
+                try? await Task.sleep(for: .seconds(seconds - 9))
             } else {
                 try? await Task.sleep(for: .seconds(seconds))
             }

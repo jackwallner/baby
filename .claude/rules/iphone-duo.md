@@ -23,6 +23,6 @@ paths:
   across the fold. History's pane drops the capsule's bottom reservation.
 - Captures: DEBUG `-DuoTour` walks Log, History (folded only), Reports, First
   Weeks with History's calendar, Settings and Night light Log on a timer (it
-  logs one wet diaper at 6 s for recordings). Run with `-SeedScreenshotData
+  logs one wet diaper at 9 s for recordings). Run with `-SeedScreenshotData
   -NoCloudKit -DemoPro` through `gh-sim launch --device 'iPhone Duo'` and
   oversample with `--url noop://N`, which fails fast and only spaces shots.
