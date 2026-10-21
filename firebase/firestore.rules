@@ -1,0 +1,155 @@
+rules_version = '2';
+
+// Baby Tracker "Log together" on Android (schema 1). See firebase/README.md.
+//
+// families/{f}                 ownerUid, createdAt, schema
+// families/{f}/members/{uid}   uid, name, role (owner|member), joinedAt, invite, platform
+// families/{f}/children/{id}   the local Child fields + updatedAt, deleted, updatedBy, syncedAt
+// families/{f}/entries/{id}    the local LogEvent fields + deleted, updatedBy, syncedAt
+// invites/{code}               familyId, createdBy, createdAt, expiresAt
+//
+// Only members read or write a family. Joining means creating your own
+// member document, which needs an unexpired invite for that family. Entries
+// and babies are last-writer-wins on the client's updatedAt: a write older
+// than the stored version is rejected, so an offline phone can't undo a
+// newer change when it reconnects.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function familyPath(f) {
+      return /databases/$(database)/documents/families/$(f);
+    }
+
+    function isMember(f) {
+      return signedIn() && exists(/databases/$(database)/documents/families/$(f)/members/$(request.auth.uid));
+    }
+
+    function optionalString(d, key, max) {
+      return !(key in d) || d[key] == null || (d[key] is string && d[key].size() <= max);
+    }
+
+    function optionalInt(d, key) {
+      return !(key in d) || d[key] == null || d[key] is int;
+    }
+
+    // Common to babies and entries: who wrote it, when, and last-writer-wins.
+    function validSync(id) {
+      let d = request.resource.data;
+      return d.id == id
+        && d.updatedAt is int
+        && d.createdAt is int
+        && d.deleted is bool
+        && d.updatedBy == request.auth.uid
+        && d.syncedAt == request.time
+        && (resource == null || d.updatedAt >= resource.data.updatedAt);
+    }
+
+    function validChild(id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['id', 'name', 'birthDate', 'createdAt', 'lastVisitAt', 'updatedAt', 'deleted', 'updatedBy', 'syncedAt'])
+        && d.keys().hasAll(['id', 'createdAt', 'updatedAt', 'deleted', 'updatedBy', 'syncedAt'])
+        && validSync(id)
+        && optionalString(d, 'name', 80)
+        && optionalInt(d, 'birthDate')
+        && optionalInt(d, 'lastVisitAt');
+    }
+
+    function validEntry(id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['id', 'childId', 'kind', 'startedAt', 'endedAt', 'side', 'amount', 'stoolColor', 'note',
+                               'createdAt', 'updatedAt', 'deleted', 'updatedBy', 'syncedAt'])
+        && d.keys().hasAll(['id', 'childId', 'kind', 'startedAt', 'createdAt', 'updatedAt', 'deleted', 'updatedBy', 'syncedAt'])
+        && validSync(id)
+        && d.childId is string && d.childId.size() <= 64
+        && d.kind is string && d.kind.size() <= 32
+        && d.startedAt is int
+        && optionalInt(d, 'endedAt')
+        && optionalString(d, 'side', 64)
+        && (!('amount' in d) || d.amount is number)
+        && optionalString(d, 'stoolColor', 32)
+        && optionalString(d, 'note', 2000);
+    }
+
+    function validInvite(f, code) {
+      let path = /databases/$(database)/documents/invites/$(code);
+      return exists(path)
+        && get(path).data.familyId == f
+        && get(path).data.expiresAt > request.time;
+    }
+
+    match /families/{f} {
+      allow read: if isMember(f);
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt', 'schema'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.schema == 1;
+      allow update: if false;
+      // The last person to leave clears the family away.
+      allow delete: if isMember(f);
+
+      match /members/{uid} {
+        allow read: if isMember(f);
+        allow create: if signedIn()
+          && uid == request.auth.uid
+          && request.resource.data.keys().hasOnly(['uid', 'name', 'role', 'joinedAt', 'invite', 'platform'])
+          && request.resource.data.uid == uid
+          && request.resource.data.name is string && request.resource.data.name.size() <= 80
+          && request.resource.data.joinedAt == request.time
+          && request.resource.data.platform is string && request.resource.data.platform.size() <= 16
+          && (
+            // The person who starts the family, in the same batch as the family.
+            (request.resource.data.role == 'owner'
+              && request.resource.data.invite == null
+              && getAfter(familyPath(f)).data.ownerUid == request.auth.uid)
+            ||
+            // Everyone else, holding an unexpired invite for this family.
+            (request.resource.data.role == 'member'
+              && request.resource.data.invite is string
+              && validInvite(f, request.resource.data.invite))
+          );
+        allow update: if uid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+          && request.resource.data.name is string && request.resource.data.name.size() <= 80;
+        // Leave yourself, or the owner removes someone.
+        allow delete: if signedIn()
+          && (uid == request.auth.uid
+            || (exists(familyPath(f)) && get(familyPath(f)).data.ownerUid == request.auth.uid));
+      }
+
+      match /children/{id} {
+        allow read: if isMember(f);
+        allow create, update: if isMember(f) && validChild(id);
+        allow delete: if isMember(f);
+      }
+
+      match /entries/{id} {
+        allow read: if isMember(f);
+        allow create, update: if isMember(f) && validEntry(id);
+        allow delete: if isMember(f);
+      }
+    }
+
+    match /invites/{code} {
+      // Holding the code is what lets you look it up; codes can't be listed.
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && code.matches('^[2-9A-HJ-NP-Z]{8}$')
+        && request.resource.data.keys().hasOnly(['familyId', 'createdBy', 'createdAt', 'expiresAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.familyId is string
+        && isMember(request.resource.data.familyId)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt <= request.time + duration.value(8, 'd');
+      allow update: if false;
+      allow delete: if signedIn()
+        && (resource.data.createdBy == request.auth.uid || isMember(resource.data.familyId));
+    }
+  }
+}

@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.jackwallner.baby.data.Appearance
 import com.jackwallner.baby.data.Reminders
+import com.jackwallner.baby.model.InviteCode
 import com.jackwallner.baby.model.ReminderPlan
 import com.jackwallner.baby.ui.Root
 import com.jackwallner.baby.ui.theme.BabyTheme
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
             pendingTab = DebugLaunchOptions.apply(graph, intent) ?: routeTab(intent)
+            takeInvite(intent)
         }
         graph.scope.launch { graph.store.start() }
         // Animator scale 0 (Remove animations) is Android's Reduce Motion.
@@ -71,9 +73,16 @@ class MainActivity : ComponentActivity() {
     private fun routeTab(intent: Intent?): Int? =
         if (intent?.getStringExtra(Reminders.EXTRA_ROUTE) == ReminderPlan.CHECKUP_ROUTE) 2 else null
 
+    /** An invite link (https or babytracker://join/CODE) opens Join with its code filled in. */
+    private fun takeInvite(intent: Intent?) {
+        if (intent?.action != Intent.ACTION_VIEW) return
+        InviteCode.parse(intent.dataString)?.let { graph.sharing.pendingCode = it }
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         routeTab(intent)?.let { pendingTab = it }
+        takeInvite(intent)
     }
 
     override fun onResume() {

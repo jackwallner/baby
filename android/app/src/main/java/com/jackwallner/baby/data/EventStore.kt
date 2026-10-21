@@ -14,6 +14,10 @@ import com.jackwallner.baby.model.LogEvent
 import com.jackwallner.baby.model.LogOps
 import com.jackwallner.baby.model.LogState
 import com.jackwallner.baby.model.NowSummary
+import com.jackwallner.baby.model.RemoteChild
+import com.jackwallner.baby.model.RemoteEntry
+import com.jackwallner.baby.model.SyncDiff
+import com.jackwallner.baby.model.SyncMerge
 import java.io.File
 import java.time.ZoneId
 import kotlinx.coroutines.CoroutineScope
@@ -24,7 +28,9 @@ import kotlinx.coroutines.launch
 /**
  * The app's one door to the log: every tap, edit, undo and delete goes
  * through here, and every surface that shows the log reads from here.
- * Saved whole to one file after each change; there is no server.
+ * Saved whole to one file after each change. When logging together is on,
+ * each change is also handed to [onCommit] for the shared log, and rows
+ * from the shared log come back in through [applyRemote].
  */
 class EventStore(
     private val file: File?,
@@ -50,6 +56,12 @@ class EventStore(
     /** Reschedules reminders after every change. */
     var onPublish: (NowSummary, Child?) -> Unit = { _, _ -> }
 
+    /** Logging together is on: stamp every change so the shared log's newest-wins rule takes it. */
+    var isShared = false
+    /** A local change, before and after, for the shared log. */
+    var onCommit: (LogState, LogState) -> Unit = { _, _ -> }
+    private var lastStamp = 0L
+
     private var undoJob: Job? = null
     val zone: ZoneId get() = ZoneId.systemDefault()
 
@@ -70,7 +82,12 @@ class EventStore(
         }
     }
 
-    private fun persist(next: LogState): Boolean {
+    /** Strictly increasing, so an undo straight after a delete still lands after it. */
+    private fun stampTime(): Long = maxOf(clock(), lastStamp + 1).also { lastStamp = it }
+
+    private fun persist(proposed: LogState, share: Boolean = true): Boolean {
+        val before = state
+        val next = if (isShared && share) SyncDiff.stamp(before, proposed, stampTime()) else proposed
         val f = file
         if (f != null) {
             val atomic = AtomicFile(f)
@@ -86,7 +103,18 @@ class EventStore(
         }
         state = next
         refresh()
+        if (isShared && share) onCommit(before, next)
         return true
+    }
+
+    /**
+     * Rows from the shared log. The undo snapshot takes them too, so undoing
+     * this phone's last tap never takes back someone else's entry.
+     */
+    fun applyRemote(children: List<RemoteChild>, entries: List<RemoteEntry>) {
+        if (children.isEmpty() && entries.isEmpty()) return
+        lastLogged?.let { lastLogged = it.copy(before = SyncMerge.merge(it.before, children, entries)) }
+        persist(SyncMerge.merge(state, children, entries), share = false)
     }
 
     /** Rebuilds the visible log and the summary, e.g. after a settings change. */
@@ -116,7 +144,7 @@ class EventStore(
     }
 
     fun updateChild(child: Child, name: String?, birthDate: Long?): Boolean =
-        persist(state.copy(children = state.children.map { if (it.id == child.id) it.copy(name = name?.trim()?.ifEmpty { null }, birthDate = birthDate) else it }))
+        persist(state.copy(children = state.children.map { if (it.id == child.id) it.copy(name = name?.trim()?.ifEmpty { null }, birthDate = birthDate, updatedAt = clock()) else it }))
 
     fun removeChild(child: Child): Boolean = persist(LogOps.removeChild(state, child.id))
 

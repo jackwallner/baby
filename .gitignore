@@ -38,3 +38,8 @@ fastlane/README.md
 marketreport.md
 research/idea-screen-2026-09-11.md
 research/data/baby-screen-2026-09-11-raw.txt
+firebase/node_modules/
+firebase/*-debug.log
+android/app/google-services.json
+firebase/test-results/
+firebase/firestore-debug.log

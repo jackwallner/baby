@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -53,9 +54,10 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * One screen: an optional name, birth date and "How is the baby fed?", which
- * only picks the reminder gap offered first. No purchase screen, no account.
- * Joining a shared log is iOS-only (CloudKit), so Android has the one path.
+ * One screen with two paths. Start a new log: an optional name, birth date
+ * and "How is the baby fed?", which only picks the reminder gap offered
+ * first. Join a shared log: an invite code from another Android phone (only
+ * when this build has a Firebase project). No purchase screen.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -71,6 +73,9 @@ fun OnboardingScreen() {
     var picking by rememberSaveable { mutableStateOf(false) }
     var failed by rememberSaveable { mutableStateOf(false) }
     val expecting = style == FeedingStyle.EXPECTING.raw
+    val canJoin = graph.sharing.isAvailable
+    var joining by rememberSaveable { mutableStateOf(graph.sharing.pendingCode != null) }
+    LaunchedEffect(graph.sharing.pendingCode) { if (graph.sharing.pendingCode != null) joining = true }
 
     Box(Modifier.fillMaxSize().background(palette.paper), contentAlignment = Alignment.TopCenter) {
         Column(
@@ -90,6 +95,20 @@ fun OnboardingScreen() {
             Column(verticalArrangement = Arrangement.spacedBy(Tokens.hair)) {
                 Text("Hello, little one.", style = MaterialTheme.typography.headlineLarge, color = palette.ink)
                 Text("Feeds, diapers and sleep. A little less to remember.", style = MaterialTheme.typography.bodyLarge, color = palette.ink2)
+            }
+            if (canJoin) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Tokens.tight)) {
+                    Chip("Start a new log", !joining, Modifier.weight(1f), tag = "onboarding.path.start") { joining = false }
+                    Chip("Join a shared log", joining, Modifier.weight(1f), tag = "onboarding.path.join") { joining = true }
+                }
+            }
+            if (canJoin && joining) {
+                Column(Modifier.fillMaxWidth().graphicBorder(palette).padding(Tokens.loose)) {
+                    JoinForm(onJoined = { graph.settings.completeSetup() })
+                }
+                Text(Guidance.DISCLAIMER, style = MaterialTheme.typography.bodySmall, color = palette.ink2)
+                TextAction("Privacy Policy", Modifier.align(Alignment.CenterHorizontally)) { context.openUrl(Links.PRIVACY) }
+                return@Column
             }
             Column(Modifier.fillMaxWidth().graphicBorder(palette).padding(Tokens.loose), verticalArrangement = Arrangement.spacedBy(Tokens.spacing)) {
                 OutlinedTextField(

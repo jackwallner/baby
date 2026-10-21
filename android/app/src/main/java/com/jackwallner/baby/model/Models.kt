@@ -126,6 +126,8 @@ data class Child(
     val birthDate: Long? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val lastVisitAt: Long? = null,
+    /** Last change to the name or birth date, for last-writer-wins when logging together. */
+    val updatedAt: Long = createdAt,
 ) {
     /** Never empty: Now and the PDF need a word. */
     val displayName: String get() = name?.trim().takeUnless { it.isNullOrEmpty() } ?: "Baby"
