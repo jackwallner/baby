@@ -161,14 +161,14 @@ object ReminderPlan {
             val evening = eveningBefore(nextCheckup, zone)
             if (evening <= now) return emptyList()
             return listOf(Planned(CHECKUP_PREFIX + "entered", evening, "Checkup tomorrow",
-                "Your summary for the doctor is ready: feeds, diapers, sleep and weight since the last visit.", CHECKUP_ROUTE))
+                "Feeds, diapers, sleep and weight since the last visit are in Baby Tracker.", CHECKUP_ROUTE))
         }
         birthDate ?: return emptyList()
         return TYPICAL_CHECKUP_DAYS.mapNotNull { day ->
             val evening = eveningBefore(DateHelpers.dateForDayOfLife(day, birthDate, zone), zone)
             if (evening <= now) null
             else Planned(CHECKUP_PREFIX + "day$day", evening, "Checkup coming up?",
-                "Newborn visits come often in the first month. Your summary for the doctor is ready.", CHECKUP_ROUTE)
+                "Newborn visits come often in the first month. Your log has the feeds, diapers and sleep to bring.", CHECKUP_ROUTE)
         }
     }
 

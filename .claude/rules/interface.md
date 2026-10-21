@@ -334,3 +334,29 @@ reads spans ("9 PM to 1 AM") or "Nothing logged yet", and the Dynamic
 Island icons are labelled. Left alone: the 10pt tab capsule labels (fixed
 for the one-screen fit), the Watch's 38pt Sleep row, a baby name on widget
 faces, per-baby reminders, and deleting a baby.
+
+Third persona pass (2026-10-21: Watch and widget dad, formula family in
+Night light, preemie backfill, App Reviewer on a fresh install). CSV dates
+and the PDF file name are local days (they were UTC, so evening entries
+moved to the next day). Sleep tallies stop at now, so a sleep entered to end
+later never counts ahead. New History entries from a past calendar day open
+on that day, and the calendar follows midnight; the sleep stepper moves 15
+minutes; a whole sleep added from the editor toasts "Logged sleep". First
+Weeks past day 14 says the table is for looking back, and its column reads
+REFERENCE. Birth dates are stored at noon so a time zone never moves them.
+The stain helper's first setup stays open until Save (each tap used to end
+it). The paywall opens without a stale error, its spinner uses `buttonInk`,
+and lifetime owners see "Lifetime, never renews" instead of Manage
+subscription. Checkup notes no longer say a summary is ready, because a free
+parent's tap lands on the paywall. A declined notification prompt still
+saves the reminder choice, so Settings shows the way to allow them, and
+Settings refreshes after the offer. Widget entries clear today's counts at
+the day start (`summary.current(now:)`, as the Watch does). The Watch no
+longer offers a double-tap side when the last feed had none, and a
+backdated Wake before the sleep began ends it now. The phone retries the
+Live Activity on every foreground (iOS refuses a background start), and
+never pushes the empty pre-unlock stand-in to the Watch. Night light dims
+the full PDF preview. Settings' By day keeps the chosen day start after
+trying Last 24 hours. Left for Jack: a bottle-only Feed row, partial bottle
+amounts in reports, per-kind widget Undo, a Watch "updated" line, and the
+widget's reach to this phone's own Watch.

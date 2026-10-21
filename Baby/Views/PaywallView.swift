@@ -51,6 +51,8 @@ struct BabyPaywallView: View {
         .background(AppTheme.paper.ignoresSafeArea())
         .task(id: isVisible) {
             guard isVisible else { return }
+            if !store.packages.isEmpty { store.clearError() }
+            restoreMessage = nil
             store.trackPaywallImpression(id: paywallImpressionID, oncePerSession: !displayCloseButton)
             if store.packages.isEmpty { store.start(forceRefresh: false) }
             selectDefaultIfNeeded()
@@ -136,10 +138,12 @@ struct BabyPaywallView: View {
                     .font(.subheadline)
                     .foregroundStyle(AppTheme.ink2)
                     .multilineTextAlignment(.center)
-                Link(destination: BabyLinks.manageSubscriptions) {
-                    Text("Manage subscription").frame(maxWidth: .infinity)
+                if !store.isLifetime {
+                    Link(destination: BabyLinks.manageSubscriptions) {
+                        Text("Manage subscription").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
                 }
-                .buttonStyle(PrimaryButtonStyle())
                 VStack(spacing: AppTheme.spacing) {
                     ForEach(PlusFeature.allCases) { feature in
                         benefitRow(feature, unlocked: true)
@@ -246,7 +250,7 @@ struct BabyPaywallView: View {
                 }
             } label: {
                 if store.isLoading {
-                    ProgressView().tint(.white)
+                    ProgressView().tint(AppTheme.buttonInk)
                 } else {
                     Text(ConversionCopy.ctaLabel(
                         trialLabel: selected?.babyIntroOfferLabel,

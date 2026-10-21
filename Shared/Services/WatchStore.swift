@@ -78,12 +78,12 @@ final class WatchStore: ObservableObject {
         confirm(payload, title: "\(what) logged")
     }
 
-    /// Sleep if nothing is running, otherwise Wake. A backdated Wake never
-    /// lands before the sleep it ends.
+    /// Sleep if nothing is running, otherwise Wake. A backdated Wake from
+    /// before the sleep began ends it now, as the phone does.
     func toggleSleep(at date: Date = .now) {
         guard summary.tracked.contains(.sleep) else { return }
         if let start = summary.runningSleepStart {
-            let payload = WatchLogPayload(action: .stopSleep, kind: .sleep, at: max(date, start))
+            let payload = WatchLogPayload(action: .stopSleep, kind: .sleep, at: date >= start ? date : max(.now, start))
             send(payload)
             confirm(payload, title: "Woke up")
         } else {

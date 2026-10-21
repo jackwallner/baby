@@ -135,7 +135,7 @@ struct ReportPreviews: View {
     private var exampleSheet: some View {
         NavigationStack {
             Group {
-                if let pageData { PDFPages(data: pageData) } else { ProgressView() }
+                if let pageData { PDFPages(data: pageData).colorMultiply(AppTheme.codePaper) } else { ProgressView() }
             }
             .background(AppTheme.paper)
             .navigationTitle("Example summary")

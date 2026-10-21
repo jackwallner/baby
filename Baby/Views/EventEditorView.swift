@@ -117,7 +117,7 @@ struct EventEditorView: View {
                     }
                     if kind == .sleep, !draft.isTimed {
                         Section {
-                            Stepper("Length: \(Format.compactDuration(Double(draft.durationMinutes) * 60))", value: $draft.durationMinutes, in: 0...1440, step: 5)
+                            Stepper("Length: \(Format.compactDuration(Double(draft.durationMinutes) * 60))", value: $draft.durationMinutes, in: 0...1440, step: 15)
                         } header: {
                             Text("Sleep")
                         } footer: {
@@ -297,12 +297,14 @@ struct EventEditorView: View {
 struct NewEntryMenuItems: View {
     @EnvironmentObject private var settings: BabySettings
     @Binding var editor: EditorRequest?
+    /// The time a new entry opens at; nil is now.
+    var at: Date?
 
     var body: some View {
         ForEach(settings.tracked.buttons, id: \.self) { kind in
-            Button(kind.isDiaper ? "\(kind.label) diaper" : kind.label) { editor = EditorRequest(kind: kind) }
+            Button(kind.isDiaper ? "\(kind.label) diaper" : kind.label) { editor = EditorRequest(kind: kind, at: at) }
         }
-        Button("Weight") { editor = EditorRequest(kind: .weight) }
+        Button("Weight") { editor = EditorRequest(kind: .weight, at: at) }
     }
 }
 

@@ -15,6 +15,16 @@ struct HistoryView: View {
     @State private var selectedDay = Calendar.current.startOfDay(for: .now)
     /// A day picked from the tiles or the chart, for the list to scroll to.
     @State private var jumpTarget: Date?
+    @State private var today = Calendar.current.startOfDay(for: .now)
+
+    /// A past day picked on the calendar opens new entries on that day, at
+    /// this time of day, rather than now.
+    private var newEntryTime: Date? {
+        let calendar = Calendar.current
+        guard layout == .calendar, selectedDay < calendar.startOfDay(for: .now) else { return nil }
+        let time = calendar.dateComponents([.hour, .minute], from: .now)
+        return calendar.date(bySettingHour: time.hour ?? 12, minute: time.minute ?? 0, second: 0, of: selectedDay)
+    }
 
     enum HistoryLayout: String, CaseIterable {
         case list
@@ -45,12 +55,23 @@ struct HistoryView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    NewEntryMenuItems(editor: $editor)
+                    NewEntryMenuItems(editor: $editor, at: newEntryTime)
                 } label: {
                     Image(systemName: "plus")
                 }
                 .accessibilityLabel("Add an entry")
             }
+        }
+        // History stays alive across midnight: a calendar left on today
+        // follows it to the new day.
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
+            let calendar = Calendar.current
+            let newDay = calendar.startOfDay(for: .now)
+            if selectedDay == today {
+                selectedDay = newDay
+                month = calendar.startOfMonth(for: newDay)
+            }
+            today = newDay
         }
         .sheet(item: $editor) { request in
             EventEditorView(request: request)

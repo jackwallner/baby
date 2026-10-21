@@ -74,6 +74,8 @@ enum FeedingStyle: String, CaseIterable, Identifiable, Sendable {
 enum Reminders {
     static let feedID = "baby.feed"
     static let checkupPrefix = "baby.checkup."
+    /// Posted when the reminder offer saves, for Settings' copy of the choices.
+    static let choicesChanged = Notification.Name("baby.reminders.changed")
     /// A tapped notification's `userInfo[routeKey]`.
     static let routeKey = "route"
     static let checkupRoute = "checkup"
@@ -164,7 +166,7 @@ enum Reminders {
                 id: checkupPrefix + "entered",
                 date: evening,
                 title: "Checkup tomorrow",
-                body: "Your summary for the doctor is ready: feeds, diapers, sleep and weight since the last visit.",
+                body: "Feeds, diapers, sleep and weight since the last visit are in Baby Tracker.",
                 route: checkupRoute
             )]
         }
@@ -176,7 +178,7 @@ enum Reminders {
                 id: checkupPrefix + "day\(day)",
                 date: evening,
                 title: "Checkup coming up?",
-                body: "Newborn visits come often in the first month. Your summary for the doctor is ready.",
+                body: "Newborn visits come often in the first month. Your log has the feeds, diapers and sleep to bring.",
                 route: checkupRoute
             )
         }

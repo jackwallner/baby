@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * Everything the pediatrician summary, the trends and the CSV are built from,
@@ -246,8 +247,8 @@ data class SummaryReport(
             for (event in events.sortedBy { it.start }) {
                 val start = event.start
                 val duration = event.duration?.let { Format.roundAway(it / 60).toInt().toString() } ?: ""
-                val amount = if (event.kind == EventKind.FEED && event.amount > 0) event.amount.toInt().toString() else ""
-                val weight = if (event.kind == EventKind.WEIGHT && event.amount > 0) event.amount.toInt().toString() else ""
+                val amount = if (event.kind == EventKind.FEED && event.amount > 0) event.amount.roundToInt().toString() else ""
+                val weight = if (event.kind == EventKind.WEIGHT && event.amount > 0) event.amount.roundToInt().toString() else ""
                 val fields = listOf(
                     childName,
                     DateTimeFormatter.ISO_LOCAL_DATE.format(DateHelpers.zoned(start, zone)),

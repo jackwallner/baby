@@ -560,7 +560,7 @@ private fun FeedReminderOffer(onDone: () -> Unit) {
                     }
                 }
                 com.jackwallner.baby.ui.ToggleRow("Before checkups too", checkups, tag = "offer.checkups", inset = 0.dp) { checkups = it }
-                Text("The evening before a newborn visit, a note that your summary for the doctor is ready.", color = palette.ink2, style = MaterialTheme.typography.bodySmall)
+                Text("The evening before a newborn visit, a note with what you have logged since the last one.", color = palette.ink2, style = MaterialTheme.typography.bodySmall)
             }
         },
         confirmButton = {

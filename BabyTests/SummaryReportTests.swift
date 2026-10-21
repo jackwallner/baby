@@ -154,6 +154,27 @@ final class SummaryReportTests: XCTestCase {
         XCTAssertEqual(report().weightChangeDescription, "One weigh-in")
     }
 
+    /// An evening entry is that evening's date in the spreadsheet, whatever
+    /// the time zone, not the next day's UTC date.
+    func testCSVDatesAreLocalDays() throws {
+        let evening = day(1, hour: 23)
+        store.log(.wet, at: evening)
+        let csv = SummaryReport.csv(events: store.events, childName: "Nora")
+        let row = try XCTUnwrap(csv.split(separator: "\n").dropFirst().first)
+        let local = DateFormatter()
+        local.dateFormat = "yyyy-MM-dd"
+        XCTAssertTrue(row.contains(local.string(from: evening)), String(row))
+    }
+
+    /// A sleep entered to end later counts only up to now.
+    func testASleepEndingLaterCountsOnlySoFar() {
+        let start = Date.now.addingTimeInterval(-3600)
+        store.log(.sleep, at: start) { $0.endedAt = start.addingTimeInterval(3 * 3600) }
+        let yesterday = Date.now.addingTimeInterval(-86400)
+        let slept = store.tally(on: .now).sleepSeconds + store.tally(on: yesterday).sleepSeconds
+        XCTAssertEqual(slept, 3600, accuracy: 60)
+    }
+
     func testADaysWeightIsItsLastWeighIn() {
         store.log(.weight, at: day(1, hour: 8))?.amount = 3300
         store.log(.weight, at: day(1, hour: 14))?.amount = 3350

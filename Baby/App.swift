@@ -111,6 +111,11 @@ struct BabyApp: App {
                     NightLight.apply(settings.appearance.isNightLight)
                     Reminders.forgetLastSchedule()
                     events.reload()
+                    // A sleep started from the Watch or a partner while this
+                    // app was in the background could not start its Live
+                    // Activity then (iOS refuses), and an unchanged summary
+                    // does not publish again.
+                    LiveActivityService.shared.sync(summary: events.summary)
                     Task { await sharing.refresh(for: events.child) }
                 }
                 .onChange(of: events.child) { _, child in

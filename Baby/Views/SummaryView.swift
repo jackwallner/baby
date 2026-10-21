@@ -387,6 +387,8 @@ struct SummaryView: View {
             Group {
                 if let pdfData {
                     PDFPages(data: pdfData)
+                        // Dimmed like the thumbnails, so Night light never flashes white.
+                        .colorMultiply(AppTheme.codePaper)
                 } else {
                     ProgressView()
                 }
@@ -497,7 +499,7 @@ private struct PDFFile: Transferable {
 
     static var transferRepresentation: some TransferRepresentation {
         DataRepresentation(exportedContentType: .pdf) { file in file.data }
-            .suggestedFileName { "\($0.name) summary \($0.date.formatted(.iso8601.year().month().day())).pdf" }
+            .suggestedFileName { "\($0.name) summary \($0.date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())).pdf" }
     }
 }
 

@@ -253,6 +253,11 @@ struct UndoToast: View {
         .accessibilityIdentifier("undoToast")
     }
 
+    /// A whole sleep added from the editor, not one just begun.
+    private var isFinishedSleep: Bool {
+        logged.kind == .sleep && !logged.reopensTimer && logged.detail != nil && logged.detail != "Asleep"
+    }
+
     /// Short, in the buttons' own words: the toast sits between two bar buttons.
     var title: String {
         if logged.deleted != nil {
@@ -268,9 +273,10 @@ struct UndoToast: View {
         let base: String = switch logged.kind {
         case .feed: "Logged feed"
         case .wet, .dirty: "Logged \(logged.kind.label.lowercased())"
-        case .sleep: logged.reopensTimer ? "Sleep ended" : "Sleep started"
+        case .sleep: logged.reopensTimer ? "Sleep ended" : (isFinishedSleep ? "Logged sleep" : "Sleep started")
         case .weight: "Logged weight"
         }
+        if logged.kind == .sleep, isFinishedSleep, let detail = logged.detail { return "\(base) · \(detail)" + backdated }
         if logged.kind == .sleep { return base + backdated }
         // A finished feed ended the running feed timer. Say so, so the timer
         // vanishing from Now is explained and Undo is known to bring it back.

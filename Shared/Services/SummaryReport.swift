@@ -311,7 +311,7 @@ struct SummaryReport: Equatable, Sendable {
             let weight = event.eventKind == .weight && event.amount > 0 ? String(Int(event.amount.rounded())) : ""
             let fields = [
                 childName,
-                start.formatted(.iso8601.year().month().day()),
+                start.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day()),
                 start.formatted(date: .omitted, time: .shortened),
                 event.eventKind.rawValue,
                 event.feedSides.map(\.rawValue).joined(separator: "+"),

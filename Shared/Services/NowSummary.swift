@@ -523,8 +523,9 @@ struct DayTally: Equatable, Sendable {
             case .dirty where start >= dayStart && start < dayEnd:
                 tally.dirty += 1
             case .sleep:
-                // Sleep is credited to the day it happened in, split at midnight.
-                let end = event.endedAt ?? (event.isRunning ? now : start)
+                // Sleep is credited to the day it happened in, split at midnight,
+                // and never past now: an entry set to end later counts so far.
+                let end = min(event.endedAt ?? (event.isRunning ? now : start), max(now, start))
                 let overlapStart = max(start, dayStart)
                 let overlapEnd = min(end, dayEnd)
                 if overlapEnd > overlapStart { sleeps.append((overlapStart, overlapEnd)) }

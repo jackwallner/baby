@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @State private var lastDayStart = { if case .day(let hour) = BabySettings.shared.totalsWindow { hour } else { 0 } }()
     @EnvironmentObject private var settings: BabySettings
     @EnvironmentObject private var store: StoreService
     @EnvironmentObject private var events: EventStore
@@ -278,7 +279,8 @@ struct SettingsView: View {
         Section {
             Picker("Count", selection: Binding(
                 get: { settings.totalsWindow == .last24Hours },
-                set: { settings.totalsWindow = $0 ? .last24Hours : .midnight }
+                // Back to By day keeps the day start chosen before.
+                set: { settings.totalsWindow = $0 ? .last24Hours : .day(startHour: lastDayStart) }
             )) {
                 Text("By day").tag(false)
                 Text("Last 24 hours").tag(true)
@@ -288,7 +290,10 @@ struct SettingsView: View {
             if case .day(let hour) = settings.totalsWindow {
                 Picker("Day starts at", selection: Binding(
                     get: { hour },
-                    set: { settings.totalsWindow = .day(startHour: $0) }
+                    set: {
+                        settings.totalsWindow = .day(startHour: $0)
+                        lastDayStart = $0
+                    }
                 )) {
                     ForEach(0..<24, id: \.self) { hour in
                         Text(TotalsWindow.hourLabel(hour)).tag(hour)
@@ -307,7 +312,9 @@ struct SettingsView: View {
     private var plusSection: some View {
         Section("Baby+") {
             LabeledContent("Status", value: store.isPro ? "Active" : "Free")
-            if store.isPro {
+            if store.isPro, store.isLifetime {
+                LabeledContent("Plan", value: "Lifetime, never renews")
+            } else if store.isPro {
                 Link("Manage subscription", destination: BabyLinks.manageSubscriptions)
                 .foregroundStyle(AppTheme.accent)
             } else {

@@ -44,7 +44,12 @@ struct BabyProvider: TimelineProvider {
             // Relative times ("2h 14m ago") are rendered per entry, so a fresh
             // entry every five minutes keeps them honest without live text.
             let entries = (undo.map { [BabyEntry(date: now, summary: summary, undo: $0)] } ?? [])
-                + (0..<12).map { BabyEntry(date: resume.addingTimeInterval(Double($0) * 300), summary: summary) }
+                + (0..<12).map {
+                    // Each entry clears today's counts once its day has ended,
+                    // so a 7 AM rollover never shows yesterday's totals.
+                    let date = resume.addingTimeInterval(Double($0) * 300)
+                    return BabyEntry(date: date, summary: summary.current(now: date))
+                }
             completion(Timeline(entries: entries, policy: .atEnd))
         }
     }

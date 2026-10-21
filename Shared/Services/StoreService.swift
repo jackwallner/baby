@@ -135,6 +135,8 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     /// gating.
     static let cachedProKey = AppGroup.Key.cachedPro
 
+    /// Baby+ came from the one-time purchase rather than a subscription.
+    @Published private(set) var isLifetime = false
     @Published private(set) var isPro = false {
         didSet {
             guard oldValue != isPro else { return }
@@ -387,6 +389,10 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     }
     #endif
 
+    /// A paywall opens clean: a restore in Settings or an earlier cancelled
+    /// purchase must not greet the next visit with its message.
+    func clearError() { errorMessage = nil }
+
     @discardableResult
     func purchase(_ package: Package) async -> PurchaseState? {
         guard isConfigured else { return nil }
@@ -588,6 +594,8 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
         // Single premium tier: any active entitlement unlocks Baby+, which
         // survives entitlement renames or casing drift in the RC dashboard.
         isPro = !customerInfo.entitlements.active.isEmpty
+        // Lifetime never renews, so there is no subscription to manage.
+        isLifetime = customerInfo.entitlements.active.values.contains { $0.productIdentifier == BabyProduct.lifetime }
         defaults.set(isPro, forKey: Self.cachedProKey)
     }
 

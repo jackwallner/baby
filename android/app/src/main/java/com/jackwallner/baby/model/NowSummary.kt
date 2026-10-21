@@ -247,8 +247,9 @@ data class DayTally(
                     EventKind.WET -> if (inDay) wet++
                     EventKind.DIRTY -> if (inDay) dirty++
                     EventKind.SLEEP -> {
-                        // Sleep is credited to the day it happened in, split at midnight.
-                        val end = event.endedAt ?: if (event.isRunning) now else start
+                        // Sleep is credited to the day it happened in, split at midnight,
+                        // and never past now: an entry set to end later counts so far.
+                        val end = minOf(event.endedAt ?: if (event.isRunning) now else start, maxOf(now, start))
                         val overlapStart = maxOf(start, dayStart)
                         val overlapEnd = minOf(end, dayEnd)
                         if (overlapEnd > overlapStart) sleeps += Span(overlapStart, overlapEnd)

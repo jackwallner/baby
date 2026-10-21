@@ -28,6 +28,12 @@ struct FirstWeeksView: View {
                         .frame(minHeight: 44)
                 }
                 if let child = events.child, let birth = child.birthDate {
+                    if let day = DateHelpers.dayOfLife(birthDate: birth, on: now), day > Guidance.tallyDays {
+                        Text("The reference covers days 1 to \(Guidance.tallyDays). \(child.displayName) is on day \(day), so the table is for looking back.")
+                            .font(.subheadline)
+                            .foregroundStyle(AppTheme.ink2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     table(birthDate: birth)
                 } else {
                     noBirthDate
@@ -121,7 +127,7 @@ struct FirstWeeksView: View {
             if settings.tracked.contains(.wet) { Text("WET").frame(maxWidth: .infinity) }
             if settings.tracked.contains(.dirty) { Text("DIRTY").frame(maxWidth: .infinity) }
             if settings.tracked.contains(.feed) { Text("FEEDS").frame(maxWidth: .infinity) }
-            Text("GUIDE").frame(width: 92, alignment: .trailing)
+            Text("REFERENCE").frame(width: 92, alignment: .trailing)
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(AppTheme.ink3)

@@ -55,7 +55,8 @@ struct WatchLogGrid: View {
             store.log(.feed, side: side, at: at ?? .now)
         }
         .accessibilityLabel(next ? "Feed, \(side.label), next" : "Feed, \(side.label)")
-        .primaryGesture(at == nil && side == summary.suggestedSide)
+        // No double-tap side to guess when the last feed named none.
+        .primaryGesture(next)
     }
 
     private var sleepButton: some View {

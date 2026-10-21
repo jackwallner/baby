@@ -317,7 +317,9 @@ final class EventStore: ObservableObject {
     private func publish() {
         hasPublished = true
         WidgetCenter.shared.reloadAllTimelines()
-        WatchSyncService.shared.push(summary: summary)
+        // Before the first unlock the log is an empty stand-in, which must
+        // not replace what the Watch shows.
+        if !persistence.isStandingIn { WatchSyncService.shared.push(summary: summary) }
         LiveActivityService.shared.sync(summary: summary)
         Reminders.reschedule(summary: summary, birthDate: child?.birthDate)
     }
@@ -365,7 +367,7 @@ final class EventStore: ObservableObject {
 
     @discardableResult
     func createChild(name: String?, birthDate: Date?) -> Bool {
-        let child = Child.make(in: context, name: name, birthDate: birthDate)
+        let child = Child.make(in: context, name: name, birthDate: Self.noon(of: birthDate))
         context.assign(child, to: persistence.privateStore)
         guard persistence.save(context) else {
             reload()
@@ -373,6 +375,12 @@ final class EventStore: ObservableObject {
         }
         setActive(child)
         return true
+    }
+
+    /// A birth date is a calendar day. Kept at noon, so crossing a time zone
+    /// never moves it to the day before or after.
+    nonisolated static func noon(of date: Date?) -> Date? {
+        date.map { Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: $0) ?? $0 }
     }
 
     func setActive(_ child: Child) {
@@ -383,7 +391,7 @@ final class EventStore: ObservableObject {
     @discardableResult
     func update(child: Child, name: String?, birthDate: Date?) -> Bool {
         child.name = name
-        child.birthDate = birthDate
+        child.birthDate = Self.noon(of: birthDate)
         guard persistence.save(context) else {
             reload()
             return false

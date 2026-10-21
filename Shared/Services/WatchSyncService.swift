@@ -57,7 +57,10 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         let reply = UncheckedReply(send: replyHandler)
         if message[Self.needsSummaryKey] != nil {
-            Task { @MainActor in reply.send(Self.context(for: EventStore.shared.summary) ?? [:]) }
+            Task { @MainActor in
+                let store = EventStore.shared
+                reply.send(store.persistence.isStandingIn ? [:] : Self.context(for: store.summary) ?? [:])
+            }
             return
         }
         guard let payload = Self.payload(from: message) else {
@@ -173,7 +176,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         requestSummary()
         Task { @MainActor in WatchStore.shared.retryPending() }
         #else
-        Task { @MainActor in self.push(summary: EventStore.shared.summary) }
+        Task { @MainActor in if !EventStore.shared.persistence.isStandingIn { self.push(summary: EventStore.shared.summary) } }
         #endif
     }
 
@@ -184,7 +187,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
         #if os(iOS)
         if userInfo[Self.needsSummaryKey] != nil {
-            Task { @MainActor in self.push(summary: EventStore.shared.summary) }
+            Task { @MainActor in if !EventStore.shared.persistence.isStandingIn { self.push(summary: EventStore.shared.summary) } }
             return
         }
         guard let payload = Self.payload(from: userInfo) else { return }
@@ -204,7 +207,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     /// the summary now rather than at the next tap.
     func sessionWatchStateDidChange(_ session: WCSession) {
         guard session.isPaired, session.isWatchAppInstalled else { return }
-        Task { @MainActor in self.push(summary: EventStore.shared.summary) }
+        Task { @MainActor in if !EventStore.shared.persistence.isStandingIn { self.push(summary: EventStore.shared.summary) } }
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {}

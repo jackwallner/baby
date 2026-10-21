@@ -8,13 +8,15 @@ struct StainHelperView: View {
 
     @State private var stain: StainGuide.Stain = .blowout
     @State private var supplies: Set<StainGuide.Supply> = StainGuide.storedSupplies()
-    @State private var isEditingSupplies = false
+    /// Opens on the picker the first time. Choices are kept on Save or Done
+    /// only: storing on each tap ended setup after the first item.
+    @State private var isEditingSupplies = !StainGuide.hasChosenSupplies
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-                    if isEditingSupplies || !StainGuide.hasChosenSupplies {
+                    if isEditingSupplies {
                         suppliesPicker
                     } else {
                         stainPicker
@@ -61,7 +63,6 @@ struct StainHelperView: View {
                 Button {
                     if supplies.contains(supply) { supplies.remove(supply) } else { supplies.insert(supply) }
                     Haptics.selected()
-                    StainGuide.store(supplies)
                 } label: {
                     HStack(spacing: AppTheme.spacing) {
                         Image(systemName: supplies.contains(supply) ? "checkmark.circle.fill" : "circle")

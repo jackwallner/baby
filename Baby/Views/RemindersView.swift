@@ -113,8 +113,8 @@ struct FeedReminderOfferView: View {
                     Text("Before checkups too")
                         .font(.subheadline.weight(.semibold))
                     Text(events.child?.birthDate == nil && Reminders.nextCheckup == nil
-                        ? "The evening before a newborn visit. Add the birth date or the visit date in Settings > Reminders."
-                        : "The evening before a newborn visit, a note that your summary for the doctor is ready.")
+                        ? "The evening before a newborn visit. Add the birth date in Settings > Baby, or the visit date in Settings > Reminders."
+                        : "The evening before a newborn visit, a note with what you have logged since the last one.")
                         .font(.footnote)
                         .foregroundStyle(AppTheme.ink2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -128,11 +128,12 @@ struct FeedReminderOfferView: View {
         isAsking = true
         Task {
             let allowed = await Reminders.requestPermission()
-            if allowed {
-                Reminders.feedInterval = interval
-                Reminders.checkupRemindersOn = checkups
-                Reminders.reschedule(summary: events.summary, birthDate: events.child?.birthDate)
-            }
+            // Kept even when notifications were declined, so Settings shows
+            // the choice with its way to allow them.
+            Reminders.feedInterval = interval
+            Reminders.checkupRemindersOn = checkups
+            if allowed { Reminders.reschedule(summary: events.summary, birthDate: events.child?.birthDate) }
+            NotificationCenter.default.post(name: Reminders.choicesChanged, object: nil)
             isAsking = false
             dismiss()
         }
@@ -216,6 +217,13 @@ struct RemindersSection: View {
             Text(footer)
         }
         .task { isDenied = await Reminders.isDenied() }
+        // The offer after a feed changes the same choices while Settings
+        // stays alive in the background.
+        .onReceive(NotificationCenter.default.publisher(for: Reminders.choicesChanged)) { _ in
+            interval = Reminders.feedInterval
+            checkups = Reminders.checkupRemindersOn
+            Task { isDenied = await Reminders.isDenied() }
+        }
         .onChange(of: interval) { _, value in
             Reminders.feedInterval = value
             apply(asking: value != .off)
