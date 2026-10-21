@@ -292,12 +292,17 @@ private struct RevenueCatProbeStatusView: View {
 #endif
 
 /// Keep each visited screen alive, with one compact capsule for navigation.
+/// Unfolded on iPhone Duo, History takes its own pane beside the open tab.
 struct BabyHomeView: View {
     @EnvironmentObject private var store: StoreService
     @ObservedObject private var router = AppRouter.shared
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selected: HomeTab
     @State private var visited: Set<HomeTab>
     @State private var settingsPath: [SettingsDestination]
+    /// The container's width and fold, measured so the unfolded iPhone Duo
+    /// can put the open tab and History on opposite sides of the fold.
+    @State private var paneGeometry = PaneGeometry(width: 0, fold: nil)
     private let showsReportSnapshot: Bool
 
     init(initialScreen: Int = 0) {
@@ -314,29 +319,58 @@ struct BabyHomeView: View {
         showsReportSnapshot = initialScreen == 3
     }
 
+    private var split: UnfoldedSplit? {
+        UnfoldedSplit.make(
+            width: paneGeometry.width,
+            isRegularWidth: horizontalSizeClass == .regular,
+            fold: paneGeometry.fold
+        )
+    }
+
+    /// Unfolded, History has its own pane, so it is never a tab.
+    private var tabs: [HomeTab] {
+        split == nil ? HomeTab.allCases : HomeTab.allCases.filter { $0 != .history }
+    }
+
+    private func isShown(_ tab: HomeTab) -> Bool {
+        selected == tab || (tab == .history && split != nil)
+    }
+
     var body: some View {
-        TabView(selection: $selected) {
+        // One tree for both poses: folding only moves frames, so every
+        // screen keeps its scroll position, path and History layout.
+        ZStack(alignment: .topLeading) {
             ForEach(HomeTab.allCases) { tab in
-                Group {
-                    if visited.contains(tab) { screen(tab) }
-                }
-                .toolbar(.hidden, for: .tabBar)
-                .tag(tab)
+                if visited.contains(tab) || isShown(tab) { pane(tab) }
             }
         }
-        .toolbar(.hidden, for: .tabBar)
         // Clip only the top, so scrolling stays below the status bar.
         .clipShape(TopEdgeClip())
         .background { AppTheme.paper.ignoresSafeArea() }
-        .overlay(alignment: .bottom) {
+        .overlay(alignment: .bottomLeading) {
             navigationCapsule
                 .padding(.top, AppTheme.hairSpacing)
                 .padding(.bottom, AppTheme.hairSpacing)
                 .padding(.horizontal, AppTheme.margin)
                 .frame(height: AppTheme.bottomNavigationReservedHeight)
+                .frame(maxWidth: split?.primaryWidth ?? .infinity)
         }
-        .undoToast()
+        .overlay(alignment: .topLeading) {
+            // The toast belongs to the pane that logs, never across the fold.
+            Color.clear
+                .allowsHitTesting(false)
+                .frame(maxWidth: split?.primaryWidth ?? .infinity)
+                .undoToast()
+        }
         .tint(AppTheme.accent)
+        .onGeometryChange(for: PaneGeometry.self) { proxy in
+            PaneGeometry(width: proxy.size.width, fold: proxy.verticalFold())
+        } action: { paneGeometry = $0 }
+        .onChange(of: split != nil) { _, isSplit in
+            guard isSplit else { return }
+            visited.insert(.history)
+            if selected == .history { selected = .log }
+        }
         .onReceive(router.$checkupRequests) { count in
             guard count > 0 else { return }
             visited.insert(.reports)
@@ -345,6 +379,24 @@ struct BabyHomeView: View {
         .onChange(of: selected) { _, tab in
             if tab != .reports { router.showsCheckupPitch = false }
         }
+        #if DEBUG
+        .task { if DuoTour.isEnabled { await runDuoTour() } }
+        #endif
+    }
+
+    /// Each unfolded pane is phone-width, so its screen lays out as on a phone.
+    private func pane(_ tab: HomeTab) -> some View {
+        let isHistoryPane = tab == .history && split != nil
+        return screen(tab)
+            .environment(\.horizontalSizeClass, split == nil ? horizontalSizeClass : .compact)
+            .frame(
+                maxWidth: (isHistoryPane ? split?.secondaryWidth : split?.primaryWidth) ?? .infinity,
+                maxHeight: .infinity
+            )
+            .padding(.leading, isHistoryPane ? split?.secondaryX ?? 0 : 0)
+            .opacity(isShown(tab) ? 1 : 0)
+            .allowsHitTesting(isShown(tab))
+            .accessibilityHidden(!isShown(tab))
     }
 
     @ViewBuilder
@@ -353,7 +405,8 @@ struct BabyHomeView: View {
         case .log:
             NavigationStack { NowView(isVisible: selected == .log).reservesNavigationCapsule() }
         case .history:
-            NavigationStack { HistoryView().reservesNavigationCapsule() }
+            // Its own pane has no capsule under it.
+            NavigationStack { HistoryView().reservesNavigationCapsule(split == nil) }
         case .reports:
             ReportsTabView(isVisible: selected == .reports, showsSnapshot: showsReportSnapshot, fromCheckup: router.showsCheckupPitch)
         case .settings:
@@ -369,7 +422,7 @@ struct BabyHomeView: View {
 
     private var navigationCapsule: some View {
         HStack(spacing: 0) {
-            ForEach(HomeTab.allCases) { tab in
+            ForEach(tabs) { tab in
                 HomeTabButton(
                     icon: tab.icon(isPro: store.isPro),
                     label: tab.label(isPro: store.isPro),
@@ -393,11 +446,64 @@ struct BabyHomeView: View {
     }
 }
 
+#if DEBUG
+/// `-DuoTour` walks the main screens on a timer for the iPhone Duo captures
+/// and recordings, which can only screenshot on a schedule. On the way it
+/// logs a wet diaper, so a recording shows a real tap reach both panes.
+enum DuoTour {
+    static var isEnabled: Bool { ProcessInfo.processInfo.arguments.contains("-DuoTour") }
+
+    enum Stop {
+        case log, history, reports, firstWeeks, settings, nightLog
+    }
+
+    /// Each stop and how long it stays, in seconds. Captures oversample
+    /// these, so every stop gets at least one settled frame.
+    static let stops: [(Stop, Int)] = [
+        (.log, 20), (.history, 12), (.reports, 12), (.firstWeeks, 12),
+        (.settings, 12), (.nightLog, 12), (.log, 600),
+    ]
+}
+
+extension BabyHomeView {
+    fileprivate func runDuoTour() async {
+        let settings = BabySettings.shared
+        settings.appearance = .system
+        UserDefaults.standard.set(HistoryView.HistoryLayout.list.rawValue, forKey: "historyLayout")
+        for (index, (stop, seconds)) in DuoTour.stops.enumerated() {
+            // Unfolded, History already has its pane.
+            if stop == .history, split != nil { continue }
+            settings.appearance = stop == .nightLog ? .night : .system
+            UserDefaults.standard.set(
+                (stop == .firstWeeks ? HistoryView.HistoryLayout.calendar : .list).rawValue,
+                forKey: "historyLayout"
+            )
+            let tab: HomeTab = switch stop {
+            case .log, .nightLog: .log
+            case .history: .history
+            case .reports: .reports
+            case .firstWeeks, .settings: .settings
+            }
+            visited.insert(tab)
+            selected = tab
+            settingsPath = stop == .firstWeeks ? [.firstWeeks] : []
+            if index == 0 {
+                try? await Task.sleep(for: .seconds(6))
+                withAnimation(AppTheme.feedbackAnimation) { _ = EventStore.shared.log(.wet) }
+                try? await Task.sleep(for: .seconds(seconds - 6))
+            } else {
+                try? await Task.sleep(for: .seconds(seconds))
+            }
+        }
+    }
+}
+#endif
+
 extension View {
     /// Reserve the floating capsule in this screen's safe area, inside its
     /// NavigationStack, so lists end above it yet scroll on beneath it.
-    func reservesNavigationCapsule() -> some View {
-        safeAreaPadding(.bottom, AppTheme.bottomNavigationReservedHeight)
+    func reservesNavigationCapsule(_ isReserved: Bool = true) -> some View {
+        safeAreaPadding(.bottom, isReserved ? AppTheme.bottomNavigationReservedHeight : 0)
     }
 }
 
