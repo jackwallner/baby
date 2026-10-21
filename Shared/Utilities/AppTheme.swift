@@ -28,6 +28,8 @@ enum AppTheme {
     static let maxLogButtonHeight: CGFloat = 124
     /// The shortest a log button gets when Now fits a small phone.
     static let minLogButtonHeight: CGFloat = 52
+    /// Only when the page cannot fit even at that: Apple's minimum tap target.
+    static let tightLogButtonHeight: CGFloat = 44
     /// Now's cards on a phone, where the page fits one screen.
     static let compactCardPadding: CGFloat = 16
     /// Below this much page height (an SE), Now drops the hour strip.

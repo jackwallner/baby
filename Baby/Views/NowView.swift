@@ -12,6 +12,7 @@ struct NowView: View {
     @State private var now = Date.now
     @State private var fit = NowFit()
     @State private var hourStripHeight: CGFloat = 0
+    @State private var olderLinkHeight: CGFloat = 0
     @StateObject private var logClock = LogClock()
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -102,6 +103,7 @@ struct NowView: View {
                 hourStripHeight = height
             }
             OlderEntryLink(editor: $editor)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { olderLinkHeight = $0 }
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             // The page as drawn, less the part the last fit decided, is the
@@ -113,6 +115,9 @@ struct NowView: View {
             if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
         }
         .onChange(of: hourStripHeight) { _, _ in
+            if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
+        }
+        .onChange(of: olderLinkHeight) { _, _ in
             if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
         }
         .frame(minHeight: max(0, available), alignment: .top)
@@ -129,9 +134,16 @@ struct NowView: View {
         let keepsStrip = available >= AppTheme.hourStripMinHeight
             && withoutStrip + hourStripHeight + AppTheme.minLogButtonHeight * rows <= available
         let fittedFixed = withoutStrip + (keepsStrip ? hourStripHeight : 0)
-        let share = ((available - fittedFixed) / rows).rounded(.down)
-        let height = min(AppTheme.maxLogButtonHeight, max(AppTheme.minLogButtonHeight, share))
-        let next = NowFit(fixed: fittedFixed, buttonHeight: height, slack: max(0, available - fittedFixed - height * rows), showsHourStrip: keepsStrip)
+        // Shorter still (the iPhone Duo's outer display, or one pane of it
+        // unfolded): Add an older entry scrolls into view instead, and the
+        // buttons share the rest down to the minimum tap target, so the
+        // capsule never sits on the totals.
+        let fitsLink = fittedFixed + AppTheme.minLogButtonHeight * rows <= available
+        let budget = fitsLink ? fittedFixed : fittedFixed - olderLinkHeight - AppTheme.spacing
+        let minimum = fitsLink ? AppTheme.minLogButtonHeight : AppTheme.tightLogButtonHeight
+        let share = ((available - budget) / rows).rounded(.down)
+        let height = min(AppTheme.maxLogButtonHeight, max(minimum, share))
+        let next = NowFit(fixed: fittedFixed, buttonHeight: height, slack: max(0, available - budget - height * rows), showsHourStrip: keepsStrip)
         guard next.showsHourStrip != fit.showsHourStrip || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
             fit.fixed = fittedFixed
             return
@@ -668,7 +680,7 @@ private struct OlderEntryLink: View {
         Menu {
             NewEntryMenuItems(editor: $editor)
         } label: {
-            Label("Add an older entry", systemImage: "clock.badge.plus")
+            Label("Add an older entry", systemImage: "calendar.badge.plus")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(AppTheme.ink2)
                 .frame(minHeight: 44)

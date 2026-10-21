@@ -88,8 +88,11 @@ the page. Sections sit 12 apart; the time row and the buttons, one control,
 8. There is no idle "Tap to log now" hint (Jack: not needed); only the
 wound-back countdown shows under the buttons. Under `hourStripMinHeight` (an
 SE), or when the side chips and minimum button heights need its space, the
-hour strip drops. Accessibility sizes and iPad keep
-the scrolling layouts.
+hour strip drops. Shorter than that even at the floor (the iPhone Duo's
+outer display and each unfolded pane, 2026-10-21), Add an older entry leaves
+the fit and scrolls into view, and the buttons go down to 44 (the minimum tap
+target, `tightLogButtonHeight`) so the capsule never covers the totals.
+Accessibility sizes and iPad keep the scrolling layouts.
 
 Reports (2026-09-30, Jack: the old page "doesn't display things in an easy
 to see or understand way"; modelled on VO2's Trends). Top to bottom: a 7 / 14
