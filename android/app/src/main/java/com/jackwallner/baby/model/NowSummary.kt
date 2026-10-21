@@ -81,7 +81,6 @@ data class NowSummary(
 
     fun supportingLines(now: Long): List<String> {
         val lines = mutableListOf<String>()
-        if (leadKind == EventKind.FEED) nextSideLine?.let(lines::add)
         if (leadKind == EventKind.FEED && tracked.tracksDiapers) lines += diaperLine(now)
         if (leadKind != EventKind.SLEEP && tracked.contains(EventKind.SLEEP)) sleepLine(now)?.let(lines::add)
         return lines
