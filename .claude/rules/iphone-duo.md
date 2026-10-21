@@ -26,3 +26,9 @@ paths:
   logs one wet diaper at 9 s for recordings). Run with `-SeedScreenshotData
   -NoCloudKit -DemoPro` through `gh-sim launch --device 'iPhone Duo'` and
   oversample with `--url noop://N`, which fails fast and only spaces shots.
+- Open gap (gh-sim run 6 on 99d3c89): at 44 pt buttons Now still needs about
+  20 pt more than the unfolded pane gives (12 pt on the folded outer
+  display), so the capsule sits on the bottom of the Today totals. Subtracting
+  the reader's insets changed nothing: `GeometryReader` already excludes them.
+  The fixed part (status card, time row, totals, spacing) has to shrink when
+  the floor is reached; check it on a Duo capture before calling it fixed.
