@@ -12,7 +12,10 @@ struct NowView: View {
     @State private var now = Date.now
     @State private var fit = NowFit()
     @State private var hourStripHeight: CGFloat = 0
-    @State private var olderLinkHeight: CGFloat = 0
+    /// Starts at the link's 44 pt minimum: at launch the page can measure
+    /// before the link does, and a first fit without it drew the buttons at
+    /// the floor, then grew them as the launch faded in.
+    @State private var olderLinkHeight = AppTheme.tightLogButtonHeight
     @StateObject private var logClock = LogClock()
 
     private let clock = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
@@ -108,8 +111,7 @@ struct NowView: View {
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             let fixed = fit.fixed(drawn: height, rows: rows)
             // Only what the page holds changing (the side chips opening)
-            // animates. A late measurement, such as the link's height landing
-            // after the page's at launch, snaps instead of morphing.
+            // animates; a late measurement snaps.
             let grew = fit.fixed.map { abs($0 - fixed) >= 1 } ?? false
             refit(fixed: fixed, available: available, showsHourStrip: showsHourStrip, animated: grew)
         }

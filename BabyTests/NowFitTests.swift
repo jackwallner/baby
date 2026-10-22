@@ -5,7 +5,7 @@ final class NowFitTests: XCTestCase {
     /// Now's fixed part on the iPhone Duo, roomy: status card, time row,
     /// button gaps, totals, Add an older entry and three section gaps.
     private let duoFixed: CGFloat = 375
-    private let link: CGFloat = 22
+    private let link: CGFloat = 44
 
     private func make(fixed: CGFloat, available: CGFloat, showsHourStrip: Bool = false) -> NowFit {
         NowFit.make(fixed: fixed, available: available, rows: 3, hourStrip: 60, showsHourStrip: showsHourStrip, olderLink: link)

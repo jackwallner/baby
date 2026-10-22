@@ -37,9 +37,10 @@ paths:
   otherwise the "44 pt" button still draws 52 and the capsule covers the
   totals (the bug gh-sim run 6 showed). `GeometryReader` already excludes
   the capsule's safe-area reservation; never subtract its insets again.
-  Only a change in the page's fixed part (side chips) animates a refit; a
-  late measurement (the link's height at launch) snaps, or the launch fade
-  shows the buttons morphing.
+  `olderLinkHeight` starts at the link's 44 pt minimum: at launch the page
+  can measure before the link, and a first fit without it showed the
+  buttons growing through the launch fade. Only a change in the page's
+  fixed part (side chips) animates a refit.
 - The seed logs "today" in the hours before launch, so a capture launched
   before about 1 pm local shows a near-empty Today. The capture script
   passes `--env TZ=America/Sao_Paulo` (an evening zone for a run around
