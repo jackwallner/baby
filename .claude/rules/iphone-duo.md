@@ -5,6 +5,7 @@ paths:
   - "BabyTests/UnfoldedSplitTests.swift"
   - "Baby/Views/NowView.swift"
   - "BabyTests/NowFitTests.swift"
+  - "BabyTests/HomeLinkTests.swift"
 ---
 
 # iPhone Duo (2026-10-21)
@@ -23,11 +24,23 @@ paths:
 - Each pane gets `horizontalSizeClass = .compact`, so it lays out as on a
   phone. The capsule and the Undo toast are framed to the primary pane, never
   across the fold. History's pane drops the capsule's bottom reservation.
-- Captures: DEBUG `-DuoTour` walks Log, History (folded only), Reports, First
-  Weeks with History's calendar, Settings and Night light Log on a timer (it
-  logs one wet diaper at 9 s for recordings). Run with `-SeedScreenshotData
-  -NoCloudKit -DemoPro` through `gh-sim launch --device 'iPhone Duo'` and
-  oversample with `--url noop://N`, which fails fast and only spaces shots.
+- Unfolded, the capsule is docked (2026-10-22, the shots review rejected
+  Reports, First Weeks and Settings with the capsule over a chart, the day
+  table and a footer): `CapsuleDock` clips the open tab's pane at the top
+  of the capsule's reservation, so its page ends above the capsule instead
+  of scrolling beneath it beside a History pane that has no capsule.
+  Folded (and on every phone) nothing is clipped and the capsule floats.
+- Captures: `babytracker://` is a real scheme. `log`, `history`, `reports`
+  and `settings` open that tab in every build (History opens Log while
+  split); DEBUG adds `babytracker://tour/<stop>` (`DuoTour`): `wet` logs a
+  wet diaper (the recording's tap reaching both panes), `log`, `reports`,
+  `firstweeks` (with History's calendar), `settings`, `night` (Night light
+  Log) and `history` (folded only). Reports, First Weeks and Settings
+  scroll their `tourAnchor` to the bottom of the pane, so each frame ends on
+  a whole card. Run with `-SeedScreenshotData -NoCloudKit -DemoPro` through
+  `gh-sim all|launch --device 'iPhone Duo'`, one `--url` per stop. Never
+  pass unhandled URLs (`noop://`) to space shots; a failed openurl can fail
+  the run.
 - Now on the Duo's short displays (both the folded outer screen and the
   unfolded Log pane) goes tight (`NowFit.make`, tested in `NowFitTests`):
   when 52 pt buttons leave no room for Add an older entry, section gaps

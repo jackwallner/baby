@@ -146,6 +146,8 @@ one baby is free; History's Today and Yesterday tiles and the full log are free.
   Raw evidence lives in `app-store/capture/`.
 - `-SeedScreenshotData` seeds a day-three newborn log; `-ScreenshotTab N`,
   and `-StartTab N` open a surface directly (all DEBUG, legacy screen numbers).
+  `babytracker://<tab>` opens a tab; DEBUG `babytracker://tour/<stop>` drives
+  the iPhone Duo captures (`.claude/rules/iphone-duo.md`).
 
 ## App Review constraints
 
