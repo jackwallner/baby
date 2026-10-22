@@ -262,6 +262,21 @@ final class EventStoreTests: XCTestCase {
         XCTAssertNotNil(store.runningSleep)
     }
 
+    func testLiveActivityWakeEndsBothParentsOpenSleeps() throws {
+        guard #available(iOS 17.2, *) else { throw XCTSkip("Live Activity Stop requires iOS 17.2") }
+        let earlier = Date.now.addingTimeInterval(-600)
+        store.startTimed(.sleep, at: earlier)
+        let child = try XCTUnwrap(store.child)
+        persistence.insert(kind: .sleep, at: earlier.addingTimeInterval(60), for: child, in: persistence.viewContext)
+        XCTAssertTrue(persistence.save(persistence.viewContext))
+        store.reload()
+        XCTAssertEqual(store.summary.runningSleepStart, earlier)
+        let wake = StopRunningIntent(kind: "sleep", startedAt: store.summary.runningSleepStart, childID: child.id)
+        try wake.stop(in: store)
+        XCTAssertNil(store.runningSleep, "the activity's earlier open timer is a valid Wake target")
+        XCTAssertTrue(store.events.allSatisfy { !$0.isRunning })
+    }
+
     func testWatchUndoRemovesEveryCloudCopy() throws {
         let payload = WatchLogPayload(action: .log, kind: .wet)
         XCTAssertTrue(store.apply(payload))

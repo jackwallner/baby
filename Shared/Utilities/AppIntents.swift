@@ -507,14 +507,11 @@ struct StopRunningIntent: LiveActivityIntent {
         store.refresh(force: false)
         guard childID.isEmpty || store.child?.id?.uuidString == childID else { return }
         guard let eventKind = EventKind(rawValue: kind) else { return }
-        let isRunning: Bool = switch eventKind {
-        case .feed: store.runningFeed != nil
-        case .sleep: store.runningSleep != nil
-        default: false
-        }
-        guard isRunning else { return }
-        let currentStart = eventKind == .sleep ? store.runningSleep?.start : store.runningFeed?.start
-        if let startedAt, currentStart != startedAt { return }
+        let running = store.events.filter { $0.eventKind == eventKind && $0.isRunning }
+        guard !running.isEmpty else { return }
+        // The summary displays the earliest of two parents' open sleeps.
+        // Its Stop is valid even when the cached running row is the newer one.
+        if let startedAt, !running.contains(where: { $0.start == startedAt }) { return }
         guard store.stopRunning(eventKind, at: .now, remember: false) else { throw WidgetSaveError() }
     }
 #endif
