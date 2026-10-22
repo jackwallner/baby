@@ -97,7 +97,7 @@ final class PerformanceBudgetTests: XCTestCase {
     // app refetches three years and rebuilds the summary the widgets and Watch read.
     func testOpeningTheAppOverThreeYears() throws {
         try fillThreeYears()
-        best("reload", budget: 3.5) {  // measured 662 ms store.reload() }
+        best("reload", budget: 3.5) { store.reload() }  // measured 662 ms
         best("now summary", budget: 1.5) {  // measured 281 ms
             let summary = NowSummary.make(
                 child: store.child, events: store.events, now: now, calendar: la,
@@ -142,7 +142,7 @@ final class PerformanceBudgetTests: XCTestCase {
     func testReportsOverThreeYears() throws {
         try fillThreeYears()
         let events = store.events
-        for (label, days, budget) in [("report 14 days", 14, 0.25), ("report 90 days", 90, 1.0), ("report 1 year", 365, 12.0)]  // measured 40 ms, 186 ms, 2.4 s {
+        for (label, days, budget) in [("report 14 days", 14, 0.25), ("report 90 days", 90, 1.0), ("report 1 year", 365, 12.0)] {  // measured 40 ms, 186 ms, 2.4 s
             best(label, budget: budget) {
                 let report = SummaryReport.make(
                     childName: "Nora", birthDate: nil, events: events,
