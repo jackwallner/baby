@@ -37,8 +37,15 @@ final class SharingService: ObservableObject {
     func isSharedChild(_ child: Child) -> Bool { persistence.isShared(child) }
 
     func refresh(for child: Child?) async {
+        // Without CloudKit (UI tests, unsigned simulator builds) creating a
+        // CKContainer traps for want of the iCloud entitlement.
+        guard persistence.cloudKitEnabled else {
+            iCloudAvailable = false
+            share = nil
+            return
+        }
         iCloudAvailable = (try? await ckContainer.accountStatus()) == .available
-        guard let child, persistence.cloudKitEnabled else {
+        guard let child else {
             share = nil
             return
         }
