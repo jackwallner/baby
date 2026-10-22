@@ -95,7 +95,9 @@ final class EventStoreTests: XCTestCase {
         store.toggleSleep()
         XCTAssertNil(store.runningSleep)
         XCTAssertEqual(Int((store.events[0].duration ?? 0) / 60), 60)
-        XCTAssertEqual(Int(store.tally(on: .now).sleepSeconds / 60), 60)
+        // Just after midnight, only the part since midnight is today's.
+        let today = min(3600, Date.now.timeIntervalSince(Calendar.current.startOfDay(for: .now)))
+        XCTAssertEqual(store.tally(on: .now).sleepSeconds, today, accuracy: 60)
     }
 
     func testStartingASecondTimedFeedEndsTheFirst() {
