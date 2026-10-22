@@ -106,7 +106,12 @@ struct NowView: View {
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { olderLinkHeight = $0 }
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-            refit(fixed: fit.fixed(drawn: height, rows: rows), available: available, showsHourStrip: showsHourStrip, animated: fit.fixed != nil)
+            let fixed = fit.fixed(drawn: height, rows: rows)
+            // Only what the page holds changing (the side chips opening)
+            // animates. A late measurement, such as the link's height landing
+            // after the page's at launch, snaps instead of morphing.
+            let grew = fit.fixed.map { abs($0 - fixed) >= 1 } ?? false
+            refit(fixed: fixed, available: available, showsHourStrip: showsHourStrip, animated: grew)
         }
         .onChange(of: available) { _, available in
             if let fixed = fit.fixed { refit(fixed: fixed, available: available, showsHourStrip: fit.showsHourStrip, animated: false) }
