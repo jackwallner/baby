@@ -5,6 +5,66 @@ import StoreKit
 import WidgetKit
 @preconcurrency import RevenueCat
 
+/// The purchase boundary is injectable so entitlement flows can run without StoreKit.
+@MainActor
+protocol RevenueCatClient: AnyObject {
+    var cachedCustomerInfo: CustomerInfo? { get }
+    func customerInfo(fetchPolicy: CacheFetchPolicy) async throws -> CustomerInfo
+    func paywallOffering(forceRefresh: Bool) async throws -> RevenueCat.Offering?
+    func purchase(package: Package) async throws -> PurchaseResultData
+    func restorePurchases() async throws -> CustomerInfo
+    func introEligibility(productIdentifiers: [String]) async -> [String: IntroEligibilityStatus]
+    func setSubscriberAttributes(_ attributes: [String: String])
+    func recordImpression(_ params: CustomPaywallImpressionParams)
+}
+
+extension Purchases: RevenueCatClient {
+    func paywallOffering(forceRefresh: Bool) async throws -> RevenueCat.Offering? {
+        let offerings: Offerings
+        if forceRefresh, let refreshed = try await syncAttributesAndOfferingsIfNeeded() {
+            offerings = refreshed
+        } else {
+            offerings = try await self.offerings()
+        }
+        return offerings.offering(identifier: "default") ?? offerings.current
+    }
+
+    func introEligibility(productIdentifiers: [String]) async -> [String: IntroEligibilityStatus] {
+        await checkTrialOrIntroDiscountEligibility(productIdentifiers: productIdentifiers).mapValues(\.status)
+    }
+
+    func setSubscriberAttributes(_ attributes: [String: String]) {
+        attribution.setAttributes(attributes)
+    }
+
+    func recordImpression(_ params: CustomPaywallImpressionParams) {
+        trackCustomPaywallImpression(params)
+    }
+}
+
+enum RevenueCatEnvironment {
+    static func key(production: String, isDebug: Bool, isSimulator: Bool, testKey: String?) -> String? {
+        if isDebug { return testKey?.hasPrefix("test_") == true ? testKey : nil }
+        return !isSimulator && production.hasPrefix("appl_") ? production : nil
+    }
+
+    static var isDebug: Bool {
+        #if DEBUG
+        true
+        #else
+        false
+        #endif
+    }
+
+    static var isSimulator: Bool {
+        #if targetEnvironment(simulator)
+        true
+        #else
+        false
+        #endif
+    }
+}
+
 enum RevenueCatConfig {
     /// Public iOS SDK key. Secret `sk_` keys must never ship in an app binary.
     static let publicSDKKey = "appl_qiLuKnhdneTEYzRYOtaovXNgZRa"
@@ -135,6 +195,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     /// gating.
     static let cachedProKey = AppGroup.Key.cachedPro
 
+    @Published private(set) var hasResolvedEntitlements = false
     /// Baby+ came from the one-time purchase rather than a subscription.
     @Published private(set) var isLifetime = false
     @Published private(set) var isPro = false {
@@ -163,14 +224,21 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     #endif
 
     private let logger = Logger(subsystem: AppGroup.subsystem, category: "Store")
-    private let defaults = UserDefaults(suiteName: AppGroup.id) ?? .standard
+    private let defaults: UserDefaults
+    private let clientOverride: (any RevenueCatClient)?
+    private var client: any RevenueCatClient { clientOverride ?? Purchases.shared }
+    private var lastCustomerInfoDate: Date?
+    @Published private(set) var entitlementCheckFailed = false
+    var isCheckingEntitlements: Bool { isConfigured && !hasResolvedEntitlements && !isPro && !entitlementCheckFailed }
     private var isConfigured = false
     /// Dedupes session-scoped paywall impressions.
     private var paywallImpressionsThisSession: Set<String> = []
 
-    private override init() {
+    init(client: (any RevenueCatClient)? = nil, defaults: UserDefaults? = nil) {
+        clientOverride = client
+        self.defaults = defaults ?? UserDefaults(suiteName: AppGroup.id) ?? .standard
         super.init()
-        isPro = defaults.bool(forKey: Self.cachedProKey)
+        isConfigured = client != nil
     }
 
     func start(forceRefresh: Bool = false) {
@@ -216,6 +284,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
             #endif
             return
         }
+        if let cached = client.cachedCustomerInfo { update(customerInfo: cached) }
         // Loading from the first moment, so a slow status check never shows
         // "Couldn't load plans" before the plans were even asked for.
         isLoadingProducts = true
@@ -379,7 +448,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     }
 
     private func probeCustomerInfo() async -> CustomerInfo? {
-        try? await Purchases.shared.customerInfo(fetchPolicy: .fetchCurrent)
+        try? await client.customerInfo(fetchPolicy: .fetchCurrent)
     }
 
     private func updateProbeStatus(_ update: (inout RevenueCatProbeStatus) -> Void) {
@@ -396,12 +465,18 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     @discardableResult
     func purchase(_ package: Package) async -> PurchaseState? {
         guard isConfigured else { return nil }
+        if !hasResolvedEntitlements { await refreshStatus() }
+        if isPro { return .purchased }
+        guard hasResolvedEntitlements else {
+            errorMessage = "Could not verify purchases. Please try again."
+            return nil
+        }
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
         let startedTrial = isEligibleForIntroOffer(package)
         do {
-            let result = try await Purchases.shared.purchase(package: package)
+            let result = try await client.purchase(package: package)
             update(customerInfo: result.customerInfo)
             if result.userCancelled {
                 errorMessage = ConversionCopy.purchaseCancelledMessage(
@@ -443,7 +518,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
         isLoading = true
         defer { isLoading = false }
         do {
-            update(customerInfo: try await Purchases.shared.restorePurchases())
+            update(customerInfo: try await client.restorePurchases())
             errorMessage = isPro ? nil : "No active Baby+ purchase was found for this Apple ID."
         } catch {
             errorMessage = "Restore failed. Please try again."
@@ -461,7 +536,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
         }
         ConversionDiagnostics.recordPitchView(impressionID: id)
         syncConversionAttributes()
-        Purchases.shared.trackCustomPaywallImpression(
+        client.recordImpression(
             CustomPaywallImpressionParams(paywallId: id)
         )
     }
@@ -484,7 +559,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
         var attributes = ConversionDiagnostics.subscriberAttributes
         if let stage = defaults.string(forKey: Self.setupStageKey) { attributes[Self.setupStageAttribute] = stage }
         guard !attributes.isEmpty else { return }
-        Purchases.shared.attribution.setAttributes(attributes)
+        client.setSubscriberAttributes(attributes)
     }
 
     private static let setupStageKey = "setupStage"
@@ -506,64 +581,59 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
     #endif
 
     nonisolated func purchases(_ purchases: Purchases, receivedUpdated customerInfo: CustomerInfo) {
-        Task { @MainActor in
-            self.update(customerInfo: customerInfo)
-        }
+        receive(customerInfo)
+    }
+
+    @discardableResult
+    nonisolated func receive(_ customerInfo: CustomerInfo) -> Task<Void, Never> {
+        Task { @MainActor in self.update(customerInfo: customerInfo) }
     }
 
     private func configureIfNeeded() {
         guard !isConfigured else { return }
-        #if targetEnvironment(simulator)
-        // Agent/sim runs must never hit the production RevenueCat project. A
-        // configure call there creates a fake customer in the live charts. Use
-        // StoreKit Testing plus the local Pro override instead.
         #if DEBUG
-        // The one exception, behind a launch argument: the Test Store key is a
-        // separate RevenueCat app inside the same project, so a probe run cannot
-        // touch App Store customers, revenue or charts. See RevenueCatProbe.
-        if RevenueCatProbe.isEnabled, RevenueCatProbe.testStoreKey.hasPrefix("test_") {
-            Purchases.logLevel = .debug
-            Purchases.configure(
-                with: Configuration.Builder(withAPIKey: RevenueCatProbe.testStoreKey)
-                    .with(appUserID: RevenueCatProbe.appUserID)
-                    .build()
-            )
-            Purchases.shared.delegate = self
-            isConfigured = true
-        }
-        #endif
-        return
+        let testKey = RevenueCatProbe.isEnabled ? RevenueCatProbe.testStoreKey : nil
         #else
-        guard RevenueCatConfig.publicSDKKey.hasPrefix("appl_") else { return }
+        let testKey: String? = nil
+        #endif
+        guard let key = RevenueCatEnvironment.key(
+            production: RevenueCatConfig.publicSDKKey,
+            isDebug: RevenueCatEnvironment.isDebug,
+            isSimulator: RevenueCatEnvironment.isSimulator,
+            testKey: testKey
+        ) else { return }
         #if DEBUG
         Purchases.logLevel = .debug
+        Purchases.configure(
+            with: Configuration.Builder(withAPIKey: key)
+                .with(appUserID: RevenueCatProbe.appUserID)
+                .build()
+        )
+        #else
+        Purchases.configure(withAPIKey: key)
         #endif
-        Purchases.configure(withAPIKey: RevenueCatConfig.publicSDKKey)
         Purchases.shared.delegate = self
         isConfigured = true
-        #endif
     }
 
-    private func refreshStatus() async {
+    func refreshStatus() async {
+        guard isConfigured else { return }
+        entitlementCheckFailed = false
         do {
-            update(customerInfo: try await Purchases.shared.customerInfo(fetchPolicy: .fetchCurrent))
+            update(customerInfo: try await client.customerInfo(fetchPolicy: .fetchCurrent))
         } catch {
+            entitlementCheckFailed = true
             errorMessage = "Could not verify purchases."
         }
     }
 
     private func loadOffering(forceRefresh: Bool = false) async {
+        introEligibilityResolved = false
+        introEligibility = [:]
         isLoadingProducts = true
         defer { isLoadingProducts = false }
         do {
-            let offerings: Offerings
-            if forceRefresh,
-               let refreshedOfferings = try await Purchases.shared.syncAttributesAndOfferingsIfNeeded() {
-                offerings = refreshedOfferings
-            } else {
-                offerings = try await Purchases.shared.offerings()
-            }
-            let offering = offerings.offering(identifier: "default") ?? offerings.current
+            let offering = try await client.paywallOffering(forceRefresh: forceRefresh)
             packages = offering?.babySortedPackages ?? []
             errorMessage = nil
             await refreshIntroEligibility()
@@ -585,12 +655,15 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
             introEligibilityResolved = true
             return
         }
-        let result = await Purchases.shared.checkTrialOrIntroDiscountEligibility(productIdentifiers: identifiers)
-        introEligibility = result.mapValues { $0.status == .eligible }
+        let result = await client.introEligibility(productIdentifiers: identifiers)
+        introEligibility = result.mapValues { $0 == .eligible }
         introEligibilityResolved = true
     }
 
     private func update(customerInfo: CustomerInfo) {
+        guard lastCustomerInfoDate.map({ customerInfo.requestDate >= $0 }) ?? true else { return }
+        lastCustomerInfoDate = customerInfo.requestDate
+        hasResolvedEntitlements = true
         // Single premium tier: any active entitlement unlocks Baby+, which
         // survives entitlement renames or casing drift in the RC dashboard.
         isPro = !customerInfo.entitlements.active.isEmpty

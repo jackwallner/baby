@@ -28,7 +28,7 @@ struct BabyPaywallView: View {
         ZStack(alignment: .topTrailing) {
             if store.isPro {
                 subscriberContent
-            } else if store.packages.isEmpty && store.isLoadingProducts {
+            } else if store.isCheckingEntitlements || (store.packages.isEmpty && store.isLoadingProducts) {
                 loadingState
             } else if store.packages.isEmpty {
                 emptyState
