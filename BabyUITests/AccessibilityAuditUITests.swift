@@ -191,4 +191,29 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 15))
         snap(app, "G10-now-xxxl-nonax")
     }
+
+    // MARK: - Reminder offer sheet at the largest text
+
+    func testReminderOfferXXXL() {
+        let app = launch(size: xxxl, seed: false, extra: ["-ShowReminderOffer"])
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 15))
+        app.buttons["log.feed"].tap()
+        sleep(8)
+        snap(app, "H01-reminder-offer-xxxl")
+        for id in ["reminderOffer.accept", "reminderOffer.decline"] {
+            let el = app.buttons[id]
+            add(XCTAttachment(string: "\(id) exists=\(el.exists) hittable=\(el.isHittable) frame=\(el.frame)"))
+        }
+    }
+
+    func testLogTogetherAndJoinXXXL() {
+        let app = launch(size: xxxl, seed: false, extra: ["-hasCompletedSetup", "NO"])
+        XCTAssertTrue(app.buttons["onboarding.path.join"].waitForExistence(timeout: 15))
+        scrollTo(app.buttons["onboarding.path.join"], in: app)
+        app.buttons["onboarding.path.join"].tap()
+        sleep(1)
+        snap(app, "I01-join-xxxl")
+        app.swipeUp()
+        snap(app, "I02-join-xxxl-scrolled")
+    }
 }
