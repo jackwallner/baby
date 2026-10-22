@@ -45,3 +45,12 @@ paths:
   before about 1 pm local shows a near-empty Today. The capture script
   passes `--env TZ=America/Sao_Paulo` (an evening zone for a run around
   midnight UTC); pick a zone where launch lands in the evening.
+- Open (2026-10-21, gh-sim launch-only run on 33cae0e, 1 of 5 runs): every
+  leading pane laid out about 84 pt narrower than the split (374 of 457 pt;
+  84 is the inner display's trailing status-bar inset, which only History
+  should feel), with Now's inline title leading-aligned and First Weeks'
+  back button on the right, while the capsule still spanned 457 pt. Same
+  fresh relaunch on the inner display as the passing `all` runs; that run
+  booted cold and gh-sim logged "simctl io enumerate empty". Reproduce on a
+  local Duo before changing code; the likely fix is to stop the primary
+  pane inheriting the trailing inset (it ends at the fold, not the edge).
