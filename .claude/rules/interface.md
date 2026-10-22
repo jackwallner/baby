@@ -91,8 +91,8 @@ SE), or when the side chips and minimum button heights need its space, the
 hour strip drops. Shorter than that even at the floor (the iPhone Duo's
 outer display and each unfolded pane, 2026-10-21), Add an older entry leaves
 the fit and scrolls into view, and the buttons go down to 44 (the minimum tap
-target, `tightLogButtonHeight`). That is not yet enough on the Duo: see the
-open gap in `.claude/rules/iphone-duo.md`.
+target, `tightLogButtonHeight`), with tighter gaps and card padding (the
+tight fit in `.claude/rules/iphone-duo.md`).
 Accessibility sizes and iPad keep the scrolling layouts.
 
 Reports (2026-09-30, Jack: the old page "doesn't display things in an easy

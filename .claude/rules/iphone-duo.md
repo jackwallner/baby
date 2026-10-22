@@ -3,6 +3,8 @@ paths:
   - "Baby/App.swift"
   - "Baby/Views/UnfoldedSplit.swift"
   - "BabyTests/UnfoldedSplitTests.swift"
+  - "Baby/Views/NowView.swift"
+  - "BabyTests/NowFitTests.swift"
 ---
 
 # iPhone Duo (2026-10-21)
@@ -26,9 +28,19 @@ paths:
   logs one wet diaper at 9 s for recordings). Run with `-SeedScreenshotData
   -NoCloudKit -DemoPro` through `gh-sim launch --device 'iPhone Duo'` and
   oversample with `--url noop://N`, which fails fast and only spaces shots.
-- Open gap (gh-sim run 6 on 99d3c89): at 44 pt buttons Now still needs about
-  20 pt more than the unfolded pane gives (12 pt on the folded outer
-  display), so the capsule sits on the bottom of the Today totals. Subtracting
-  the reader's insets changed nothing: `GeometryReader` already excludes them.
-  The fixed part (status card, time row, totals, spacing) has to shrink when
-  the floor is reached; check it on a Duo capture before calling it fixed.
+- Now on the Duo's short displays (both the folded outer screen and the
+  unfolded Log pane) goes tight (`NowFit.make`, tested in `NowFitTests`):
+  when 52 pt buttons leave no room for Add an older entry, section gaps
+  drop to 8 and both cards lose 4 pt top and bottom (never at the sides, so
+  nothing rewraps and the measured fit cannot oscillate), and buttons go
+  down to 44 pt. The care graphic shrinks inside a button shorter than 52,
+  otherwise the "44 pt" button still draws 52 and the capsule covers the
+  totals (the bug gh-sim run 6 showed). `GeometryReader` already excludes
+  the capsule's safe-area reservation; never subtract its insets again.
+  Only a change in the page's fixed part (side chips) animates a refit; a
+  late measurement (the link's height at launch) snaps, or the launch fade
+  shows the buttons morphing.
+- The seed logs "today" in the hours before launch, so a capture launched
+  before about 1 pm local shows a near-empty Today. The capture script
+  passes `--env TZ=America/Sao_Paulo` (an evening zone for a run around
+  midnight UTC); pick a zone where launch lands in the evening.
