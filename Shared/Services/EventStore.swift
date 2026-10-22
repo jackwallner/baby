@@ -409,8 +409,8 @@ final class EventStore: ObservableObject {
 
     /// A birth date is a calendar day. Kept at noon, so crossing a time zone
     /// never moves it to the day before or after.
-    nonisolated static func noon(of date: Date?) -> Date? {
-        date.map { Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: $0) ?? $0 }
+    nonisolated static func noon(of date: Date?, calendar: Calendar = .current) -> Date? {
+        date.map { calendar.date(bySettingHour: 12, minute: 0, second: 0, of: $0) ?? $0 }
     }
 
     func setActive(_ child: Child) {

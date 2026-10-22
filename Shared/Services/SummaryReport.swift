@@ -300,7 +300,7 @@ struct SummaryReport: Equatable, Sendable {
 
     /// Every entry as a spreadsheet. One row per event, newest last, with the
     /// header row spelled out so a column is readable without the app.
-    static func csv(events: [LogEvent], childName: String) -> String {
+    static func csv(events: [LogEvent], childName: String, timeZone: TimeZone = .current) -> String {
         let stamp = ISO8601DateFormatter()
         stamp.formatOptions = [.withInternetDateTime]
         var lines = ["baby,date,time,kind,side,amount_ml,weight_g,stool_color,duration_min,note,logged_at"]
@@ -311,7 +311,7 @@ struct SummaryReport: Equatable, Sendable {
             let weight = event.eventKind == .weight && event.amount > 0 ? String(Int(event.amount.rounded())) : ""
             let fields = [
                 childName,
-                start.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day()),
+                start.formatted(Date.ISO8601FormatStyle(timeZone: timeZone).year().month().day()),
                 start.formatted(date: .omitted, time: .shortened),
                 event.eventKind.rawValue,
                 event.feedSides.map(\.rawValue).joined(separator: "+"),
