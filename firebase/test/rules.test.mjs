@@ -16,6 +16,7 @@ import {
   getDocs,
   collection,
   collectionGroup,
+  deleteField,
   query,
   where,
   serverTimestamp,
@@ -342,7 +343,7 @@ describe('leaving and removing', () => {
     }));
     const scrubbed = (await getDoc(doc(alice, 'families', FAMILY, 'entries', 'e1'))).data();
     if ('note' in scrubbed || 'side' in scrubbed || scrubbed.childId !== '') throw new Error('care data must be scrubbed');
-    await assertSucceeds(deleteDoc(doc(alice, 'invites', CODE)));
+    await assertSucceeds(updateDoc(doc(alice, 'invites', CODE), { revokedAt: serverTimestamp() }));
     await assertFails(deleteDoc(doc(alice, 'families', FAMILY)));
     await assertSucceeds(removeMember(alice, 'alice'));
     await assertFails(getDoc(doc(alice, 'families', FAMILY)));
@@ -438,6 +439,36 @@ describe('additional owner and expiry regressions', () => {
 
 
 describe('revocation protocol', () => {
+  test('a withdrawn code cannot be rebound to capture a joining phones log', async () => {
+    const alice = await startFamily();
+    await invite(alice);
+    const evilFamily = 'mallory:22222222-2222-4222-8222-222222222222';
+    const mallory = await startFamily('mallory', evilFamily);
+    const carol = db('carol');
+    await assertFails((async () => {
+      // The old withdrawal protocol freed a code already sent to Carol.
+      await deleteDoc(doc(alice, 'invites', CODE));
+      await invite(mallory, 'mallory', CODE, evilFamily);
+      const target = (await getDoc(doc(carol, 'invites', CODE))).data().familyId;
+      await setDoc(doc(carol, 'families', target, 'members', 'carol'), member('carol', 'member', CODE));
+      // Joining uploads the phone's existing local log (SharingService.join).
+      await setDoc(doc(carol, 'families', target, 'entries', 'private'), entry('private', 'carol'));
+      await getDoc(doc(mallory, 'families', evilFamily, 'entries', 'private'));
+    })());
+  });
+
+  test('a former owner rejoining as a member cannot remove other members', async () => {
+    const alice = await startFamily();
+    await invite(alice);
+    const bob = db('bob');
+    await setDoc(doc(bob, 'families', FAMILY, 'members', 'bob'), member('bob', 'member', CODE));
+    await removeMember(alice, 'alice');
+    await invite(bob, 'bob', 'BCDE2345');
+    await setDoc(doc(alice, 'families', FAMILY, 'members', 'alice'), member('alice', 'member', 'BCDE2345'));
+    await assertFails(removeMember(alice, 'bob'));
+    await assertSucceeds(getDoc(doc(bob, 'families', FAMILY)));
+  });
+
   test('removal revokes old codes, preserves other members, and permits a fresh invite', async () => {
     const alice = await startFamily();
     await invite(alice);
@@ -454,9 +485,23 @@ describe('revocation protocol', () => {
   test('a withdrawn code cannot join and unknown collections cannot be written', async () => {
     const alice = await startFamily();
     await invite(alice);
-    await deleteDoc(doc(alice, 'invites', CODE));
+    await updateDoc(doc(alice, 'invites', CODE), { revokedAt: serverTimestamp() });
     await assertFails(setDoc(doc(db('bob'), 'families', FAMILY, 'members', 'bob'), member('bob', 'member', CODE)));
     await assertFails(setDoc(doc(alice, 'families', FAMILY, 'secrets', 'x'), { data: 'x' }));
+  });
+
+  test('withdrawal cannot be undone or used to change the code binding', async () => {
+    const alice = await startFamily();
+    await invite(alice);
+    const ref = doc(alice, 'invites', CODE);
+    await assertFails(updateDoc(doc(db('mallory'), 'invites', CODE), { revokedAt: serverTimestamp() }));
+    await assertSucceeds(updateDoc(ref, { revokedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { revokedAt: null }));
+    await assertFails(updateDoc(ref, { revokedAt: deleteField() }));
+    await assertFails(updateDoc(ref, { revokedAt: serverTimestamp(), familyId: 'another-family' }));
+    await assertFails(deleteDoc(ref));
+    await assertFails(invite(alice));
+    await assertSucceeds(getDoc(doc(db('bob'), 'invites', CODE)));
   });
 });
 

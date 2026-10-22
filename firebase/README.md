@@ -22,7 +22,7 @@ orphaned legacy logs by manufacturing a replacement family document.
 | `families/{f}/members/{uid}` | `uid`, `name` (first name from Google), `role` (`owner` or `member`), `joinedAt` (server time), `invite` (code used, null for the owner), `platform` (`android`). |
 | `families/{f}/children/{childId}` | `id`, `name`, `birthDate`, `createdAt`, `lastVisitAt`, `updatedAt`, `deleted`, `updatedBy`, `syncedAt` |
 | `families/{f}/entries/{entryId}` | `id`, `childId`, `kind`, `startedAt`, `endedAt`, `side`, `amount`, `stoolColor`, `note`, `createdAt`, `updatedAt`, `deleted`, `updatedBy`, `syncedAt` |
-| `invites/{code}` | `familyId`, `createdBy`, `createdAt` (server time), `expiresAt` (7 days) |
+| `invites/{code}` | `familyId`, `createdBy`, `createdAt` (server time), `expiresAt` (7 days), optional `revokedAt` (server time) |
 
 - Babies and entries keep the Android JSON model's field names and ids
   (`android/.../model/LogState.kt`). Times are epoch milliseconds as
@@ -48,6 +48,11 @@ orphaned legacy logs by manufacturing a replacement family document.
   delete/recreate rollback. Clients cannot hard-delete families, babies or entries.
 - Bootstrap owner membership is allowed only alongside a new family. Leaving
   does not let an old owner restore their membership or remove remaining members.
+- A former owner invited back as a member has ordinary member permissions.
+- Withdraw an invite by setting `revokedAt = serverTimestamp()`. Invite documents
+  cannot be deleted or rebound to another family, including after expiry. This
+  prevents a withdrawn link from being claimed by another log and receiving a
+  joining phone's private history. Do not garbage-collect these code identities.
 - Existing clients must upgrade for leave/remove and last-member cleanup under
   these rules. The Android client in this change implements the new protocol.
 
@@ -61,7 +66,7 @@ rules already accept any `platform` string up to 16 characters.
 ```sh
 cd firebase
 npm ci
-# Rules: 41 tests against the Firestore emulator (JDK 21+ on PATH).
+# Rules against the Firestore emulator (JDK 21+ on PATH).
 npm run emulator-test
 # Android connected tests (two phones, UI) against Auth + Firestore emulators:
 PATH=~/jdks/temurin-21/Contents/Home/bin:$PATH npx firebase-tools emulators:exec --project demo-baby --only auth,firestore \
@@ -70,6 +75,9 @@ PATH=~/jdks/temurin-21/Contents/Home/bin:$PATH npx firebase-tools emulators:exec
 ```
 
 `demo-baby` is an emulator-only project id: nothing leaves the host.
+On this Mac, use `PATH=/opt/homebrew/opt/openjdk/bin:$PATH npm run emulator-test`.
+Client verification runs remotely with
+`cd ../android && fm-gradle :app:testDebugUnitTest :app:assembleDebug`.
 `scripts/join-as.mjs CODE Name [kind]` joins a running emulator log as a
 second caregiver from Node, for captures and manual checks. Debug builds
 point at the emulators with `--es firebaseEmulator 10.0.2.2` (fake Google

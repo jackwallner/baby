@@ -208,6 +208,7 @@ class SharingService(
         val id = invite.getString("familyId")
         val expires = invite.getTimestamp("expiresAt")?.toDate()?.time ?: 0L
         if (!invite.exists() || id == null) throw SharingException("That code doesn't match a shared log. Check it, or ask for a new one.")
+        if (invite.getTimestamp("revokedAt") != null) throw SharingException("That invite was withdrawn. Ask for a new one.")
         if (expires < System.currentTimeMillis()) throw SharingException("That invite has expired. Ask for a new one.")
         if (id == familyId) return
         if (familyId != null) throw SharingException("This phone is already logging together. Leave that log first.")
@@ -240,7 +241,7 @@ class SharingService(
                 val current = online { db.collection("invites").document(code).get(Source.SERVER).await() }
                 val boundary = online { family(id).get(Source.SERVER).await() }.getTimestamp("invitesValidAfter")
                 val issued = current.getTimestamp("createdAt")
-                if (current.exists() && issued != null && (boundary == null || issued >= boundary)) return code
+                if (current.exists() && current.getTimestamp("revokedAt") == null && issued != null && (boundary == null || issued >= boundary)) return code
             }
             clearInvite()
         }
@@ -280,7 +281,7 @@ class SharingService(
                     val f = family(id)
                     val others = f.collection("members").get(Source.SERVER).await().documents.filter { it.id != user.uid }
                     if (others.isEmpty()) clearFamily(f)
-                    inviteCode?.let { runCatching { db.collection("invites").document(it).delete().await() } }
+                    inviteCode?.let { runCatching { db.collection("invites").document(it).update("revokedAt", FieldValue.serverTimestamp()).await() } }
                     db.batch().apply {
                         update(f, "invitesValidAfter", FieldValue.serverTimestamp())
                         delete(f.collection("members").document(user.uid))

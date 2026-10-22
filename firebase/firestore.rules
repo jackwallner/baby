@@ -6,7 +6,7 @@ rules_version = '2';
 // families/{f}/members/{uid}   uid, name, role (owner|member), joinedAt, invite, platform
 // families/{f}/children/{id}   the local Child fields + updatedAt, deleted, updatedBy, syncedAt
 // families/{f}/entries/{id}    the local LogEvent fields + deleted, updatedBy, syncedAt
-// invites/{code}               familyId, createdBy, createdAt, expiresAt
+// invites/{code}               familyId, createdBy, createdAt, expiresAt, revokedAt?
 //
 // Only members read or write a family. Joining means creating your own
 // member document, which needs an unexpired invite for that family. Entries
@@ -78,6 +78,7 @@ service cloud.firestore {
       let family = getAfter(familyPath(f)).data;
       return exists(path)
         && get(path).data.familyId == f
+        && get(path).data.get('revokedAt', null) == null
         && get(path).data.expiresAt > request.time
         && get(path).data.createdAt + duration.value(7, 'd') > request.time
         && get(path).data.createdAt >= family.get('invitesValidAfter', family.createdAt)
@@ -130,7 +131,8 @@ service cloud.firestore {
           && isMember(f)
           && getAfter(familyPath(f)).data.invitesValidAfter == request.time
           && (uid == request.auth.uid
-            || get(familyPath(f)).data.ownerUid == request.auth.uid);
+            || (get(familyPath(f)).data.ownerUid == request.auth.uid
+              && get(/databases/$(database)/documents/families/$(f)/members/$(request.auth.uid)).data.role == 'owner'));
       }
 
       match /children/{id} {
@@ -162,9 +164,13 @@ service cloud.firestore {
         && request.resource.data.expiresAt is timestamp
         && request.resource.data.expiresAt > request.time
         && request.resource.data.expiresAt <= request.time + duration.value(7, 'd');
-      allow update: if false;
-      allow delete: if signedIn()
-        && (resource.data.createdBy == request.auth.uid || isMember(resource.data.familyId));
+      // Keep withdrawn codes bound to their original log. Deleting one would
+      // let another family claim a link already sent to a joining phone.
+      allow update: if signedIn()
+        && (resource.data.createdBy == request.auth.uid || isMember(resource.data.familyId))
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['revokedAt'])
+        && request.resource.data.revokedAt == request.time;
+      allow delete: if false;
     }
   }
 }
