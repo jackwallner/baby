@@ -10,6 +10,9 @@ struct FirstWeeksView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var now = Date.now
 
+    /// The Duo capture tour ends this page on day 6, under the logged days.
+    nonisolated static let tourAnchor = "tallyDay6"
+
     var body: some View {
         ScrollViewReader { proxy in
         ScrollView {
@@ -49,6 +52,7 @@ struct FirstWeeksView: View {
             .padding(.vertical, AppTheme.spacing)
         }
         .background(AppTheme.paper)
+        .followsDuoTour(proxy)
         }
         .navigationTitle("First Weeks")
         .navigationBarTitleDisplayMode(.large)
@@ -98,6 +102,7 @@ struct FirstWeeksView: View {
                 let range = Guidance.range(forDayOfLife: day)
                 let state: RowState = day < today ? .past : (day == today ? .today : .future)
                 row(day: day, date: date, tally: tally, range: range, state: state)
+                    .id("tallyDay\(day)")
                 if day < Guidance.tallyDays {
                     Divider().overlay(AppTheme.cardElevated)
                 }

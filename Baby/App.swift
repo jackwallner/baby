@@ -380,9 +380,26 @@ struct BabyHomeView: View {
         .onChange(of: selected) { _, tab in
             if tab != .reports { router.showsCheckupPitch = false }
         }
+        .onOpenURL { openLink($0) }
+    }
+
+    /// `babytracker://log`, `history`, `reports` or `settings` opens that tab.
+    private func openLink(_ url: URL) {
         #if DEBUG
-        .onReceive(DuoTour.ticks) { advanceDuoTour(at: $0) }
+        if let stop = DuoTour.Stop(url: url) {
+            showDuoTour(stop)
+            return
+        }
         #endif
+        guard let tab = HomeTab(link: url) else { return }
+        show(tab)
+    }
+
+    /// Unfolded, History is already beside every tab, so it opens Log.
+    private func show(_ requested: HomeTab) {
+        let tab: HomeTab = requested == .history && split != nil ? .log : requested
+        visited.insert(tab)
+        selected = tab
     }
 
     /// Each unfolded pane is phone-width, so its screen lays out as on a phone.
@@ -394,6 +411,9 @@ struct BabyHomeView: View {
                 maxWidth: (isHistoryPane ? split?.secondaryWidth : split?.primaryWidth) ?? .infinity,
                 maxHeight: .infinity
             )
+            // Unfolded, the open tab ends above the capsule, so no page runs
+            // beneath it beside a History pane that has none.
+            .clipShape(CapsuleDock(isDocked: split != nil && !isHistoryPane))
             .padding(.leading, isHistoryPane ? split?.secondaryX ?? 0 : 0)
             .opacity(isShown(tab) ? 1 : 0)
             .allowsHitTesting(isShown(tab))
@@ -448,80 +468,97 @@ struct BabyHomeView: View {
 }
 
 #if DEBUG
-/// `-DuoTour` walks the main screens on a timer for the iPhone Duo captures
-/// and recordings, which can only screenshot on a schedule. On the way it
-/// logs a wet diaper 9 s in (after gh-sim's inner relaunch has started
-/// recording), so a recording shows a real tap reach both panes. The stop
-/// comes from the time since launch, so a view that restarts resumes it.
+/// `babytracker://tour/<stop>` sets up one iPhone Duo capture: gh-sim opens
+/// each stop in turn on both displays and screenshots it, so every frame is
+/// a settled screen. `wet` logs a real wet diaper, so a recording shows one
+/// tap reach both panes. Scrolling stops hold their page at an anchor whose
+/// bottom meets the capsule, so the page ends on a whole card.
 @MainActor
 enum DuoTour {
-    static var isEnabled: Bool { ProcessInfo.processInfo.arguments.contains("-DuoTour") }
-    static let launched = Date.now
-    static let diaperDelay: TimeInterval = 9
-    static var hasLoggedDiaper = false
+    enum Stop: String {
+        case log, wet, history, reports, firstWeeks = "firstweeks", settings, night
 
-    static let ticks: AnyPublisher<Date, Never> = isEnabled
-        ? Timer.publish(every: 0.5, on: .main, in: .common).autoconnect().eraseToAnyPublisher()
-        : Empty<Date, Never>().eraseToAnyPublisher()
-
-    enum Stop {
-        case log, history, reports, firstWeeks, settings, nightLog
-    }
-
-    /// Each stop and how long it stays, in seconds. Captures oversample
-    /// these, so every stop gets at least one settled frame.
-    static let stops: [(Stop, TimeInterval)] = [
-        (.log, 22), (.history, 12), (.reports, 12), (.firstWeeks, 12),
-        (.settings, 12), (.nightLog, 12), (.log, .infinity),
-    ]
-
-    /// The stop at this many seconds after launch. Unfolded, History has its
-    /// own pane, so its stop is skipped there.
-    static func stop(at elapsed: TimeInterval, isSplit: Bool) -> Stop {
-        var end: TimeInterval = 0
-        for (stop, seconds) in stops where !(stop == .history && isSplit) {
-            end += seconds
-            if elapsed < end { return stop }
+        init?(url: URL) {
+            guard url.scheme == HomeTab.linkScheme, url.host == "tour" else { return nil }
+            self.init(rawValue: url.lastPathComponent)
         }
-        return .log
+
+        /// The view each scrolling stop brings to the bottom of its pane.
+        var anchor: String? {
+            switch self {
+            case .reports: SummaryView.tourAnchor
+            case .firstWeeks: FirstWeeksView.tourAnchor
+            case .settings: SettingsView.tourAnchor
+            default: nil
+            }
+        }
     }
+
+    /// The latest stop's anchor, replayed to a page that appears after it.
+    static let anchor = CurrentValueSubject<String?, Never>(nil)
 }
 
 extension BabyHomeView {
-    fileprivate func advanceDuoTour(at date: Date) {
-        let elapsed = date.timeIntervalSince(DuoTour.launched)
-        if elapsed >= DuoTour.diaperDelay, !DuoTour.hasLoggedDiaper {
-            DuoTour.hasLoggedDiaper = true
+    fileprivate func showDuoTour(_ stop: DuoTour.Stop) {
+        if stop == .wet {
             withAnimation(AppTheme.feedbackAnimation) { _ = EventStore.shared.log(.wet) }
+        } else {
+            EventStore.shared.dismissUndo()
         }
-        let stop = DuoTour.stop(at: elapsed, isSplit: split != nil)
-        let appearance: AppAppearance = stop == .nightLog ? .night : .system
+        let appearance: AppAppearance = stop == .night ? .night : .system
         if BabySettings.shared.appearance != appearance { BabySettings.shared.appearance = appearance }
         let layout: HistoryView.HistoryLayout = stop == .firstWeeks ? .calendar : .list
         if UserDefaults.standard.string(forKey: "historyLayout") != layout.rawValue {
             UserDefaults.standard.set(layout.rawValue, forKey: "historyLayout")
         }
         let tab: HomeTab = switch stop {
-        case .log, .nightLog: .log
+        case .log, .wet, .night: .log
         case .history: .history
         case .reports: .reports
         case .firstWeeks, .settings: .settings
         }
+        show(tab)
         let path: [SettingsDestination] = stop == .firstWeeks ? [.firstWeeks] : []
-        if selected != tab {
-            visited.insert(tab)
-            selected = tab
-        }
         if settingsPath != path { settingsPath = path }
+        DuoTour.anchor.send(stop.anchor)
     }
 }
 #endif
+
+extension View {
+    /// DEBUG captures: brings the Duo tour's anchor to the bottom of this
+    /// page, once the page has laid out. Nothing in Release.
+    @MainActor @ViewBuilder
+    func followsDuoTour(_ proxy: ScrollViewProxy) -> some View {
+        #if DEBUG
+        onReceive(DuoTour.anchor.compactMap { $0 }) { anchor in
+            Task {
+                try? await Task.sleep(for: .milliseconds(400))
+                proxy.scrollTo(anchor, anchor: .bottom)
+            }
+        }
+        #else
+        self
+        #endif
+    }
+}
 
 extension View {
     /// Reserve the floating capsule in this screen's safe area, inside its
     /// NavigationStack, so lists end above it yet scroll on beneath it.
     func reservesNavigationCapsule(_ isReserved: Bool = true) -> some View {
         safeAreaPadding(.bottom, isReserved ? AppTheme.bottomNavigationReservedHeight : 0)
+    }
+}
+
+/// Ends a pane at the top of the capsule's reservation when docked, so its
+/// page stops above the capsule; otherwise clips nothing.
+private struct CapsuleDock: Shape {
+    var isDocked: Bool
+
+    func path(in rect: CGRect) -> Path {
+        let bottom = isDocked ? rect.maxY - AppTheme.bottomNavigationReservedHeight : rect.maxY + rect.height
+        return Path(CGRect(x: rect.minX - rect.width, y: rect.minY - rect.height, width: rect.width * 3, height: bottom - rect.minY + rect.height))
     }
 }
 
@@ -532,10 +569,17 @@ private struct TopEdgeClip: Shape {
     }
 }
 
-private enum HomeTab: String, CaseIterable, Identifiable {
+enum HomeTab: String, CaseIterable, Identifiable {
     case log, history, reports, settings
 
+    static let linkScheme = "babytracker"
+
     var id: Self { self }
+
+    init?(link: URL) {
+        guard link.scheme == Self.linkScheme else { return nil }
+        self.init(rawValue: link.host ?? "")
+    }
 
     func label(isPro: Bool) -> String {
         switch self {

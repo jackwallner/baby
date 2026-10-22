@@ -60,7 +60,11 @@ struct SummaryView: View {
     private var hasData: Bool { !events.events.isEmpty }
     private var isExample: Bool { !hasData }
 
+    /// The Duo capture tour ends this page on the feeds chart.
+    nonisolated static let tourAnchor = "chart.feeds"
+
     var body: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
                 rangeSection
@@ -72,7 +76,7 @@ struct SummaryView: View {
                 }
                 statsGrid
                 ForEach(ReportMetric.shown(for: report.tracked), id: \.self) { metric in
-                    chartCard(metric)
+                    chartCard(metric).id("chart.\(metric)")
                 }
                 doctorCard
                 Text(Guidance.disclaimer)
@@ -82,6 +86,8 @@ struct SummaryView: View {
             }
             .padding(.horizontal, AppTheme.margin)
             .padding(.vertical, AppTheme.spacing)
+        }
+        .followsDuoTour(proxy)
         }
         .background(AppTheme.paper)
         .navigationTitle("Reports")

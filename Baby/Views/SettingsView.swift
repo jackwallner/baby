@@ -17,7 +17,11 @@ struct SettingsView: View {
     @State private var newBabyName = ""
     @State private var restoreMessage: String?
 
+    /// The Duo capture tour ends this page on the daily totals choice.
+    nonisolated static let tourAnchor = "totals.mode"
+
     var body: some View {
+        ScrollViewReader { proxy in
         Form {
             Group {
                 babySection
@@ -33,6 +37,8 @@ struct SettingsView: View {
                 aboutSection
             }
             .themedRow()
+        }
+        .followsDuoTour(proxy)
         }
         .foregroundStyle(AppTheme.ink)
         .scrollContentBackground(.hidden)
@@ -280,6 +286,7 @@ struct SettingsView: View {
             }
             .pickerStyle(.segmented)
             .accessibilityIdentifier("totals.mode")
+            .id(Self.tourAnchor)
             if case .day(let hour) = settings.totalsWindow {
                 Picker("Day starts at", selection: Binding(
                     get: { hour },
