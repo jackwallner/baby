@@ -5,7 +5,7 @@ paths:
   - "BabyTests/UnfoldedSplitTests.swift"
   - "Baby/Views/NowView.swift"
   - "BabyTests/NowFitTests.swift"
-  - "BabyTests/HomeLinkTests.swift"
+  - "BabyTests/DuoTourTests.swift"
 ---
 
 # iPhone Duo (2026-10-21)
@@ -30,17 +30,19 @@ paths:
   of the capsule's reservation, so its page ends above the capsule instead
   of scrolling beneath it beside a History pane that has no capsule.
   Folded (and on every phone) nothing is clipped and the capsule floats.
-- Captures: `babytracker://` is a real scheme. `log`, `history`, `reports`
-  and `settings` open that tab in every build (History opens Log while
-  split); DEBUG adds `babytracker://tour/<stop>` (`DuoTour`): `wet` logs a
-  wet diaper (the recording's tap reaching both panes), `log`, `reports`,
-  `firstweeks` (with History's calendar), `settings`, `night` (Night light
-  Log) and `history` (folded only). Reports, First Weeks and Settings
-  scroll their `tourAnchor` to the bottom of the pane, so each frame ends on
-  a whole card. Run with `-SeedScreenshotData -NoCloudKit -DemoPro` through
-  `gh-sim all|launch --device 'iPhone Duo'`, one `--url` per stop. Never
-  pass unhandled URLs (`noop://`) to space shots; a failed openurl can fail
-  the run.
+- Captures: DEBUG `-DuoStop <stop>` (`DuoTour`) opens one surface per
+  launch: `log`, `reports`, `firstweeks` (with History's calendar),
+  `settings`, `night` (Night light Log) or `history` (folded only). Run
+  with `-SeedScreenshotData -NoCloudKit -DemoPro -DuoStop <stop>` through
+  `gh-sim launch|all --device 'iPhone Duo' --wait 25`, which shoots the
+  launch folded and unfolded; one run per surface. Reports, First Weeks
+  and Settings scroll their `tourAnchor` to the bottom of the pane, so the
+  frame ends on a whole card. A wet diaper is logged 10 s in, for the
+  recording (`--record-seconds 30`; an `all` run loses its launch
+  recordings to the test recorder, so record in `launch` runs). Never use
+  `--url` to space shots: an unhandled URL (`noop://`) can fail the run,
+  and a custom scheme (tried 2026-10-22) only raises iOS's "Open in" prompt
+  over every later frame.
 - Now on the Duo's short displays (both the folded outer screen and the
   unfolded Log pane) goes tight (`NowFit.make`, tested in `NowFitTests`):
   when 52 pt buttons leave no room for Add an older entry, section gaps
