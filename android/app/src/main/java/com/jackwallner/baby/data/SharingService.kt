@@ -185,7 +185,7 @@ class SharingService(
     /** Makes a new shared log from everything on this phone. */
     suspend fun start(signIn: GoogleSignIn) {
         val user = signedIn(signIn)
-        val id = UUID.randomUUID().toString()
+        val id = "${user.uid}:${UUID.randomUUID()}"
         val batch = db.batch()
         batch.set(family(id), mapOf("ownerUid" to user.uid, "createdAt" to FieldValue.serverTimestamp(), "schema" to SyncDocs.SCHEMA))
         batch.set(family(id).collection("members").document(user.uid), memberFields(user, "owner", null))
@@ -235,7 +235,15 @@ class SharingService(
     suspend fun invite(): String {
         val id = familyId ?: throw SharingException("Start logging together first.")
         val now = System.currentTimeMillis()
-        inviteCode?.let { if (inviteExpires - now > DAY_MS) return it }
+        inviteCode?.let { code ->
+            if (inviteExpires - now > DAY_MS) {
+                val current = online { db.collection("invites").document(code).get(Source.SERVER).await() }
+                val boundary = online { family(id).get(Source.SERVER).await() }.getTimestamp("invitesValidAfter")
+                val issued = current.getTimestamp("createdAt")
+                if (current.exists() && issued != null && (boundary == null || issued >= boundary)) return code
+            }
+            clearInvite()
+        }
         val uid = auth.currentUser?.uid ?: throw SharingException("Sign in again to make an invite.")
         repeat(4) {
             val code = InviteCode.generate()
@@ -273,7 +281,10 @@ class SharingService(
                     val others = f.collection("members").get(Source.SERVER).await().documents.filter { it.id != user.uid }
                     if (others.isEmpty()) clearFamily(f)
                     inviteCode?.let { runCatching { db.collection("invites").document(it).delete().await() } }
-                    f.collection("members").document(user.uid).delete().await()
+                    db.batch().apply {
+                        update(f, "invitesValidAfter", FieldValue.serverTimestamp())
+                        delete(f.collection("members").document(user.uid))
+                    }.commit().await()
                 }
             } catch (e: Exception) {
                 attach(id)
@@ -316,9 +327,10 @@ class SharingService(
     suspend fun remove(member: Member) {
         val id = familyId ?: return
         online {
-            family(id).collection("members").document(member.uid).delete().await()
-            // Their old invite would let them straight back in.
-            inviteCode?.let { db.collection("invites").document(it).delete().await() }
+            db.batch().apply {
+                update(family(id), "invitesValidAfter", FieldValue.serverTimestamp())
+                delete(family(id).collection("members").document(member.uid))
+            }.commit().await()
         }
         clearInvite()
     }
@@ -326,9 +338,29 @@ class SharingService(
     private suspend fun clearFamily(f: DocumentReference) {
         for (name in listOf("entries", "children")) {
             val docs = f.collection(name).get(Source.SERVER).await().documents
-            docs.chunked(BATCH).forEach { chunk -> db.batch().apply { chunk.forEach { delete(it.reference) } }.commit().await() }
+            val uid = auth.currentUser?.uid ?: throw SharingException("Sign in again to leave the shared log.")
+            docs.chunked(BATCH).forEach { chunk ->
+                db.batch().apply {
+                    chunk.forEach { row ->
+                        // Keep the version guard while removing the care data.
+                        val fields = mutableMapOf<String, Any>(
+                            "id" to row.id,
+                            "createdAt" to 0L,
+                            "updatedAt" to maxOf(row.getLong("updatedAt") ?: 0L, System.currentTimeMillis()),
+                            "deleted" to true,
+                            "updatedBy" to uid,
+                            "syncedAt" to FieldValue.serverTimestamp(),
+                        )
+                        if (name == "entries") {
+                            fields["childId"] = ""
+                            fields["kind"] = "feed"
+                            fields["startedAt"] = 0L
+                        }
+                        set(row.reference, fields)
+                    }
+                }.commit().await()
+            }
         }
-        f.delete().await()
     }
 
     // MARK: Syncing

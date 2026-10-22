@@ -75,21 +75,31 @@ service cloud.firestore {
 
     function validInvite(f, code) {
       let path = /databases/$(database)/documents/invites/$(code);
+      let family = getAfter(familyPath(f)).data;
       return exists(path)
         && get(path).data.familyId == f
-        && get(path).data.expiresAt > request.time;
+        && get(path).data.expiresAt > request.time
+        && get(path).data.createdAt + duration.value(7, 'd') > request.time
+        && get(path).data.createdAt >= family.get('invitesValidAfter', family.createdAt)
+        && exists(/databases/$(database)/documents/families/$(f)/members/$(get(path).data.createdBy));
     }
 
     match /families/{f} {
       allow read: if isMember(f);
       allow create: if signedIn()
+        // New identities are bound to their creator. Legacy orphan paths cannot
+        // be claimed by another account after an older client deleted the parent.
+        && f.matches('^' + request.auth.uid + ':[0-9a-f-]{36}$')
         && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt', 'schema'])
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.createdAt == request.time
         && request.resource.data.schema == 1;
-      allow update: if false;
-      // The last person to leave clears the family away.
-      allow delete: if isMember(f);
+      // Every departure rotates the invitation boundary in the same batch.
+      allow update: if isMember(f)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['invitesValidAfter'])
+        && request.resource.data.invitesValidAfter == request.time;
+      // Keep the immutable identity so nobody can recreate it over orphan rows.
+      allow delete: if false;
 
       match /members/{uid} {
         allow read: if isMember(f);
@@ -104,6 +114,7 @@ service cloud.firestore {
             // The person who starts the family, in the same batch as the family.
             (request.resource.data.role == 'owner'
               && request.resource.data.invite == null
+              && !exists(familyPath(f))
               && getAfter(familyPath(f)).data.ownerUid == request.auth.uid)
             ||
             // Everyone else, holding an unexpired invite for this family.
@@ -116,20 +127,24 @@ service cloud.firestore {
           && request.resource.data.name is string && request.resource.data.name.size() <= 80;
         // Leave yourself, or the owner removes someone.
         allow delete: if signedIn()
+          && isMember(f)
+          && getAfter(familyPath(f)).data.invitesValidAfter == request.time
           && (uid == request.auth.uid
-            || (exists(familyPath(f)) && get(familyPath(f)).data.ownerUid == request.auth.uid));
+            || get(familyPath(f)).data.ownerUid == request.auth.uid);
       }
 
       match /children/{id} {
         allow read: if isMember(f);
         allow create, update: if isMember(f) && validChild(id);
-        allow delete: if isMember(f);
+        // Preserve the version even for deleted rows.
+        allow delete: if false;
       }
 
       match /entries/{id} {
         allow read: if isMember(f);
         allow create, update: if isMember(f) && validEntry(id);
-        allow delete: if isMember(f);
+        // Preserve the version even for deleted rows.
+        allow delete: if false;
       }
     }
 
@@ -146,7 +161,7 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && request.resource.data.expiresAt is timestamp
         && request.resource.data.expiresAt > request.time
-        && request.resource.data.expiresAt <= request.time + duration.value(8, 'd');
+        && request.resource.data.expiresAt <= request.time + duration.value(7, 'd');
       allow update: if false;
       allow delete: if signedIn()
         && (resource.data.createdBy == request.auth.uid || isMember(resource.data.familyId));

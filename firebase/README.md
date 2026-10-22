@@ -10,11 +10,15 @@ Android to Android in v1. iPhones keep using CloudKit sharing, and an iPhone
 partner cannot join an Android log yet (the app says so on every sharing
 screen). The schema below is plain enough for the iOS app to join later.
 
+New family ids use `<ownerUid>:<UUID>`. Existing family ids remain usable, but
+cannot be recreated after deletion by an older client. This blocks claiming
+orphaned legacy logs by manufacturing a replacement family document.
+
 ## Schema (version 1)
 
 | Path | Fields |
 |---|---|
-| `families/{familyId}` | `ownerUid`, `createdAt` (server time), `schema` (1). Never updated. |
+| `families/{familyId}` | `ownerUid`, `createdAt` (server time), `schema` (1), optional `invitesValidAfter` (server time). Only the invitation boundary changes. |
 | `families/{f}/members/{uid}` | `uid`, `name` (first name from Google), `role` (`owner` or `member`), `joinedAt` (server time), `invite` (code used, null for the owner), `platform` (`android`). |
 | `families/{f}/children/{childId}` | `id`, `name`, `birthDate`, `createdAt`, `lastVisitAt`, `updatedAt`, `deleted`, `updatedBy`, `syncedAt` |
 | `families/{f}/entries/{entryId}` | `id`, `childId`, `kind`, `startedAt`, `endedAt`, `side`, `amount`, `stoolColor`, `note`, `createdAt`, `updatedAt`, `deleted`, `updatedBy`, `syncedAt` |
@@ -35,11 +39,17 @@ screen). The schema below is plain enough for the iOS app to join later.
 - Invite codes are 8 characters from `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`
   (no 0/O, 1/I), shown as `ABCD-2345`, sent as
   `https://jackwallner.github.io/baby/join.html#ABCD2345`. Codes can be
-  looked up one at a time but never listed. Removing someone withdraws this
-  phone's open invite.
+  looked up one at a time but never listed. Every leave or removal invalidates every earlier invite atomically. An invite also requires its creator to remain a member.
 - Leaving deletes your member document and your Firebase Auth user (Play's
-  account deletion rule). The last member to leave deletes every entry,
-  baby and the family.
+  account deletion rule). The membership deletion must share a batch with
+  `families/{f}.invitesValidAfter = serverTimestamp()`. The last member scrubs
+  care fields into minimal tombstones. The family identity and row versions
+  remain inaccessible to former members, preventing ownership takeover and
+  delete/recreate rollback. Clients cannot hard-delete families, babies or entries.
+- Bootstrap owner membership is allowed only alongside a new family. Leaving
+  does not let an old owner restore their membership or remove remaining members.
+- Existing clients must upgrade for leave/remove and last-member cleanup under
+  these rules. The Android client in this change implements the new protocol.
 
 For iOS to join later: sign in with Google (or add Apple as a second Auth
 provider), read the invite, create `members/{uid}` with `platform: "ios"`,
@@ -51,8 +61,8 @@ rules already accept any `platform` string up to 16 characters.
 ```sh
 cd firebase
 npm ci
-# Rules: 28 tests against the Firestore emulator (JDK 21+ on PATH).
-PATH=~/jdks/temurin-21/Contents/Home/bin:$PATH npx firebase-tools emulators:exec --project demo-baby --only firestore 'npm test'
+# Rules: 41 tests against the Firestore emulator (JDK 21+ on PATH).
+npm run emulator-test
 # Android connected tests (two phones, UI) against Auth + Firestore emulators:
 PATH=~/jdks/temurin-21/Contents/Home/bin:$PATH npx firebase-tools emulators:exec --project demo-baby --only auth,firestore \
   "cd ../android && ANDROID_SERIAL=emulator-5560 JAVA_HOME=$HOME/jdks/temurin-17/Contents/Home ./gradlew :app:connectedDebugAndroidTest \

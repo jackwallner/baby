@@ -15,13 +15,16 @@ import {
   getDoc,
   getDocs,
   collection,
+  collectionGroup,
+  query,
+  where,
   serverTimestamp,
   setDoc,
   updateDoc,
   writeBatch,
 } from 'firebase/firestore';
 
-const FAMILY = 'fam-1';
+const FAMILY = 'alice:11111111-1111-4111-8111-111111111111';
 const CODE = 'ABCD2345';
 const DAY = 24 * 3600 * 1000;
 
@@ -30,7 +33,7 @@ let env;
 before(async () => {
   env = await initializeTestEnvironment({
     projectId: 'demo-baby',
-    firestore: { rules: readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8') },
+    firestore: { rules: readFileSync(process.env.FIRESTORE_RULES_FILE ?? new URL('../firestore.rules', import.meta.url), 'utf8') },
   });
 });
 
@@ -104,6 +107,13 @@ async function invite(store, uid = 'alice', code = CODE, familyId = FAMILY, expi
 }
 
 /** Writes outside the rules, for states the app can't reach on its own. */
+async function removeMember(store, uid) {
+  const batch = writeBatch(store);
+  batch.update(doc(store, 'families', FAMILY), { invitesValidAfter: serverTimestamp() });
+  batch.delete(doc(store, 'families', FAMILY, 'members', uid));
+  return batch.commit();
+}
+
 async function seed(fn) {
   await env.withSecurityRulesDisabled(async (ctx) => fn(ctx.firestore()));
 }
@@ -158,7 +168,7 @@ describe('invites', () => {
     await assertFails(invite(db('mallory'), 'mallory'));
   });
 
-  test('an invite can\'t last more than eight days', async () => {
+  test('an invite can\'t last more than seven days', async () => {
     const store = await startFamily();
     await assertFails(invite(store, 'alice', CODE, FAMILY, 30 * DAY));
   });
@@ -166,8 +176,8 @@ describe('invites', () => {
   test('an existing code can\'t be overwritten to point at another family', async () => {
     const store = await startFamily();
     await invite(store);
-    const other = await startFamily('mallory', 'fam-2');
-    await assertFails(invite(other, 'mallory', CODE, 'fam-2'));
+    const other = await startFamily('mallory', 'mallory:22222222-2222-4222-8222-222222222222');
+    await assertFails(invite(other, 'mallory', CODE, 'mallory:22222222-2222-4222-8222-222222222222'));
   });
 
   test('anyone signed in can look up a code, nobody can list them', async () => {
@@ -204,9 +214,9 @@ describe('joining', () => {
 
   test('an invite for one family does not open another', async () => {
     const store = await startFamily();
-    await startFamily('carol', 'fam-2');
+    await startFamily('carol', 'carol:22222222-2222-4222-8222-222222222222');
     await invite(store);
-    await assertFails(setDoc(doc(db('bob'), 'families', 'fam-2', 'members', 'bob'), member('bob', 'member', CODE)));
+    await assertFails(setDoc(doc(db('bob'), 'families', 'carol:22222222-2222-4222-8222-222222222222', 'members', 'bob'), member('bob', 'member', CODE)));
   });
 
   test('nobody can add someone else', async () => {
@@ -311,25 +321,32 @@ describe('leaving and removing', () => {
 
   test('a member leaves and loses access', async () => {
     const { bob } = await aliceAndBob();
-    await assertSucceeds(deleteDoc(doc(bob, 'families', FAMILY, 'members', 'bob')));
+    await assertSucceeds(removeMember(bob, 'bob'));
     await assertFails(getDocs(collection(bob, 'families', FAMILY, 'entries')));
   });
 
   test('the owner removes someone; a member can\'t remove the owner', async () => {
     const { alice, bob } = await aliceAndBob();
     await assertFails(deleteDoc(doc(bob, 'families', FAMILY, 'members', 'alice')));
-    await assertSucceeds(deleteDoc(doc(alice, 'families', FAMILY, 'members', 'bob')));
+    await assertSucceeds(removeMember(alice, 'bob'));
     await assertFails(setDoc(doc(bob, 'families', FAMILY, 'entries', 'e1'), entry('e1', 'bob')));
   });
 
-  test('the last member clears the family away', async () => {
+  test('the last member scrubs the log and leaves an inaccessible family identity', async () => {
     const alice = await startFamily();
     await setDoc(doc(alice, 'families', FAMILY, 'entries', 'e1'), entry('e1', 'alice'));
     await invite(alice);
-    await assertSucceeds(deleteDoc(doc(alice, 'families', FAMILY, 'entries', 'e1')));
+    await assertSucceeds(setDoc(doc(alice, 'families', FAMILY, 'entries', 'e1'), {
+      id: 'e1', childId: '', kind: 'feed', startedAt: 0, createdAt: 0,
+      updatedAt: Date.now(), deleted: true, updatedBy: 'alice', syncedAt: serverTimestamp(),
+    }));
+    const scrubbed = (await getDoc(doc(alice, 'families', FAMILY, 'entries', 'e1'))).data();
+    if ('note' in scrubbed || 'side' in scrubbed || scrubbed.childId !== '') throw new Error('care data must be scrubbed');
     await assertSucceeds(deleteDoc(doc(alice, 'invites', CODE)));
-    await assertSucceeds(deleteDoc(doc(alice, 'families', FAMILY)));
-    await assertSucceeds(deleteDoc(doc(alice, 'families', FAMILY, 'members', 'alice')));
+    await assertFails(deleteDoc(doc(alice, 'families', FAMILY)));
+    await assertSucceeds(removeMember(alice, 'alice'));
+    await assertFails(getDoc(doc(alice, 'families', FAMILY)));
+    await assertFails(getDocs(collection(alice, 'families', FAMILY, 'entries')));
   });
 
   test('outsiders can\'t delete invites or entries', async () => {
@@ -337,5 +354,136 @@ describe('leaving and removing', () => {
     await setDoc(doc(alice, 'families', FAMILY, 'entries', 'e1'), entry('e1', 'alice'));
     await assertFails(deleteDoc(doc(db('mallory'), 'invites', CODE)));
     await assertFails(deleteDoc(doc(db('mallory'), 'families', FAMILY, 'entries', 'e1')));
+  });
+});
+
+
+describe('security regressions', () => {
+  async function shared() {
+    const alice = await startFamily();
+    await invite(alice);
+    const bob = db('bob');
+    await setDoc(doc(bob, 'families', FAMILY, 'members', 'bob'), member('bob', 'member', CODE));
+    return { alice, bob };
+  }
+
+  test('removal must revoke every outstanding code atomically', async () => {
+    const { alice } = await shared();
+    await assertFails(deleteDoc(doc(alice, 'families', FAMILY, 'members', 'bob')));
+  });
+
+  test('a removed member cannot reuse any code from before removal', async () => {
+    const { alice, bob } = await shared();
+    await invite(bob, 'bob', 'BCDE2345');
+    await seed(async (s) => {
+      await deleteDoc(doc(s, 'families', FAMILY, 'members', 'bob'));
+      await updateDoc(doc(s, 'families', FAMILY), { invitesValidAfter: Timestamp.now() });
+    });
+    for (const code of [CODE, 'BCDE2345']) {
+      await assertFails(setDoc(doc(bob, 'families', FAMILY, 'members', 'bob'), member('bob', 'member', code)));
+    }
+  });
+
+  test('an invite stops working when its creator leaves', async () => {
+    const { bob } = await shared();
+    await invite(bob, 'bob', 'BCDE2345');
+    await seed((s) => deleteDoc(doc(s, 'families', FAMILY, 'members', 'bob')));
+    await assertFails(setDoc(doc(db('carol'), 'families', FAMILY, 'members', 'carol'), member('carol', 'member', 'BCDE2345')));
+  });
+
+  test('a former owner cannot bootstrap membership in an existing family', async () => {
+    const { alice } = await shared();
+    await seed((s) => deleteDoc(doc(s, 'families', FAMILY, 'members', 'alice')));
+    await assertFails(setDoc(doc(alice, 'families', FAMILY, 'members', 'alice'), member('alice', 'owner')));
+  });
+
+  test('a member cannot erase the family and replace its owner', async () => {
+    const { bob } = await shared();
+    await assertFails(deleteDoc(doc(bob, 'families', FAMILY)));
+  });
+
+  test('hard deletes cannot erase the last-writer guard on entries or children', async () => {
+    const { alice, bob } = await shared();
+    await setDoc(doc(alice, 'families', FAMILY, 'entries', 'e1'), entry('e1', 'alice', { updatedAt: 5000 }));
+    await setDoc(doc(alice, 'families', FAMILY, 'children', 'c1'), child('c1', 'alice', { updatedAt: 5000 }));
+    await assertFails(deleteDoc(doc(bob, 'families', FAMILY, 'entries', 'e1')));
+    await assertFails(deleteDoc(doc(bob, 'families', FAMILY, 'children', 'c1')));
+  });
+
+  test('collection-group and filtered outsider queries cannot reveal entries', async () => {
+    const { alice } = await shared();
+    await setDoc(doc(alice, 'families', FAMILY, 'entries', 'e1'), entry('e1', 'alice'));
+    const outsider = db('mallory');
+    await assertFails(getDocs(collectionGroup(outsider, 'entries')));
+    await assertFails(getDocs(query(collection(outsider, 'families', FAMILY, 'entries'), where('childId', '==', 'child-1'))));
+    await assertFails(getDocs(collection(outsider, 'families')));
+  });
+});
+
+
+describe('additional owner and expiry regressions', () => {
+  test('a former owner cannot remove members after leaving', async () => {
+    const alice = await startFamily();
+    await invite(alice);
+    await setDoc(doc(db('bob'), 'families', FAMILY, 'members', 'bob'), member('bob', 'member', CODE));
+    await seed((store) => deleteDoc(doc(store, 'families', FAMILY, 'members', 'alice')));
+    await assertFails(deleteDoc(doc(alice, 'families', FAMILY, 'members', 'bob')));
+  });
+
+  test('an invite cannot exceed the seven-day lifetime', async () => {
+    const alice = await startFamily();
+    await assertFails(invite(alice, 'alice', CODE, FAMILY, 7.5 * DAY));
+  });
+});
+
+
+describe('revocation protocol', () => {
+  test('removal revokes old codes, preserves other members, and permits a fresh invite', async () => {
+    const alice = await startFamily();
+    await invite(alice);
+    const bob = db('bob');
+    await setDoc(doc(bob, 'families', FAMILY, 'members', 'bob'), member('bob', 'member', CODE));
+    await assertSucceeds(removeMember(alice, 'bob'));
+    await assertFails(getDocs(collection(bob, 'families', FAMILY, 'entries')));
+    await assertFails(setDoc(doc(bob, 'families', FAMILY, 'members', 'bob'), member('bob', 'member', CODE)));
+    await assertSucceeds(getDoc(doc(alice, 'families', FAMILY)));
+    await invite(alice, 'alice', 'CDEF2345');
+    await assertSucceeds(setDoc(doc(bob, 'families', FAMILY, 'members', 'bob'), member('bob', 'member', 'CDEF2345')));
+  });
+
+  test('a withdrawn code cannot join and unknown collections cannot be written', async () => {
+    const alice = await startFamily();
+    await invite(alice);
+    await deleteDoc(doc(alice, 'invites', CODE));
+    await assertFails(setDoc(doc(db('bob'), 'families', FAMILY, 'members', 'bob'), member('bob', 'member', CODE)));
+    await assertFails(setDoc(doc(alice, 'families', FAMILY, 'secrets', 'x'), { data: 'x' }));
+  });
+});
+
+
+describe('additional owner and expiry regressions', () => {
+  test('an older eight-day invite is rejected once it is seven days old', async () => {
+    await startFamily();
+    await seed((store) => setDoc(doc(store, 'invites', CODE), {
+      familyId: FAMILY, createdBy: 'alice',
+      createdAt: Timestamp.fromMillis(Date.now() - 7.5 * DAY),
+      expiresAt: Timestamp.fromMillis(Date.now() + 0.5 * DAY),
+    }));
+    await assertFails(setDoc(doc(db('bob'), 'families', FAMILY, 'members', 'bob'), member('bob', 'member', CODE)));
+  });
+});
+
+
+describe('security regressions', () => {
+  test('orphaned logs cannot be claimed by recreating their family', async () => {
+    const alice = await startFamily();
+    await setDoc(doc(alice, 'families', FAMILY, 'entries', 'e1'), entry('e1', 'alice'));
+    await seed((store) => deleteDoc(doc(store, 'families', FAMILY)));
+    const mallory = db('mallory');
+    const batch = writeBatch(mallory);
+    batch.set(doc(mallory, 'families', FAMILY), { ownerUid: 'mallory', createdAt: serverTimestamp(), schema: 1 });
+    batch.set(doc(mallory, 'families', FAMILY, 'members', 'mallory'), member('mallory', 'owner'));
+    await assertFails(batch.commit());
+    await assertFails(getDoc(doc(mallory, 'families', FAMILY, 'entries', 'e1')));
   });
 });

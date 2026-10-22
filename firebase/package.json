@@ -4,8 +4,8 @@
   "type": "module",
   "description": "Security rules tests for Baby Tracker Log together, run against the Firestore emulator.",
   "scripts": {
-    "test": "node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=test-results/rules-junit.xml test/rules.test.mjs",
-    "emulator-test": "firebase-tools emulators:exec --project demo-baby --only firestore 'npm test'"
+    "test": "mkdir -p test-results && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=test-results/rules-junit.xml test/rules.test.mjs",
+    "emulator-test": "firebase emulators:exec --project demo-baby --only firestore 'npm test'"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "6.0.0",
