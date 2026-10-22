@@ -200,7 +200,7 @@ struct NowSummary: Codable, Equatable, Sendable {
         summary.hiddenKinds = tracked.hidden.isEmpty ? nil : TrackedKinds.buttons.filter { !tracked.contains($0) }
         summary.hiddenFeedTypes = feedTypes == .all ? nil : feedTypes.hidden
         guard let child else { return summary }
-        let events = events.filter { tracked.contains($0.eventKind) }
+        let events = LogEvent.coalesced(events).filter { tracked.contains($0.eventKind) }
         let today = window.interval(at: now, calendar: calendar)
         summary.childName = child.displayName
         summary.childID = child.id

@@ -65,6 +65,37 @@ final class SharingTests: XCTestCase {
         XCTAssertEqual(events.events.count, 1)
     }
 
+    func testSwitchingBabyClearsTheOldInviteBeforeICloudReplies() async throws {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let events = EventStore(persistence: persistence)
+        events.createChild(name: "First", birthDate: nil)
+        let share = CKShare(recordZoneID: CKRecordZone.ID(zoneName: "First"))
+        share.publicPermission = .readWrite
+        var reply: CheckedContinuation<Bool, Never>?
+        let sharing = SharingService(persistence: persistence, share: share, events: events,
+                                     accountAvailable: { await withCheckedContinuation { reply = $0 } })
+        events.createChild(name: "Second", birthDate: nil)
+        let task = Task { await sharing.refresh(for: events.child) }
+        while reply == nil { await Task.yield() }
+        XCTAssertNil(sharing.share, "a slow account lookup must not expose another baby's invite or people")
+        reply?.resume(returning: true)
+        await task.value
+    }
+
+    func testAnOldAsyncResultCannotReplaceTheSelectedBabysShare() throws {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let events = EventStore(persistence: persistence)
+        events.createChild(name: "First", birthDate: nil)
+        let first = try XCTUnwrap(events.child)
+        let sharing = SharingService(persistence: persistence, events: events)
+        events.createChild(name: "Second", birthDate: nil)
+        let second = try XCTUnwrap(events.child)
+        let current = CKShare(recordZoneID: CKRecordZone.ID(zoneName: "Second"))
+        sharing.cache(current, for: second.objectID)
+        sharing.cache(CKShare(recordZoneID: CKRecordZone.ID(zoneName: "First")), for: first.objectID)
+        XCTAssertEqual(sharing.share?.recordID, current.recordID)
+    }
+
     func testSceneDelegateReceivesColdStartInvitations() {
         let delegate = SceneDelegate()
         XCTAssertTrue(delegate.responds(to: #selector(UISceneDelegate.scene(_:willConnectTo:options:))))

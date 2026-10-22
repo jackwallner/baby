@@ -3,69 +3,139 @@ import ActivityKit
 import Foundation
 import os
 
-/// Keeps exactly one Live Activity alive while a feed or sleep runs, and none
-/// otherwise. Driven from the summary so the Watch, the widgets and the app all
-/// converge on the same answer.
+struct LiveActivityState: Equatable, Sendable {
+    var kind: String
+    var start: Date
+    var side: String?
+    var childName: String
+    var childID: UUID?
+
+    init?(summary: NowSummary) {
+        if let start = summary.runningSleepStart {
+            kind = EventKind.sleep.rawValue
+            self.start = start
+            side = nil
+        } else if let start = summary.runningFeedStart {
+            kind = EventKind.feed.rawValue
+            self.start = start
+            side = FeedSide.encode(summary.runningSides)
+        } else {
+            return nil
+        }
+        childName = summary.childName
+        childID = summary.childID
+    }
+}
+
+struct LiveActivitySnapshot: Sendable {
+    var id: String
+    var state: LiveActivityState
+}
+
 @MainActor
-final class LiveActivityService {
-    static let shared = LiveActivityService()
+protocol LiveActivityClient {
+    var areActivitiesEnabled: Bool { get }
+    var activities: [LiveActivitySnapshot] { get }
+    func end(_ id: String) async
+    func update(_ id: String, to state: LiveActivityState) async
+    func request(_ state: LiveActivityState) throws
+}
 
-    private let logger = Logger(subsystem: AppGroup.subsystem, category: "LiveActivity")
+@MainActor
+private struct SystemLiveActivityClient: LiveActivityClient {
+    var areActivitiesEnabled: Bool { ActivityAuthorizationInfo().areActivitiesEnabled }
 
-    private init() {}
+    var activities: [LiveActivitySnapshot] {
+        Activity<BabyActivityAttributes>.activities.filter {
+            $0.activityState == .active || $0.activityState == .stale
+        }.map { activity in
+            let content = activity.content.state
+            var summary = NowSummary()
+            summary.childID = activity.attributes.childID
+            summary.childName = content.childName ?? activity.attributes.childName
+            let kind = content.kind ?? activity.attributes.kind
+            if kind == EventKind.sleep.rawValue {
+                summary.runningSleepStart = activity.content.state.startedAt
+            } else {
+                summary.runningFeedStart = activity.content.state.startedAt
+                summary.setRunningFeedSides(FeedSide.decode(content.kind == nil ? activity.attributes.side : content.side))
+            }
+            return LiveActivitySnapshot(id: activity.id, state: LiveActivityState(summary: summary)!)
+        }
+    }
 
-    /// `Activity` is not Sendable, and ending one is async. It is only ever
-    /// touched from the main actor here, so the box is honest.
+    // ActivityKit's non-Sendable handle stays on the main actor.
     private struct ActivityBox: @unchecked Sendable {
         let activity: Activity<BabyActivityAttributes>
     }
 
-    private func end(_ activity: Activity<BabyActivityAttributes>) {
-        let box = ActivityBox(activity: activity)
-        Task { @MainActor in await box.activity.end(nil, dismissalPolicy: .immediate) }
+    func end(_ id: String) async {
+        guard let activity = Activity<BabyActivityAttributes>.activities.first(where: { $0.id == id }) else { return }
+        await ActivityBox(activity: activity).activity.end(nil, dismissalPolicy: .immediate)
     }
 
+    private func content(_ state: LiveActivityState) -> ActivityContent<BabyActivityAttributes.ContentState> {
+        .init(state: .init(startedAt: state.start, kind: state.kind, side: state.side, childName: state.childName), staleDate: nil)
+    }
+
+    func update(_ id: String, to state: LiveActivityState) async {
+        guard let activity = Activity<BabyActivityAttributes>.activities.first(where: { $0.id == id }) else { return }
+        await ActivityBox(activity: activity).activity.update(content(state))
+    }
+
+    func request(_ state: LiveActivityState) throws {
+        _ = try Activity.request(
+            attributes: BabyActivityAttributes(kind: state.kind, side: state.side, childName: state.childName, childID: state.childID),
+            content: content(state)
+        )
+    }
+}
+
+/// Reconciles the lock screen with the latest local or imported summary.
+@MainActor
+final class LiveActivityService {
+    static let shared = LiveActivityService(client: SystemLiveActivityClient())
+    private let client: any LiveActivityClient
+    private let logger = Logger(subsystem: AppGroup.subsystem, category: "LiveActivity")
+    private var desired: LiveActivityState?
+    private var revision = 0
+    private var task: Task<Void, Never>?
+
+    init(client: any LiveActivityClient) { self.client = client }
+
+    func waitForUpdates() async { await task?.value }
+
     func sync(summary: NowSummary) {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        let wanted: (kind: EventKind, start: Date, side: String?)?
-        if let start = summary.runningSleepStart {
-            wanted = (.sleep, start, nil)
-        } else if let start = summary.runningFeedStart {
-            wanted = (.feed, start, FeedSide.encode(summary.runningSides))
-        } else {
-            wanted = nil
-        }
-        let existing = Activity<BabyActivityAttributes>.activities
-        guard let wanted else {
-            for activity in existing {
-                end(activity)
+        desired = LiveActivityState(summary: summary)
+        revision += 1
+        guard task == nil else { return }
+        task = Task { await reconcile() }
+    }
+
+    private func reconcile() async {
+        while true {
+            let generation = revision
+            let wanted = client.areActivitiesEnabled ? desired : nil
+            let existing = client.activities
+            let matching = wanted.flatMap { wanted in
+                existing.first { $0.state.childID == wanted.childID }
             }
-            return
-        }
-        // Name and side are fixed attributes, so a rename or a side change
-        // needs a fresh activity rather than a silent stale one.
-        let matching = existing.first {
-            $0.attributes.kind == wanted.kind.rawValue
-                && $0.content.state.startedAt == wanted.start
-                && $0.attributes.side == wanted.side
-                && $0.attributes.childName == summary.childName
-        }
-        if matching != nil {
             for activity in existing where activity.id != matching?.id {
-                end(activity)
+                await client.end(activity.id)
             }
+            // An end may suspend while a partner edit or Undo changes the log.
+            guard generation == revision else { continue }
+            if let wanted {
+                if let matching {
+                    if matching.state != wanted { await client.update(matching.id, to: wanted) }
+                } else {
+                    do { try client.request(wanted) }
+                    catch { logger.error("Live Activity request failed: \(String(describing: error), privacy: .public)") }
+                }
+            }
+            guard generation == revision else { continue }
+            task = nil
             return
-        }
-        for activity in existing {
-            end(activity)
-        }
-        do {
-            _ = try Activity.request(
-                attributes: BabyActivityAttributes(kind: wanted.kind.rawValue, side: wanted.side, childName: summary.childName),
-                content: .init(state: .init(startedAt: wanted.start), staleDate: nil)
-            )
-        } catch {
-            logger.error("Live Activity request failed: \(String(describing: error), privacy: .public)")
         }
     }
 }

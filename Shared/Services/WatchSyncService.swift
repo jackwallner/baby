@@ -51,6 +51,15 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         ]
     }
 
+    /// The receipt and the summary describe the same committed transaction.
+    /// A bare receipt can remove the wrist's pending overlay before the
+    /// corresponding application context arrives.
+    static func receipt(for id: UUID, summary: NowSummary) -> [String: Any] {
+        var reply = context(for: summary) ?? [:]
+        reply[savedActionKey] = id.uuidString
+        return reply
+    }
+
     /// A live message from an open Watch app: a request for the summary, or a
     /// tap, answered with its receipt once saved. Application context and
     /// queued transfers can take minutes to arrive; a reply does not.
@@ -69,7 +78,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         }
         Task { @MainActor in
             let saved = EventStore.shared.apply(payload, forChildID: payload.childID)
-            reply.send(saved ? [Self.savedActionKey: payload.id.uuidString] : [:])
+            reply.send(saved ? Self.receipt(for: payload.id, summary: EventStore.shared.summary) : [:])
         }
     }
 
@@ -95,6 +104,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     /// its receipt, so the wrist hears back in a moment. Otherwise, or if the
     /// message fails, it queues as a transfer that survives being out of range.
     /// The phone applies each tap once, whichever way it arrives.
+    @MainActor
     func send(_ payload: WatchLogPayload) {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
@@ -104,16 +114,17 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
             return
         }
         session.sendMessage(payload.dictionary, replyHandler: { [weak self] reply in
-            guard let id = (reply[Self.savedActionKey] as? String).flatMap(UUID.init) else {
-                self?.queue(payload, on: .default)
+            guard (reply[Self.savedActionKey] as? String).flatMap(UUID.init) == payload.id else {
+                Task { @MainActor in self?.queue(payload, on: .default) }
                 return
             }
-            Task { @MainActor in WatchStore.shared.markDelivered(id) }
+            self?.applyContext(reply)
         }, errorHandler: { [weak self] _ in
-            self?.queue(payload, on: .default)
+            Task { @MainActor in self?.queue(payload, on: .default) }
         })
     }
 
+    @MainActor
     private func queue(_ payload: WatchLogPayload, on session: WCSession) {
         guard !session.outstandingUserInfoTransfers.contains(where: {
             WatchLogPayload(userInfo: $0.userInfo)?.id == payload.id
@@ -124,6 +135,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     /// Asks the phone for its latest summary while it is reachable, when the
     /// Watch app opens. The reply lands in a moment; application context can
     /// lag by minutes, and has nothing at all for a freshly installed Watch app.
+    @MainActor
     func requestSummary() {
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
@@ -138,7 +150,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
     }
 
     func sessionReachabilityDidChange(_ session: WCSession) {
-        if session.isReachable { requestSummary() }
+        if session.isReachable { Task { @MainActor in requestSummary() } }
     }
 
     /// With no summary at all, also queue the request, which reaches the
@@ -153,12 +165,15 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
 
     private func applyContext(_ context: [String: Any]) {
         #if os(watchOS)
-        if let words = context[Self.diaperWordsKey] as? String {
-            AppGroup.defaults.set(words, forKey: AppGroup.Key.diaperWords)
+        let words = context[Self.diaperWordsKey] as? String
+        let summary = (context[Self.summaryKey] as? Data)
+            .flatMap { try? JSONDecoder().decode(NowSummary.self, from: $0) }
+        let saved = (context[Self.savedActionKey] as? String).flatMap(UUID.init)
+        Task { @MainActor in
+            if let words { AppGroup.defaults.set(words, forKey: AppGroup.Key.diaperWords) }
+            if let summary { WatchStore.shared.receive(summary) }
+            if let saved { WatchStore.shared.markDelivered(saved) }
         }
-        guard let data = context[Self.summaryKey] as? Data,
-              let summary = try? JSONDecoder().decode(NowSummary.self, from: data) else { return }
-        Task { @MainActor in WatchStore.shared.receive(summary) }
         #endif
     }
 
@@ -173,8 +188,10 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         }
         #if os(watchOS)
         applyContext(session.receivedApplicationContext)
-        requestSummary()
-        Task { @MainActor in WatchStore.shared.retryPending() }
+        Task { @MainActor in
+            requestSummary()
+            WatchStore.shared.retryPending()
+        }
         #else
         Task { @MainActor in if !EventStore.shared.persistence.isStandingIn { self.push(summary: EventStore.shared.summary) } }
         #endif
@@ -193,12 +210,10 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         guard let payload = Self.payload(from: userInfo) else { return }
         Task { @MainActor in
             guard EventStore.shared.apply(payload, forChildID: payload.childID) else { return }
-            WCSession.default.transferUserInfo([Self.savedActionKey: payload.id.uuidString])
+            WCSession.default.transferUserInfo(Self.receipt(for: payload.id, summary: EventStore.shared.summary))
         }
         #else
-        guard let rawID = userInfo[Self.savedActionKey] as? String,
-              let id = UUID(uuidString: rawID) else { return }
-        Task { @MainActor in WatchStore.shared.markDelivered(id) }
+        applyContext(userInfo)
         #endif
     }
 

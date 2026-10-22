@@ -48,6 +48,11 @@ final class EventStore: ObservableObject {
         var deleted: DeletedEvent?
         /// The diapers the All button logged with this feed, undone with it.
         var alsoLogged: [NSManagedObjectID] = []
+        // Cloud cleanup can replace a managed object during the Undo window.
+        var eventID: UUID?
+        var childID: UUID?
+        var closedEventIDs: [UUID] = []
+        var alsoLoggedEventIDs: [UUID] = []
     }
 
     /// Everything needed to put a deleted entry back as it was.
@@ -61,13 +66,21 @@ final class EventStore: ObservableObject {
     private var observers: [Any] = []
     private var undoTask: Task<Void, Never>?
     private let sharedZoneID: (Child) -> CKRecordZone.ID?
+    private let liveActivities: LiveActivityService
+    private let cloudRecordID: @Sendable (NSManagedObjectID) -> CKRecord.ID?
+    private let resolvesCloudRecords: Bool
     /// How long the undo stays offered after a tap.
     static let undoWindow: TimeInterval = 8
 
     var context: NSManagedObjectContext { persistence.viewContext }
 
-    init(persistence: Persistence, sharedZoneID: ((Child) -> CKRecordZone.ID?)? = nil) {
+    init(persistence: Persistence, sharedZoneID: ((Child) -> CKRecordZone.ID?)? = nil,
+         liveActivities: LiveActivityService = .shared,
+         cloudRecordID: (@Sendable (NSManagedObjectID) -> CKRecord.ID?)? = nil) {
         self.persistence = persistence
+        self.liveActivities = liveActivities
+        self.cloudRecordID = cloudRecordID ?? { persistence.container.recordID(for: $0) }
+        resolvesCloudRecords = cloudRecordID != nil || persistence.cloudKitEnabled
         self.sharedZoneID = sharedZoneID ?? { persistence.container.recordID(for: $0.objectID)?.zoneID }
         reload()
         let center = NotificationCenter.default
@@ -147,7 +160,14 @@ final class EventStore: ObservableObject {
             logger.error("CloudKit \(String(describing: activity), privacy: .public) failed: \(String(describing: event.error), privacy: .public)")
         }
         sync.ended(activity, at: date, succeeded: event.succeeded, error: event.error)
-        if activity == .import, event.succeeded { scheduleReload() }
+        if event.succeeded, activity == .import || activity == .export { cloudRecordsChanged() }
+    }
+
+    /// Sharing can move records to another zone without changing object IDs.
+    func cloudRecordsChanged() {
+        cloudTargetGeneration += 1
+        publishedCloudKey = nil
+        scheduleReload()
     }
 
     func reload() { refresh(force: true) }
@@ -180,7 +200,10 @@ final class EventStore: ObservableObject {
         let summary = NowSummary.make(child: child, events: events)
         let same = !contextChanged && children == self.children && child == self.child
             && events == self.events && awaiting == isAwaitingSharedBaby && summary.sameContent(as: self.summary)
-        guard force || !same else { return }
+        guard force || !same else {
+            publishCloudTargets()
+            return
+        }
         contextChanged = false
         tallyCache = [:]
         dayGroups = nil
@@ -193,7 +216,7 @@ final class EventStore: ObservableObject {
         let summaryChanged = !summary.sameContent(as: self.summary)
         self.summary = summary
         revision += 1
-        summary.store()
+        if !persistence.isStandingIn { summary.store() }
         publishCloudTargets()
         if summaryChanged || !hasPublished { publish() }
     }
@@ -205,17 +228,8 @@ final class EventStore: ObservableObject {
     /// CloudKit copy shows once while the cleanup that deletes it runs, so
     /// a partner's totals never count one feed twice for a moment.
     static func shown(_ fetched: [LogEvent], tracked: TrackedKinds = .current) -> [LogEvent] {
-        var seen: Set<UUID> = []
-        return fetched.filter { event in
-            guard tracked.contains(event.eventKind) else { return false }
-            guard let id = event.id else { return true }
-            return seen.insert(id).inserted
-        }
+        LogEvent.coalesced(fetched).filter { tracked.contains($0.eventKind) }
     }
-
-    /// When this process started. The container exports everything a widget
-    /// saved before then, so those queued uploads are no longer needed.
-    private let launchedAt = Date.now
 
     /// Folds a widget tap's two CloudKit copies (its own direct write and this
     /// app's export of the local save) into one, and removes entries the
@@ -235,8 +249,8 @@ final class EventStore: ObservableObject {
             needsReconcile = true
             return
         }
-        WidgetCloudSync.dropExported(before: launchedAt)
-        let undone = WidgetCloudSync.undoneIDs()
+        WidgetCloudSync.prune()
+        let undone = WidgetCloudSync.undoneDates()
         let persistence = persistence
         isReconciling = true
         Task.detached(priority: .utility) { [weak self] in
@@ -244,12 +258,17 @@ final class EventStore: ObservableObject {
             let (changed, saved) = context.performAndWait {
                 let container = persistence.container
                 var changed = DuplicateEvents.remove(in: context) { container.recordID(for: $0)?.recordName } > 0
-                for event in persistence.events(ids: undone, in: context) {
+                for event in persistence.events(ids: Array(undone.keys), in: context) {
+                    guard let id = event.id, let deletedAt = undone[id],
+                          (event.updatedAt ?? .distantPast) <= deletedAt else { continue }
                     context.delete(event)
                     changed = true
                 }
                 return (changed, !changed || persistence.save(context))
             }
+            // A launch alone cannot acknowledge the extension's direct
+            // records. Retry its durable queue as well as the native export.
+            await WidgetCloudSync.flush()
             await MainActor.run {
                 guard let self else { return }
                 self.isReconciling = false
@@ -268,37 +287,44 @@ final class EventStore: ObservableObject {
     /// Record names come from the mirroring queue, so they are looked up off
     /// the main thread, and only when the babies or running timers change.
     private var publishedCloudKey: [NSManagedObjectID]?
-    private var isPublishingCloudTargets = false
+    private var cloudTargetGeneration = 0
+    private var cloudTargetsTask: Task<Void, Never>?
+
+    func waitForCloudTargets() async {
+        while let task = cloudTargetsTask { await task.value }
+    }
 
     private func publishCloudTargets() {
-        guard persistence.cloudKitEnabled, !persistence.isStandingIn else { return }
+        guard resolvesCloudRecords, !persistence.isStandingIn else { return }
         let (babies, running) = cloudTargetInputs()
         let key = babies.map(\.0) + running.map(\.0)
-        guard key != publishedCloudKey, !isPublishingCloudTargets else { return }
-        isPublishingCloudTargets = true
-        let container = persistence.container
+        guard key != publishedCloudKey, cloudTargetsTask == nil else { return }
+        let generation = cloudTargetGeneration
+        let recordID = cloudRecordID
         let lookup = (babies: babies, running: running)
-        Task.detached(priority: .utility) { [weak self] in
+        cloudTargetsTask = Task.detached(priority: .utility) { [weak self] in
             var targets: [UUID: CloudZoneTarget] = [:]
             var resolved = true
             for (objectID, id, isShared) in lookup.babies {
-                guard let recordID = container.recordID(for: objectID) else { resolved = false; continue }
+                guard let recordID = recordID(objectID) else { resolved = false; continue }
                 targets[id] = CloudZoneTarget(childRecordID: recordID, isShared: isShared)
             }
             var recordNames: [UUID: String] = [:]
             for (objectID, id) in lookup.running {
-                guard let recordID = container.recordID(for: objectID) else { resolved = false; continue }
+                guard let recordID = recordID(objectID) else { resolved = false; continue }
                 recordNames[id] = recordID.recordName
             }
-            WidgetCloudSync.publish(targets: targets, recordNames: recordNames)
+            let result = (targets: targets, recordNames: recordNames, resolved: resolved)
             await MainActor.run {
                 guard let self else { return }
-                self.isPublishingCloudTargets = false
-                // A baby not exported yet has no record: ask again next time.
-                if resolved { self.publishedCloudKey = key }
-                // Something changed while the names were looked up.
+                self.cloudTargetsTask = nil
                 let (babies, running) = self.cloudTargetInputs()
-                if babies.map(\.0) + running.map(\.0) != key { self.publishCloudTargets() }
+                if babies.map(\.0) + running.map(\.0) != key || generation != self.cloudTargetGeneration {
+                    self.publishCloudTargets()
+                    return
+                }
+                WidgetCloudSync.publish(targets: result.targets, recordNames: result.recordNames)
+                if result.resolved { self.publishedCloudKey = key }
             }
         }
     }
@@ -322,8 +348,10 @@ final class EventStore: ObservableObject {
         // Before the first unlock the log is an empty stand-in, which must
         // not replace what the Watch shows.
         if !persistence.isStandingIn { WatchSyncService.shared.push(summary: summary) }
-        LiveActivityService.shared.sync(summary: summary)
-        Reminders.reschedule(summary: summary, birthDate: child?.birthDate)
+        if !persistence.isStandingIn {
+            liveActivities.sync(summary: summary)
+            Reminders.reschedule(summary: summary, birthDate: child?.birthDate)
+        }
     }
 
     /// Found once per reload rather than on every read: the log buttons ask
@@ -476,6 +504,7 @@ final class EventStore: ObservableObject {
         at date: Date = .now,
         configure: ((LogEvent) -> Void)? = nil
     ) -> LogEvent? {
+        refresh(force: false)
         guard let child else { return nil }
         // A completed feed logged during a running one means the running feed
         // is over, otherwise Now would keep saying "Feeding" for the older row.
@@ -497,6 +526,7 @@ final class EventStore: ObservableObject {
     /// undone together. Returns the feed, whose side the chips then set.
     @discardableResult
     func logAll(at date: Date = .now) -> LogEvent? {
+        refresh(force: false)
         guard let child else { return nil }
         let closed = closeRunning(.feed, at: date)
         let feed = persistence.insert(kind: .feed, at: date, side: FeedTypes.current.tapSide, ended: date, for: child, in: context)
@@ -520,6 +550,7 @@ final class EventStore: ObservableObject {
         at date: Date = .now,
         configure: ((LogEvent) -> Void)? = nil
     ) -> LogEvent? {
+        refresh(force: false)
         guard kind.canRun, let child else { return nil }
         let closed = closeRunning(kind, at: date, onlyStartedBefore: false)
         let event = persistence.insert(kind: kind, at: date, side: kind == .feed ? side : nil, ended: nil, for: child, in: context)
@@ -538,6 +569,7 @@ final class EventStore: ObservableObject {
     /// leave two open rows; one Wake ends both, and Undo reopens both.
     @discardableResult
     func stopRunning(_ kind: EventKind, at date: Date = .now, remember: Bool = true) -> Bool {
+        refresh(force: false)
         let running = events.filter { $0.eventKind == kind && $0.isRunning }
         guard let newest = running.first else { return false }
         for event in running {
@@ -557,6 +589,7 @@ final class EventStore: ObservableObject {
 
     /// The Sleep button: start if nothing is running, otherwise end.
     func toggleSleep(at date: Date = .now) {
+        refresh(force: false)
         if runningSleep != nil {
             stopRunning(.sleep, at: date)
         } else {
@@ -580,6 +613,7 @@ final class EventStore: ObservableObject {
     @discardableResult
     func delete(_ event: LogEvent) -> Bool {
         let childID = event.child?.objectID
+        let removed = event.id.map { ($0, event.child?.id) }
         let values = event.entity.attributesByName.keys.reduce(into: [String: AnyHashable]()) { values, name in
             if let value = event.value(forKey: name) as? AnyHashable { values[name] = value }
         }
@@ -596,6 +630,7 @@ final class EventStore: ObservableObject {
             reload()
             return false
         }
+        if let removed { suppressCloudCopy(removed) }
         if let childID {
             remember(LoggedEvent(objectID: objectID, kind: kind, detail: detail, at: .now, deleted: DeletedEvent(childID: childID, values: values)))
         } else if lastLogged?.objectID == objectID {
@@ -623,6 +658,13 @@ final class EventStore: ObservableObject {
     }
 
     private func remember(_ logged: LoggedEvent) {
+        var logged = logged
+        if logged.deleted == nil, let event = try? context.existingObject(with: logged.objectID) as? LogEvent {
+            logged.eventID = event.id
+            logged.childID = event.child?.id
+            logged.closedEventIDs = referencedEvents(logged.closedTimers, ids: [], childID: nil).compactMap(\.id)
+            logged.alsoLoggedEventIDs = referencedEvents(logged.alsoLogged, ids: [], childID: nil).compactMap(\.id)
+        }
         lastLogged = logged
         undoTask?.cancel()
         undoTask = Task { [weak self] in
@@ -637,9 +679,10 @@ final class EventStore: ObservableObject {
     @discardableResult
     func undoLast() -> Bool {
         guard let lastLogged else { return false }
+        var removed: [(UUID, UUID?)] = []
         let widgetUndo = WidgetUndo.load()
         let clearsWidgetUndo = widgetUndo.map { undo in
-            persistence.events(ids: [undo.eventID], in: context).contains { $0.objectID == lastLogged.objectID }
+            undo.eventID == lastLogged.eventID
         } ?? false
         if let deleted = lastLogged.deleted {
             guard restore(deleted) else {
@@ -647,7 +690,8 @@ final class EventStore: ObservableObject {
                 return false
             }
         } else {
-            guard let event = try? context.existingObject(with: lastLogged.objectID) as? LogEvent else {
+            guard let event = referencedEvents([lastLogged.objectID], ids: lastLogged.eventID.map { [$0] } ?? [],
+                                              childID: lastLogged.childID).first else {
                 self.lastLogged = nil
                 return false
             }
@@ -657,22 +701,24 @@ final class EventStore: ObservableObject {
                 event.endedAt = nil
                 event.updatedAt = .now
             } else {
-                context.delete(event)
+                if let id = event.id { removed.append((id, event.child?.id)) }
+                deleteCopies(of: event)
             }
-            for id in lastLogged.closedTimers {
-                guard let closed = try? context.existingObject(with: id) as? LogEvent else { continue }
+            for closed in referencedEvents(lastLogged.closedTimers, ids: lastLogged.closedEventIDs, childID: lastLogged.childID) {
                 closed.endedAt = nil
                 closed.updatedAt = .now
             }
-            for id in lastLogged.alsoLogged {
-                guard let diaper = try? context.existingObject(with: id) as? LogEvent else { continue }
-                context.delete(diaper)
+            for diaper in referencedEvents(lastLogged.alsoLogged, ids: lastLogged.alsoLoggedEventIDs, childID: lastLogged.childID) {
+                if let id = diaper.id { removed.append((id, diaper.child?.id)) }
+                deleteCopies(of: diaper)
             }
         }
         guard persistence.save(context) else {
             reload()
             return false
         }
+        for entry in removed { suppressCloudCopy(entry) }
+        if let id = lastLogged.deleted?.values["id"]?.base as? UUID { WidgetCloudSync.restore(id) }
         self.lastLogged = nil
         undoTask?.cancel()
         if clearsWidgetUndo {
@@ -708,10 +754,10 @@ final class EventStore: ObservableObject {
     /// one-button widgets for a few seconds.
     func offerWidgetUndo(for event: LogEvent) {
         guard let id = event.id else { return }
-        let closed = lastLogged?.objectID == event.objectID ? lastLogged?.closedTimers ?? [] : []
-        let closedIDs = closed.compactMap { (try? context.existingObject(with: $0) as? LogEvent)?.id }
+        let same = lastLogged?.eventID == id
+        let closedIDs = same ? lastLogged?.closedEventIDs ?? [] : []
         WidgetUndo(eventID: id, kind: event.eventKind, loggedAt: .now, closedIDs: closedIDs,
-                   reopensTimer: lastLogged?.objectID == event.objectID && lastLogged?.reopensTimer == true,
+                   reopensTimer: same && lastLogged?.reopensTimer == true,
                    childID: child?.id).store()
         WidgetCenter.shared.reloadAllTimelines()
     }
@@ -720,12 +766,13 @@ final class EventStore: ObservableObject {
     /// it ended. False if the entry is already gone.
     @discardableResult
     func undoWidgetLog(_ undo: WidgetUndo) -> Bool {
-        let found = persistence.events(ids: [undo.eventID] + undo.closedIDs, in: context)
+        let found = persistence.events(ids: [undo.eventID] + undo.closedIDs, in: context).filter { $0.child == child }
         guard let event = found.first(where: { $0.id == undo.eventID }) else {
             reload()
             return false
         }
         guard event.child == child else { return false }
+        let removed = (undo.eventID, event.child?.id)
         let objectID = event.objectID
         if undo.reopensTimer {
             event.endedAt = nil
@@ -733,7 +780,10 @@ final class EventStore: ObservableObject {
         } else {
             context.delete(event)
         }
-        for closed in found where closed.id != undo.eventID {
+        for closed in found where closed.child == child {
+            if closed.id == undo.eventID {
+                if !undo.reopensTimer { context.delete(closed); continue }
+            }
             closed.endedAt = nil
             closed.updatedAt = .now
         }
@@ -741,6 +791,7 @@ final class EventStore: ObservableObject {
             reload()
             return false
         }
+        if !undo.reopensTimer { suppressCloudCopy(removed) }
         if lastLogged?.objectID == objectID { dismissUndo() }
         reload()
         return true
@@ -774,6 +825,7 @@ final class EventStore: ObservableObject {
     /// rather than silently written to a different baby's log.
     @discardableResult
     func apply(_ payload: WatchLogPayload, forChildID childID: UUID?) -> Bool {
+        refresh(force: false)
         var applied = AppGroup.defaults.stringArray(forKey: AppGroup.Key.appliedWatchActions) ?? []
         if applied.contains(payload.id.uuidString) { return true }
         let targetID = childID ?? payload.childID
@@ -827,6 +879,9 @@ final class EventStore: ObservableObject {
         // applied actions, including timer stops that have no event of their own.
         applied.append(payload.id.uuidString)
         AppGroup.defaults.set(Array(applied.suffix(NowSummary.knownEventLimit)), forKey: AppGroup.Key.appliedWatchActions)
+        if payload.action == .undo, payload.targetAction != .stopSleep, let id = payload.targetID {
+            suppressCloudCopy((id, target.id))
+        }
         reload()
         return true
     }
@@ -851,6 +906,37 @@ final class EventStore: ObservableObject {
                 feed.updatedAt = .now
             }
         }
+        deleteCopies(of: event)
+    }
+
+    /// A logical entry can temporarily have both the widget's direct record
+    /// and Core Data's export. Every removal must remove both local copies.
+    private func deleteCopies(of event: LogEvent) {
+        if let id = event.id {
+            for copy in persistence.events(ids: [id], in: context) where copy.child == event.child {
+                context.delete(copy)
+            }
+        }
         context.delete(event)
+    }
+
+    private func referencedEvents(_ objects: [NSManagedObjectID], ids: [UUID], childID: UUID?) -> [LogEvent] {
+        let found: [LogEvent]
+        if ids.isEmpty {
+            found = objects.compactMap { try? context.existingObject(with: $0) as? LogEvent }
+        } else {
+            found = persistence.events(ids: ids, in: context)
+        }
+        return found.filter { !$0.isDeleted && (childID == nil || $0.child?.id == childID) }
+    }
+
+    /// A direct widget record may still be in flight when Undo saves locally.
+    /// Delete it by its deterministic name and suppress a late import too.
+    private func suppressCloudCopy(_ entry: (id: UUID, childID: UUID?)) {
+        WidgetCloudSync.markUndone(entry.id)
+        guard let target = WidgetCloudSync.target(for: entry.childID) else { return }
+        WidgetCloudSync.enqueue([WidgetCloudOp(action: .delete, recordName: entry.id.uuidString, target: target)])
+        guard persistence.cloudKitEnabled else { return }
+        Task { await WidgetCloudSync.flush() }
     }
 }

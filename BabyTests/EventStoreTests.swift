@@ -213,6 +213,63 @@ final class EventStoreTests: XCTestCase {
         XCTAssertNil(store.runningSleep)
     }
 
+    private func addTwin(of event: LogEvent) throws {
+        let twin = LogEvent(context: persistence.viewContext)
+        for key in event.entity.attributesByName.keys { twin.setValue(event.value(forKey: key), forKey: key) }
+        twin.child = event.child
+        try persistence.viewContext.save()
+        store.reload()
+    }
+
+    func testAppUndoRemovesEveryCloudCopy() throws {
+        let event = try XCTUnwrap(store.log(.wet))
+        let id = try XCTUnwrap(event.id)
+        try addTwin(of: event)
+        XCTAssertTrue(store.undoLast())
+        XCTAssertTrue(store.events.isEmpty)
+        XCTAssertTrue(WidgetCloudSync.undoneIDs().contains(id),
+                      "a direct record still in flight must also be suppressed")
+    }
+
+    func testWidgetUndoInTheAppRemovesEveryCloudCopy() throws {
+        let event = try XCTUnwrap(store.log(.wet))
+        let undo = WidgetUndo(eventID: try XCTUnwrap(event.id), kind: .wet, loggedAt: .now)
+        try addTwin(of: event)
+        XCTAssertTrue(store.undoWidgetLog(undo))
+        XCTAssertTrue(store.events.isEmpty)
+    }
+
+    func testUndoSurvivesTheCloudCleanupReplacingItsManagedObject() throws {
+        let event = try XCTUnwrap(store.log(.wet))
+        try addTwin(of: event)
+        persistence.viewContext.delete(event)
+        try persistence.viewContext.save()
+        store.reload()
+        XCTAssertEqual(store.events.count, 1)
+        XCTAssertTrue(store.undoLast(), "Undo follows the logical entry ID after duplicate cleanup")
+        XCTAssertTrue(store.events.isEmpty)
+    }
+
+    func testLiveActivityStopCannotEndAnotherBabysIdenticalTimer() throws {
+        guard #available(iOS 17.2, *) else { throw XCTSkip("Live Activity Stop requires iOS 17.2") }
+        let start = Date.now.addingTimeInterval(-300)
+        let first = try XCTUnwrap(store.child?.id)
+        store.startTimed(.sleep, at: start)
+        let stop = StopRunningIntent(kind: "sleep", startedAt: start, childID: first)
+        store.createChild(name: "Nora", birthDate: nil)
+        store.startTimed(.sleep, at: start)
+        try stop.stop(in: store)
+        XCTAssertNotNil(store.runningSleep)
+    }
+
+    func testWatchUndoRemovesEveryCloudCopy() throws {
+        let payload = WatchLogPayload(action: .log, kind: .wet)
+        XCTAssertTrue(store.apply(payload))
+        try addTwin(of: XCTUnwrap(store.events.first))
+        XCTAssertTrue(store.apply(payload.undo))
+        XCTAssertTrue(store.events.isEmpty)
+    }
+
     func testWatchPayloadStaysWithTheProfileItCameFrom() throws {
         let first = try XCTUnwrap(store.child)
         store.createChild(name: "Other baby", birthDate: nil)

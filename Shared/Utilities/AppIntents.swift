@@ -461,6 +461,9 @@ struct StopRunningIntent: LiveActivityIntent {
     @Parameter(title: "Timer", default: "")
     var timerStart: String
 
+    @Parameter(title: "Baby", default: "")
+    var childID: String
+
     private var startedAt: Date? {
         Double(timerStart).map { Date(timeIntervalSinceReferenceDate: $0) }
     }
@@ -469,8 +472,9 @@ struct StopRunningIntent: LiveActivityIntent {
         kind = EventKind.sleep.rawValue
     }
 
-    init(kind: String, startedAt: Date? = nil) {
+    init(kind: String, startedAt: Date? = nil, childID: UUID? = nil) {
         self.kind = kind
+        self.childID = childID?.uuidString ?? ""
         self.timerStart = startedAt.map { String($0.timeIntervalSinceReferenceDate) } ?? ""
     }
 
@@ -481,6 +485,7 @@ struct StopRunningIntent: LiveActivityIntent {
         let context = persistence.viewContext
         guard let child = persistence.activeChild(in: context),
               let eventKind = EventKind(rawValue: kind) else { return .result() }
+        guard childID.isEmpty || child.id?.uuidString == childID else { return .result() }
         let now = Date.now
         let running = persistence.runningEvents(eventKind, for: child, in: context)
         if let startedAt, !running.contains(where: { $0.start == startedAt }) { return .result() }
@@ -499,6 +504,8 @@ struct StopRunningIntent: LiveActivityIntent {
 #if !BABY_WIDGET
     @MainActor
     func stop(in store: EventStore) throws {
+        store.refresh(force: false)
+        guard childID.isEmpty || store.child?.id?.uuidString == childID else { return }
         guard let eventKind = EventKind(rawValue: kind) else { return }
         let isRunning: Bool = switch eventKind {
         case .feed: store.runningFeed != nil

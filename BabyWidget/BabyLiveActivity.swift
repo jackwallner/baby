@@ -59,7 +59,7 @@ struct BabyLiveActivity: Widget {
                     .foregroundStyle(AppTheme.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-                Text("\(context.attributes.childName) · since \(Format.time(context.state.startedAt))")
+                Text("\(context.state.childName ?? context.attributes.childName) · since \(Format.time(context.state.startedAt))")
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
                     .lineLimit(1)
@@ -78,8 +78,8 @@ struct BabyLiveActivity: Widget {
     @ViewBuilder
     private func stopButton(_ context: ActivityViewContext<BabyActivityAttributes>) -> some View {
         if #available(iOS 17.2, *) {
-            Button(intent: StopRunningIntent(kind: context.attributes.kind, startedAt: context.state.startedAt)) {
-                Text(context.attributes.kind == EventKind.sleep.rawValue ? "Wake" : "Stop")
+            Button(intent: StopRunningIntent(kind: kind(context), startedAt: context.state.startedAt, childID: context.attributes.childID)) {
+                Text(kind(context) == EventKind.sleep.rawValue ? "Wake" : "Stop")
                     .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
                     .fixedSize(horizontal: true, vertical: false)
@@ -94,17 +94,21 @@ struct BabyLiveActivity: Widget {
         Text(context.state.startedAt, style: .timer)
     }
 
+    private func kind(_ context: ActivityViewContext<BabyActivityAttributes>) -> String {
+        context.state.kind ?? context.attributes.kind
+    }
+
     private func title(_ context: ActivityViewContext<BabyActivityAttributes>) -> String {
-        if context.attributes.kind == EventKind.sleep.rawValue { return "Asleep" }
-        if let sides = FeedSide.label(for: FeedSide.decode(context.attributes.side)) { return "Feeding · \(sides)" }
+        if kind(context) == EventKind.sleep.rawValue { return "Asleep" }
+        if let sides = FeedSide.label(for: FeedSide.decode(context.state.kind == nil ? context.attributes.side : context.state.side)) { return "Feeding · \(sides)" }
         return "Feeding"
     }
 
     private func symbol(_ context: ActivityViewContext<BabyActivityAttributes>) -> String {
-        context.attributes.kind == EventKind.sleep.rawValue ? EventKind.sleep.symbolName : EventKind.feed.symbolName
+        kind(context) == EventKind.sleep.rawValue ? EventKind.sleep.symbolName : EventKind.feed.symbolName
     }
 
     private func color(_ context: ActivityViewContext<BabyActivityAttributes>) -> Color {
-        context.attributes.kind == EventKind.sleep.rawValue ? AppTheme.sleep : AppTheme.feed
+        kind(context) == EventKind.sleep.rawValue ? AppTheme.sleep : AppTheme.feed
     }
 }

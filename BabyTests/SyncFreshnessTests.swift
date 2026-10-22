@@ -114,9 +114,9 @@ final class SyncFreshnessTests: XCTestCase {
         XCTAssertTrue(Persistence.isExternal("com.jackwallner.baby.widget", own: own))
         XCTAssertTrue(Persistence.isExternal(nil, own: own))
         XCTAssertFalse(Persistence.isExternal(own, own: own), "this process's saves merge already")
-        XCTAssertFalse(
+        XCTAssertTrue(
             Persistence.isExternal("NSCloudKitMirroringDelegate.import", own: own),
-            "CloudKit's imports merge already"
+            "imports must merge even when the automatic main-queue merge has not run"
         )
     }
 
@@ -174,5 +174,57 @@ final class SyncFreshnessTests: XCTestCase {
         let now = Date.now
         XCTAssertEqual(SettingsView.syncedPhrase(now.addingTimeInterval(-20), now: now), "just now")
         XCTAssertNotEqual(SettingsView.syncedPhrase(now.addingTimeInterval(-600), now: now), "just now")
+    }
+
+    func testATapMergesTheWidgetSleepBeforeDecidingWhetherToWake() throws {
+        let (app, widget) = makeAppAndWidget()
+        let child = try XCTUnwrap(widget.activeChild(in: widget.viewContext))
+        widget.insert(kind: .sleep, at: .now.addingTimeInterval(-300), for: child, in: widget.viewContext)
+        XCTAssertTrue(widget.save(widget.viewContext))
+        app.toggleSleep()
+        XCTAssertNil(app.runningSleep, "a wake tap must not create a second sleep from a stale snapshot")
+        XCTAssertEqual(app.events.filter { $0.eventKind == .sleep }.count, 1)
+    }
+
+    func testImportIsMergedBeforeTheScheduledMainQueueMergeRuns() throws {
+        let (app, _) = makeAppAndWidget()
+        let sleep = try XCTUnwrap(app.startTimed(.sleep, at: .now.addingTimeInterval(-300)))
+        let id = sleep.objectID
+        let background = app.persistence.newBackgroundContext()
+        background.transactionAuthor = "NSCloudKitMirroringDelegate.import"
+        try background.performAndWait {
+            let remote = try XCTUnwrap(background.existingObject(with: id) as? LogEvent)
+            remote.endedAt = .now
+            try background.save()
+        }
+        app.refresh(force: false)
+        XCTAssertNil(app.summary.runningSleepStart, "a completed import must not leave the Live Activity running")
+    }
+
+    func testConcurrentAppAndWidgetEditsPreserveDifferentFields() throws {
+        let (app, widget) = makeAppAndWidget()
+        let feed = try XCTUnwrap(app.startTimed(.feed, side: .left, at: .now.addingTimeInterval(-300)))
+        let child = try XCTUnwrap(widget.activeChild(in: widget.viewContext))
+        let other = try XCTUnwrap(widget.events(for: child, in: widget.viewContext).first)
+        feed.note = "from the app"
+        other.endedAt = .now
+        XCTAssertTrue(widget.save(widget.viewContext))
+        XCTAssertTrue(app.save())
+        XCTAssertEqual(app.events.first?.note, "from the app")
+        XCTAssertNotNil(app.events.first?.endedAt)
+    }
+
+    func testBackgroundCleanupEditsMergeBeforeAutomaticDelivery() throws {
+        let (app, _) = makeAppAndWidget()
+        let feed = try XCTUnwrap(app.startTimed(.feed, side: .left))
+        let id = feed.objectID
+        let context = app.persistence.newBackgroundContext()
+        try context.performAndWait {
+            let changed = try XCTUnwrap(context.existingObject(with: id) as? LogEvent)
+            changed.feedSide = .right
+            try context.save()
+        }
+        app.refresh(force: false)
+        XCTAssertEqual(app.summary.runningSides, [.right])
     }
 }

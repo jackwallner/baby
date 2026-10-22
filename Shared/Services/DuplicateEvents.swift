@@ -8,8 +8,8 @@ import Foundation
 ///
 /// The choice has to be the same on every device, or two phones could each
 /// delete a different copy and lose the entry: the copy whose record is named
-/// after the entry (the widget's) wins, then the lowest record name. A copy
-/// with no record yet has never left this phone and always loses.
+/// after the entry (the widget's) wins, then the lowest record name. Cleanup
+/// waits for every name, since a missing name may belong to the winner.
 enum DuplicateEvents {
     /// Deletes the extra copies and returns how many went. Does not save.
     static func remove(in context: NSManagedObjectContext, recordName: (NSManagedObjectID) -> String?) -> Int {
@@ -19,8 +19,15 @@ enum DuplicateEvents {
         request.predicate = NSPredicate(format: "id IN %@", ids)
         guard let copies = try? context.fetch(request) else { return 0 }
         var removed = 0
-        for group in Dictionary(grouping: copies, by: { $0.id }).values where group.count > 1 {
-            let ranked = group.sorted { rank($0, recordName) < rank($1, recordName) }
+        struct Identity: Hashable {
+            let child: NSManagedObjectID?
+            let event: UUID?
+        }
+        let groups = Dictionary(grouping: copies) { Identity(child: $0.child?.objectID, event: $0.id) }
+        for group in groups.values where group.count > 1 {
+            let named = group.compactMap { event in recordName(event.objectID).map { (event, $0) } }
+            guard named.count == group.count else { continue }
+            let ranked = named.sorted { rank($0.0, $0.1) < rank($1.0, $1.1) }.map(\.0)
             let keeper = ranked[0]
             for extra in ranked.dropFirst() {
                 // An edit made to the losing copy since must not be lost.
@@ -53,8 +60,7 @@ enum DuplicateEvents {
 
     /// Lower ranks first. Only names, never local object ids, decide, so
     /// every device ranks the same copies the same way.
-    private static func rank(_ event: LogEvent, _ recordName: (NSManagedObjectID) -> String?) -> String {
-        guard let name = recordName(event.objectID) else { return "2" }
+    private static func rank(_ event: LogEvent, _ name: String) -> String {
         if name == event.id?.uuidString { return "0" }
         return "1" + name
     }

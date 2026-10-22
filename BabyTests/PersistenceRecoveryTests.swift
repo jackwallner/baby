@@ -63,4 +63,16 @@ final class PersistenceRecoveryTests: XCTestCase {
         persistence.viewContext.assign(added, to: persistence.privateStore)
         XCTAssertFalse(persistence.save(persistence.viewContext), "a write that would vanish is refused")
     }
+
+    func testBusyAndFullDisksDoNotReplaceAHealthySharedDatabase() {
+        for error in [
+            NSError(domain: NSSQLiteErrorDomain, code: 5),
+            NSError(domain: NSSQLiteErrorDomain, code: 13),
+            NSError(domain: NSPOSIXErrorDomain, code: Int(ENOSPC)),
+            NSError(domain: NSCocoaErrorDomain, code: NSPersistentStoreTimeoutError),
+            NSError(domain: NSCocoaErrorDomain, code: NSPersistentStoreIncompatibleVersionHashError),
+        ] {
+            XCTAssertFalse(Persistence.isCorrupt(error), "\(error) must not move a healthy log aside")
+        }
+    }
 }

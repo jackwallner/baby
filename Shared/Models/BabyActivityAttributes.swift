@@ -7,6 +7,10 @@ import Foundation
 struct BabyActivityAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         var startedAt: Date
+        // Optional fields let activities from an older build still decode.
+        var kind: String?
+        var side: String?
+        var childName: String?
     }
 
     /// `EventKind` raw value: "feed" or "sleep".
@@ -14,5 +18,6 @@ struct BabyActivityAttributes: ActivityAttributes {
     /// `FeedSide.encode` of a feed's sides, nil for sleep or no side.
     var side: String?
     var childName: String
+    var childID: UUID?
 }
 #endif

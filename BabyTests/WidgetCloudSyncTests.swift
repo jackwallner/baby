@@ -3,6 +3,23 @@ import CoreData
 import XCTest
 @testable import Baby
 
+private actor SuspendedUpload {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private(set) var actions: [WidgetCloudOp.Action] = []
+    var isWaiting: Bool { continuation != nil }
+
+    func send(_ ops: [WidgetCloudOp]) async -> Set<WidgetCloudRecordKey> {
+        actions.append(contentsOf: ops.map(\.action))
+        if actions.count == 1 { await withCheckedContinuation { continuation = $0 } }
+        return Set(ops.map(\.key))
+    }
+
+    func resume() {
+        continuation?.resume()
+        continuation = nil
+    }
+}
+
 @MainActor
 final class WidgetCloudSyncTests: XCTestCase {
     private var persistence: Persistence!
@@ -11,6 +28,7 @@ final class WidgetCloudSyncTests: XCTestCase {
 
     override func setUp() async throws {
         persistence = Persistence(cloudKit: false, inMemory: true)
+        try? FileManager.default.removeItem(at: WidgetCloudSync.queueDirectory)
         for key in [AppGroup.Key.widgetCloudOps, AppGroup.Key.undoneEventIDs, AppGroup.Key.cloudTargets, AppGroup.Key.cloudRecordNames] {
             AppGroup.defaults.removeObject(forKey: key)
         }
@@ -69,8 +87,9 @@ final class WidgetCloudSyncTests: XCTestCase {
         let local = makeEvent(id: id, child: child, updatedAt: .now)
         local.endedAt = .now
         try context.save()
-        XCTAssertEqual(DuplicateEvents.remove(in: context) { $0 == imported.objectID ? "Z-record" : nil }, 1)
-        XCTAssertTrue(local.isDeleted, "a copy that never left this phone always loses")
+        XCTAssertEqual(DuplicateEvents.remove(in: context) { $0 == imported.objectID ? "Z-record" : nil }, 0)
+        XCTAssertEqual(DuplicateEvents.remove(in: context) { $0 == imported.objectID ? "Z-record" : "ZZ-local" }, 1)
+        XCTAssertTrue(local.isDeleted, "cleanup waits until both record names are known")
         XCTAssertNotNil(imported.endedAt, "the losing copy's newer edit moves to the keeper")
     }
 
@@ -101,12 +120,12 @@ final class WidgetCloudSyncTests: XCTestCase {
         XCTAssertEqual(undone.map(\.action), [.delete])
     }
 
-    func testAppDropsUploadsItAlreadyExported() {
+    func testAppRetainsUploadsUntilExportIsConfirmed() {
         let old = WidgetCloudOp(action: .create, recordName: "old", values: nil, target: target, queuedAt: .now.addingTimeInterval(-120))
         let fresh = WidgetCloudOp(action: .create, recordName: "fresh", values: nil, target: target, queuedAt: .now)
         WidgetCloudSync.enqueue([old, fresh])
-        WidgetCloudSync.dropExported(before: .now.addingTimeInterval(-60))
-        XCTAssertEqual(WidgetCloudSync.pending().map(\.recordName), ["fresh"])
+        WidgetCloudSync.prune()
+        XCTAssertEqual(WidgetCloudSync.pending().map(\.recordName), ["old", "fresh"])
     }
 
     func testRecordNamesFallBackToTheEntryID() {
@@ -130,5 +149,120 @@ final class WidgetCloudSyncTests: XCTestCase {
         XCTAssertEqual(WidgetCloudSync.undoneIDs(), [])
         WidgetCloudSync.markUndone(id)
         XCTAssertEqual(WidgetCloudSync.undoneIDs(), [id])
+    }
+
+    func testUnresolvedCopiesWaitForStableCloudRecordNames() throws {
+        let child = Child.make(in: context, name: "Nora", birthDate: nil)
+        let id = UUID()
+        _ = makeEvent(id: id, child: child)
+        _ = makeEvent(id: id, child: child)
+        try context.save()
+        XCTAssertEqual(DuplicateEvents.remove(in: context) { _ in nil }, 0,
+                       "two phones must not delete different copies before names resolve")
+        XCTAssertEqual(persistence.events(ids: [id], in: context).count, 2)
+    }
+
+    func testDuplicateIDsInDifferentBabiesKeepBothLogs() throws {
+        let first = Child.make(in: context, name: "First", birthDate: nil)
+        let second = Child.make(in: context, name: "Second", birthDate: nil)
+        let id = UUID()
+        _ = makeEvent(id: id, child: first)
+        _ = makeEvent(id: id, child: second)
+        try context.save()
+        XCTAssertEqual(DuplicateEvents.remove(in: context) { $0.uriRepresentation().absoluteString }, 0)
+        XCTAssertEqual(persistence.events(ids: [id], in: context).count, 2)
+    }
+
+    func testQueueDoesNotFoldDifferentZonesTogether() {
+        var other = target
+        other.zoneName = "another-baby"
+        let first = WidgetCloudOp(action: .delete, recordName: "same-name", target: target)
+        let second = WidgetCloudOp(action: .delete, recordName: "same-name", target: other)
+        XCTAssertEqual(WidgetCloudSync.fold([first], [second]).count, 2)
+    }
+
+    func testLaunchingTheAppDoesNotDiscardAnUnsentCloudDelete() {
+        let deletion = WidgetCloudOp(action: .delete, recordName: "undone", target: target,
+                                     queuedAt: .now.addingTimeInterval(-120))
+        WidgetCloudSync.enqueue([deletion])
+        WidgetCloudSync.prune()
+        XCTAssertEqual(WidgetCloudSync.pending(), [deletion],
+                       "the app cannot export deletion of a direct record it has never imported")
+    }
+
+    func testConcurrentEnqueuesKeepEveryOperation() {
+        let target = target
+        DispatchQueue.concurrentPerform(iterations: 64) { index in
+            WidgetCloudSync.enqueue([WidgetCloudOp(action: .delete, recordName: "concurrent-\(index)", target: target)])
+        }
+        XCTAssertEqual(Set(WidgetCloudSync.pending().map(\.recordName)).count, 64)
+    }
+
+    func testTimerUpdatePreservesAPartnersOtherFields() {
+        let child = Child.make(in: context, name: "Nora", birthDate: nil)
+        let sleep = LogEvent.make(in: context, child: child, kind: .sleep, at: .now)
+        let record = CloudEventWriter.record(for: CloudEventValues(sleep), named: "sleep", in: target)
+        record["CD_note"] = "partner's note"
+        record["CD_startedAt"] = sleep.start.addingTimeInterval(-60)
+        sleep.endedAt = .now
+        sleep.updatedAt = .now
+        CloudEventWriter.apply(CloudEventValues(sleep), to: record)
+        XCTAssertEqual(record["CD_note"] as? String, "partner's note")
+        XCTAssertEqual(record["CD_startedAt"] as? Date, sleep.start.addingTimeInterval(-60))
+        XCTAssertEqual(record["CD_endedAt"] as? Date, sleep.endedAt)
+    }
+
+    func testAnUndoQueuedDuringUploadIsSentAfterTheCreate() async {
+        let upload = SuspendedUpload()
+        WidgetCloudSync.enqueue([WidgetCloudOp(action: .create, recordName: "one", target: target)])
+        let first = Task { await WidgetCloudSync.flush { await upload.send($0) } }
+        while !(await upload.isWaiting) { await Task.yield() }
+        WidgetCloudSync.enqueue([WidgetCloudOp(action: .delete, recordName: "one", target: target)])
+        let competing = await WidgetCloudSync.flush { await upload.send($0) }
+        XCTAssertFalse(competing, "an overlapping flush must not send a delete ahead of an in-flight create")
+        await upload.resume()
+        let success = await first.value
+        XCTAssertTrue(success)
+        let actions = await upload.actions
+        XCTAssertEqual(actions, [.create, .delete])
+        XCTAssertTrue(WidgetCloudSync.pending().isEmpty)
+    }
+
+    func testConcurrentUndoTombstonesKeepEveryID() {
+        let ids = (0..<64).map { _ in UUID() }
+        DispatchQueue.concurrentPerform(iterations: ids.count) { index in WidgetCloudSync.markUndone(ids[index]) }
+        XCTAssertEqual(Set(WidgetCloudSync.undoneIDs()), Set(ids))
+    }
+
+    func testWidgetSummaryCountsCopiesOnceAndUsesTheLatestTimerState() throws {
+        let child = Child.make(in: context, name: "Nora", birthDate: nil)
+        let id = UUID()
+        let older = makeEvent(id: id, kind: .feed, child: child, updatedAt: .now.addingTimeInterval(-60))
+        let newer = makeEvent(id: id, kind: .feed, child: child)
+        newer.endedAt = .now
+        let summary = NowSummary.make(child: child, events: [older, newer])
+        XCTAssertEqual(summary.todayFeeds, 1)
+        XCTAssertNil(summary.runningFeedStart, "a stale duplicate must not keep the timer running")
+        XCTAssertEqual(EventStore.shown([older, newer]).first, newer)
+    }
+
+    func testUnacknowledgedDeletesSurviveLongOfflineGaps() {
+        let deletion = WidgetCloudOp(action: .delete, recordName: "offline-undo", target: target,
+                                     queuedAt: .now.addingTimeInterval(-WidgetCloudSync.queueLifetime * 4))
+        WidgetCloudSync.enqueue([deletion])
+        WidgetCloudSync.prune()
+        XCTAssertEqual(WidgetCloudSync.pending(), [deletion])
+    }
+
+    func testAStaleWidgetTimerCannotOverwriteANewerTimerEdit() {
+        let child = Child.make(in: context, name: "Nora", birthDate: nil)
+        let sleep = LogEvent.make(in: context, child: child, kind: .sleep, at: .now.addingTimeInterval(-600))
+        let values = CloudEventValues(sleep)
+        let record = CloudEventWriter.record(for: values, named: "sleep", in: target)
+        let ended = Date.now
+        record["CD_endedAt"] = ended
+        record["CD_updatedAt"] = ended.addingTimeInterval(60)
+        CloudEventWriter.apply(values, to: record)
+        XCTAssertEqual(record["CD_endedAt"] as? Date, ended)
     }
 }

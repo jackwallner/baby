@@ -38,9 +38,13 @@ final class Persistence: @unchecked Sendable {
     static let storesDidReopen = Notification.Name("BabyPersistenceStoresDidReopen")
 
     let container: NSPersistentCloudKitContainer
-    private(set) var privateStore: NSPersistentStore
-    private(set) var sharedStore: NSPersistentStore
-    private(set) var cloudKitEnabled: Bool
+    // Store handles change only at unlock. Background cleanup reads them too.
+    private var storedPrivateStore: NSPersistentStore
+    private var storedSharedStore: NSPersistentStore
+    var privateStore: NSPersistentStore { standInLock.withLock { storedPrivateStore } }
+    var sharedStore: NSPersistentStore { standInLock.withLock { storedSharedStore } }
+    let cloudKitEnabled: Bool
+    private let inMemory: Bool
     /// Nil in production. Tests can inject a throwing operation to exercise
     /// rollback paths without changing the persistent model or store files.
     private let saveOperation: ((NSManagedObjectContext) throws -> Void)?
@@ -77,7 +81,8 @@ final class Persistence: @unchecked Sendable {
         directory: URL? = nil,
         saveOperation: ((NSManagedObjectContext) throws -> Void)? = nil
     ) {
-        cloudKitEnabled = cloudKit && !inMemory
+        var wantsCloudKit = cloudKit && !inMemory
+        self.inMemory = inMemory
         self.saveOperation = saveOperation
         container = NSPersistentCloudKitContainer(name: "Baby", managedObjectModel: BabyModel.model)
 
@@ -105,7 +110,7 @@ final class Persistence: @unchecked Sendable {
             }
             #endif
         }
-        if cloudKitEnabled {
+        if wantsCloudKit {
             let privateOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: AppGroup.cloudKitContainerID)
             privateOptions.databaseScope = .private
             privateDescription.cloudKitContainerOptions = privateOptions
@@ -121,7 +126,7 @@ final class Persistence: @unchecked Sendable {
         for (description, error) in failures where description.cloudKitContainerOptions != nil {
             Self.logger.error("\(Self.name(of: description), privacy: .public) failed with CloudKit: \(String(describing: error), privacy: .public)")
             description.cloudKitContainerOptions = nil
-            cloudKitEnabled = false
+            wantsCloudKit = false
             failures[description] = Self.load([description], in: container)[description]
         }
 
@@ -150,13 +155,16 @@ final class Persistence: @unchecked Sendable {
         }
         // An in-memory store cannot fail to open, so the fallbacks below are
         // unreachable; they only keep the stores non-optional.
-        privateStore = opened[privateDescription] ?? Self.memoryStandIn(in: container)!
-        sharedStore = opened[sharedDescription] ?? Self.memoryStandIn(in: container)!
+        storedPrivateStore = opened[privateDescription] ?? Self.memoryStandIn(in: container)!
+        storedSharedStore = opened[sharedDescription] ?? Self.memoryStandIn(in: container)!
 
-        container.viewContext.automaticallyMergesChangesFromParent = true
-        container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-        container.viewContext.transactionAuthor = Bundle.main.bundleIdentifier
-        historyToken = container.persistentStoreCoordinator.currentPersistentHistoryToken(fromStores: nil)
+        cloudKitEnabled = wantsCloudKit
+        container.viewContext.performAndWait {
+            container.viewContext.automaticallyMergesChangesFromParent = true
+            container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
+            container.viewContext.transactionAuthor = Bundle.main.bundleIdentifier
+            historyToken = container.persistentStoreCoordinator.currentPersistentHistoryToken(fromStores: nil)
+        }
 
         #if os(iOS)
         if isStandingIn {
@@ -233,15 +241,16 @@ final class Persistence: @unchecked Sendable {
     /// protection is keeping shut (a background launch before the first
     /// unlock) is intact and is left exactly where it is, and so is one whose
     /// load said nothing at all.
-    private static func isCorrupt(_ error: Error) -> Bool {
-        if error is StoreMissing { return false }
+    static func isCorrupt(_ error: Error) -> Bool {
         var next: NSError? = error as NSError
         while let error = next {
-            if error.domain == NSCocoaErrorDomain, error.code == NSFileReadNoPermissionError { return false }
-            if error.domain == NSPOSIXErrorDomain, error.code == EPERM || error.code == EACCES { return false }
+            // SQLite extended errors keep the primary error in the low byte.
+            // Busy, full, locked and incompatible-model errors do not prove
+            // corruption and must never replace a shared database file.
+            if error.domain == NSSQLiteErrorDomain, [11, 26].contains(error.code & 0xff) { return true }
             next = error.userInfo[NSUnderlyingErrorKey] as? NSError
         }
-        return true
+        return false
     }
 
     private static func moveAside(_ url: URL) {
@@ -260,6 +269,10 @@ final class Persistence: @unchecked Sendable {
     /// Opens the real files once the phone is unlocked, and tells every
     /// surface to refetch so nobody is left looking at the empty stand-in.
     private func reopenStandInStores() {
+        container.viewContext.performAndWait { reopenOnViewContext() }
+    }
+
+    private func reopenOnViewContext() {
         let shut = standInLock.withLock { standIns }
         guard !shut.isEmpty else { return }
         container.viewContext.reset()
@@ -291,10 +304,12 @@ final class Persistence: @unchecked Sendable {
     }
 
     private func adopt(_ store: NSPersistentStore, for description: NSPersistentStoreDescription) {
-        if description === privateDescription {
-            privateStore = store
-        } else {
-            sharedStore = store
+        standInLock.withLock {
+            if description === privateDescription {
+                storedPrivateStore = store
+            } else {
+                storedSharedStore = store
+            }
         }
     }
 
@@ -302,24 +317,27 @@ final class Persistence: @unchecked Sendable {
 
     /// Merges what other processes saved since the last call into the view
     /// context, so rows it already holds show their new values and rows they
-    /// deleted leave. This process's own saves and CloudKit's imports already
-    /// merge through `automaticallyMergesChangesFromParent`. Main thread only.
+    /// deleted leave. Imports are included even if their automatic main-queue
+    /// merge has not run yet. The view context serializes this cursor.
     @discardableResult
     func mergeExternalChanges() -> Int {
-        guard let historyToken, !isStandingIn else { return 0 }
+        container.viewContext.performAndWait { mergeOnViewContext() }
+    }
+
+    private func mergeOnViewContext() -> Int {
+        guard !inMemory, !isStandingIn else { return 0 }
+        let historyToken = historyToken
         let context = container.viewContext
-        // Taken before the fetch, because CloudKit's imports never match the
-        // filter below: moving only to the last match left the token behind
-        // them, and every reload scanned the whole backlog again. A save that
-        // lands between the two is merged twice, which changes nothing.
+        // Capture the cursor before fetching. A save between these calls can
+        // be merged twice, but cannot be skipped.
         let current = container.persistentStoreCoordinator.currentPersistentHistoryToken(fromStores: nil)
         let request = NSPersistentHistoryChangeRequest.fetchHistory(after: historyToken)
-        // Filtered in the store: a phone catching up on CloudKit writes
-        // thousands of import transactions, and none of them need reading here.
+        // Exclude this process's own saves. A nil cursor on an initially
+        // empty database means fetch from the beginning, never stop merging.
         if let external = NSPersistentHistoryTransaction.fetchRequest {
             external.predicate = NSPredicate(
-                format: "author == nil OR (author != %@ AND NOT (author BEGINSWITH %@))",
-                Bundle.main.bundleIdentifier ?? "", Self.mirroringAuthorPrefix
+                format: "author == nil OR author != %@",
+                Bundle.main.bundleIdentifier ?? ""
             )
             request.fetchRequest = external
         }
@@ -341,19 +359,16 @@ final class Persistence: @unchecked Sendable {
         return merged
     }
 
-    /// Another process's save: not this one's, and not CloudKit mirroring's,
-    /// whose imports are merged already.
+    /// Widget saves and CloudKit imports must both be visible before a tap.
     static func isExternal(_ author: String?, own: String?) -> Bool {
         guard let author else { return true }
-        return author != own && !author.hasPrefix(mirroringAuthorPrefix)
+        return author != own
     }
-
-    private static let mirroringAuthorPrefix = "NSCloudKitMirroringDelegate"
 
     func newBackgroundContext() -> NSManagedObjectContext {
         let context = container.newBackgroundContext()
         context.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
-        context.transactionAuthor = Bundle.main.bundleIdentifier
+        context.transactionAuthor = (Bundle.main.bundleIdentifier ?? AppGroup.bundleID) + ".background"
         return context
     }
 

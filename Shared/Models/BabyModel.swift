@@ -291,6 +291,28 @@ final class LogEvent: NSManagedObject {
         event.child = child
         return event
     }
+
+    /// Show the newest values while CloudKit's two records for a widget tap
+    /// are waiting for cleanup. Call on the events' managed object context.
+    static func coalesced(_ events: [LogEvent]) -> [LogEvent] {
+        struct Identity: Hashable {
+            var child: NSManagedObjectID?
+            var id: UUID
+        }
+        var winners: [Identity: LogEvent] = [:]
+        var anonymous: [LogEvent] = []
+        for event in events where !event.isDeleted {
+            guard let id = event.id else { anonymous.append(event); continue }
+            let key = Identity(child: event.child?.objectID, id: id)
+            if let previous = winners[key],
+               (previous.updatedAt ?? .distantPast) >= (event.updatedAt ?? .distantPast) { continue }
+            winners[key] = event
+        }
+        return (Array(winners.values) + anonymous).sorted {
+            if $0.start == $1.start { return ($0.id?.uuidString ?? "") < ($1.id?.uuidString ?? "") }
+            return $0.start > $1.start
+        }
+    }
 }
 
 /// One wrist action on its way to the phone.

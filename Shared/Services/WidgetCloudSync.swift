@@ -1,4 +1,5 @@
 import CloudKit
+import Darwin
 import Foundation
 import os
 
@@ -18,6 +19,44 @@ struct WidgetCloudOp: Codable, Equatable, Sendable {
     var values: CloudEventValues?
     var target: CloudZoneTarget
     var queuedAt: Date = .now
+
+    var key: WidgetCloudRecordKey {
+        WidgetCloudRecordKey(recordName: recordName, zoneName: target.zoneName,
+                             ownerName: target.ownerName, isShared: target.isShared)
+    }
+}
+
+struct WidgetCloudRecordKey: Hashable, Sendable {
+    let recordName: String
+    let zoneName: String
+    let ownerName: String
+    let isShared: Bool
+}
+
+/// Advisory file locks coordinate separate app and extension processes. A
+/// process-local actor or a UserDefaults read/modify/write cannot do that.
+private final class WidgetCloudLease: Sendable {
+    private let descriptor: Int32
+
+    private init(_ descriptor: Int32) { self.descriptor = descriptor }
+
+    static func acquire(at url: URL, blocking: Bool = true) throws -> WidgetCloudLease? {
+        let descriptor = open(url.path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
+        guard descriptor >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
+        while flock(descriptor, LOCK_EX | (blocking ? 0 : LOCK_NB)) != 0 {
+            if errno == EINTR { continue }
+            let code = errno
+            close(descriptor)
+            if !blocking && code == EWOULDBLOCK { return nil }
+            throw NSError(domain: NSPOSIXErrorDomain, code: Int(code))
+        }
+        return WidgetCloudLease(descriptor)
+    }
+
+    deinit {
+        flock(descriptor, LOCK_UN)
+        close(descriptor)
+    }
 }
 
 /// Widget taps reach the partner's phone without anyone opening the app.
@@ -69,17 +108,41 @@ enum WidgetCloudSync {
 
     // MARK: - Queue
 
-    static func pending() -> [WidgetCloudOp] {
-        guard let data = AppGroup.defaults.data(forKey: AppGroup.Key.widgetCloudOps),
-              let ops = try? JSONDecoder().decode([WidgetCloudOp].self, from: data) else { return [] }
-        return ops
+    static let queueDirectory = AppGroup.containerURL.appendingPathComponent("WidgetCloudSync", isDirectory: true)
+
+    private struct State: Codable {
+        var ops: [WidgetCloudOp] = []
+        var tombstones: [String: Date] = [:]
     }
 
-    private static func save(_ ops: [WidgetCloudOp]) {
-        if ops.isEmpty {
-            AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetCloudOps)
-        } else if let data = try? JSONEncoder().encode(ops) {
-            AppGroup.defaults.set(data, forKey: AppGroup.Key.widgetCloudOps)
+    /// Reads the latest disk state while locked, then atomically replaces it.
+    /// UserDefaults is read only once, to migrate an older installed build.
+    private static func transaction<T>(_ body: (inout State) -> T) throws -> T {
+        try FileManager.default.createDirectory(at: queueDirectory, withIntermediateDirectories: true)
+        let lease = try WidgetCloudLease.acquire(at: queueDirectory.appendingPathComponent("state.lock"))
+        defer { withExtendedLifetime(lease) {} }
+        let url = queueDirectory.appendingPathComponent("state.json")
+        var state: State
+        if FileManager.default.fileExists(atPath: url.path) {
+            state = try JSONDecoder().decode(State.self, from: Data(contentsOf: url))
+        } else {
+            let legacy = AppGroup.defaults.data(forKey: AppGroup.Key.widgetCloudOps)
+                .flatMap { try? JSONDecoder().decode([WidgetCloudOp].self, from: $0) } ?? []
+            let stones = AppGroup.defaults.dictionary(forKey: AppGroup.Key.undoneEventIDs) as? [String: Date] ?? [:]
+            state = State(ops: legacy, tombstones: stones)
+        }
+        let result = body(&state)
+        try JSONEncoder().encode(state).write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetCloudOps)
+        AppGroup.defaults.removeObject(forKey: AppGroup.Key.undoneEventIDs)
+        return result
+    }
+
+    static func pending() -> [WidgetCloudOp] {
+        do { return try transaction { $0.ops } }
+        catch {
+            logger.error("Could not read widget queue: \(String(describing: error), privacy: .public)")
+            return []
         }
     }
 
@@ -88,13 +151,14 @@ enum WidgetCloudSync {
     /// entry added and undone is only a delete.
     static func enqueue(_ new: [WidgetCloudOp]) {
         guard !new.isEmpty else { return }
-        save(fold(pending(), new))
+        do { try transaction { $0.ops = fold($0.ops, new) } }
+        catch { logger.error("Could not queue widget changes: \(String(describing: error), privacy: .public)") }
     }
 
     static func fold(_ queue: [WidgetCloudOp], _ new: [WidgetCloudOp]) -> [WidgetCloudOp] {
         var ops = queue
         for op in new {
-            guard let index = ops.firstIndex(where: { $0.recordName == op.recordName }) else {
+            guard let index = ops.firstIndex(where: { $0.key == op.key }) else {
                 ops.append(op)
                 continue
             }
@@ -105,31 +169,45 @@ enum WidgetCloudSync {
         return ops
     }
 
-    /// Drops what the app has already exported itself: everything queued
-    /// before it started, and everything past its lifetime.
-    static func dropExported(before launch: Date, now: Date = .now) {
-        let kept = pending().filter { $0.queuedAt >= launch && now.timeIntervalSince($0.queuedAt) < queueLifetime }
-        save(kept)
+    /// Starting the app does not prove an export succeeded. In particular a
+    /// direct-record delete cannot be exported until that record is imported.
+    /// Keep deletes until CloudKit confirms them, even after long offline gaps.
+    static func prune(now: Date = .now) {
+        do {
+            try transaction { state in
+                state.ops.removeAll { $0.action != .delete && now.timeIntervalSince($0.queuedAt) >= queueLifetime }
+            }
+        } catch { logger.error("Could not prune widget queue: \(String(describing: error), privacy: .public)") }
     }
 
     // MARK: - Undo tombstones
 
     static func markUndone(_ eventID: UUID, at now: Date = .now) {
-        var stones = tombstones(now: now)
-        stones[eventID.uuidString] = now
-        AppGroup.defaults.set(stones, forKey: AppGroup.Key.undoneEventIDs)
+        do { try transaction { $0.tombstones[eventID.uuidString] = now } }
+        catch { logger.error("Could not record widget Undo: \(String(describing: error), privacy: .public)") }
     }
 
-    /// Entries undone recently enough that a copy coming back is removed.
+    static func restore(_ eventID: UUID) {
+        do { _ = try transaction { $0.tombstones.removeValue(forKey: eventID.uuidString) } }
+        catch { logger.error("Could not restore widget entry: \(String(describing: error), privacy: .public)") }
+    }
+
     static func undoneIDs(now: Date = .now) -> [UUID] {
-        let stones = tombstones(now: now)
-        AppGroup.defaults.set(stones, forKey: AppGroup.Key.undoneEventIDs)
-        return stones.keys.compactMap(UUID.init(uuidString:))
+        Array(undoneDates(now: now).keys)
     }
 
-    private static func tombstones(now: Date) -> [String: Date] {
-        let stored = AppGroup.defaults.dictionary(forKey: AppGroup.Key.undoneEventIDs) as? [String: Date] ?? [:]
-        return stored.filter { now.timeIntervalSince($0.value) < tombstoneLifetime }
+    static func undoneDates(now: Date = .now) -> [UUID: Date] {
+        do {
+            return try transaction { state in
+                state.tombstones = state.tombstones.filter { now.timeIntervalSince($0.value) < tombstoneLifetime }
+                return Dictionary(uniqueKeysWithValues: state.tombstones.compactMap { key, value in
+                    UUID(uuidString: key).map { ($0, value) }
+                })
+            }
+        } catch {
+            logger.error("Could not read widget Undo: \(String(describing: error), privacy: .public)")
+            return [:]
+        }
     }
 
     // MARK: - Upload
@@ -140,51 +218,73 @@ enum WidgetCloudSync {
     /// tap or the app.
     @discardableResult
     static func flush(container: CKContainer = CKContainer(identifier: AppGroup.cloudKitContainerID)) async -> Bool {
-        let now = Date.now
-        let queue = pending().filter { now.timeIntervalSince($0.queuedAt) < queueLifetime }
-        guard !queue.isEmpty else { return true }
-        var finished: Set<String> = []
-        for isShared in [false, true] {
-            let ops = queue.filter { $0.target.isShared == isShared }
-            guard !ops.isEmpty else { continue }
-            let database = CloudEventWriter.database(for: ops[0].target, in: container)
-            finished.formUnion(await send(ops, to: database))
+        await flush { queue in
+            var finished: Set<WidgetCloudRecordKey> = []
+            for isShared in [false, true] {
+                let ops = queue.filter { $0.target.isShared == isShared }
+                guard let first = ops.first else { continue }
+                let database = CloudEventWriter.database(for: first.target, in: container)
+                finished.formUnion(await send(ops, to: database))
+            }
+            return finished
         }
-        // Only what this flush sent leaves; a tap queued meanwhile stays.
-        let remaining = pending().filter { op in
-            !(finished.contains(op.recordName) && queue.contains(op))
-        }
-        save(remaining)
-        logger.info("Widget cloud flush sent \(finished.count) of \(queue.count)")
-        return remaining.isEmpty
+    }
+
+    /// One uploader across processes, including while its network calls are
+    /// suspended. Queue transactions use a separate short-lived file lock.
+    @discardableResult
+    static func flush(using send: @Sendable ([WidgetCloudOp]) async -> Set<WidgetCloudRecordKey>) async -> Bool {
+        do {
+            try FileManager.default.createDirectory(at: queueDirectory, withIntermediateDirectories: true)
+            guard let lease = try WidgetCloudLease.acquire(at: queueDirectory.appendingPathComponent("upload.lock"), blocking: false)
+            else { return false }
+            defer { withExtendedLifetime(lease) {} }
+            prune()
+            // Drain taps queued while a request was suspended, within the
+            // extension's short runtime budget. Failed operations stay queued.
+            for _ in 0..<3 {
+                let queue = try transaction { $0.ops }
+                guard !queue.isEmpty else { return true }
+                let finished = await send(queue)
+                let remaining = try transaction { state in
+                    state.ops.removeAll { finished.contains($0.key) && queue.contains($0) }
+                    return state.ops
+                }
+                if remaining.isEmpty { return true }
+                if finished.isEmpty { return false }
+            }
+        } catch { logger.error("Widget cloud flush failed: \(String(describing: error), privacy: .public)") }
+        return false
     }
 
     /// Returns the record names that are done with: saved, deleted, or gone
     /// from CloudKit so there is nothing left to change.
-    private static func send(_ ops: [WidgetCloudOp], to database: CKDatabase) async -> Set<String> {
+    private static func send(_ ops: [WidgetCloudOp], to database: CKDatabase) async -> Set<WidgetCloudRecordKey> {
         let configuration = CKOperation.Configuration()
         configuration.qualityOfService = .userInitiated
         configuration.timeoutIntervalForRequest = 4
         configuration.timeoutIntervalForResource = 6
         do {
             return try await database.configuredWith(configuration: configuration) { database in
-                var done: Set<String> = []
+                var done: Set<WidgetCloudRecordKey> = []
                 var saving: [CKRecord] = []
-                for op in ops where op.action == .create {
-                    guard let values = op.values else { continue }
-                    saving.append(CloudEventWriter.record(for: values, named: op.recordName, in: op.target))
-                }
-                let updates = ops.filter { $0.action == .update && $0.values != nil }
-                if !updates.isEmpty {
-                    let ids = updates.map { $0.target.recordID($0.recordName) }
+                let changes = ops.filter { $0.action != .delete && $0.values != nil }
+                if !changes.isEmpty {
+                    let ids = changes.map { $0.target.recordID($0.recordName) }
                     let fetched = try await database.records(for: ids)
-                    for op in updates {
+                    for op in changes {
+                        guard let values = op.values else { continue }
                         switch fetched[op.target.recordID(op.recordName)] {
                         case .success(let record)?:
-                            CloudEventWriter.apply(op.values!, to: record)
-                            saving.append(record)
+                            // A retried create may already exist and have
+                            // partner edits. Patch only the timer fields.
+                            CloudEventWriter.apply(values, to: record)
+                            if record.changedKeys().isEmpty { done.insert(op.key) }
+                            else { saving.append(record) }
                         case .failure(let error as CKError)? where error.code == .unknownItem:
-                            done.insert(op.recordName)
+                            if op.action == .create {
+                                saving.append(CloudEventWriter.record(for: values, named: op.recordName, in: op.target))
+                            }
                         default:
                             break
                         }
@@ -194,11 +294,13 @@ enum WidgetCloudSync {
                 let result = try await database.modifyRecords(
                     saving: saving,
                     deleting: deleting,
-                    savePolicy: .changedKeys,
+                    savePolicy: .ifServerRecordUnchanged,
                     atomically: false
                 )
                 for (id, outcome) in result.saveResults {
-                    if case .success = outcome { done.insert(id.recordName) }
+                    if case .success = outcome {
+                        done.formUnion(ops.filter { $0.target.recordID($0.recordName) == id }.map(\.key))
+                    }
                     if case .failure(let error) = outcome {
                         logger.error("Widget cloud save failed: \(String(describing: error), privacy: .public)")
                     }
@@ -206,9 +308,9 @@ enum WidgetCloudSync {
                 for (id, outcome) in result.deleteResults {
                     switch outcome {
                     case .success:
-                        done.insert(id.recordName)
+                        done.formUnion(ops.filter { $0.target.recordID($0.recordName) == id }.map(\.key))
                     case .failure(let error as CKError) where error.code == .unknownItem:
-                        done.insert(id.recordName)
+                        done.formUnion(ops.filter { $0.target.recordID($0.recordName) == id }.map(\.key))
                     case .failure(let error):
                         logger.error("Widget cloud delete failed: \(String(describing: error), privacy: .public)")
                     }

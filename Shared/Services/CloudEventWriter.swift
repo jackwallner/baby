@@ -82,12 +82,20 @@ enum CloudEventWriter {
         record["CD_entityName"] = "LogEvent"
         record["CD_child"] = target.childRecordName
         record["CD_id"] = values.id.uuidString
-        apply(values, to: record)
+        applyAllValues(values, to: record)
         return record
     }
 
-    /// Copies the values that can change after a tap onto a record.
+    /// Widget updates only stop or reopen timers. The other fields may have
+    /// been edited on the partner's phone since this local snapshot was made.
     static func apply(_ values: CloudEventValues, to record: CKRecord) {
+        if let remote = record["CD_updatedAt"] as? Date,
+           remote > (values.updatedAt ?? .distantPast) { return }
+        record["CD_endedAt"] = values.endedAt
+        record["CD_updatedAt"] = values.updatedAt
+    }
+
+    private static func applyAllValues(_ values: CloudEventValues, to record: CKRecord) {
         record["CD_kind"] = values.kind
         record["CD_startedAt"] = values.startedAt
         record["CD_endedAt"] = values.endedAt

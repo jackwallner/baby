@@ -25,12 +25,18 @@ final class SharingService: ObservableObject {
 
     private let persistence: Persistence
     private let events: EventStore
+    private let accountAvailable: @MainActor () async -> Bool
     private let logger = Logger(subsystem: AppGroup.subsystem, category: "Sharing")
 
-    init(persistence: Persistence, share: CKShare? = nil, events: EventStore? = nil) {
+    init(persistence: Persistence, share: CKShare? = nil, events: EventStore? = nil,
+         accountAvailable: @escaping @MainActor () async -> Bool = {
+             (try? await CKContainer(identifier: AppGroup.cloudKitContainerID).accountStatus()) == .available
+         }) {
         self.persistence = persistence
         self.share = share
         self.events = events ?? EventStore(persistence: persistence)
+        self.accountAvailable = accountAvailable
+        shareChildID = self.events.child?.objectID
     }
 
     var ckContainer: CKContainer { CKContainer(identifier: AppGroup.cloudKitContainerID) }
@@ -43,7 +49,12 @@ final class SharingService: ObservableObject {
         // below can take seconds: only the newest refresh may write.
         refreshes += 1
         let generation = refreshes
-        let available = (try? await ckContainer.accountStatus()) == .available
+        // Clear the previous baby's invitation before the first suspension.
+        if child?.objectID != shareChildID {
+            share = nil
+            shareChildID = child?.objectID
+        }
+        let available = await accountAvailable()
         guard generation == refreshes else { return }
         iCloudAvailable = available
         guard let child, persistence.cloudKitEnabled else {
@@ -64,7 +75,7 @@ final class SharingService: ObservableObject {
         guard generation == refreshes else { return }
         switch lookup {
         case .found(let found):
-            share = found
+            cache(found, for: objectID)
         case .failed(let zoneID):
             // A transient failure must not make a shared log look unshared.
             // Keep the last known share if it belongs to this baby.
@@ -73,6 +84,14 @@ final class SharingService: ObservableObject {
     }
 
     private var refreshes = 0
+
+    /// An async operation may finish after a different baby was selected.
+    func cache(_ updated: CKShare?, for childID: NSManagedObjectID) {
+        guard events.child?.objectID == childID else { return }
+        refreshes += 1
+        shareChildID = childID
+        share = updated
+    }
 
     private enum ShareLookup: @unchecked Sendable {
         case found(CKShare?)
@@ -100,14 +119,16 @@ final class SharingService: ObservableObject {
     func shareForPresentation(child: Child) async throws -> CKShare {
         // The active baby may have changed since the last async refresh.
         // Never reuse a cached invitation belonging to a different baby.
-        await waitForFirstExport(of: child)
+        try await waitForFirstExport(of: child)
+        try Task.checkCancellation()
         if let existing = try persistence.container.fetchShares(matching: [child.objectID])[child.objectID] {
-            share = existing
+            cache(existing, for: child.objectID)
             return existing
         }
         let (_, newShare, _) = try await persistence.container.share([child], to: nil)
         newShare[CKShare.SystemFieldKey.title] = "\(child.displayName)'s log" as CKRecordValue
-        share = newShare
+        try Task.checkCancellation()
+        cache(newShare, for: child.objectID)
         return newShare
     }
 
@@ -115,14 +136,15 @@ final class SharingService: ObservableObject {
     /// the share as it is; only the owner may change who can join.
     func inviteShare(child: Child) async throws -> CKShare {
         guard !persistence.isShared(child) else { return try await shareForPresentation(child: child) }
-        await waitForFirstExport(of: child)
+        try await waitForFirstExport(of: child)
         let opened = try await ShareInvite.prepare(
             for: [child],
             title: "\(child.displayName)'s log",
             container: persistence.container,
             database: ckContainer.privateCloudDatabase
         )
-        share = opened
+        try Task.checkCancellation()
+        cache(opened, for: child.objectID)
         return opened
     }
 
@@ -179,15 +201,17 @@ final class SharingService: ObservableObject {
     /// exported record is the observable proof that setup is done. Verified
     /// against the real Production container by
     /// `scripts/cloudkit-schema` `--verify-share`.
-    private func waitForFirstExport(of child: Child) async {
+    private func waitForFirstExport(of child: Child) async throws {
         guard persistence.cloudKitEnabled else { return }
         // First setup on a fresh install can take about two minutes.
         let deadline = Date.now.addingTimeInterval(150)
-        while Date.now < deadline, !Task.isCancelled {
+        while Date.now < deadline {
+            try Task.checkCancellation()
             if persistence.container.recordID(for: child.objectID) != nil { return }
-            try? await Task.sleep(for: .milliseconds(500))
+            try await Task.sleep(for: .milliseconds(500))
         }
         logger.error("share requested before the first CloudKit export finished")
+        throw JoinError.unavailable
     }
 
     /// Called from the sharing controller after it saves, and after a share is
@@ -195,17 +219,19 @@ final class SharingService: ObservableObject {
     func persist(_ updated: CKShare, for child: Child) async throws {
         guard let store = child.objectID.persistentStore else { return }
         let saved = try await persistence.container.persistUpdatedShare(updated, in: store)
-        share = saved
+        cache(saved, for: child.objectID)
     }
 
     func stopped(for child: Child) async throws {
-        guard let share, let store = child.objectID.persistentStore else { return }
+        guard let store = child.objectID.persistentStore else { return }
         // Leaving someone else's share removes its local copy. Stopping our
         // own share must never purge the baby's original log.
         if persistence.isShared(child) {
-            _ = try await persistence.container.purgeObjectsAndRecordsInZone(with: share.recordID.zoneID, in: store)
+            let lookup = await Self.lookUpShare(for: child.objectID, in: persistence.container)
+            guard case .found(let target) = lookup, let target else { throw JoinError.unavailable }
+            _ = try await persistence.container.purgeObjectsAndRecordsInZone(with: target.recordID.zoneID, in: store)
         }
-        self.share = nil
+        cache(nil, for: child.objectID)
         events.reload()
     }
 
