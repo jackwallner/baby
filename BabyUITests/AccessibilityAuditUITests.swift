@@ -21,11 +21,16 @@ final class AccessibilityAuditUITests: XCTestCase {
         return app
     }
 
-    private func snap(_ app: XCUIApplication, _ name: String) {
+    /// Screenshot without the element dump, which takes minutes at the largest text.
+    private func shot(_ app: XCUIApplication, _ name: String) {
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = name
         shot.lifetime = .keepAlways
         add(shot)
+    }
+
+    private func snap(_ app: XCUIApplication, _ name: String) {
+        shot(app, name)
 
         let screen = app.windows.firstMatch.frame
         var lines = ["screen \(Int(screen.width))x\(Int(screen.height))"]
@@ -98,13 +103,28 @@ final class AccessibilityAuditUITests: XCTestCase {
         snap(app, "B02-now-scrolled")
         app.swipeDown(); app.swipeDown(); app.swipeDown(); app.swipeDown()
         app.buttons["log.feed"].tap()
-        sleep(1)
-        snap(app, "B03-after-feed-with-sides-and-toast")
-        // Is the Undo toast and the capsule still usable?
+        // The Undo toast lasts 8 seconds and the element dump takes longer, so
+        // measure the toast first and take the dump after.
         let undo = app.buttons["Undo"]
-        add(XCTAttachment(string: "undo exists=\(undo.exists) hittable=\(undo.isHittable) frame=\(undo.frame)"))
+        let appeared = undo.waitForExistence(timeout: 3)
+        add(XCTAttachment(string: "undo exists=\(appeared) hittable=\(undo.isHittable) frame=\(undo.frame) toast=\(app.otherElements["undoToast"].frame)"))
+        shot(app, "B03-after-feed-with-sides-and-toast")
+        snap(app, "B03b-after-feed-dump")
         app.buttons["logTime.earlier"].tap()
-        snap(app, "B04-log-time-wound-back")
+        shot(app, "B04-log-time-wound-back")
+    }
+
+    /// Does the toast outlast a slow reader? Counts how long Undo stays.
+    func testUndoToastLifetimeXXXL() {
+        let app = launch(size: xxxl)
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 15))
+        scrollTo(app.buttons["log.feed"], in: app)
+        app.buttons["log.feed"].tap()
+        let undo = app.buttons["Undo"]
+        XCTAssertTrue(undo.waitForExistence(timeout: 3))
+        let start = Date()
+        while undo.exists && Date().timeIntervalSince(start) < 15 { usleep(250_000) }
+        add(XCTAttachment(string: "undo visible for \(String(format: "%.1f", Date().timeIntervalSince(start))) s after the tap"))
     }
 
     func testNavigationXXXL() {
@@ -151,22 +171,31 @@ final class AccessibilityAuditUITests: XCTestCase {
 
     // MARK: - Settings pages that matter for the persona
 
-    func testSettingsDetailXXXL() {
+    func testSettingsSectionsXXXL() {
         let app = launch(size: xxxl)
         XCTAssertTrue(app.buttons["tab.settings"].waitForExistence(timeout: 15))
         app.buttons["tab.settings"].tap()
-        for label in ["Buttons", "Appearance", "Reminders", "First Weeks"] {
-            let row = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", label)).firstMatch
-            var tries = 0
-            while !row.isHittable && tries < 10 { app.swipeUp(); tries += 1 }
-            guard row.exists else { add(XCTAttachment(string: "missing row \(label)")); continue }
-            row.tap()
-            sleep(1)
-            snap(app, "E-\(label.replacingOccurrences(of: " ", with: "-"))-xxxl")
-            let back = app.navigationBars.buttons.firstMatch
-            if back.exists { back.tap() }
-            app.swipeDown(); app.swipeDown(); app.swipeDown()
+        sleep(1)
+        var screens = 0
+        while screens < 14 {
+            app.swipeUp()
+            screens += 1
+            shot(app, String(format: "E%02d-settings-xxxl", screens))
         }
+    }
+
+    func testHistoryCalendarXXXL() {
+        let app = launch(size: xxxl)
+        XCTAssertTrue(app.buttons["tab.history"].waitForExistence(timeout: 15))
+        app.buttons["tab.history"].tap()
+        sleep(1)
+        let calendar = app.buttons["Calendar"]
+        add(XCTAttachment(string: "calendar segment exists=\(calendar.exists) frame=\(calendar.frame)"))
+        if calendar.exists { calendar.tap() }
+        sleep(1)
+        shot(app, "J01-history-calendar-xxxl")
+        app.swipeUp()
+        shot(app, "J02-history-calendar-xxxl-scrolled")
     }
 
     // MARK: - Dark and a standard size, for contrast and baseline
@@ -195,11 +224,13 @@ final class AccessibilityAuditUITests: XCTestCase {
     // MARK: - Reminder offer sheet at the largest text
 
     func testReminderOfferXXXL() {
-        let app = launch(size: xxxl, seed: false, extra: ["-ShowReminderOffer"])
+        let app = launch(size: xxxl, extra: ["-ShowReminderOffer"])
         XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 15))
+        scrollTo(app.buttons["log.feed"], in: app)
         app.buttons["log.feed"].tap()
         sleep(8)
-        snap(app, "H01-reminder-offer-xxxl")
+        shot(app, "H01-reminder-offer-xxxl")
+        snap(app, "H01b-reminder-offer-dump")
         for id in ["reminderOffer.accept", "reminderOffer.decline"] {
             let el = app.buttons[id]
             add(XCTAttachment(string: "\(id) exists=\(el.exists) hittable=\(el.isHittable) frame=\(el.frame)"))
