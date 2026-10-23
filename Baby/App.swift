@@ -397,6 +397,7 @@ struct BabyHomeView: View {
         let isHistoryPane = tab == .history && split != nil
         return screen(tab)
             .environment(\.horizontalSizeClass, split == nil ? horizontalSizeClass : .compact)
+            .ignoresSafeArea(.container, edges: split?.foldEdge(isSecondary: isHistoryPane) ?? [])
             .frame(
                 maxWidth: (isHistoryPane ? split?.secondaryWidth : split?.primaryWidth) ?? .infinity,
                 maxHeight: .infinity

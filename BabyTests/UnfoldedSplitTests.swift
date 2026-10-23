@@ -1,3 +1,4 @@
+import SwiftUI
 import XCTest
 @testable import Baby
 
@@ -26,6 +27,12 @@ final class UnfoldedSplitTests: XCTestCase {
     func testFoldLeavingANarrowPaneFallsBackToEvenSplit() {
         let split = UnfoldedSplit.make(width: 951, isRegularWidth: true, fold: 300...320)
         XCTAssertEqual(split, UnfoldedSplit(primaryWidth: 475, secondaryX: 475, secondaryWidth: 476))
+    }
+
+    func testEachPaneDropsTheSideInsetAtTheFold() {
+        let split = UnfoldedSplit.make(width: 951, isRegularWidth: true, fold: 466...485)
+        XCTAssertEqual(split?.foldEdge(isSecondary: false), .trailing)
+        XCTAssertEqual(split?.foldEdge(isSecondary: true), .leading)
     }
 
     func testEveryPaneIsAtLeastTheMinimumWidth() {
