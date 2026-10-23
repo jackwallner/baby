@@ -392,12 +392,14 @@ struct BabyHomeView: View {
         selected = tab
     }
 
-    /// Each unfolded pane is phone-width, so its screen lays out as on a phone.
+    /// Every screen is a phone layout, and each unfolded pane is phone-width.
+    /// The size class stays compact before the split is measured too: a pane
+    /// that launched regular could keep it, and Log then drew iPad-style, its
+    /// title leading and its page 84 pt short of the fold.
     private func pane(_ tab: HomeTab) -> some View {
         let isHistoryPane = tab == .history && split != nil
         return screen(tab)
-            .environment(\.horizontalSizeClass, split == nil ? horizontalSizeClass : .compact)
-            .ignoresSafeArea(.container, edges: split?.foldEdge(isSecondary: isHistoryPane) ?? [])
+            .environment(\.horizontalSizeClass, .compact)
             .frame(
                 maxWidth: (isHistoryPane ? split?.secondaryWidth : split?.primaryWidth) ?? .infinity,
                 maxHeight: .infinity

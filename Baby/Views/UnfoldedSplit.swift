@@ -31,13 +31,6 @@ struct UnfoldedSplit: Equatable, Sendable {
         let half = (width / 2).rounded(.down)
         return UnfoldedSplit(primaryWidth: half, secondaryX: half, secondaryWidth: width - half)
     }
-
-    /// The pane's side at the fold, where the display's side inset (the
-    /// unfolded status bar) never reaches. A cold unfold once handed the
-    /// leading pane the trailing inset and laid Log out 84 pt narrow.
-    func foldEdge(isSecondary: Bool) -> Edge.Set {
-        isSecondary ? .leading : .trailing
-    }
 }
 
 /// The container's width and fold, measured together so one change

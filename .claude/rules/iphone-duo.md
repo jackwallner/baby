@@ -21,8 +21,8 @@ paths:
   `TabView`, so History can be either a tab or a pane without being rebuilt.
   Folding only moves frames: scroll, settings path and History layout survive.
   Hidden screens are hit-test and accessibility hidden, as the tabs were.
-- Each pane gets `horizontalSizeClass = .compact`, so it lays out as on a
-  phone. The capsule and the Undo toast are framed to the primary pane, never
+- Every screen gets `horizontalSizeClass = .compact` always, not only once
+  split, so it lays out as on a phone (the app is iPhone only). The capsule and the Undo toast are framed to the primary pane, never
   across the fold. History's pane drops the capsule's bottom reservation.
 - Unfolded, the capsule is docked (2026-10-22, the shots review rejected
   Reports, First Weeks and Settings with the capsule over a chart, the day
@@ -60,12 +60,10 @@ paths:
   before about 1 pm local shows a near-empty Today. The capture script
   passes `--env TZ=America/Sao_Paulo` (an evening zone for a run around
   midnight UTC); pick a zone where launch lands in the evening.
-- Open (2026-10-21, gh-sim launch-only run on 33cae0e, 1 of 5 runs): every
-  leading pane laid out about 84 pt narrower than the split (374 of 457 pt;
-  84 is the inner display's trailing status-bar inset, which only History
-  should feel), with Now's inline title leading-aligned and First Weeks'
-  back button on the right, while the capsule still spanned 457 pt. Same
-  fresh relaunch on the inner display as the passing `all` runs; that run
-  booted cold and gh-sim logged "simctl io enumerate empty". Reproduce on a
-  local Duo before changing code; the likely fix is to stop the primary
-  pane inheriting the trailing inset (it ends at the fold, not the edge).
+- Narrow Log pane (fixed 2026-10-22): 4 of 13 gh-sim runs, cold and warm
+  boots alike, laid the leading pane out 84 pt short of the fold with Now's
+  inline title leading-aligned (UIKit's regular-width bar), while every full
+  width run had it centered. The panes started regular (no split before the
+  first geometry) and the Log NavigationStack sometimes kept it after the
+  switch to compact. Ignoring the fold-edge safe area did not help (gh-sim
+  run 223743). A pane's size class must never change at runtime.
