@@ -162,3 +162,36 @@ ANDROID_SERIAL=emulator-5554 fm-gradle :app:connectedDebugAndroidTest -Pkotlin.c
 
 Last verified Play state: no Play app exists (2026-10-20). No Firebase
 project exists yet (2026-10-21); everything was verified on the emulators.
+
+## Signed package (2026-10-23, run shift-android-package-baby-3-1792792548)
+
+Signed 1.0.0 (versionCode 1) APK and AAB built on the Air from main `876a6de`
+(`android/` tree `92064d1b`) with `./gradlew --no-daemon assembleRelease
+bundleRelease` (JDK Temurin 17). `fm-gradle` routes signed release tasks to
+clawd-mac and strips the keys from `local.properties`, so signed builds stay on
+the Air's `./gradlew`, which the Gradle guard allows for signed release tasks.
+Release inputs on the Air (gitignored, copied into the worktree):
+`android/local.properties` (sdk.dir, `REVENUECAT_PLAY_KEY` goog_,
+`PLAY_UPLOAD_*`) and `android/app/google-services.json` (Firebase project
+`baby-tracker-1d295`). Upload key `~/.android/keystores/baby-upload.p12`, alias
+`upload`, cert SHA-1 `D4:ED:AF:08:...:C6:F6`, SHA-256 `C1:EF:7C:21:...:3A:7B`,
+byte-identical copy in `backups/`.
+
+- Artifacts: `~/fleet-artifacts/shift-android-package-baby-3-1792792548/`
+  `baby-1.0.0-vc1.aab` and `baby-1.0.0-vc1.apk`, with `mapping.txt`,
+  `SHA256SUMS` and `SOURCE`.
+- Verified (evidence in `~/fleet-evidence/shift-android-package-baby-3-1792792548/`):
+  apksigner v2 and jarsigner, both signed by the upload key; package
+  `com.jackwallner.baby`, target 36, min 26, not debuggable; `zipalign -c -P
+  16`; all 16 native libraries (`libandroidx.graphics.path.so`,
+  `libdatastore_shared_counter.so`, 4 ABIs, APK and AAB) have 16 KB LOAD
+  alignment; the release dex has no debug launch hooks or Test Store key and
+  has the goog_ key.
+- Firebase's Android OAuth client lists only SHA-1 `7aa89ed5...4093`, which is
+  neither the upload key nor the Air debug key (expected to be Play app
+  signing). Add the upload SHA-1 too if upload-signed builds installed outside
+  Play need Google sign-in.
+- Play state not verified this run (no Console session used). Nothing was
+  uploaded or staged by this task. Next: the Air release worker uploads the AAB
+  to internal testing once the Play app, products and price review (steps 1
+  and 2) are confirmed. Any rebuild for upload after that bumps versionCode.
