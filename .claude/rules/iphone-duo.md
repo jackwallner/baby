@@ -59,11 +59,14 @@ paths:
 - The seed logs "today" in the hours before launch, so a capture launched
   before about 1 pm local shows a near-empty Today. The capture script
   passes `--env TZ=America/Sao_Paulo` (an evening zone for a run around
-  midnight UTC); pick a zone where launch lands in the evening.
+  midnight UTC; `Pacific/Auckland` around 07:00 UTC); pick a zone where
+  launch lands in the evening.
 - Narrow Log pane (fixed 2026-10-22): 4 of 13 gh-sim runs, cold and warm
   boots alike, laid the leading pane out 84 pt short of the fold with Now's
   inline title leading-aligned (UIKit's regular-width bar), while every full
   width run had it centered. The panes started regular (no split before the
   first geometry) and the Log NavigationStack sometimes kept it after the
   switch to compact. Ignoring the fold-edge safe area did not help (gh-sim
-  run 223743). A pane's size class must never change at runtime.
+  run 223743). A pane's size class must never change at runtime; with
+  `.compact` from launch, gh-sim runs 231043 (Log) and 233930 (First Weeks)
+  drew centered titles, a leading back button and full panes.
