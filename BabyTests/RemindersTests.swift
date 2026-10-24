@@ -137,4 +137,17 @@ final class RemindersTests: XCTestCase {
         Reminders.nextCheckup = nil
         XCTAssertNil(Reminders.nextCheckup)
     }
+
+    // Build 66 aborted on a notification tap: the async delegate answered
+    // UIKit from a background thread.
+    func testANotificationTapIsAnsweredOnTheMainThread() {
+        let answered = expectation(description: "completion handler called")
+        DispatchQueue.global(qos: .userInitiated).async {
+            NotificationRouter.handleTap(route: nil) {
+                XCTAssertTrue(Thread.isMainThread)
+                answered.fulfill()
+            }
+        }
+        wait(for: [answered], timeout: 2)
+    }
 }

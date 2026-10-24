@@ -40,15 +40,32 @@ final class NotificationRouter: NSObject, UNUserNotificationCenterDelegate, @unc
 
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification
-    ) async -> UNNotificationPresentationOptions {
-        [.banner, .list, .sound]
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .list, .sound])
     }
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+    // Completion handler form, answered on the main thread. The async form's
+    // compiler-made thunk calls UIKit's handler from a background thread, and
+    // UIKit asserts the main thread there: every tap aborted (build 66).
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
         let route = response.notification.request.content.userInfo[Reminders.routeKey] as? String
-        guard route == Reminders.checkupRoute else { return }
-        await MainActor.run { AppRouter.shared.openCheckup() }
+        Self.handleTap(route: route, completionHandler: completionHandler)
+    }
+
+    /// The tap without the response, which has no public initializer, so a
+    /// test can call it from a background thread.
+    static func handleTap(route: String?, completionHandler: @escaping () -> Void) {
+        nonisolated(unsafe) let done = completionHandler
+        Task { @MainActor in
+            if route == Reminders.checkupRoute { AppRouter.shared.openCheckup() }
+            done()
+        }
     }
 }
 
