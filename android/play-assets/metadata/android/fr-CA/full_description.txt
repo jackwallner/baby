@@ -1,0 +1,34 @@
+Le suivi de bébé ultra simple. Un toucher enregistre une tétée, une couche pipi ou caca, ou le sommeil. Un coup d'œil répond à la question de 3 h du matin : quand bébé a-t-il mangé pour la dernière fois, et de quel côté reprendre ?
+
+QUATRE BOUTONS QUI NE BOUGENT JAMAIS
+Feed, Pee, Poop, Sleep. Vous préférez Wet et Dirty ? Un réglage les renomme. Un toucher enregistre à l'instant, et une ligne de côté (gauche, droite, biberon) s'ouvre un moment sous Feed si vous voulez la préciser. Un appui long règle l'heure, le côté, la quantité du biberon ou la couleur des selles. Annuler reste en haut de l'écran quelques secondes. Jamais de fenêtre de confirmation.
+
+OUBLI DE NOTER ?
+Reculez l'heure par pas de cinq minutes et le toucher suivant s'enregistre à cette heure. Ajoutez une entrée plus ancienne depuis le bas de l'écran pour rattraper les premiers jours.
+
+DES RAPPELS À VOTRE MESURE
+Une alerte quand la prochaine tétée approche, comptée depuis le début de la dernière, toutes les 2 à 4 heures selon votre choix, avec le côté pour reprendre. La veille d'un bilan de santé, une note vous prévient que votre résumé pour le médecin est prêt. Les deux sont facultatifs et restent sur votre téléphone.
+
+NOTER À PLUSIEURS
+Invitez votre conjoint, un grand-parent ou une nounou avec un court code ou un lien. Chacun note depuis son propre téléphone Android dans le même journal, et chaque téléphone affiche la dernière tétée. Il faut une connexion Google, tout fonctionne hors ligne et se synchronise au retour du réseau. Noter à plusieurs avec un iPhone n'est pas encore possible.
+
+LES PREMIÈRES SEMAINES
+La feuille de suivi remise par la maternité, sous forme d'écran : vos couches notées par jour de vie, à côté d'une référence sur l'allaitement pour les deux premières semaines issue de NHS Healthier Together, avec les lignes « appelez votre pédiatre si » dessous. Cette référence est un repère général, pas un objectif ni un jugement sur votre bébé.
+
+L'AIDE ANTI-TACHES
+Dites une fois ce que vous avez à la maison, et pour une fuite de couche, une régurgitation, du lait maternel ou infantile, vous obtenez les étapes dans l'ordre, sans ce que vous ne possédez pas.
+
+GRATUIT, ET ÇA NE CHANGERA PAS
+Le suivi, le suivi à plusieurs, les rappels de tétée, le suivi des premières semaines, tout l'historique, l'aide anti-taches, tous les thèmes dont une veilleuse chaleureuse pour les chambres sombres, et plusieurs bébés. Ce que vous avez déjà noté ne sera jamais verrouillé après coup.
+
+BABY+, EN OPTION
+- Le résumé pour le pédiatre : un PDF des jours depuis la dernière visite à partager ou imprimer, avec les tétées par jour et le plus long intervalle entre elles, les couches wet et dirty, le sommeil, les poids et vos notes
+- Tendances : tétées par jour, couches et sommeil au fil des semaines
+- Export CSV de toutes les entrées
+
+Baby+ est proposé en abonnement mensuel ou annuel, ou en achat unique à vie qui ne se renouvelle pas. Les nouveaux abonnés peuvent bénéficier d'un essai gratuit. Les abonnements se renouvellent automatiquement jusqu'à résiliation ; gérez-les ou résiliez-les dans Google Play sous Paiements et abonnements. Les prix s'affichent dans l'appli avant l'achat et varient selon la région.
+
+SANS PUB, SANS IA, SANS COMPTE POUR COMMENCER
+Aucune publicité et aucun panneau ni prédiction d'IA. Aucun compte requis : votre journal reste sur votre téléphone, sauf si vous activez Log together, qui garde le journal partagé dans Google Firebase pour les personnes invitées.
+
+Baby Tracker est un journal, pas un avis médical. Il ne pose aucun diagnostic, ne soigne pas et n'évalue pas votre bébé, et n'est pas un dispositif médical. Appelez votre pédiatre au moindre doute.

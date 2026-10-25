@@ -1,0 +1,34 @@
+Son derece basit bebek takibi. Tek dokunuş bir emzirmeyi, çiş veya kaka bezini ya da uykuyu kaydeder. Tek bakış gece 3 sorusunu yanıtlar: bebek en son ne zaman yedi ve hangi taraftan başlanmalı?
+
+HİÇ YER DEĞİŞTİRMEYEN DÖRT DÜĞME
+Feed, Pee, Poop, Sleep. Wet ve Dirty'yi mi tercih edersiniz? Tek bir ayar yeniden adlandırır. Tek dokunuş şimdi kaydeder; eklemek isterseniz Feed altında kısa süreliğine bir taraf satırı (sol, sağ, biberon) açılır. Uzun basış saati, tarafı, biberon miktarını veya kaka rengini düzeltir. Geri al, birkaç saniye ekranın üstünde durur. Asla onay penceresi yok.
+
+DOKUNMAYI MI UNUTTUNUZ?
+Kayıt saatini beşer dakikalık adımlarla geri alın, sonraki dokunuş o saatte kaydedilir. İlk günleri tamamlamak için ekranın altından daha eski bir kayıt ekleyin.
+
+SİZİN SEÇTİĞİNİZ HATIRLATICILAR
+Bir sonraki emzirme yaklaştığında, sonuncunun başlangıcından sayılarak, ayarladığınız gibi her 2 ila 4 saatte bir, hangi taraftan başlanacağıyla birlikte bir bildirim. Bebek kontrolünün arife akşamı, doktora özetinizin hazır olduğunu söyleyen bir not. İkisi de isteğe bağlıdır ve telefonunuzda kalır.
+
+BİRLİKTE KAYDEDİN
+Eşinizi, büyükanne veya büyükbabayı ya da bakıcıyı kısa bir kodla veya bağlantıyla davet edin. Herkes kendi Android telefonundan aynı kayda kaydeder ve her telefon son emzirmeyi gösterir. Google girişi kullanır, çevrimdışı çalışır ve sinyal gelince yetişir. iPhone ile birlikte kayıt henüz mevcut değil.
+
+İLK HAFTALAR
+Hastanenin eve gönderdiği sayım çizelgesi, ekran olarak: kaydettiğiniz bezler yaşam gününe göre, yanında NHS Healthier Together'dan ilk iki hafta için emzirme referansı, altında "şu durumda çocuk doktorunuzu arayın" satırları. Referans genel bir rehberdir, hedef veya bebeğiniz hakkında bir hüküm değildir.
+
+LEKE YARDIMCISI
+Evde neyiniz olduğunu bir kez söyleyin; bez sızıntısı, kusma, anne sütü veya mama lekesi için adımları sırayla alın, sahip olmadığınız şeyler atlanır.
+
+ÜCRETSİZ VE ÜCRETSİZ KALACAK
+Kayıt, birlikte kayıt, emzirme hatırlatıcıları, ilk haftaların çizelgesi, tüm geçmiş, leke yardımcısı, karanlık odalar için sıcak bir Night light dahil her görünüm ve birden fazla bebek. Daha önce kaydettiğiniz hiçbir şey sonradan kilitlenmez.
+
+BABY+, İSTEĞE BAĞLI
+- Çocuk doktoru özeti: son ziyaretten bu yana günlerin paylaşılabilir veya yazdırılabilir PDF'i; günlük emzirmeler ve aralarındaki en uzun boşluk, wet ve dirty sayıları, uyku, kilolar ve notlarınız
+- Eğilimler: haftalar boyunca günlük emzirme, bez sayıları ve uyku
+- Tüm kayıtların CSV dışa aktarımı
+
+Baby+ aylık veya yıllık abonelik olarak ya da yenilenmeyen tek seferlik ömür boyu satın alma olarak sunulur. Yeni aboneler ücretsiz deneme alabilir. Abonelikler iptal edilene kadar otomatik yenilenir; Google Play'de Ödemeler ve abonelikler altından yönetin veya iptal edin. Fiyatlar satın almadan önce uygulamada gösterilir ve bölgeye göre değişir.
+
+REKLAM YOK, YAPAY ZEKA YOK, BAŞLAMAK İÇİN HESAP YOK
+Hiçbir türde reklam ve yapay zeka paneli ya da tahmini yok. Hesaba hiç ihtiyacınız yok: Log together'ı açmazsanız kaydınız telefonunuzda kalır; açarsanız ortak kayıt, davet ettiğiniz kişiler için Google Firebase'de tutulur.
+
+Baby Tracker bir kayıt defteridir, tıbbi tavsiye değildir. Bebeğinizi teşhis etmez, tedavi etmez veya değerlendirmez ve tıbbi cihaz değildir. Herhangi bir endişede çocuk doktorunuzu arayın.

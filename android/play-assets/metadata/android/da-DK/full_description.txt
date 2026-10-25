@@ -1,0 +1,34 @@
+Ultraenkel babylog. Ét tryk logger et måltid, en pis- eller bæsble eller søvn. Ét blik svarer på spørgsmålet kl. 3 om natten: hvornår spiste babyen sidst, og hvilken side skal du starte på?
+
+FIRE KNAPPER, DER ALDRIG FLYTTER SIG
+Feed, Pee, Poop, Sleep. Foretrækker du Wet og Dirty? Én indstilling omdøber dem. Ét tryk logger det nu, og under Feed åbner en siderække (venstre, højre, flaske) et øjeblik, hvis du vil tilføje den. Et langt tryk retter tidspunkt, side, flaskemængde eller farven på afføringen. Fortryd står øverst på skærmen i et par sekunder. Aldrig bekræftelsesvinduer.
+
+GLEMT AT TRYKKE?
+Skub logtiden tilbage i trin på fem minutter, så logges næste tryk på det tidspunkt. Tilføj en ældre post nederst på skærmen for at udfylde de første dage.
+
+PÅMINDELSER PÅ DIN MÅDE
+En besked, når næste måltid nærmer sig, regnet fra start på det sidste, hver 2. til 4. time efter din indstilling, med den side du skal starte på. Aftenen før en sundhedsplejerske- eller lægekontrol en note om, at dit resumé til lægen er klar. Begge er valgfrie og bliver på din telefon.
+
+LOG SAMMEN
+Inviter din partner, en bedsteforælder eller en barnepige med en kort kode eller et link. Alle logger fra deres egen Android-telefon i den samme log, og hver telefon viser det seneste måltid. Det bruger et Google-login, virker offline og indhenter, når signalet vender tilbage. Fælles log med en iPhone findes ikke endnu.
+
+DE FØRSTE UGER
+Tælleskemaet, som hospitalet sender med hjem, som skærm: dine loggede bleer efter levedøgn ved siden af en amningsreference for de første to uger fra NHS Healthier Together, med linjerne "ring til din læge hvis" under. Referencen er generel vejledning, ikke et mål eller en dom over din baby.
+
+PLETHJÆLPEREN
+Fortæl én gang, hvad du har hjemme, og ved en lækket ble, savl, brystmælk eller modermælkserstatning får du trinene i rækkefølge uden det, du ikke har.
+
+GRATIS, OG DET BLIVER VED
+Logning, fælles logning, påmindelser om måltider, de første ugers oversigt, hele historikken, plethjælperen, alle udseender inklusive et varmt Night light til mørke rum og mere end én baby. Det, du allerede har logget, bliver aldrig låst bagefter.
+
+BABY+, VALGFRIT
+- Resuméet til lægen: en PDF med dagene siden sidste besøg til deling eller udskrift, med daglige måltider og den længste pause mellem dem, wet- og dirty-antal, søvn, vægt og dine noter
+- Tendenser: måltider pr. dag, bleer og søvn over ugerne
+- CSV-eksport af alle poster
+
+Baby+ fås som månedligt eller årligt abonnement eller som et engangskøb for livet, der ikke fornyes. Nye abonnenter kan få en gratis prøveperiode. Abonnementer fornyes automatisk, til de opsiges; administrer eller opsig dem i Google Play under Betalinger og abonnementer. Priser vises i appen før køb og varierer efter region.
+
+INGEN REKLAMER, INGEN AI, INGEN KONTO FOR AT KOMME I GANG
+Ingen reklamer af nogen art og ingen AI-paneler eller forudsigelser. Du behøver aldrig en konto: din log bliver på din telefon, medmindre du slår Log together til, som gemmer den fælles log i Google Firebase for de personer, du inviterer.
+
+Baby Tracker er en log, ikke lægelig rådgivning. Den stiller ingen diagnose, behandler ikke og vurderer ikke din baby, og er ikke medicinsk udstyr. Ring til din læge, hvis du er bekymret.

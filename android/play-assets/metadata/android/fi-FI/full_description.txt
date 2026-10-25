@@ -1,0 +1,34 @@
+Äärimmäisen yksinkertainen vauvan seuranta. Yksi napautus kirjaa syötön, pissa- tai kakkavaipan tai unen. Yksi katse vastaa kolmen yön kysymykseen: milloin vauva söi viimeksi ja kummalta puolelta jatketaan?
+
+NELJÄ NAPPIA, JOTKA EIVÄT KOSKAAN SIIRRY
+Feed, Pee, Poop, Sleep. Haluatko mieluummin Wet ja Dirty? Yksi asetus nimeää ne uudelleen. Yksi napautus kirjaa heti, ja Feedin alle aukeaa hetkeksi puolirivi (vasen, oikea, pullo), jos haluat lisätä sen. Pitkä painallus muuttaa ajan, puolen, pullon määrän tai ulosteen värin. Kumoa on näytön ylälaidassa muutaman sekunnin. Ei koskaan vahvistusikkunoita.
+
+UNOHDIT NAPAUTTAA?
+Siirrä kirjausaikaa taaksepäin viiden minuutin askelin, niin seuraava napautus kirjataan siihen aikaan. Lisää vanhempi merkintä näytön alareunasta ja täydennä ensimmäiset päivät.
+
+MUISTUTUKSET SINUN TAVALLASI
+Ilmoitus, kun seuraava syöttö lähestyy, laskettuna edellisen alusta, 2–4 tunnin välein asetuksesi mukaan, sekä puoli, jolta aloittaa. Neuvolakäyntiä edeltävänä iltana huomautus siitä, että yhteenveto lääkärille on valmis. Molemmat ovat valinnaisia ja pysyvät puhelimessasi.
+
+KIRJAA YHDESSÄ
+Kutsu kumppanisi, isovanhempi tai lapsenvahti lyhyellä koodilla tai linkillä. Jokainen kirjaa omalta Android-puhelimeltaan samaan lokiin, ja jokainen puhelin näyttää viimeisimmän syötön. Se käyttää Google-kirjautumista, toimii offline-tilassa ja päivittyy, kun yhteys palaa. Yhteiskirjaus iPhonen kanssa ei ole vielä mahdollista.
+
+ENSIMMÄISET VIIKOT
+Sairaalan kotiin antama laskentalomake näytöllä: kirjaamasi vaipat elinpäivän mukaan, vieressä imetysohje ensimmäisille kahdelle viikolle NHS Healthier Togetherilta, ja alla "soita lastenlääkärille jos" -rivit. Ohje on yleinen suositus, ei tavoite eikä arvio vauvastasi.
+
+TAHRA-APURI
+Kerro kerran, mitä kotona on, niin vaippavuodosta, pulauttelusta, rintamaidosta tai korvikkeesta saat vaiheet järjestyksessä ilman sellaista, mitä sinulla ei ole.
+
+ILMAINEN, JA SE PYSYY ILMAISENA
+Kirjaus, yhteiskirjaus, syöttömuistutukset, ensimmäisten viikkojen laskenta, koko historia, tahra-apuri, kaikki ulkoasut mukaan lukien lämmin Night light pimeisiin huoneisiin, ja useampi kuin yksi vauva. Aiemmin kirjaamaasi ei koskaan lukita jälkikäteen.
+
+BABY+, VALINNAINEN
+- Yhteenveto lastenlääkärille: PDF viimeisen käynnin jälkeisistä päivistä jaettavaksi tai tulostettavaksi, päivittäiset syötöt ja pisin väli niiden välillä, wet- ja dirty-määrät, uni, painot ja muistiinpanosi
+- Trendit: syötöt päivässä, vaipat ja uni viikkojen yli
+- CSV-vienti kaikista merkinnöistä
+
+Baby+ on saatavilla kuukausi- tai vuositilauksena tai kertaostona elinikäiseksi, joka ei uusiudu. Uudet tilaajat voivat saada ilmaisen kokeilujakson. Tilaukset uusiutuvat automaattisesti peruutukseen asti; hallitse tai peruuta ne Google Playssa kohdassa Maksut ja tilaukset. Hinnat näytetään sovelluksessa ennen ostoa ja vaihtelevat alueittain.
+
+EI MAINOKSIA, EI TEKOÄLYÄ, EI TILIÄ ALUKSI
+Ei minkäänlaisia mainoksia eikä tekoälypaneeleja tai ennusteita. Et tarvitse koskaan tiliä: lokisi pysyy puhelimessasi, ellet ota käyttöön Log together -toimintoa, joka säilyttää jaetun lokin Google Firebasessa kutsumillesi ihmisille.
+
+Baby Tracker on loki, ei lääketieteellinen neuvo. Se ei tee diagnoosia, hoida tai arvioi vauvaasi, eikä se ole lääkinnällinen laite. Soita lastenlääkärille, jos olet huolissasi.

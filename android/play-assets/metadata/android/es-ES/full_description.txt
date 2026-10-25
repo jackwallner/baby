@@ -1,0 +1,34 @@
+Seguimiento del bebé ultra sencillo. Un toque registra una toma, un pañal de pipí o caca, o el sueño. Un vistazo responde la pregunta de las 3 de la madrugada: ¿cuándo comió el bebé por última vez y por qué lado seguir?
+
+CUATRO BOTONES QUE NUNCA SE MUEVEN
+Feed, Pee, Poop, Sleep. ¿Prefieres Wet y Dirty? Un ajuste los renombra. Un toque lo registra ahora, y bajo Feed se abre un momento una fila de lado (izquierdo, derecho, biberón) por si quieres añadirlo. Con una pulsación larga ajustas la hora, el lado, la cantidad del biberón o el color de la caca. Deshacer aparece arriba unos segundos. Nunca hay ventanas de confirmación.
+
+¿SE TE OLVIDÓ ANOTAR?
+Retrocede la hora de cinco en cinco minutos y el siguiente toque se registra a esa hora. Añade una entrada anterior desde la parte de abajo para completar los primeros días.
+
+RECORDATORIOS A TU MEDIDA
+Un aviso cuando toca la siguiente toma, contado desde que empezó la última, cada 2 a 4 horas según elijas, con el lado por el que empezar. La noche antes de un control del recién nacido, una nota avisa de que tu resumen para el médico está listo. Ambos son opcionales y se quedan en tu teléfono.
+
+REGISTRAR EN PAREJA
+Invita a tu pareja, a un abuelo o a una niñera con un código corto o un enlace. Cada uno registra desde su propio teléfono Android en el mismo diario, y todos ven la última toma. Usa un inicio de sesión de Google, funciona sin conexión y se pone al día cuando vuelve la señal. Registrar juntos con un iPhone aún no está disponible.
+
+LAS PRIMERAS SEMANAS
+La hoja de seguimiento que da el hospital, convertida en pantalla: tus pañales registrados por día de vida, junto a una referencia de lactancia para las dos primeras semanas de NHS Healthier Together, con las líneas «llama a tu pediatra si» debajo. La referencia es una guía general, no una meta ni un juicio sobre tu bebé.
+
+LA AYUDA PARA MANCHAS
+Cuéntale una vez qué tienes en casa y, para una fuga de pañal, un regurgitado, leche materna o de fórmula, te da los pasos en orden, sin lo que no tengas.
+
+GRATIS, Y SEGUIRÁ SIENDO GRATIS
+Registro, registro compartido, recordatorios de tomas, el conteo de las primeras semanas, historial completo, ayuda para manchas, todas las apariencias, incluida una cálida luz nocturna para cuartos oscuros, y más de un bebé. Lo que ya registraste nunca se bloquea después.
+
+BABY+, OPCIONAL
+- El resumen para el pediatra: un PDF de los días desde la última visita para compartir o imprimir, con tomas diarias y el intervalo más largo entre ellas, conteos de wet y dirty, sueño, pesos y tus notas
+- Tendencias: tomas por día, pañales y sueño a lo largo de las semanas
+- Exportación CSV de todas las entradas
+
+Baby+ se ofrece como suscripción mensual o anual, o como compra única de por vida que no se renueva. Los nuevos suscriptores pueden recibir una prueba gratuita. Las suscripciones se renuevan automáticamente hasta que se cancelen; adminístralas o cancélalas en Google Play, en Pagos y suscripciones. Los precios se muestran en la app antes de comprar y varían según la región.
+
+SIN ANUNCIOS, SIN IA, SIN CUENTA PARA EMPEZAR
+Ningún anuncio y ningún panel ni predicción de IA. Nunca necesitas una cuenta: tu diario se queda en tu teléfono, salvo que actives Log together, que guarda el diario compartido en Google Firebase para las personas que invitas.
+
+Baby Tracker es un diario, no un consejo médico. No diagnostica, no trata ni evalúa a tu bebé, y no es un dispositivo médico. Llama a tu pediatra ante cualquier duda.

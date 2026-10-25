@@ -1,0 +1,34 @@
+Pelacak bayi yang sangat sederhana. Satu ketukan mencatat menyusu, popok pipis atau BAB, atau tidur. Sekali lihat menjawab pertanyaan jam 3 pagi: kapan bayi terakhir makan, dan mulai dari sisi mana?
+
+EMPAT TOMBOL YANG TIDAK PERNAH PINDAH
+Feed, Pee, Poop, Sleep. Lebih suka Wet dan Dirty? Satu pengaturan mengganti namanya. Satu ketukan mencatat sekarang, dan baris Sisi (kiri, kanan, botol) terbuka sebentar di bawah Feed jika ingin menambahkannya. Tekan lama untuk memperbaiki waktu, sisi, jumlah susu botol, atau warna tinja. Urungkan muncul di atas layar selama beberapa detik. Tidak pernah ada jendela konfirmasi.
+
+LUPA MENCATAT?
+Mundurkan waktu catat per lima menit, dan ketukan berikutnya tercatat pada waktu itu. Tambahkan catatan lama dari bagian bawah layar untuk melengkapi hari-hari pertama.
+
+PENGINGAT PILIHAN ANDA
+Pemberitahuan saat menyusu berikutnya tiba, dihitung dari awal yang terakhir, setiap 2 sampai 4 jam sesuai pengaturan Anda, dengan sisi untuk memulai. Malam sebelum kontrol bayi baru lahir, catatan bahwa ringkasan untuk dokter sudah siap. Keduanya opsional dan tetap di ponsel Anda.
+
+CATAT BERSAMA
+Undang pasangan, kakek nenek, atau pengasuh dengan kode singkat atau tautan. Semua mencatat dari ponsel Android masing-masing ke catatan yang sama, dan setiap ponsel menampilkan menyusu terakhir. Memakai login Google, bekerja offline, dan menyusul saat sinyal kembali. Mencatat bersama dengan iPhone belum tersedia.
+
+MINGGU-MINGGU PERTAMA
+Lembar hitung yang dikirim rumah sakit pulang, dalam bentuk layar: popok yang Anda catat per hari kehidupan, di samping acuan menyusui untuk dua minggu pertama dari NHS Healthier Together, dengan baris "hubungi dokter anak jika" di bawahnya. Acuan ini panduan umum, bukan target atau penilaian atas bayi Anda.
+
+PEMBANTU NODA
+Katakan sekali apa yang ada di rumah, dan untuk popok bocor, gumoh, ASI, atau noda susu formula, Anda mendapat langkah berurutan tanpa yang tidak Anda miliki.
+
+GRATIS, DAN TETAP GRATIS
+Pencatatan, pencatatan bersama, pengingat menyusu, hitungan minggu pertama, riwayat lengkap, pembantu noda, setiap tampilan termasuk Night light hangat untuk kamar gelap, dan lebih dari satu bayi. Yang sudah Anda catat tidak akan dikunci kemudian.
+
+BABY+, OPSIONAL
+- Ringkasan dokter anak: PDF hari-hari sejak kunjungan terakhir untuk dibagikan atau dicetak, dengan menyusu harian dan jeda terpanjang di antaranya, jumlah wet dan dirty, tidur, berat badan, dan catatan Anda
+- Tren: menyusu per hari, jumlah popok, dan tidur selama berminggu-minggu
+- Ekspor CSV semua catatan
+
+Baby+ tersedia sebagai langganan bulanan atau tahunan, atau pembelian sekali seumur hidup yang tidak diperpanjang. Pelanggan baru mungkin mendapat uji coba gratis. Langganan diperpanjang otomatis hingga dibatalkan; kelola atau batalkan di Google Play di Pembayaran dan langganan. Harga ditampilkan di aplikasi sebelum membeli dan bervariasi menurut wilayah.
+
+TANPA IKLAN, TANPA AI, TANPA AKUN UNTUK MULAI
+Tidak ada iklan apa pun dan tidak ada panel atau prediksi AI. Anda tidak pernah perlu akun: catatan tetap di ponsel Anda kecuali Anda mengaktifkan Log together, yang menyimpan catatan bersama di Google Firebase untuk orang yang Anda undang.
+
+Baby Tracker adalah catatan, bukan saran medis. Aplikasi ini tidak mendiagnosis, mengobati, atau menilai bayi Anda, dan bukan alat medis. Hubungi dokter anak jika ada kekhawatiran.

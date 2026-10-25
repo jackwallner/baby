@@ -1,0 +1,34 @@
+Maximálne jednoduchý denník bábätka. Jedno ťuknutie zapíše kŕmenie, plienku s čúraním alebo kakaním či spánok. Jeden pohľad odpovie na otázku o tretej ráno: kedy bábätko naposledy jedlo a od ktorej strany začať?
+
+ŠTYRI TLAČIDLÁ, KTORÉ SA NIKDY NEPRESUNÚ
+Feed, Pee, Poop, Sleep. Chcete radšej Wet a Dirty? Jedno nastavenie ich premenuje. Jedno ťuknutie zapíše záznam hneď a pod Feed sa na chvíľu otvorí riadok strany (ľavá, pravá, fľaša), ak ju chcete doplniť. Dlhé podržanie upraví čas, stranu, množstvo z fľaše alebo farbu stolice. Späť je hore na obrazovke niekoľko sekúnd. Nikdy žiadne potvrdzovacie okná.
+
+ZABUDLI STE ŤUKNÚŤ?
+Posuňte čas záznamu späť po piatich minútach a ďalšie ťuknutie sa zapíše v tomto čase. Staršie záznamy pridáte dole na obrazovke, aby ste doplnili prvé dni.
+
+PRIPOMIENKY PODĽA VÁS
+Upozornenie, keď sa blíži ďalšie kŕmenie, počítané od začiatku posledného, každé 2 až 4 hodiny podľa vášho nastavenia, so stranou, od ktorej začať. Večer pred preventívnou prehliadkou novorodenca poznámka, že súhrn pre lekára je hotový. Oboje je voliteľné a zostáva vo vašom telefóne.
+
+ZAPISUJTE SPOLOČNE
+Pozvite partnera, starých rodičov alebo opatrovateľku krátkym kódom alebo odkazom. Každý zapisuje zo svojho telefónu s Androidom do toho istého denníka a každý telefón ukazuje posledné kŕmenie. Používa prihlásenie Google, funguje offline a po obnovení signálu sa dorovná. Spoločné zapisovanie s iPhonom zatiaľ nie je dostupné.
+
+PRVÉ TÝŽDNE
+Tabuľka, ktorú posiela pôrodnica domov, ako obrazovka: vaše zapísané plienky podľa dňa života popri prehľade o dojčení pre prvé dva týždne z NHS Healthier Together, s riadkami „zavolajte pediatrovi, ak“ pod ním. Prehľad je všeobecné vodítko, nie cieľ ani súd o vašom bábätku.
+
+POMOCNÍK NA SKVRNY
+Povedzte raz, čo máte doma, a pri uniknutej plienke, vyvrátení, materskom mlieku alebo umelom mlieku dostanete kroky po poradí, bez toho, čo nemáte.
+
+ZADARMO A TAK ZOSTANE
+Zapisovanie, spoločné zapisovanie, pripomienky kŕmenia, prehľad prvých týždňov, celá história, pomocník na škvrny, každý vzhľad vrátane teplého Night light do tmavých izieb a viac ako jedno bábätko. Čo ste už zapísali, sa neskôr nikdy nezamkne.
+
+BABY+, VOLITEĽNE
+- Súhrn pre pediatra: PDF dní od poslednej návštevy na zdieľanie alebo tlač, s denným kŕmením a najdlhšou pauzou medzi ním, počtami wet a dirty, spánkom, váhami a vašimi poznámkami
+- Trendy: kŕmenia za deň, plienky a spánok v priebehu týždňov
+- Export všetkých záznamov do CSV
+
+Baby+ je k dispozícii ako mesačné alebo ročné predplatné, alebo ako jednorazový doživotný nákup, ktorý sa neobnovuje. Noví predplatitelia môžu získať bezplatné skúšobné obdobie. Predplatné sa automaticky obnovuje, kým ho nezrušíte; spravujte ho alebo zrušte v Google Play v časti Platby a predplatné. Ceny sa zobrazia v aplikácii pred nákupom a líšia sa podľa regiónu.
+
+BEZ REKLÁM, BEZ AI, BEZ ÚČTU NA ZAČIATOK
+Žiadne reklamy a žiadne panely ani predpovede AI. Účet nepotrebujete nikdy: váš denník zostáva v telefóne, ak nezapnete Log together, ktoré ukladá zdieľaný denník v Google Firebase pre ľudí, ktorých pozvete.
+
+Baby Tracker je denník, nie lekárska rada. Nestanovuje diagnózu, nelieči ani nehodnotí vaše bábätko a nie je zdravotnícka pomôcka. S akoukoľvek obavou zavolajte pediatrovi.

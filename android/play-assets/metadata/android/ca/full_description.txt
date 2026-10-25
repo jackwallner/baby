@@ -1,0 +1,34 @@
+Seguiment del nadó ultrasimple. Un toc registra una presa, un bolquer de pipí o caca, o el son. Una ullada respon la pregunta de les 3 de la matinada: quan va menjar el nadó per última vegada i per quin costat cal començar?
+
+QUATRE BOTONS QUE MAI ES MOUEN
+Feed, Pee, Poop, Sleep. Prefereixes Wet i Dirty? Un ajust els reanomena. Un toc ho registra ara, i sota Feed s'obre un moment una fila de costat (esquerre, dret, biberó) si vols afegir-lo. Una pulsació llarga ajusta l'hora, el costat, la quantitat del biberó o el color de la caca. Desfés queda a dalt de la pantalla uns segons. Mai finestres de confirmació.
+
+T'HAS OBLIDAT D'ANOTAR?
+Retrocedeix l'hora de cinc en cinc minuts i el toc següent es registra a aquella hora. Afegeix una entrada anterior des de la part de baix de la pantalla per completar els primers dies.
+
+RECORDATORIS A LA TEVA MANERA
+Un avís quan s'acosta la presa següent, comptada des que va començar l'última, cada 2 a 4 hores segons configuris, amb el costat per on començar. La nit abans d'una revisió del nadó, una nota avisa que el teu resum per al metge és a punt. Tots dos són opcionals i es queden al teu telèfon.
+
+REGISTRAR JUNTS
+Convida la teva parella, un avi o una cangur amb un codi curt o un enllaç. Cadascú registra des del seu telèfon Android al mateix diari, i cada telèfon mostra l'última presa. Utilitza un inici de sessió de Google, funciona sense connexió i es posa al dia quan torna el senyal. Registrar junts amb un iPhone encara no és disponible.
+
+LES PRIMERES SETMANES
+El full de seguiment que envia l'hospital a casa, convertit en pantalla: els bolquers registrats per dia de vida, al costat d'una referència de lactància per a les dues primeres setmanes de NHS Healthier Together, amb les línies «truca al pediatre si» a sota. La referència és una guia general, no un objectiu ni un veredicte sobre el teu nadó.
+
+L'AJUDA PER A LES TAQUES
+Explica una vegada què tens a casa i, per una fuita de bolquer, una vomitada, llet materna o de fórmula, et dona els passos en ordre, sense allò que no tens.
+
+GRATUÏT, I CONTINUARÀ SENT-HO
+Registre, registre compartit, recordatoris de preses, el recompte de les primeres setmanes, historial complet, ajuda per a les taques, totes les aparences, inclosa una càlida Night light per a habitacions fosques, i més d'un nadó. El que ja has registrat no es bloqueja mai més tard.
+
+BABY+, OPCIONAL
+- El resum per al pediatre: un PDF dels dies des de l'última visita per compartir o imprimir, amb preses diàries i l'interval més llarg entre elles, recomptes de wet i dirty, son, pesos i les teves notes
+- Tendències: preses per dia, bolquers i son al llarg de les setmanes
+- Exportació CSV de totes les entrades
+
+Baby+ s'ofereix com a subscripció mensual o anual, o com a compra única per a tota la vida que no es renova. Els nous subscriptors poden rebre una prova gratuïta. Les subscripcions es renoven automàticament fins que es cancel·lin; gestiona-les o cancel·la-les a Google Play a Pagaments i subscripcions. Els preus es mostren a l'aplicació abans de comprar i varien segons la regió.
+
+SENSE ANUNCIS, SENSE IA, SENSE COMPTE PER COMENÇAR
+Cap anunci i cap panell ni predicció d'IA. Mai necessites un compte: el teu diari es queda al telèfon, tret que activis Log together, que desa el diari compartit a Google Firebase per a les persones que convidis.
+
+Baby Tracker és un diari, no un consell mèdic. No diagnostica, no tracta ni avalua el teu nadó, i no és un producte sanitari. Truca al pediatre davant qualsevol dubte.

@@ -1,0 +1,34 @@
+Acompanhamento do bebê ultrassimples. Um toque registra uma mamada, uma fralda de xixi ou cocô, ou o sono. Um olhar responde à pergunta das 3 da manhã: quando o bebê mamou pela última vez e por qual lado continuar?
+
+QUATRO BOTÕES QUE NUNCA MUDAM DE LUGAR
+Feed, Pee, Poop, Sleep. Prefere Wet e Dirty? Uma configuração renomeia. Um toque registra agora, e abaixo de Feed abre por um instante uma linha de lado (esquerdo, direito, mamadeira) se quiser acrescentar. Um toque longo ajusta a hora, o lado, a quantidade da mamadeira ou a cor do cocô. Desfazer fica no alto da tela por alguns segundos. Nunca há telas de confirmação.
+
+ESQUECEU DE ANOTAR?
+Volte a hora de cinco em cinco minutos e o próximo toque registra nesse horário. Adicione um registro mais antigo pela parte de baixo da tela para completar os primeiros dias.
+
+LEMBRETES DO SEU JEITO
+Um aviso quando a próxima mamada se aproxima, contada desde o início da última, a cada 2 a 4 horas conforme você definir, com o lado para começar. Na noite anterior a uma consulta do recém-nascido, uma nota avisa que seu resumo para o médico está pronto. Os dois são opcionais e ficam no seu celular.
+
+ANOTAR EM CONJUNTO
+Convide seu parceiro, avós ou a babá com um código curto ou um link. Cada pessoa registra do próprio celular Android no mesmo diário, e todos veem a última mamada. Usa login do Google, funciona offline e se atualiza quando o sinal volta. Anotar em conjunto com um iPhone ainda não está disponível.
+
+AS PRIMEIRAS SEMANAS
+A folha de controle que o hospital manda para casa, em formato de tela: suas fraldas registradas por dia de vida, ao lado de uma referência de amamentação para as duas primeiras semanas do NHS Healthier Together, com as linhas «ligue para o pediatra se» abaixo. A referência é uma orientação geral, não uma meta nem um veredito sobre seu bebê.
+
+O AJUDANTE DE MANCHAS
+Diga uma vez o que você tem em casa e, para vazamento de fralda, golfada, leite materno ou fórmula, ele dá os passos em ordem, sem o que você não tem.
+
+GRÁTIS, E CONTINUA GRÁTIS
+Registro, registro em conjunto, lembretes de mamada, o controle das primeiras semanas, histórico completo, ajudante de manchas, todas as aparências, incluindo uma Night light aconchegante para quartos escuros, e mais de um bebê. O que você já registrou nunca é bloqueado depois.
+
+BABY+, OPCIONAL
+- O resumo para o pediatra: um PDF dos dias desde a última consulta para compartilhar ou imprimir, com mamadas diárias e o maior intervalo entre elas, contagens de wet e dirty, sono, pesos e suas notas
+- Tendências: mamadas por dia, fraldas e sono ao longo das semanas
+- Exportação CSV de todos os registros
+
+O Baby+ está disponível como assinatura mensal ou anual, ou como compra única vitalícia que não renova. Novos assinantes podem ganhar um teste gratuito. As assinaturas renovam automaticamente até serem canceladas; gerencie ou cancele no Google Play em Pagamentos e assinaturas. Os preços aparecem no app antes da compra e variam por região.
+
+SEM ANÚNCIOS, SEM IA, SEM CONTA PARA COMEÇAR
+Nenhum anúncio e nenhum painel ou previsão de IA. Você nunca precisa de conta: seu diário fica no celular, a menos que ative o Log together, que guarda o diário compartilhado no Google Firebase para as pessoas que você convida.
+
+O Baby Tracker é um diário, não um aconselhamento médico. Não diagnostica, não trata nem avalia seu bebê, e não é um dispositivo médico. Ligue para o pediatra diante de qualquer dúvida.

@@ -1,0 +1,34 @@
+Superenkel babylogg. Ett tryck loggar en måltid, en kiss- eller bajsblöja eller sömn. En blick svarar på frågan klockan 3 på natten: när åt bebisen senast, och vilken sida ska du börja på?
+
+FYRA KNAPPAR SOM ALDRIG FLYTTAR SIG
+Feed, Pee, Poop, Sleep. Föredrar du Wet och Dirty? En inställning döper om dem. Ett tryck loggar nu, och under Feed öppnas en sidorad (vänster, höger, flaska) en stund om du vill lägga till den. Ett långt tryck ändrar tid, sida, flaskmängd eller färgen på bajset. Ångra visas överst på skärmen i några sekunder. Aldrig några bekräftelsefönster.
+
+GLÖMDE DU ATT TRYCKA?
+Backa loggtiden i steg om fem minuter så loggas nästa tryck på den tiden. Lägg till en äldre post längst ned på skärmen för att fylla i de första dagarna.
+
+PÅMINNELSER PÅ DITT SÄTT
+En avisering när nästa måltid närmar sig, räknat från när den förra började, var 2:a till 4:e timme som du ställer in, med sidan du ska börja på. Kvällen före ett BVC-besök en notis om att din sammanfattning till läkaren är klar. Båda är valfria och stannar på din telefon.
+
+LOGGA TILLSAMMANS
+Bjud in din partner, en mor- eller farförälder eller barnvakten med en kort kod eller en länk. Alla loggar från sin egen Android-telefon i samma logg, och varje telefon visar senaste måltiden. Det använder Google-inloggning, fungerar offline och hinner ikapp när signalen är tillbaka. Gemensam logg med iPhone finns inte än.
+
+DE FÖRSTA VECKORNA
+Räkneschemat som sjukhuset skickar hem, som en skärm: dina loggade blöjor per levnadsdag bredvid en amningsreferens för de första två veckorna från NHS Healthier Together, med raderna "ring din barnläkare om" under. Referensen är allmän vägledning, inget mål och ingen dom över din bebis.
+
+FLÄCKHJÄLPEN
+Berätta en gång vad du har hemma, så får du vid en blöjläcka, spyfläck, bröstmjölk eller ersättning stegen i ordning, utan det du inte äger.
+
+GRATIS, OCH DET BLIR DET KVAR
+Loggning, gemensam loggning, matpåminnelser, översikten över de första veckorna, hela historiken, fläckhjälpen, alla utseenden inklusive ett varmt Night light för mörka rum, och fler än en bebis. Det du redan loggat låses aldrig i efterhand.
+
+BABY+, VALFRITT
+- Sammanfattningen till barnläkaren: en PDF med dagarna sedan senaste besöket att dela eller skriva ut, med dagliga måltider och längsta uppehållet mellan dem, wet- och dirty-antal, sömn, vikter och dina anteckningar
+- Trender: måltider per dag, blöjor och sömn över veckorna
+- CSV-export av alla poster
+
+Baby+ finns som månads- eller årsprenumeration, eller som ett engångsköp för livet som inte förnyas. Nya prenumeranter kan få en gratis provperiod. Prenumerationer förnyas automatiskt tills de sägs upp; hantera eller säg upp dem i Google Play under Betalningar och prenumerationer. Priser visas i appen före köp och varierar mellan regioner.
+
+INGA ANNONSER, INGEN AI, INGET KONTO FÖR ATT KOMMA IGÅNG
+Inga annonser av något slag och inga AI-paneler eller förutsägelser. Du behöver aldrig något konto: din logg stannar på telefonen om du inte slår på Log together, som lagrar den gemensamma loggen i Google Firebase för de personer du bjuder in.
+
+Baby Tracker är en logg, inte medicinsk rådgivning. Den ställer ingen diagnos, behandlar inte och bedömer inte din bebis, och är inte en medicinteknisk produkt. Ring din barnläkare vid minsta oro.

@@ -1,0 +1,34 @@
+Babytracking, so einfach wie möglich. Ein Tipp hält eine Mahlzeit, eine Pipi- oder Kacka-Windel oder den Schlaf fest. Ein Blick beantwortet die Frage um 3 Uhr nachts: Wann hat das Baby zuletzt getrunken, und mit welcher Seite geht es weiter?
+
+VIER TASTEN, DIE NIE WANDERN
+Feed, Pee, Poop, Sleep. Lieber Wet und Dirty? Eine Einstellung benennt sie um. Ein Tipp speichert den Eintrag jetzt, und unter Feed öffnet sich kurz eine Seitenzeile (links, rechts, Flasche), falls du sie ergänzen willst. Mit langem Drücken stellst du Uhrzeit, Seite, Flaschenmenge oder Stuhlfarbe ein. Rückgängig erscheint für ein paar Sekunden oben im Bildschirm. Nie eine Bestätigungsabfrage.
+
+ETWAS VERGESSEN?
+Stelle die Zeit in Fünf-Minuten-Schritten zurück, und der nächste Tipp wird zu dieser Zeit gespeichert. Ältere Einträge fügst du unten im Bildschirm nach, um die ersten Tage nachzutragen.
+
+ERINNERUNGEN NACH DEINEM GESCHMACK
+Ein Hinweis, wenn die nächste Mahlzeit ansteht, gezählt ab Beginn der letzten, alle 2 bis 4 Stunden nach deiner Einstellung, mit der Seite, auf der es weitergeht. Am Abend vor einer U-Untersuchung der Hinweis, dass deine Zusammenfassung für die Ärztin oder den Arzt bereit ist. Beides ist optional und bleibt auf deinem Handy.
+
+GEMEINSAM LOGGEN
+Lade Partner, Großeltern oder Nanny mit einem kurzen Code oder einem Link ein. Alle loggen von ihrem eigenen Android-Handy in dasselbe Protokoll, und jedes Handy zeigt die letzte Mahlzeit. Es nutzt eine Google-Anmeldung, funktioniert offline und gleicht ab, sobald wieder Empfang da ist. Gemeinsames Loggen mit einem iPhone ist noch nicht möglich.
+
+DIE ERSTEN WOCHEN
+Der Zählbogen, den das Krankenhaus mitgibt, als Bildschirm: deine geloggten Windeln nach Lebenstag, neben einer Stillreferenz für die ersten zwei Wochen von NHS Healthier Together, mit den Hinweisen „Rufe deine Kinderärztin an, wenn“ darunter. Die Referenz ist eine allgemeine Orientierung, kein Ziel und kein Urteil über dein Baby.
+
+DER FLECKENHELFER
+Sag einmal, was du zu Hause hast, und bei Windelunfall, Spucken, Muttermilch- oder Pulvermilchflecken bekommst du die Schritte in der richtigen Reihenfolge, ohne das, was du nicht besitzt.
+
+KOSTENLOS UND DAS BLEIBT SO
+Loggen, gemeinsames Loggen, Fütterungserinnerungen, die Zählübersicht der ersten Wochen, der komplette Verlauf, der Fleckenhelfer, jedes Erscheinungsbild einschließlich eines warmen Nachtlichts für dunkle Zimmer und mehrere Babys. Bereits Geloggtes wird nie nachträglich gesperrt.
+
+BABY+, OPTIONAL
+- Die Zusammenfassung für die Kinderarztpraxis: ein PDF der Tage seit dem letzten Besuch zum Teilen oder Ausdrucken, mit täglichen Mahlzeiten und dem längsten Abstand dazwischen, Wet- und Dirty-Zahlen, Schlaf, Gewichten und deinen Notizen
+- Trends: Mahlzeiten pro Tag, Windelzahlen und Schlaf über die Wochen
+- CSV-Export aller Einträge
+
+Baby+ gibt es als Monats- oder Jahresabo oder als einmaligen Kauf auf Lebenszeit, der sich nicht verlängert. Neue Abonnenten erhalten eventuell eine kostenlose Testphase. Abos verlängern sich automatisch bis zur Kündigung; verwalte oder kündige sie in Google Play unter Zahlungen und Abos. Preise werden vor dem Kauf in der App angezeigt und variieren je nach Region.
+
+KEINE WERBUNG, KEINE KI, KEIN KONTO ZUM START
+Keine Werbung jeder Art und keine KI-Felder oder Prognosen. Du brauchst nie ein Konto: Dein Protokoll bleibt auf deinem Handy, es sei denn, du aktivierst Log together. Dann liegt das gemeinsame Protokoll bei Google Firebase für die Personen, die du einlädst.
+
+Baby Tracker ist ein Protokoll, keine medizinische Beratung. Die App stellt keine Diagnose, behandelt nicht und bewertet dein Baby nicht, und sie ist kein Medizinprodukt. Bei jeder Sorge ruf deine Kinderarztpraxis an.

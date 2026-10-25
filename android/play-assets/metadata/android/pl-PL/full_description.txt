@@ -1,0 +1,34 @@
+Najprostszy dziennik dziecka. Jedno dotknięcie zapisuje karmienie, pieluchę z siku lub kupą albo sen. Jedno spojrzenie odpowiada na pytanie z trzeciej w nocy: kiedy dziecko jadło ostatnio i od której strony zacząć?
+
+CZTERY PRZYCISKI, KTÓRE NIGDY SIĘ NIE ZMIENIAJĄ
+Feed, Pee, Poop, Sleep. Wolisz Wet i Dirty? Jedno ustawienie zmieni nazwy. Jedno dotknięcie zapisuje wpis teraz, a pod Feed na chwilę otwiera się wiersz strony (lewa, prawa, butelka), jeśli chcesz ją dodać. Długie przytrzymanie poprawia godzinę, stronę, ilość z butelki lub kolor stolca. Cofnij jest u góry ekranu przez kilka sekund. Nigdy żadnych okien potwierdzenia.
+
+ZAPOMNIAŁO SIĘ ZAPISAĆ?
+Cofnij czas zapisu co pięć minut, a kolejne dotknięcie zapisze wpis o tej godzinie. Dodaj starszy wpis z dołu ekranu, by uzupełnić pierwsze dni.
+
+PRZYPOMNIENIA WEDŁUG CIEBIE
+Powiadomienie, gdy zbliża się kolejne karmienie, liczone od początku poprzedniego, co 2 do 4 godzin według ustawienia, ze stroną, od której zacząć. Wieczorem przed wizytą kontrolną noworodka informacja, że podsumowanie dla lekarza jest gotowe. Oba są opcjonalne i zostają na Twoim telefonie.
+
+ZAPISUJCIE RAZEM
+Zaproś partnera, dziadków lub nianię krótkim kodem albo linkiem. Każdy zapisuje z własnego telefonu z Androidem w tym samym dzienniku i każdy telefon pokazuje ostatnie karmienie. Wymaga logowania przez Google, działa offline i nadrabia po powrocie zasięgu. Wspólne zapisywanie z iPhone'em nie jest jeszcze dostępne.
+
+PIERWSZE TYGODNIE
+Karta, którą szpital wysyła do domu, jako ekran: zapisane pieluchy według doby życia obok wskazówek o karmieniu piersią na pierwsze dwa tygodnie z NHS Healthier Together, a pod nimi linie "zadzwoń do pediatry, jeśli". Wskazówki to ogólne informacje, nie cel ani ocena Twojego dziecka.
+
+POMOC PRZY PLAMACH
+Powiedz raz, co masz w domu, a przy przecieku z pieluchy, ulaniu, mleku mamy lub mleku modyfikowanym dostaniesz kroki po kolei, bez tego, czego nie masz.
+
+DARMOWE, I TAK ZOSTANIE
+Zapisywanie, wspólne zapisywanie, przypomnienia o karmieniu, zestawienie pierwszych tygodni, pełna historia, pomoc przy plamach, każdy wygląd łącznie z ciepłym Night light do ciemnych pokoi oraz więcej niż jedno dziecko. To, co już zapisano, nigdy nie zostanie później zablokowane.
+
+BABY+, OPCJONALNIE
+- Podsumowanie dla pediatry: PDF z dniami od ostatniej wizyty do udostępnienia lub wydruku, z dziennymi karmieniami i najdłuższą przerwą między nimi, liczbą wet i dirty, snem, wagą i Twoimi notatkami
+- Trendy: karmienia na dzień, pieluchy i sen w kolejnych tygodniach
+- Eksport CSV wszystkich wpisów
+
+Baby+ jest dostępne jako subskrypcja miesięczna lub roczna albo jednorazowy zakup na zawsze, który się nie odnawia. Nowi subskrybenci mogą dostać bezpłatny okres próbny. Subskrypcje odnawiają się automatycznie do momentu anulowania; zarządzaj nimi lub anuluj w Google Play w sekcji Płatności i subskrypcje. Ceny widać w aplikacji przed zakupem i różnią się w zależności od regionu.
+
+BEZ REKLAM, BEZ AI, BEZ KONTA NA START
+Żadnych reklam i żadnych paneli ani prognoz AI. Nigdy nie potrzebujesz konta: dziennik zostaje na telefonie, chyba że włączysz Log together, które przechowuje wspólny dziennik w Google Firebase dla zaproszonych osób.
+
+Baby Tracker to dziennik, nie porada medyczna. Nie diagnozuje, nie leczy i nie ocenia Twojego dziecka, i nie jest wyrobem medycznym. W razie wątpliwości zadzwoń do pediatry.

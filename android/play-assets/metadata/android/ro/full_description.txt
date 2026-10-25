@@ -1,0 +1,34 @@
+Urmărirea bebelușului, ultra simplă. O atingere notează o masă, un scutec ud sau murdar ori somnul. O privire răspunde la întrebarea de la ora 3 noaptea: când a mâncat bebelușul ultima dată și pe ce parte începem?
+
+PATRU BUTOANE CARE NU SE MUTĂ NICIODATĂ
+Feed, Pee, Poop, Sleep. Preferi Wet și Dirty? O setare le redenumește. O atingere notează acum, iar sub Feed se deschide o clipă un rând pentru parte (stânga, dreapta, biberon) dacă vrei să o adaugi. O apăsare lungă corectează ora, partea, cantitatea din biberon sau culoarea scaunului. Anulează apare sus pe ecran câteva secunde. Niciodată ferestre de confirmare.
+
+AI UITAT SĂ NOTEZI?
+Dă ora înapoi din cinci în cinci minute și următoarea atingere se notează la acea oră. Adaugă o intrare mai veche din partea de jos a ecranului ca să completezi primele zile.
+
+MEMENTOURI CA SĂ LE VREI TU
+O notificare când se apropie următoarea masă, numărată de la începutul ultimei, la fiecare 2 până la 4 ore, cum setezi, cu partea de la care să începi. În seara dinaintea unui control al nou-născutului, o notă că rezumatul pentru medic e gata. Ambele sunt opționale și rămân pe telefonul tău.
+
+NOTAȚI ÎMPREUNĂ
+Invită partenerul, un bunic sau bona cu un cod scurt sau un link. Fiecare notează de pe propriul telefon Android în același jurnal, iar fiecare telefon arată ultima masă. Folosește autentificarea Google, funcționează offline și se actualizează când revine semnalul. Notarea împreună cu un iPhone nu este încă disponibilă.
+
+PRIMELE SĂPTĂMÂNI
+Fișa pe care o trimite spitalul acasă, ca ecran: scutecele notate pe zile de viață, lângă o referință despre alăptare pentru primele două săptămâni de la NHS Healthier Together, cu rândurile „sună medicul pediatru dacă” dedesubt. Referința este o îndrumare generală, nu o țintă și nu un verdict despre bebelușul tău.
+
+AJUTORUL PENTRU PETE
+Spune o dată ce ai în casă, iar pentru o scurgere de scutec, o regurgitare, lapte matern sau praf, primești pașii în ordine, fără ce nu ai.
+
+GRATUIT, ȘI RĂMÂNE AȘA
+Notare, notare împreună, mementouri pentru mese, evidența primelor săptămâni, tot istoricul, ajutorul pentru pete, fiecare aspect, inclusiv o Night light caldă pentru camere întunecate, și mai mult de un bebeluș. Ce ai notat deja nu se blochează niciodată mai târziu.
+
+BABY+, OPȚIONAL
+- Rezumatul pentru pediatru: un PDF cu zilele de la ultima vizită, de partajat sau tipărit, cu mesele zilnice și cea mai lungă pauză dintre ele, numărul de wet și dirty, somn, greutăți și notele tale
+- Tendințe: mese pe zi, scutece și somn pe săptămâni
+- Export CSV al tuturor intrărilor
+
+Baby+ este disponibil ca abonament lunar sau anual ori ca achiziție unică pe viață, care nu se reînnoiește. Abonații noi pot primi o perioadă de probă gratuită. Abonamentele se reînnoiesc automat până la anulare; gestionează-le sau anulează-le în Google Play la Plăți și abonamente. Prețurile se afișează în aplicație înainte de cumpărare și variază în funcție de regiune.
+
+FĂRĂ RECLAME, FĂRĂ IA, FĂRĂ CONT PENTRU ÎNCEPUT
+Nicio reclamă și niciun panou sau predicție IA. Nu ai nevoie niciodată de cont: jurnalul rămâne pe telefon, dacă nu pornești Log together, care păstrează jurnalul comun în Google Firebase pentru persoanele invitate.
+
+Baby Tracker este un jurnal, nu un sfat medical. Nu diagnostichează, nu tratează și nu evaluează bebelușul tău și nu este un dispozitiv medical. Sună pediatrul pentru orice îngrijorare.

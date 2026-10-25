@@ -1,0 +1,34 @@
+Supersimpel babytracken. Eén tik logt een voeding, een plas- of poepluier, of slaap. Eén blik beantwoordt de vraag van 3 uur 's nachts: wanneer at de baby voor het laatst, en met welke kant begin je?
+
+VIER KNOPPEN DIE NOOIT VERSPRINGEN
+Feed, Pee, Poop, Sleep. Liever Wet en Dirty? Eén instelling hernoemt ze. Eén tik logt het nu, en onder Feed opent even een kant-rij (links, rechts, fles) als je die wilt toevoegen. Met lang indrukken stel je de tijd, de kant, de hoeveelheid uit de fles of de kleur van de poep in. Ongedaan maken staat een paar seconden bovenaan. Nooit bevestigingsschermen.
+
+VERGETEN TE TIKKEN?
+Zet de logtijd in stappen van vijf minuten terug en de volgende tik logt op die tijd. Voeg een oudere invoer toe onderaan het scherm om de eerste dagen aan te vullen.
+
+HERINNERINGEN NAAR JE KEUZE
+Een seintje als de volgende voeding aankomt, geteld vanaf het begin van de laatste, elke 2 tot 4 uur zoals jij instelt, met de kant om mee te beginnen. De avond voor een consult op het consultatiebureau een melding dat je samenvatting voor de arts klaar is. Beide zijn optioneel en blijven op je telefoon.
+
+SAMEN LOGGEN
+Nodig je partner, opa of oma of de oppas uit met een korte code of een link. Iedereen logt vanaf de eigen Android-telefoon in hetzelfde logboek en elke telefoon toont de laatste voeding. Het gebruikt een Google-login, werkt offline en loopt bij zodra er weer bereik is. Samen loggen met een iPhone kan nog niet.
+
+DE EERSTE WEKEN
+Het telblad dat het ziekenhuis meegeeft, als scherm: je gelogde luiers per levensdag, naast een borstvoedingsreferentie voor de eerste twee weken van NHS Healthier Together, met de regels "bel je kinderarts als" eronder. De referentie is een algemene richtlijn, geen doel en geen oordeel over je baby.
+
+DE VLEKKENHULP
+Vertel één keer wat je in huis hebt, en bij een luierlekkage, spuugvlek, borstvoeding- of flesvoedingvlek krijg je de stappen op volgorde, zonder wat je niet hebt.
+
+GRATIS, EN DAT BLIJFT
+Loggen, samen loggen, voedingsherinneringen, het telblad van de eerste weken, volledige geschiedenis, de vlekkenhulp, elk uiterlijk inclusief een warme Night light voor donkere kamers, en meer dan één baby. Wat je al hebt gelogd wordt nooit later vergrendeld.
+
+BABY+, OPTIONEEL
+- De samenvatting voor de kinderarts: een pdf van de dagen sinds het laatste bezoek om te delen of af te drukken, met dagelijkse voedingen en de langste tijd ertussen, wet- en dirty-aantallen, slaap, gewichten en je notities
+- Trends: voedingen per dag, luiers en slaap over de weken
+- CSV-export van elke invoer
+
+Baby+ is er als maand- of jaarabonnement, of als eenmalige aankoop voor het leven die niet verlengt. Nieuwe abonnees krijgen mogelijk een gratis proefperiode. Abonnementen verlengen automatisch tot ze worden opgezegd; beheer of zeg ze op in Google Play onder Betalingen en abonnementen. Prijzen zie je in de app vóór aankoop en verschillen per regio.
+
+GEEN ADVERTENTIES, GEEN AI, GEEN ACCOUNT OM TE STARTEN
+Geen advertenties van welke aard ook en geen AI-panelen of voorspellingen. Je hebt nooit een account nodig: je logboek blijft op je telefoon, tenzij je Log together aanzet, dat het gedeelde logboek in Google Firebase bewaart voor de mensen die je uitnodigt.
+
+Baby Tracker is een logboek, geen medisch advies. Het stelt geen diagnose, behandelt niet en beoordeelt je baby niet, en is geen medisch hulpmiddel. Bel bij elke zorg je kinderarts.

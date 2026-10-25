@@ -1,0 +1,34 @@
+Il tracker del neonato più semplice. Un tocco registra una poppata, un pannolino con pipì o cacca, o il sonno. Un'occhiata risponde alla domanda delle 3 di notte: quando ha mangiato l'ultima volta il bimbo, e da quale lato si riparte?
+
+QUATTRO PULSANTI CHE NON SI SPOSTANO MAI
+Feed, Pee, Poop, Sleep. Preferisci Wet e Dirty? Un'impostazione li rinomina. Un tocco registra subito, e sotto Feed si apre per un attimo una riga del lato (sinistro, destro, biberon) se vuoi aggiungerlo. Con una pressione lunga correggi l'ora, il lato, la quantità del biberon o il colore delle feci. Annulla resta in alto per qualche secondo. Mai finestre di conferma.
+
+TI SEI DIMENTICATO DI SEGNARE?
+Riporta indietro l'ora a passi di cinque minuti e il tocco successivo registra a quell'ora. Aggiungi una voce più vecchia dal fondo dello schermo per recuperare i primi giorni.
+
+PROMEMORIA A MODO TUO
+Un avviso quando si avvicina la poppata successiva, contata dall'inizio dell'ultima, ogni 2 a 4 ore come imposti, con il lato da cui iniziare. La sera prima di un controllo del neonato, una nota avvisa che il riepilogo per il medico è pronto. Entrambi sono facoltativi e restano sul tuo telefono.
+
+SEGNARE INSIEME
+Invita il partner, un nonno o una babysitter con un breve codice o un link. Ognuno registra dal proprio telefono Android nello stesso diario e ogni telefono mostra l'ultima poppata. Usa un accesso Google, funziona offline e si aggiorna quando torna il segnale. Registrare insieme con un iPhone non è ancora disponibile.
+
+LE PRIME SETTIMANE
+La scheda che l'ospedale manda a casa, come schermata: i tuoi pannolini registrati per giorno di vita, accanto a un riferimento sull'allattamento per le prime due settimane di NHS Healthier Together, con le righe «chiama il pediatra se» sotto. Il riferimento è una guida generale, non un obiettivo né un giudizio sul tuo bambino.
+
+L'AIUTO MACCHIE
+Dì una volta cosa hai in casa e, per una perdita del pannolino, un rigurgito, una macchia di latte materno o artificiale, ottieni i passaggi in ordine, senza ciò che non possiedi.
+
+GRATIS, E LO RESTERÀ
+Registrazione, registrazione condivisa, promemoria delle poppate, il conteggio delle prime settimane, cronologia completa, aiuto macchie, ogni aspetto incluso un caldo Night light per le stanze buie, e più di un bambino. Quello che hai già registrato non verrà mai bloccato.
+
+BABY+, FACOLTATIVO
+- Il riepilogo per il pediatra: un PDF dei giorni dall'ultima visita da condividere o stampare, con poppate giornaliere e il più lungo intervallo tra loro, conteggi wet e dirty, sonno, pesi e le tue note
+- Andamenti: poppate al giorno, pannolini e sonno nelle settimane
+- Esportazione CSV di ogni voce
+
+Baby+ è disponibile come abbonamento mensile o annuale, o come acquisto una tantum a vita che non si rinnova. I nuovi abbonati possono ricevere una prova gratuita. Gli abbonamenti si rinnovano automaticamente fino alla disdetta; gestiscili o annullali in Google Play sotto Pagamenti e abbonamenti. I prezzi sono mostrati nell'app prima dell'acquisto e variano per area.
+
+NIENTE PUBBLICITÀ, NIENTE IA, NIENTE ACCOUNT PER INIZIARE
+Nessuna pubblicità e nessun pannello o previsione IA. Non ti serve mai un account: il diario resta sul telefono, a meno che attivi Log together, che conserva il diario condiviso in Google Firebase per le persone che inviti.
+
+Baby Tracker è un diario, non un consiglio medico. Non diagnostica, non cura e non valuta il tuo bambino, e non è un dispositivo medico. Chiama il pediatra per qualsiasi dubbio.

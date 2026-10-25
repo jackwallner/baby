@@ -1,0 +1,34 @@
+Penjejak bayi yang sangat mudah. Satu ketikan merekod susuan, lampin kencing atau najis, atau tidur. Sekali pandang menjawab soalan jam 3 pagi: bila kali terakhir bayi makan, dan mula dari sebelah mana?
+
+EMPAT BUTANG YANG TIDAK PERNAH BERALIH
+Feed, Pee, Poop, Sleep. Lebih suka Wet dan Dirty? Satu tetapan menamakan semula. Satu ketikan merekod sekarang, dan baris Sebelah (kiri, kanan, botol) terbuka seketika di bawah Feed jika anda mahu menambahnya. Tekan lama untuk membetulkan masa, sebelah, jumlah susu botol atau warna najis. Buat asal muncul di atas skrin beberapa saat. Tiada tetingkap pengesahan.
+
+TERLUPA KETIK?
+Undurkan masa rekod lima minit demi lima minit, dan ketikan seterusnya direkod pada masa itu. Tambah catatan lama dari bahagian bawah skrin untuk melengkapkan hari-hari awal.
+
+PERINGATAN PILIHAN ANDA
+Pemberitahuan apabila susuan seterusnya hampir tiba, dikira dari permulaan yang terakhir, setiap 2 hingga 4 jam seperti anda tetapkan, dengan sebelah untuk bermula. Malam sebelum pemeriksaan bayi baru lahir, nota bahawa ringkasan untuk doktor sudah siap. Kedua-duanya pilihan dan kekal pada telefon anda.
+
+REKOD BERSAMA
+Jemput pasangan, datuk nenek atau pengasuh dengan kod pendek atau pautan. Semua orang merekod dari telefon Android sendiri ke dalam rekod yang sama, dan setiap telefon menunjukkan susuan terakhir. Ia menggunakan log masuk Google, berfungsi luar talian dan mengejar apabila isyarat kembali. Rekod bersama dengan iPhone belum tersedia.
+
+MINGGU-MINGGU PERTAMA
+Helaian kiraan yang dihantar hospital pulang, sebagai skrin: lampin yang anda rekod mengikut hari kehidupan, di sebelah rujukan penyusuan untuk dua minggu pertama daripada NHS Healthier Together, dengan baris "hubungi pakar pediatrik anda jika" di bawahnya. Rujukan ini panduan am, bukan sasaran atau penilaian tentang bayi anda.
+
+PEMBANTU NODA
+Beritahu sekali apa yang ada di rumah, dan untuk lampin bocor, muntah susu, susu ibu atau noda formula, anda mendapat langkah mengikut urutan tanpa apa yang anda tiada.
+
+PERCUMA, DAN KEKAL PERCUMA
+Rekod, rekod bersama, peringatan susuan, kiraan minggu pertama, sejarah penuh, pembantu noda, setiap rupa termasuk Night light hangat untuk bilik gelap, dan lebih daripada seorang bayi. Apa yang telah anda rekod tidak akan dikunci kemudian.
+
+BABY+, PILIHAN
+- Ringkasan pediatrik: PDF hari-hari sejak lawatan terakhir untuk dikongsi atau dicetak, dengan susuan harian dan sela terpanjang antaranya, kiraan wet dan dirty, tidur, berat dan nota anda
+- Trend: susuan sehari, kiraan lampin dan tidur sepanjang minggu
+- Eksport CSV bagi setiap catatan
+
+Baby+ tersedia sebagai langganan bulanan atau tahunan, atau pembelian sekali seumur hidup yang tidak diperbaharui. Pelanggan baharu mungkin mendapat percubaan percuma. Langganan diperbaharui secara automatik sehingga dibatalkan; urus atau batalkan dalam Google Play di bawah Pembayaran dan langganan. Harga ditunjukkan dalam aplikasi sebelum anda membeli dan berbeza mengikut rantau.
+
+TIADA IKLAN, TIADA AI, TIADA AKAUN UNTUK MULA
+Tiada iklan jenis apa pun dan tiada panel atau ramalan AI. Anda tidak perlukan akaun: rekod kekal pada telefon anda melainkan anda hidupkan Log together, yang menyimpan rekod bersama dalam Google Firebase untuk orang yang anda jemput.
+
+Baby Tracker ialah rekod, bukan nasihat perubatan. Ia tidak mendiagnosis, merawat atau menilai bayi anda, dan bukan peranti perubatan. Hubungi pakar pediatrik anda jika ada kebimbangan.

@@ -1,0 +1,34 @@
+Iznimno jednostavan dnevnik bebe. Jedan dodir bilježi podoj, pelenu s pišanjem ili kakanjem ili san. Jedan pogled odgovara na pitanje u tri ujutro: kada je beba zadnji put jela i s koje strane nastaviti?
+
+ČETIRI GUMBA KOJA SE NIKAD NE POMIČU
+Feed, Pee, Poop, Sleep. Više volite Wet i Dirty? Jedna postavka ih preimenuje. Jedan dodir bilježi odmah, a ispod Feed se na trenutak otvori redak strane (lijeva, desna, bočica) ako je želite dodati. Dugi pritisak ispravlja vrijeme, stranu, količinu iz bočice ili boju stolice. Poništi stoji pri vrhu zaslona nekoliko sekundi. Nikad prozora za potvrdu.
+
+ZABORAVILI STE ZABILJEŽITI?
+Vrijeme zapisa vratite unatrag u koracima od pet minuta i sljedeći dodir bilježi se u to vrijeme. Stariji unos dodajte pri dnu zaslona kako biste popunili prve dane.
+
+PODSJETNICI PO VAŠEM
+Obavijest kad se bliži sljedeći obrok, računato od početka zadnjeg, svaka 2 do 4 sata prema vašoj postavci, sa stranom na kojoj početi. Večer prije kontrolnog pregleda novorođenčeta napomena da je sažetak za liječnika spreman. Oboje je neobavezno i ostaje na vašem telefonu.
+
+BILJEŽITE ZAJEDNO
+Pozovite partnera, baku ili djeda ili dadilju kratkim kodom ili poveznicom. Svatko bilježi sa svog Android telefona u isti dnevnik, a svaki telefon prikazuje zadnji obrok. Koristi Google prijavu, radi izvan mreže i sustiže kad se signal vrati. Zajedničko bilježenje s iPhoneom još nije dostupno.
+
+PRVI TJEDNI
+List za brojanje koji bolnica šalje kući, kao zaslon: vaše zabilježene pelene po danu života uz referencu o dojenju za prva dva tjedna iz NHS Healthier Together, a ispod redci „nazovite pedijatra ako“. Referenca je opća smjernica, ne cilj i ne prosudba o vašoj bebi.
+
+POMOĆNIK ZA MRLJE
+Jednom recite što imate kod kuće, a za procurenu pelenu, povraćanje, majčino mlijeko ili formulu dobit ćete korake redom, bez onoga što nemate.
+
+BESPLATNO, I TAKO OSTAJE
+Bilježenje, zajedničko bilježenje, podsjetnici za podoj, pregled prvih tjedana, cijela povijest, pomoćnik za mrlje, svaki izgled uključujući topli Night light za tamne sobe i više od jedne bebe. Ono što ste već zabilježili nikad se kasnije ne zaključava.
+
+BABY+, NEOBVEZNO
+- Sažetak za pedijatra: PDF dana od zadnjeg posjeta za dijeljenje ili ispis, s dnevnim obrocima i najdužom stankom među njima, brojem wet i dirty, snom, težinama i vašim bilješkama
+- Trendovi: obroci na dan, pelene i san kroz tjedne
+- CSV izvoz svih unosa
+
+Baby+ je dostupan kao mjesečna ili godišnja pretplata ili kao jednokratna doživotna kupnja koja se ne obnavlja. Novi pretplatnici mogu dobiti besplatno probno razdoblje. Pretplate se automatski obnavljaju do otkazivanja; upravljajte njima ili ih otkažite u Google Playu pod Plaćanja i pretplate. Cijene se prikazuju u aplikaciji prije kupnje i razlikuju se po regiji.
+
+BEZ OGLASA, BEZ AI-ja, BEZ RAČUNA ZA POČETAK
+Bez oglasa i bez AI ploča ili predviđanja. Račun vam nikad ne treba: dnevnik ostaje na telefonu osim ako uključite Log together, koji zajednički dnevnik čuva u Google Firebaseu za osobe koje pozovete.
+
+Baby Tracker je dnevnik, a ne liječnički savjet. Ne postavlja dijagnozu, ne liječi i ne ocjenjuje vašu bebu te nije medicinski proizvod. Za svaku brigu nazovite pedijatra.

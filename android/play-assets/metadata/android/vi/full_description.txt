@@ -1,0 +1,34 @@
+Theo dõi bé cực kỳ đơn giản. Một chạm ghi lại một cữ bú, một chiếc tã ướt hoặc bẩn, hay giấc ngủ. Một cái nhìn trả lời câu hỏi lúc 3 giờ sáng: lần cuối bé bú là khi nào và nên bắt đầu bên nào?
+
+BỐN NÚT KHÔNG BAO GIỜ DỜI CHỖ
+Feed, Pee, Poop, Sleep. Thích Wet và Dirty hơn? Một cài đặt sẽ đổi tên. Một chạm ghi ngay bây giờ, và hàng Bên (trái, phải, bình sữa) mở ra một lúc dưới Feed nếu bạn muốn thêm. Nhấn giữ để chỉnh giờ, bên bú, lượng sữa bình hoặc màu phân. Hoàn tác nằm ở đầu màn hình vài giây. Không bao giờ có hộp xác nhận.
+
+QUÊN GHI?
+Lùi giờ ghi theo từng năm phút, lần chạm tiếp theo sẽ ghi vào giờ đó. Thêm mục cũ hơn từ cuối màn hình để bổ sung những ngày đầu.
+
+NHẮC NHỞ THEO Ý BẠN
+Thông báo khi cữ bú kế tiếp đến gần, tính từ lúc cữ trước bắt đầu, mỗi 2 đến 4 giờ tùy bạn đặt, kèm bên nên bắt đầu. Tối trước buổi khám định kỳ cho trẻ sơ sinh, một ghi chú báo bản tóm tắt gửi bác sĩ đã sẵn sàng. Cả hai đều tùy chọn và ở lại trên điện thoại của bạn.
+
+CÙNG GHI
+Mời chồng hoặc vợ, ông bà hay người trông trẻ bằng mã ngắn hoặc liên kết. Mỗi người ghi từ điện thoại Android của mình vào cùng một nhật ký, và điện thoại nào cũng hiện cữ bú mới nhất. Dùng đăng nhập Google, chạy ngoại tuyến và bắt kịp khi có sóng lại. Cùng ghi với iPhone chưa được hỗ trợ.
+
+NHỮNG TUẦN ĐẦU
+Phiếu theo dõi bệnh viện gửi về nhà, dưới dạng màn hình: số tã bạn ghi theo ngày tuổi, bên cạnh tham chiếu về cho bú trong hai tuần đầu từ NHS Healthier Together, với các dòng "gọi bác sĩ nhi nếu" bên dưới. Tham chiếu chỉ là hướng dẫn chung, không phải mục tiêu hay nhận định về bé của bạn.
+
+TRỢ THỦ VẾT BẨN
+Nói một lần bạn có gì ở nhà, và với tã bị tràn, sữa trớ, vết sữa mẹ hay sữa công thức, bạn nhận các bước theo thứ tự, bỏ qua thứ bạn không có.
+
+MIỄN PHÍ, VÀ SẼ LUÔN MIỄN PHÍ
+Ghi chép, cùng ghi, nhắc cữ bú, bảng đếm những tuần đầu, toàn bộ lịch sử, trợ thủ vết bẩn, mọi giao diện gồm Night light ấm áp cho phòng tối, và nhiều hơn một bé. Những gì bạn đã ghi sẽ không bị khóa sau này.
+
+BABY+, TÙY CHỌN
+- Bản tóm tắt cho bác sĩ nhi: tệp PDF các ngày kể từ lần khám trước để chia sẻ hoặc in, với số cữ bú mỗi ngày và khoảng cách dài nhất giữa chúng, số wet và dirty, giấc ngủ, cân nặng và ghi chú của bạn
+- Xu hướng: số cữ bú mỗi ngày, số tã và giấc ngủ qua các tuần
+- Xuất CSV mọi mục
+
+Baby+ có dạng gói tháng hoặc năm, hoặc mua một lần trọn đời không tự gia hạn. Người đăng ký mới có thể được dùng thử miễn phí. Gói đăng ký tự động gia hạn đến khi hủy; quản lý hoặc hủy trong Google Play tại Thanh toán và gói đăng ký. Giá hiển thị trong ứng dụng trước khi mua và khác nhau theo khu vực.
+
+KHÔNG QUẢNG CÁO, KHÔNG AI, KHÔNG CẦN TÀI KHOẢN ĐỂ BẮT ĐẦU
+Không có quảng cáo dưới bất kỳ hình thức nào và không có bảng hay dự đoán AI. Bạn không bao giờ cần tài khoản: nhật ký ở lại trên điện thoại trừ khi bạn bật Log together, tính năng lưu nhật ký chung trong Google Firebase cho những người bạn mời.
+
+Baby Tracker là một nhật ký, không phải lời khuyên y tế. Ứng dụng không chẩn đoán, điều trị hay đánh giá bé của bạn, và không phải thiết bị y tế. Hãy gọi bác sĩ nhi nếu bạn lo lắng.

@@ -1,0 +1,34 @@
+Rendkívül egyszerű babanapló. Egy koppintás rögzít egy etetést, egy pisis vagy kakis pelenkát, vagy az alvást. Egy pillantás megválaszolja a hajnali háromórás kérdést: mikor evett utoljára a baba, és melyik oldalon folytassuk?
+
+NÉGY GOMB, AMELY SOHA NEM MOZOG
+Feed, Pee, Poop, Sleep. Inkább Wet és Dirty? Egy beállítás átnevezi őket. Egy koppintás most rögzít, és a Feed alatt egy pillanatra megnyílik az oldal sora (bal, jobb, cumisüveg), ha hozzáadnád. A hosszú nyomás módosítja az időt, az oldalt, a cumisüveg mennyiségét vagy a széklet színét. A Visszavonás néhány másodpercig a képernyő tetején áll. Soha nincs megerősítő ablak.
+
+ELFELEJTETTÉL RÖGZÍTENI?
+Tekerd vissza az időt ötperces lépésekben, és a következő koppintás arra az időre kerül. Régebbi bejegyzést a képernyő aljáról adhatsz hozzá, hogy pótold az első napokat.
+
+EMLÉKEZTETŐK, AHOGY TE AKAROD
+Értesítés, amikor közeleg a következő etetés, az utolsó kezdetétől számolva, 2-4 óránként a beállításod szerint, azzal az oldallal, amelyen kezdeni kell. A csecsemő kontrollja előtti este üzenet arról, hogy az orvosnak szóló összegzésed kész. Mindkettő választható, és a telefonodon marad.
+
+NAPLÓZZATOK EGYÜTT
+Hívd meg a párodat, egy nagyszülőt vagy a bébiszittert rövid kóddal vagy linkkel. Mindenki a saját Android telefonjáról naplóz ugyanabba a naplóba, és minden telefon az utolsó etetést mutatja. Google-bejelentkezést használ, offline is működik, és a térerő visszatértekor felzárkózik. Az iPhone-nal közös naplózás még nem érhető el.
+
+AZ ELSŐ HETEK
+A kórházból hazaküldött számlálólap képernyőként: a naplózott pelenkáid életnapok szerint, mellette szoptatási útmutató az első két hétre az NHS Healthier Together oldaláról, alatta a „hívd a gyermekorvost, ha” sorokkal. Az útmutató általános tájékoztatás, nem cél és nem ítélet a babádról.
+
+A FOLTSEGÉD
+Mondd el egyszer, mi van otthon, és pelenkabalesetnél, kibukásnál, anyatej- vagy tápszerfoltnál sorrendben megkapod a lépéseket, azok nélkül, amik nincsenek meg.
+
+INGYENES, ÉS AZ IS MARAD
+Naplózás, közös naplózás, etetési emlékeztetők, az első hetek összesítője, a teljes előzmény, a foltsegéd, minden megjelenés, köztük egy meleg Night light sötét szobákhoz, és több baba. Amit már naplóztál, azt utólag soha nem zárjuk le.
+
+BABY+, OPCIONÁLIS
+- A gyermekorvosi összegzés: PDF az utolsó vizit óta eltelt napokról megosztásra vagy nyomtatásra, napi etetésekkel és a leghosszabb szünettel köztük, wet és dirty számokkal, alvással, súlyokkal és a jegyzeteiddel
+- Trendek: etetések naponta, pelenkák és alvás hétről hétre
+- Minden bejegyzés CSV exportja
+
+A Baby+ havi vagy éves előfizetésként, illetve egyszeri, élethosszig tartó vásárlásként érhető el, amely nem újul meg. Az új előfizetők ingyenes próbaidőszakot kaphatnak. Az előfizetések lemondásig automatikusan megújulnak; kezeld vagy mondd le őket a Google Playben a Fizetések és előfizetések alatt. Az árak vásárlás előtt látszanak az alkalmazásban, és régiónként eltérnek.
+
+NINCS REKLÁM, NINCS MI, NEM KELL FIÓK AZ INDULÁSHOZ
+Semmilyen reklám, és nincsenek MI-panelek vagy előrejelzések. Soha nincs szükséged fiókra: a naplód a telefonodon marad, hacsak nem kapcsolod be a Log together funkciót, amely a közös naplót a Google Firebase-ben tárolja a meghívott személyeknek.
+
+A Baby Tracker napló, nem orvosi tanács. Nem diagnosztizál, nem kezel és nem értékeli a babádat, és nem orvostechnikai eszköz. Bármilyen aggodalom esetén hívd a gyermekorvost.

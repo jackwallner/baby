@@ -1,0 +1,34 @@
+Zelo preprost dnevnik dojenčka. En dotik zabeleži obrok, plenico s scanjem ali kakanjem ali spanje. En pogled odgovori na vprašanje ob treh zjutraj: kdaj je dojenček nazadnje jedel in na kateri strani nadaljevati?
+
+ŠTIRI GUMBI, KI SE NIKOLI NE PREMAKNEJO
+Feed, Pee, Poop, Sleep. Raje Wet in Dirty? Ena nastavitev jih preimenuje. En dotik zabeleži zdaj, pod Feed pa se za trenutek odpre vrstica strani (leva, desna, steklenička), če jo želite dodati. Dolg pritisk popravi čas, stran, količino iz stekleničke ali barvo blata. Razveljavi je nekaj sekund na vrhu zaslona. Nikoli potrditvenih oken.
+
+STE POZABILI ZABELEŽITI?
+Čas zapisa premaknite nazaj po pet minut in naslednji dotik se zabeleži ob tistem času. Starejši vnos dodate na dnu zaslona in dopolnite prve dneve.
+
+OPOMNIKI PO VAŠE
+Obvestilo, ko se bliža naslednji obrok, šteto od začetka zadnjega, vsake 2 do 4 ure po vaši nastavitvi, s stranjo, na kateri začeti. Zvečer pred pregledom novorojenčka sporočilo, da je povzetek za zdravnika pripravljen. Oboje je izbirno in ostane v vašem telefonu.
+
+BELEŽITE SKUPAJ
+Povabite partnerja, starega starša ali varuško s kratko kodo ali povezavo. Vsak beleži s svojega telefona Android v isti dnevnik, vsak telefon pa kaže zadnji obrok. Uporablja prijavo Google, deluje brez povezave in se posodobi, ko se vrne signal. Skupno beleženje z iPhonom še ni na voljo.
+
+PRVI TEDNI
+List za štetje, ki ga bolnišnica pošlje domov, kot zaslon: vaše zabeležene plenice po dnevu življenja ob napotkih za dojenje za prva dva tedna iz NHS Healthier Together, pod njimi vrstice »pokličite pediatra, če«. Napotki so splošno vodilo, ne cilj in ne sodba o vašem dojenčku.
+
+POMOČNIK ZA LISE
+Enkrat povejte, kaj imate doma, in pri iztekli plenici, bruhanju, materinem mleku ali formuli dobite korake po vrstnem redu, brez tega, česar nimate.
+
+BREZPLAČNO IN TAKO OSTANE
+Beleženje, skupno beleženje, opomniki za obroke, pregled prvih tednov, vsa zgodovina, pomočnik za lise, vsak videz vključno s toplo Night light za temne sobe in več kot en dojenček. Kar ste že zabeležili, se nikoli pozneje ne zaklene.
+
+BABY+, IZBIRNO
+- Povzetek za pediatra: PDF dni od zadnjega obiska za deljenje ali tiskanje, z dnevnimi obroki in najdaljšim premorom med njimi, številom wet in dirty, spanjem, težami in vašimi zapiski
+- Trendi: obroki na dan, plenice in spanje skozi tedne
+- Izvoz vseh vnosov v CSV
+
+Baby+ je na voljo kot mesečna ali letna naročnina ali kot enkraten nakup za vse življenje, ki se ne obnavlja. Novi naročniki lahko dobijo brezplačno preskusno obdobje. Naročnine se samodejno obnavljajo do preklica; upravljajte jih ali prekličite v Google Play pod Plačila in naročnine. Cene so v aplikaciji prikazane pred nakupom in se razlikujejo po regiji.
+
+BREZ OGLASOV, BREZ AI, BREZ RAČUNA ZA ZAČETEK
+Brez oglasov in brez AI plošč ali napovedi. Računa nikoli ne potrebujete: dnevnik ostane v telefonu, razen če vklopite Log together, ki skupni dnevnik hrani v Google Firebase za osebe, ki jih povabite.
+
+Baby Tracker je dnevnik, ne zdravniški nasvet. Ne postavlja diagnoz, ne zdravi in ne ocenjuje vašega dojenčka ter ni medicinski pripomoček. Ob vsaki skrbi pokličite pediatra.
