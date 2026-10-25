@@ -50,7 +50,9 @@ the NavigationStack, does not reach the hosted List, so the last rows ended
 under the capsule; clipping the whole TabView then hid everything behind it.
 Clip only the top edge (`TopEdgeClip`), so lists end above the capsule yet
 scroll on beneath it, and Now fits its own safe-area height. Any new pushed
-screen must call `reservesNavigationCapsule()` too.
+screen must call `reservesNavigationCapsule()` too. Since 2026-10-21 the tabs are a `ZStack`
+of visited screens, not a `TabView`, so the unfolded iPhone Duo can show History
+as a pane (`.claude/rules/iphone-duo.md`); the capsule and reservations are unchanged.
 
 The paywall pitches with `ReportPreviews`, three cards (summary page, first
 trend chart, export rows) with one rule: the example is sharp, labelled Example
@@ -98,8 +100,12 @@ control, 8. There is no idle "Tap to log now" hint (Jack: not needed). When mini
 button heights need its space, the hour strip first sheds its hour labels
 (`StripStyle.compact`; an 18 Pro at XL and XXL text) and only then drops; under
 `hourStripMinHeight` (an SE) it drops. "Add an older entry" sits right under
-the totals with no section gap, since its 44pt touch area holds its own. Accessibility sizes and iPad keep
-the scrolling layouts.
+the totals with no section gap, since its 44pt touch area holds its own.
+Shorter than that even at the floor (the iPhone Duo's outer display and each
+unfolded pane, 2026-10-21), the page goes tight (`NowFit.make`): Add an older
+entry scrolls into view, the buttons go down to 44 (the minimum tap target,
+`tightLogButtonHeight`), with tighter gaps and card padding (`.claude/rules/iphone-duo.md`).
+Accessibility sizes and iPad keep the scrolling layouts.
 
 Reports (2026-09-30, Jack: the old page "doesn't display things in an easy
 to see or understand way"; modelled on VO2's Trends). Top to bottom: a 7 / 14

@@ -118,7 +118,10 @@ struct HistoryView: View {
                 DayJumpTiles(onJump: jump)
                 DayScrubChart(onJump: jump)
             }
+            // The header clips at its bounds: room for the offset shadow
+            // below and to the right.
             .padding(.bottom, AppTheme.shadowOffset)
+            .padding(.trailing, AppTheme.shadowOffset)
             .textCase(nil)
             .listRowInsets(EdgeInsets())
         }

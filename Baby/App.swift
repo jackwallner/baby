@@ -306,12 +306,17 @@ private struct RevenueCatProbeStatusView: View {
 #endif
 
 /// Keep each visited screen alive, with one compact capsule for navigation.
+/// Unfolded on iPhone Duo, History takes its own pane beside the open tab.
 struct BabyHomeView: View {
     @EnvironmentObject private var store: StoreService
     @ObservedObject private var router = AppRouter.shared
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selected: HomeTab
     @State private var visited: Set<HomeTab>
     @State private var settingsPath: [SettingsDestination]
+    /// The container's width and fold, measured so the unfolded iPhone Duo
+    /// can put the open tab and History on opposite sides of the fold.
+    @State private var paneGeometry = PaneGeometry(width: 0, fold: nil)
     private let showsReportSnapshot: Bool
 
     init(initialScreen: Int = 0) {
@@ -328,29 +333,58 @@ struct BabyHomeView: View {
         showsReportSnapshot = initialScreen == 3
     }
 
+    private var split: UnfoldedSplit? {
+        UnfoldedSplit.make(
+            width: paneGeometry.width,
+            isRegularWidth: horizontalSizeClass == .regular,
+            fold: paneGeometry.fold
+        )
+    }
+
+    /// Unfolded, History has its own pane, so it is never a tab.
+    private var tabs: [HomeTab] {
+        split == nil ? HomeTab.allCases : HomeTab.allCases.filter { $0 != .history }
+    }
+
+    private func isShown(_ tab: HomeTab) -> Bool {
+        selected == tab || (tab == .history && split != nil)
+    }
+
     var body: some View {
-        TabView(selection: $selected) {
+        // One tree for both poses: folding only moves frames, so every
+        // screen keeps its scroll position, path and History layout.
+        ZStack(alignment: .topLeading) {
             ForEach(HomeTab.allCases) { tab in
-                Group {
-                    if visited.contains(tab) { screen(tab) }
-                }
-                .toolbar(.hidden, for: .tabBar)
-                .tag(tab)
+                if visited.contains(tab) || isShown(tab) { pane(tab) }
             }
         }
-        .toolbar(.hidden, for: .tabBar)
         // Clip only the top, so scrolling stays below the status bar.
         .clipShape(TopEdgeClip())
         .background { AppTheme.paper.ignoresSafeArea() }
-        .overlay(alignment: .bottom) {
+        .overlay(alignment: .bottomLeading) {
             navigationCapsule
                 .padding(.top, AppTheme.hairSpacing)
                 .padding(.bottom, AppTheme.hairSpacing)
                 .padding(.horizontal, AppTheme.margin)
                 .frame(height: AppTheme.bottomNavigationReservedHeight)
+                .frame(maxWidth: split?.primaryWidth ?? .infinity)
         }
-        .undoToast(clearsBarButtons: selected != .log)
+        .overlay(alignment: .topLeading) {
+            // The toast belongs to the pane that logs, never across the fold.
+            Color.clear
+                .allowsHitTesting(false)
+                .frame(maxWidth: split?.primaryWidth ?? .infinity)
+                .undoToast(clearsBarButtons: selected != .log)
+        }
         .tint(AppTheme.accent)
+        .onGeometryChange(for: PaneGeometry.self) { proxy in
+            PaneGeometry(width: proxy.size.width, fold: proxy.verticalFold())
+        } action: { paneGeometry = $0 }
+        .onChange(of: split != nil) { _, isSplit in
+            guard isSplit else { return }
+            visited.insert(.history)
+            if selected == .history { selected = .log }
+        }
         .onReceive(router.$checkupRequests) { count in
             guard count > 0 else { return }
             visited.insert(.reports)
@@ -359,6 +393,42 @@ struct BabyHomeView: View {
         .onChange(of: selected) { _, tab in
             if tab != .reports { router.showsCheckupPitch = false }
         }
+        #if DEBUG
+        .task { await runDuoTour() }
+        #endif
+    }
+
+    /// Unfolded, History is already beside every tab, so it opens Log.
+    private func show(_ requested: HomeTab) {
+        let tab: HomeTab = requested == .history && split != nil ? .log : requested
+        visited.insert(tab)
+        selected = tab
+    }
+
+    /// Every screen is a phone layout, and each unfolded pane is phone-width.
+    /// The size class stays compact before the split is measured too: a pane
+    /// that launched regular could keep it, and Log then drew iPad-style, its
+    /// title leading and its page 84 pt short of the fold.
+    private func pane(_ tab: HomeTab) -> some View {
+        let isHistoryPane = tab == .history && split != nil
+        return screen(tab)
+            .environment(\.horizontalSizeClass, .compact)
+            .frame(
+                maxWidth: (isHistoryPane ? split?.secondaryWidth : split?.primaryWidth) ?? .infinity,
+                maxHeight: .infinity
+            )
+            // Unfolded, the open tab ends above the capsule, so no page runs
+            // beneath it beside a History pane that has none.
+            .clipShape(CapsuleDock(isDocked: split != nil && !isHistoryPane))
+            .overlay(alignment: .bottom) {
+                // A page that runs on fades into the dock instead of ending
+                // on a cut card.
+                if split != nil && !isHistoryPane { DockFade() }
+            }
+            .padding(.leading, isHistoryPane ? split?.secondaryX ?? 0 : 0)
+            .opacity(isShown(tab) ? 1 : 0)
+            .allowsHitTesting(isShown(tab))
+            .accessibilityHidden(!isShown(tab))
     }
 
     @ViewBuilder
@@ -367,7 +437,8 @@ struct BabyHomeView: View {
         case .log:
             NavigationStack { NowView(isVisible: selected == .log).reservesNavigationCapsule() }
         case .history:
-            NavigationStack { HistoryView().reservesNavigationCapsule() }
+            // Its own pane has no capsule under it.
+            NavigationStack { HistoryView().reservesNavigationCapsule(split == nil) }
         case .reports:
             ReportsTabView(isVisible: selected == .reports, showsSnapshot: showsReportSnapshot, fromCheckup: router.showsCheckupPitch)
         case .settings:
@@ -383,7 +454,7 @@ struct BabyHomeView: View {
 
     private var navigationCapsule: some View {
         HStack(spacing: 0) {
-            ForEach(HomeTab.allCases) { tab in
+            ForEach(tabs) { tab in
                 HomeTabButton(
                     icon: tab.icon(isPro: store.isPro),
                     label: tab.label(isPro: store.isPro),
@@ -407,11 +478,82 @@ struct BabyHomeView: View {
     }
 }
 
+#if DEBUG
+/// `-DuoStop <stop>` opens one iPhone Duo capture: gh-sim screenshots the
+/// launch on the folded and the unfolded display (a custom-scheme link from
+/// simctl only raises iOS's "Open in" prompt, so each surface is its own
+/// launch). Each page shows from its top; the docked pane fades into the
+/// capsule rather than cutting a card. A wet diaper is logged 10 s in, so each recording shows one real tap reach both panes, and the
+/// toast is gone well before gh-sim's 25 s screenshot.
+@MainActor
+enum DuoTour {
+    enum Stop: String {
+        case log, history, reports, firstWeeks = "firstweeks", settings, night
+    }
+
+    static func stop(in arguments: [String]) -> Stop? {
+        guard let index = arguments.firstIndex(of: "-DuoStop"), index + 1 < arguments.count else { return nil }
+        return Stop(rawValue: arguments[index + 1])
+    }
+
+    static let wetDelay: Duration = .seconds(10)
+    static var hasRun = false
+}
+
+extension BabyHomeView {
+    fileprivate func runDuoTour() async {
+        guard !DuoTour.hasRun, let stop = DuoTour.stop(in: ProcessInfo.processInfo.arguments) else { return }
+        DuoTour.hasRun = true
+        let appearance: AppAppearance = stop == .night ? .night : .system
+        if BabySettings.shared.appearance != appearance { BabySettings.shared.appearance = appearance }
+        let layout: HistoryView.HistoryLayout = stop == .firstWeeks ? .calendar : .list
+        if UserDefaults.standard.string(forKey: "historyLayout") != layout.rawValue {
+            UserDefaults.standard.set(layout.rawValue, forKey: "historyLayout")
+        }
+        let tab: HomeTab = switch stop {
+        case .log, .night: .log
+        case .history: .history
+        case .reports: .reports
+        case .firstWeeks, .settings: .settings
+        }
+        show(tab)
+        if stop == .firstWeeks { settingsPath = [.firstWeeks] }
+        try? await Task.sleep(for: DuoTour.wetDelay)
+        withAnimation(AppTheme.feedbackAnimation) { _ = EventStore.shared.log(.wet) }
+    }
+}
+#endif
+
 extension View {
     /// Reserve the floating capsule in this screen's safe area, inside its
     /// NavigationStack, so lists end above it yet scroll on beneath it.
-    func reservesNavigationCapsule() -> some View {
-        safeAreaPadding(.bottom, AppTheme.bottomNavigationReservedHeight)
+    func reservesNavigationCapsule(_ isReserved: Bool = true) -> some View {
+        safeAreaPadding(.bottom, isReserved ? AppTheme.bottomNavigationReservedHeight : 0)
+    }
+}
+
+/// Ends a pane at the top of the capsule's reservation when docked, so its
+/// page stops above the capsule; otherwise clips nothing.
+struct CapsuleDock: Shape {
+    var isDocked: Bool
+
+    func path(in rect: CGRect) -> Path {
+        let bottom = isDocked ? rect.maxY - AppTheme.bottomNavigationReservedHeight : rect.maxY + rect.height
+        return Path(CGRect(x: rect.minX - rect.width, y: rect.minY - rect.height, width: rect.width * 3, height: bottom - rect.minY + rect.height))
+    }
+}
+
+/// Paper fading in over the last stretch of a docked pane, just above the
+/// capsule's reserved strip.
+private struct DockFade: View {
+    static let height: CGFloat = 28
+
+    var body: some View {
+        LinearGradient(colors: [AppTheme.paper.opacity(0), AppTheme.paper], startPoint: .top, endPoint: .bottom)
+            .frame(height: Self.height)
+            .padding(.bottom, AppTheme.bottomNavigationReservedHeight)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 }
 

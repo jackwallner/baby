@@ -148,6 +148,7 @@ one baby is free; History's Today and Yesterday tiles and the full log are free.
   Raw evidence lives in `app-store/capture/`.
 - `-SeedScreenshotData` seeds a day-three newborn log; `-ScreenshotTab N`,
   and `-StartTab N` open a surface directly (all DEBUG, legacy screen numbers).
+  `-DuoStop <stop>` opens one iPhone Duo capture (`.claude/rules/iphone-duo.md`).
 
 ## App Review constraints
 
@@ -187,6 +188,7 @@ and a fresh Development-to-Production deploy before the build that ships it.
 - `.claude/rules/graphic-style.md`: graphic vocabulary, responsive layouts, and guidance scope.
 - `.claude/rules/release-verification.md`: build 16 test, listing and screenshot evidence.
 - `.claude/rules/watch.md`: Watch pages, wrist Undo, complications and their tests.
+- `.claude/rules/iphone-duo.md`: the unfolded two-pane layout (open tab beside History) and its capture tour.
 - `.claude/rules/android.md`: the Kotlin/Compose port in `android/`, its iOS parity tests, Firebase Log together (`firebase/`), deliberate differences and remaining Play steps.
 
 ---

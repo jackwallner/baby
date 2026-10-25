@@ -12,6 +12,10 @@ struct NowView: View {
     @State private var now = Date.now
     @State private var fit = NowFit()
     @State private var strip = StripMetrics()
+    /// Starts at the link's 44 pt minimum: at launch the page can measure
+    /// before the link does, and a first fit without it drew the buttons at
+    /// the floor, then grew them as the launch faded in.
+    @State private var olderLinkHeight = AppTheme.tightLogButtonHeight
     @StateObject private var logClock = LogClock()
     @StateObject private var feedSides = FeedSidePrompt()
 
@@ -98,30 +102,35 @@ struct NowView: View {
     /// than clipping.
     private func fitted(available: CGFloat) -> some View {
         let shown = available >= AppTheme.hourStripMinHeight ? fit.strip : .hidden
-        // Sections sit 12 apart; the time row and the buttons, one control,
-        // sit 8 apart.
-        return VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            NowStatusCard(now: now, clock: logClock, compact: true)
+        // Sections sit 12 apart (8 when tight); the time row and the buttons,
+        // one control, sit 8 apart.
+        return VStack(alignment: .leading, spacing: fit.isTight ? AppTheme.tightSpacing : AppTheme.spacing) {
+            NowStatusCard(now: now, clock: logClock, compact: true, tight: fit.isTight)
             LoggingControls(height: fit.buttonHeight, spacing: AppTheme.tightSpacing, clock: logClock, sides: feedSides, editor: $editor)
                 .padding(.bottom, fit.slack)
             // The link's 44pt touch area already holds its own gap.
             VStack(spacing: 0) {
-                TodayTotalsView(now: now, compact: true, strip: shown) { metrics in
+                TodayTotalsView(now: now, compact: true, tight: fit.isTight, strip: shown) { metrics in
                     strip = metrics
                 }
                 OlderEntryLink(editor: $editor)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { olderLinkHeight = $0 }
             }
         }
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-            // The page as drawn, less the part the last fit decided, is the
-            // part that does not stretch.
-            let fixed = height - fit.slack - fit.buttonHeight * rows
-            refit(fixed: fixed, available: available, drawn: shown, animated: fit.fixed != nil)
+            let fixed = fit.fixed(drawn: height, rows: rows)
+            // Only what the page holds changing (the side chips opening)
+            // animates; a late measurement snaps.
+            let grew = fit.fixed.map { abs($0 - fixed) >= 1 } ?? false
+            refit(fixed: fixed, available: available, drawn: shown, animated: grew)
         }
         .onChange(of: available) { _, available in
             if let fixed = fit.fixed { refit(fixed: fixed, available: available, drawn: fit.strip, animated: false) }
         }
         .onChange(of: strip) { _, _ in
+            if let fixed = fit.fixed { refit(fixed: fixed, available: available, drawn: fit.strip, animated: false) }
+        }
+        .onChange(of: olderLinkHeight) { _, _ in
             if let fixed = fit.fixed { refit(fixed: fixed, available: available, drawn: fit.strip, animated: false) }
         }
         .frame(minHeight: max(0, available), alignment: .top)
@@ -131,21 +140,14 @@ struct NowView: View {
         CGFloat(max(1, LogButtons.rows(for: settings.tracked).count))
     }
 
-    /// The buttons split what the rest leaves. Slack past the cap goes above
-    /// the totals, so they sit at the bottom of the screen. The hour strip
-    /// keeps its hour labels while the buttons can stay above their floor,
-    /// then sheds them, and only then drops (larger text on a Pro).
     private func refit(fixed: CGFloat, available: CGFloat, drawn: StripStyle, animated: Bool) {
-        let withoutStrip = fixed - strip.height(drawn)
-        let floor = withoutStrip + AppTheme.minLogButtonHeight * rows
-        let style = available < AppTheme.hourStripMinHeight ? .hidden
-            : [StripStyle.full, .compact].first { floor + strip.height($0) <= available } ?? .hidden
-        let fittedFixed = withoutStrip + strip.height(style)
-        let share = ((available - fittedFixed) / rows).rounded(.down)
-        let height = min(AppTheme.maxLogButtonHeight, max(AppTheme.minLogButtonHeight, share))
-        let next = NowFit(fixed: fittedFixed, buttonHeight: height, slack: max(0, available - fittedFixed - height * rows), strip: style)
-        guard next.strip != fit.strip || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
-            fit.fixed = fittedFixed
+        let next = NowFit.make(
+            fixed: fixed, available: available, rows: rows,
+            strip: strip, drawn: drawn, olderLink: olderLinkHeight
+        )
+        guard next.strip != fit.strip || next.isTight != fit.isTight
+            || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
+            fit.fixed = next.fixed
             return
         }
         // The first fit lands before anything draws; later ones (the side
@@ -156,14 +158,61 @@ struct NowView: View {
     }
 }
 
-/// The phone layout's last fit: the height that does not stretch (nil until
-/// measured), each button's height, the slack above the totals, and how much
-/// of the hour strip fits.
-private struct NowFit: Equatable {
+/// The phone layout's last fit: the height that does not stretch (as the
+/// roomy layout draws it; nil until measured), each button's height, the
+/// slack above the totals, how much of the hour strip fits, and whether the
+/// page had to go tight.
+struct NowFit: Equatable {
     var fixed: CGFloat?
     var buttonHeight: CGFloat = AppTheme.logButtonHeight
     var slack: CGFloat = 0
     var strip = StripStyle.full
+    var isTight = false
+
+    /// What tight takes off: the two section gaps go from 12 to 8, and both
+    /// cards lose 4 top and bottom (never at the sides, so no line rewraps
+    /// and the measured height stays true to this sum).
+    static let tightSaving = (AppTheme.spacing - AppTheme.tightSpacing) * 2
+        + (AppTheme.compactCardPadding - AppTheme.tightCardPadding) * 4
+
+    /// The page as drawn under this fit, less the part this fit decided, is
+    /// the part that does not stretch.
+    func fixed(drawn height: CGFloat, rows: CGFloat) -> CGFloat {
+        height - slack - buttonHeight * rows + (isTight ? Self.tightSaving : 0)
+    }
+
+    /// The buttons split what the rest leaves. Slack past the cap goes above
+    /// the totals, so they sit at the bottom of the screen. The hour strip
+    /// keeps its hour labels while the buttons can stay above their floor,
+    /// then sheds them, and only then drops (larger text on a Pro). Shorter
+    /// still (the iPhone Duo's outer display, or one pane of it unfolded),
+    /// the page goes tight: tighter cards and gaps, Add an older entry
+    /// scrolls into view, and the buttons share the rest down to the minimum
+    /// tap target, so the capsule never sits on the totals.
+    static func make(
+        fixed: CGFloat, available: CGFloat, rows: CGFloat,
+        strip: StripMetrics, drawn: StripStyle, olderLink: CGFloat
+    ) -> NowFit {
+        let withoutStrip = fixed - strip.height(drawn)
+        let floor = withoutStrip + AppTheme.minLogButtonHeight * rows
+        let style = available < AppTheme.hourStripMinHeight ? .hidden
+            : [StripStyle.full, .compact].first { floor + strip.height($0) <= available } ?? .hidden
+        let fittedFixed = withoutStrip + strip.height(style)
+        let isTight = fittedFixed + AppTheme.minLogButtonHeight * rows > available
+        // The link sits flush under the totals, so tight drops it with no gap.
+        let budget = isTight ? fittedFixed - tightSaving - olderLink : fittedFixed
+        let share = ((available - budget) / rows).rounded(.down)
+        // Tight never grows the buttons past the roomy floor: the room goes
+        // above the totals instead, so going tight only ever shrinks them.
+        let height = isTight
+            ? min(AppTheme.minLogButtonHeight, max(AppTheme.tightLogButtonHeight, share))
+            : min(AppTheme.maxLogButtonHeight, max(AppTheme.minLogButtonHeight, share))
+        return NowFit(
+            fixed: fittedFixed, buttonHeight: height,
+            slack: max(0, available - budget - height * rows),
+            strip: style, isTight: isTight
+        )
+    }
 }
 
 /// The hour strip with its hour labels, without them, or not at all.
@@ -425,6 +474,8 @@ private struct NowStatusCard: View {
     @ObservedObject var clock: LogClock
     /// A phone fitting one screen: a tighter card.
     var compact = false
+    /// The shortest pages (the iPhone Duo): tighter still.
+    var tight = false
 
     private enum Lead { case feed, diaper, sleep }
 
@@ -494,7 +545,7 @@ private struct NowStatusCard: View {
                 }
             }
         }
-        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing)
+        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing, verticalPadding: tight ? AppTheme.tightCardPadding : nil)
         .accessibilityIdentifier("nowCard")
         .alert("Couldn't finish this feed", isPresented: $showSaveError) {
             Button("OK", role: .cancel) {}
@@ -601,6 +652,7 @@ private struct TodayTotalsView: View {
     @EnvironmentObject private var settings: BabySettings
     let now: Date
     var compact = false
+    var tight = false
     var strip = StripStyle.full
     var onStripChange: ((StripMetrics) -> Void)?
     @State private var measured = StripMetrics()
@@ -635,7 +687,7 @@ private struct TodayTotalsView: View {
                 }
             }
         }
-        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing)
+        .card(padding: compact ? AppTheme.compactCardPadding : AppTheme.looseSpacing, verticalPadding: tight ? AppTheme.tightCardPadding : nil)
         .onChange(of: measured) { _, metrics in
             onStripChange?(metrics)
         }
@@ -771,7 +823,7 @@ private struct OlderEntryLink: View {
         Menu {
             NewEntryMenuItems(editor: $editor)
         } label: {
-            Label("Add an older entry", systemImage: "clock.badge.plus")
+            Label("Add an older entry", systemImage: "calendar.badge.plus")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(AppTheme.ink2)
                 .frame(minHeight: 44)

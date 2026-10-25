@@ -28,8 +28,13 @@ enum AppTheme {
     static let maxLogButtonHeight: CGFloat = 124
     /// The shortest a log button gets when Now fits a small phone.
     static let minLogButtonHeight: CGFloat = 52
+    /// Only when the page cannot fit even at that: Apple's minimum tap target.
+    static let tightLogButtonHeight: CGFloat = 44
     /// Now's cards on a phone, where the page fits one screen.
     static let compactCardPadding: CGFloat = 16
+    /// Now's cards top and bottom when even the shortest buttons leave too
+    /// little room.
+    static let tightCardPadding: CGFloat = 12
     /// Below this much page height (an SE), Now drops the hour strip.
     static let hourStripMinHeight: CGFloat = 620
     static let outlineWidth: CGFloat = 2
@@ -185,6 +190,7 @@ enum AppTheme {
 struct CareGraphic: View {
     let kind: EventKind
     var side: FeedSide? = nil
+    var size = AppTheme.graphicSize
 
     var body: some View {
         ZStack {
@@ -202,7 +208,7 @@ struct CareGraphic: View {
                     .padding(AppTheme.tightSpacing)
             }
         }
-        .frame(width: AppTheme.graphicSize, height: AppTheme.graphicSize)
+        .frame(width: size, height: size)
         .accessibilityHidden(true)
     }
 }

@@ -40,15 +40,17 @@ final class FormatTests: XCTestCase {
     }
 
     func testWatchStoreReplaysAPendingTapOverAnOlderPhoneSummary() {
+        // Midday, so ten minutes ago is never yesterday.
+        let now = Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: .now)!
         var phone = NowSummary()
-        phone.generatedAt = Date.now.addingTimeInterval(-600)
+        phone.generatedAt = now.addingTimeInterval(-600)
         phone.todayWet = 2
-        let tap = WatchLogPayload(action: .log, kind: .wet, at: Date.now.addingTimeInterval(-60))
-        let merged = phone.applying(tap)
+        let tap = WatchLogPayload(action: .log, kind: .wet, at: now.addingTimeInterval(-60))
+        let merged = phone.applying(tap, now: now)
         XCTAssertEqual(merged.todayWet, 3)
         XCTAssertEqual(merged.lastDiaperKind, .wet)
         XCTAssertEqual(merged.lastDiaperAt, tap.at)
-        let sleep = merged.applying(WatchLogPayload(action: .startSleep, kind: .sleep))
+        let sleep = merged.applying(WatchLogPayload(action: .startSleep, kind: .sleep, at: now), now: now)
         XCTAssertTrue(sleep.isSleeping)
     }
 

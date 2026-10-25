@@ -26,6 +26,13 @@ struct LogButtons: View {
         height == nil ? AppTheme.tightSpacing : AppTheme.hairSpacing
     }
 
+    /// The graphic gives way inside the shortest fitted button, so a 44pt
+    /// button really is 44pt.
+    private var graphicSize: CGFloat {
+        guard let height else { return AppTheme.graphicSize }
+        return min(AppTheme.graphicSize, height - labelPadding * 2)
+    }
+
     /// The rows the tracked buttons make: Feed, the diaper pair (or the one
     /// diaper button left), Sleep.
     static func rows(for tracked: TrackedKinds) -> [[EventKind]] {
@@ -166,10 +173,10 @@ struct LogButtons: View {
                     Image(systemName: "sun.max.fill")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(AppTheme.sleep)
-                        .frame(width: AppTheme.graphicSize, height: AppTheme.graphicSize)
+                        .frame(width: graphicSize, height: graphicSize)
                         .accessibilityHidden(true)
                 } else {
-                    CareGraphic(kind: kind)
+                    CareGraphic(kind: kind, size: graphicSize)
                 }
                 VStack(spacing: AppTheme.hairSpacing) {
                     Text(label)

@@ -112,6 +112,7 @@ targets:
       - path: Baby/Views/PDFReport.swift
       - path: Baby/Views/Components.swift
       - path: Baby/Views/RemindersView.swift
+      - path: Baby/Views/UnfoldedSplit.swift
       - path: Baby/Assets.xcassets
       - path: Baby/PrivacyInfo.xcprivacy
         buildPhase: resources
