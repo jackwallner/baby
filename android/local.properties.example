@@ -7,3 +7,6 @@ PLAY_UPLOAD_KEYSTORE=
 PLAY_UPLOAD_KEY_ALIAS=upload
 PLAY_UPLOAD_STORE_PASSWORD=
 PLAY_UPLOAD_KEY_PASSWORD=
+# Lowercase SHA-256 hex of the Play reviewer code (never the code itself):
+#   printf '%s' 'the-code' | shasum -a 256
+PLAY_REVIEW_CODE_SHA256=

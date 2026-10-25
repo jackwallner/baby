@@ -9,13 +9,13 @@ paths:
 
 Native Kotlin/Compose port in `android/`, screen for screen with iOS where the
 platform allows. First built 2026-10-20 on jmbp2 (fleet run
-`shift-android-baby-1-1792553156`). Not uploaded to Play yet.
+`shift-android-baby-1-1792553156`). versionCode 1 is uploaded to Play.
 
 ## Identity
 
 - Package and namespace `com.jackwallner.baby` (permanent once uploaded).
   Listing name `Baby Tracker: Feeds & Diapers`. minSdk 26, target/compile 36.
-  versionCode 1, versionName 1.0.0.
+  versionCode 2, versionName 1.0.0.
 - Same RevenueCat project `proj0b545ae2`, entitlement `baby`, offering
   `default` with `$rc_monthly`, `$rc_annual`, `$rc_lifetime`. The app treats
   any active entitlement as Baby+, as iOS does.
@@ -128,6 +128,32 @@ ANDROID_SERIAL=emulator-5554 fm-gradle :app:connectedDebugAndroidTest -Pkotlin.c
   windows: native 60 fps cannot be proven there. Motion review belongs on the
   Air.
 
+## Play reviewer unlock
+
+Reviewer path: Settings > long-press the Version line at the bottom. It opens
+a masked Password-keyboard dialog (autocorrect off) with Unlock. The code's
+SHA-256 is compared with `PLAY_REVIEW_CODE_SHA256` (ignored `local.properties`
+into `BuildConfig`; never the plaintext). A match stores the digest as
+`reviewAccessDigest` and unlocks Baby+ (entitlement `baby`) for that install
+only (`ReviewAccess`, read by `StoreService.isPlus`, so a customer-info
+refresh keeps it). No purchase is written, nothing goes to RevenueCat, and
+changing the digest revokes every earlier grant. `validateReleaseConfiguration`
+fails without a valid digest; generate it with
+`printf '%s' CODE | shasum -a 256`. Tests: `ReviewAccessTest` (JVM) and
+`ReviewerUnlockTest` (device; pass a throwaway code as
+`-Pandroid.testInstrumentationRunnerArguments.reviewCode=...` with its digest
+in `local.properties` or as `-PPLAY_REVIEW_CODE_SHA256=...`, else it reports
+as skipped; never a real code). On a GitHub API 34 emulator (2026-10-25) it
+passed; `LoggingFlowTests.guidesAreFreeOnAFreshInstall` fails there on the
+base commit too (`settings.stain` not found after Back from First Weeks).
+
+Log together is free and still needs a Google sign-in, so a reviewer without
+their own Google account cannot open it. A sign-in-free demo shared log was
+not added: Firestore rules need an authenticated member, and faking the
+service's family state locally would touch most of `SharingService`. In App
+access, describe Log together as optional (Google sign-in); every paid feature
+is reachable through the code.
+
 ## Release preparation and remaining Play steps
 
 1. Create the Play app `com.jackwallner.baby` in the E3 Apps account (Console,
@@ -155,10 +181,11 @@ ANDROID_SERIAL=emulator-5554 fm-gradle :app:connectedDebugAndroidTest -Pkotlin.c
    `https://jackwallner.github.io/baby/delete-account.html`; purchases go
    to RevenueCat), Health apps declaration (baby care log, not a medical
    device), ads: none, target audience: adults (parents), content rating
-   questionnaire, app access: no login needed (Google sign-in optional).
+   questionnaire, app access: no login needed (Google sign-in optional);
+   give the reviewer code and the Settings > long-press Version path for Baby+.
 6. Signed AAB and internal track upload are the Air release worker's job
    (upload key stays on the Air). Then licence-tester purchase and restore,
    pre-launch report, and production only when Jack asks.
 
-Last verified Play state: no Play app exists (2026-10-20). No Firebase
+Play state: versionCode 1 uploaded (per Jack, 2026-10-24); vc2 adds the reviewer unlock. No Firebase
 project exists yet (2026-10-21); everything was verified on the emulators.

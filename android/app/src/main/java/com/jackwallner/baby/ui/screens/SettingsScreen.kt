@@ -8,6 +8,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -48,6 +50,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.jackwallner.baby.BuildConfig
 import com.jackwallner.baby.LocalGraph
@@ -120,6 +124,7 @@ fun SettingsScreen(open: (SettingsPage) -> Unit, onSeePlus: () -> Unit) {
     var addingBaby by remember { mutableStateOf(false) }
     var pickingBirth by remember { mutableStateOf(false) }
     var restoreMessage by remember { mutableStateOf<String?>(null) }
+    var reviewerCodeOpen by remember { mutableStateOf(false) }
 
     Page("Settings", tag = "settings") {
         Group(header = "Guides") {
@@ -217,8 +222,16 @@ fun SettingsScreen(open: (SettingsPage) -> Unit, onSeePlus: () -> Unit) {
             NavRow("Terms of use", tag = "settings.terms") { context.openUrl(Links.TERMS) }
         }
         Text(Guidance.DISCLAIMER, style = MaterialTheme.typography.bodySmall, color = palette.ink2)
-        Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", style = MaterialTheme.typography.bodySmall, color = palette.ink3)
+        // A long press opens the Play reviewer unlock; the line has no other action.
+        Text(
+            "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            style = MaterialTheme.typography.bodySmall,
+            color = palette.ink3,
+            modifier = Modifier.testTag("settings.version").combinedClickable(onClick = {}, onLongClick = { reviewerCodeOpen = true }),
+        )
     }
+
+    if (reviewerCodeOpen) ReviewerCodeDialog(onUnlock = graph.store::activateReviewAccess, onClose = { reviewerCodeOpen = false })
 
     if (editingName || addingBaby) {
         var text by remember { mutableStateOf(if (addingBaby) "" else child.name.orEmpty()) }
@@ -253,6 +266,36 @@ fun SettingsScreen(open: (SettingsPage) -> Unit, onSeePlus: () -> Unit) {
         AlertDialog(onDismissRequest = { restoreMessage = null }, containerColor = palette.card, text = { Text(message, color = palette.ink) },
             confirmButton = { TextAction("OK") { restoreMessage = null } })
     }
+}
+
+@Composable
+private fun ReviewerCodeDialog(onUnlock: (String) -> Boolean, onClose: () -> Unit) {
+    val palette = LocalPalette.current
+    var code by remember { mutableStateOf("") }
+    var failed by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onClose,
+        containerColor = palette.card,
+        title = { Text("Reviewer access", color = palette.ink) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(Tokens.tight)) {
+                OutlinedTextField(
+                    code,
+                    { code = it; failed = false },
+                    singleLine = true,
+                    label = { Text("Reviewer code") },
+                    isError = failed,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+                    visualTransformation = PasswordVisualTransformation(),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = palette.accent, focusedLabelColor = palette.accent, cursorColor = palette.accent),
+                    modifier = Modifier.testTag("settings.reviewerCode"),
+                )
+                if (failed) Text("That code isn't valid.", style = MaterialTheme.typography.bodySmall, color = palette.ink2)
+            }
+        },
+        confirmButton = { TextAction("Unlock", tag = "settings.reviewerUnlock") { if (onUnlock(code)) onClose() else failed = true } },
+        dismissButton = { TextAction("Cancel", color = palette.ink2, onClick = onClose) },
+    )
 }
 
 /** Settings > Reminders: the feed reminder, checkup notes and the next visit date. */

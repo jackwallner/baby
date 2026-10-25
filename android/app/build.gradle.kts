@@ -12,6 +12,9 @@ val localProperties = Properties().apply {
 }
 
 val playKey = localProperties.getProperty("REVENUECAT_PLAY_KEY", "")
+// A connected-test run without local.properties may pass a throwaway digest with -P.
+val reviewCodeDigest = localProperties.getProperty("PLAY_REVIEW_CODE_SHA256")
+    ?: providers.gradleProperty("PLAY_REVIEW_CODE_SHA256").getOrElse("")
 val testKey = localProperties.getProperty("REVENUECAT_TEST_KEY", "")
 val uploadKeyStore = localProperties.getProperty("PLAY_UPLOAD_KEYSTORE", "")
 val uploadKeyAlias = localProperties.getProperty("PLAY_UPLOAD_KEY_ALIAS", "")
@@ -55,6 +58,7 @@ val validateReleaseConfiguration = tasks.register("validateReleaseConfiguration"
             "google-services.json has no web OAuth client: enable Google sign-in in Firebase Authentication and add the upload and Play signing SHA-1s, then download it again."
         }
         check(playKey.startsWith("goog_")) { "Set REVENUECAT_PLAY_KEY in android/local.properties before a release build." }
+        check(reviewCodeDigest.matches(Regex("[a-f0-9]{64}"))) { "Set PLAY_REVIEW_CODE_SHA256 (lowercase SHA-256 hex of the reviewer code) in android/local.properties before a release build." }
         check(uploadKeyStore.isNotBlank() && rootProject.file(uploadKeyStore).isFile) {
             "Set PLAY_UPLOAD_KEYSTORE to the external upload keystore before a release build."
         }
@@ -72,12 +76,13 @@ android {
         applicationId = "com.jackwallner.baby"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Every connected test starts from a clean install: no setup, no log.
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
         buildConfigField("String", "REVENUECAT_API_KEY", "\"$testKey\"")
+        buildConfigField("String", "PLAY_REVIEW_CODE_SHA256", "\"$reviewCodeDigest\"")
         buildConfigField("String", "FIREBASE_API_KEY", "\"${firebase?.apiKey.orEmpty()}\"")
         buildConfigField("String", "FIREBASE_APP_ID", "\"${firebase?.appId.orEmpty()}\"")
         buildConfigField("String", "FIREBASE_PROJECT_ID", "\"${firebase?.projectId.orEmpty()}\"")

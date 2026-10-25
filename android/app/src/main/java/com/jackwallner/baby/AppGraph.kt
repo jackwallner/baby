@@ -5,6 +5,7 @@ import android.content.Context
 import com.jackwallner.baby.data.AppSettings
 import com.jackwallner.baby.data.EventStore
 import com.jackwallner.baby.data.Reminders
+import com.jackwallner.baby.data.ReviewAccess
 import com.jackwallner.baby.data.SharingService
 import com.jackwallner.baby.data.StoreService
 import java.io.File
@@ -19,7 +20,7 @@ class AppGraph(context: Context) {
     val settings = AppSettings(prefs)
     val reminders = Reminders(context.applicationContext, prefs, settings)
     val events = EventStore(File(context.filesDir, "baby-log.json"), settings, scope)
-    val store = StoreService(context.applicationContext, settings)
+    val store = StoreService(context.applicationContext, settings, ReviewAccess(prefs, BuildConfig.PLAY_REVIEW_CODE_SHA256))
     /** Log together: off (local only) unless this phone started or joined a shared log. */
     val sharing = SharingService(context.applicationContext, prefs, events)
 

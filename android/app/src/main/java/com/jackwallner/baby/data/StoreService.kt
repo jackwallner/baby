@@ -49,7 +49,11 @@ data class PlanOption(
  * the `baby` entitlement). Debug builds use the Test Store key; release
  * builds the Play key; the production key never runs in a debuggable build.
  */
-class StoreService(private val context: Context, private val settings: AppSettings) {
+class StoreService(
+    private val context: Context,
+    private val settings: AppSettings,
+    private val reviewAccess: ReviewAccess,
+) {
     var plans by mutableStateOf<List<PlanOption>>(emptyList())
         private set
     var isLoading by mutableStateOf(false)
@@ -60,13 +64,14 @@ class StoreService(private val context: Context, private val settings: AppSettin
         private set
     var errorMessage by mutableStateOf<String?>(null)
     private var entitled by mutableStateOf(false)
+    private var reviewGranted by mutableStateOf(reviewAccess.isGranted)
 
     /** Debug: screenshot runs record no paywall impressions. */
     var suppressImpressions = false
     private val impressions = mutableSetOf<String>()
     private var configured = false
 
-    val isPlus: Boolean get() = entitled || (BuildConfig.DEBUG && settings.debugPlus)
+    val isPlus: Boolean get() = entitled || reviewGranted || (BuildConfig.DEBUG && settings.debugPlus)
     val isAvailable: Boolean get() = configureIfNeeded()
 
     private fun configureIfNeeded(): Boolean {
@@ -91,6 +96,16 @@ class StoreService(private val context: Context, private val settings: AppSettin
         // Single premium tier: any active entitlement unlocks Baby+, which
         // survives entitlement renames in the dashboard (as on iOS).
         entitled = info.entitlements.active.isNotEmpty()
+    }
+
+    /**
+     * The Play reviewer code. Unlocks Baby+ on this install only: no purchase
+     * is recorded, and a customer-info refresh does not take it back.
+     */
+    fun activateReviewAccess(code: String): Boolean {
+        if (!reviewAccess.activate(code)) return false
+        reviewGranted = true
+        return true
     }
 
     suspend fun start() {
