@@ -24,14 +24,14 @@ paths:
 - Every screen gets `horizontalSizeClass = .compact` always, not only once
   split, so it lays out as on a phone (the app is iPhone only). The capsule and the Undo toast are framed to the primary pane, never
   across the fold. History's pane drops the capsule's bottom reservation.
-- Unfolded, the capsule is docked (2026-10-22, the shots review rejected
-  Reports, First Weeks and Settings with the capsule over a chart, the day
-  table and a footer): `CapsuleDock` clips the open tab's pane at the top
-  of the capsule's reservation, so its page ends above the capsule instead
-  of scrolling beneath it beside a History pane that has no capsule. The
-  last 28 pt above the dock fade to paper (`DockFade`), so a page that runs
-  on reads as continuing rather than as a card cut by the capsule.
-  Folded (and on every phone) nothing is clipped and the capsule floats.
+- Unfolded, the capsule heads the open tab's pane (2026-10-24): the screen
+  is padded down by the capsule's reservation and reserves nothing at its
+  foot (`reservesBottomCapsule` is false), so both panes run to the
+  display's bottom edge alike. Floating over the pane, the capsule covered a
+  chart, the day table and a footer (review 2026-10-22); docked at the foot
+  with the page clipped above it and faded, the page ended on a cut card
+  with blank paper below it (review 2026-10-24). Folded (and on every
+  phone) the capsule floats at the bottom as before.
 - Captures: DEBUG `-DuoStop <stop>` (`DuoTour`) opens one surface per
   launch: `log`, `reports`, `firstweeks` (with History's calendar),
   `settings`, `night` (Night light Log) or `history` (folded only). Run
@@ -42,7 +42,7 @@ paths:
   from the top. Until 2026-10-24 Reports, First Weeks and Settings scrolled
   an anchor to the dock so the frame ended on a whole card; that put their
   top cards under the translucent inline header, and the review rejected
-  it, so the dock fade replaced it. A wet diaper is logged 10 s in, for the
+  it. A wet diaper is logged 10 s in, for the
   recording (`--record-seconds 30`; an `all` run loses its launch
   recordings to the test recorder, so record in `launch` runs). Never use
   `--url` to space shots: an unhandled URL (`noop://`) can fail the run,

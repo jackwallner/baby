@@ -361,7 +361,11 @@ struct BabyHomeView: View {
         // Clip only the top, so scrolling stays below the status bar.
         .clipShape(TopEdgeClip())
         .background { AppTheme.paper.ignoresSafeArea() }
-        .overlay(alignment: .bottomLeading) {
+        // Unfolded, the capsule heads the open tab's pane, so both panes
+        // run to the display's bottom edge alike. Docked at the bottom
+        // there, the open tab ended above it on a cut card while History
+        // ran on beside it (review 2026-10-24).
+        .overlay(alignment: split == nil ? .bottomLeading : .topLeading) {
             navigationCapsule
                 .padding(.top, AppTheme.hairSpacing)
                 .padding(.bottom, AppTheme.hairSpacing)
@@ -375,6 +379,7 @@ struct BabyHomeView: View {
                 .allowsHitTesting(false)
                 .frame(maxWidth: split?.primaryWidth ?? .infinity)
                 .undoToast(clearsBarButtons: selected != .log)
+                .padding(.top, split == nil ? 0 : AppTheme.bottomNavigationReservedHeight)
         }
         .tint(AppTheme.accent)
         .onGeometryChange(for: PaneGeometry.self) { proxy in
@@ -411,20 +416,15 @@ struct BabyHomeView: View {
     /// title leading and its page 84 pt short of the fold.
     private func pane(_ tab: HomeTab) -> some View {
         let isHistoryPane = tab == .history && split != nil
+        let headsCapsule = split != nil && !isHistoryPane
         return screen(tab)
             .environment(\.horizontalSizeClass, .compact)
+            .environment(\.reservesBottomCapsule, split == nil)
+            .padding(.top, headsCapsule ? AppTheme.bottomNavigationReservedHeight : 0)
             .frame(
                 maxWidth: (isHistoryPane ? split?.secondaryWidth : split?.primaryWidth) ?? .infinity,
                 maxHeight: .infinity
             )
-            // Unfolded, the open tab ends above the capsule, so no page runs
-            // beneath it beside a History pane that has none.
-            .clipShape(CapsuleDock(isDocked: split != nil && !isHistoryPane))
-            .overlay(alignment: .bottom) {
-                // A page that runs on fades into the dock instead of ending
-                // on a cut card.
-                if split != nil && !isHistoryPane { DockFade() }
-            }
             .padding(.leading, isHistoryPane ? split?.secondaryX ?? 0 : 0)
             .opacity(isShown(tab) ? 1 : 0)
             .allowsHitTesting(isShown(tab))
@@ -527,33 +527,23 @@ extension BabyHomeView {
 extension View {
     /// Reserve the floating capsule in this screen's safe area, inside its
     /// NavigationStack, so lists end above it yet scroll on beneath it.
+    /// Unfolded, the capsule heads the pane instead and nothing is reserved.
     func reservesNavigationCapsule(_ isReserved: Bool = true) -> some View {
-        safeAreaPadding(.bottom, isReserved ? AppTheme.bottomNavigationReservedHeight : 0)
+        modifier(NavigationCapsuleReservation(isReserved: isReserved))
     }
 }
 
-/// Ends a pane at the top of the capsule's reservation when docked, so its
-/// page stops above the capsule; otherwise clips nothing.
-struct CapsuleDock: Shape {
-    var isDocked: Bool
-
-    func path(in rect: CGRect) -> Path {
-        let bottom = isDocked ? rect.maxY - AppTheme.bottomNavigationReservedHeight : rect.maxY + rect.height
-        return Path(CGRect(x: rect.minX - rect.width, y: rect.minY - rect.height, width: rect.width * 3, height: bottom - rect.minY + rect.height))
-    }
+extension EnvironmentValues {
+    /// False while the capsule heads the unfolded pane rather than its foot.
+    @Entry var reservesBottomCapsule = true
 }
 
-/// Paper fading in over the last stretch of a docked pane, just above the
-/// capsule's reserved strip.
-private struct DockFade: View {
-    static let height: CGFloat = 28
+private struct NavigationCapsuleReservation: ViewModifier {
+    @Environment(\.reservesBottomCapsule) private var atBottom
+    let isReserved: Bool
 
-    var body: some View {
-        LinearGradient(colors: [AppTheme.paper.opacity(0), AppTheme.paper], startPoint: .top, endPoint: .bottom)
-            .frame(height: Self.height)
-            .padding(.bottom, AppTheme.bottomNavigationReservedHeight)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
+    func body(content: Content) -> some View {
+        content.safeAreaPadding(.bottom, isReserved && atBottom ? AppTheme.bottomNavigationReservedHeight : 0)
     }
 }
 

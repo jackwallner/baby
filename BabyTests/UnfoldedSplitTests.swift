@@ -38,18 +38,4 @@ final class UnfoldedSplitTests: XCTestCase {
             XCTAssertEqual(split.secondaryX + split.secondaryWidth, width)
         }
     }
-
-    @MainActor func testDockedPaneEndsAboveTheCapsule() {
-        // The unfolded Duo's leading pane: its page must stop where the capsule's
-        // reservation starts, above the capsule's own top edge.
-        let pane = CGRect(x: 0, y: 0, width: 466, height: 615)
-        let reservationTop = pane.maxY - AppTheme.bottomNavigationReservedHeight
-        let capsuleTop = reservationTop + AppTheme.hairSpacing
-        let docked = CapsuleDock(isDocked: true).path(in: pane).boundingRect
-        XCTAssertEqual(docked.maxY, reservationTop)
-        XCTAssertLessThanOrEqual(docked.maxY, capsuleTop)
-        // Folded, the page runs on beneath the floating capsule.
-        let floating = CapsuleDock(isDocked: false).path(in: pane).boundingRect
-        XCTAssertGreaterThan(floating.maxY, pane.maxY)
-    }
 }

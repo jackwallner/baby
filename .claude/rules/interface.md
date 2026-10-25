@@ -52,7 +52,8 @@ Clip only the top edge (`TopEdgeClip`), so lists end above the capsule yet
 scroll on beneath it, and Now fits its own safe-area height. Any new pushed
 screen must call `reservesNavigationCapsule()` too. Since 2026-10-21 the tabs are a `ZStack`
 of visited screens, not a `TabView`, so the unfolded iPhone Duo can show History
-as a pane (`.claude/rules/iphone-duo.md`); the capsule and reservations are unchanged.
+as a pane (`.claude/rules/iphone-duo.md`). Unfolded, the capsule heads the open tab's pane
+and nothing is reserved at the foot; folded, the capsule and reservations are unchanged.
 
 The paywall pitches with `ReportPreviews`, three cards (summary page, first
 trend chart, export rows) with one rule: the example is sharp, labelled Example
