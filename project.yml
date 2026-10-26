@@ -30,7 +30,7 @@ schemes:
     build:
       targets:
         Baby: all
-        BabyUITests: [test]
+        BabyUITests: all
     test:
       config: Debug
       targets:
