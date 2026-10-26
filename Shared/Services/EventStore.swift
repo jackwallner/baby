@@ -268,7 +268,7 @@ final class EventStore: ObservableObject {
             }
             // A launch alone cannot acknowledge the extension's direct
             // records. Retry its durable queue as well as the native export.
-            await WidgetCloudSync.flush()
+            if !ProcessInfo.processInfo.arguments.contains("-NoCloudKit") { await WidgetCloudSync.flush() } // TEMP preview capture
             await MainActor.run {
                 guard let self else { return }
                 self.isReconciling = false

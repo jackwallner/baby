@@ -54,7 +54,8 @@ final class SharingService: ObservableObject {
             share = nil
             shareChildID = child?.objectID
         }
-        let available = await accountAvailable()
+        // TEMP preview capture (uncommitted): unsigned gh-sim builds trap in CKContainer.
+        let available = ProcessInfo.processInfo.arguments.contains("-NoCloudKit") ? false : await accountAvailable()
         guard generation == refreshes else { return }
         iCloudAvailable = available
         guard let child, persistence.cloudKitEnabled else {
