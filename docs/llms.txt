@@ -13,7 +13,7 @@
 
 ## Optional
 
-- [Delete your sharing sign-in | Baby Tracker](https://jackwallner.github.io/baby/delete-account.html.md): How to delete the Google sign-in and shared data Baby Tracker's Log together uses on Android.
+- [Delete your sharing sign-in | Baby Tracker](https://jackwallner.com/ios/baby/delete-account.html.md): How to delete the Google sign-in and shared data Baby Tracker's Log together uses on Android.
 - [Privacy Policy | Baby Tracker](https://jackwallner.com/ios/baby/privacy-policy.html.md): Privacy policy for the Baby Tracker feeds and diapers app by Jack Wallner.
 - [Support | Baby Tracker](https://jackwallner.com/ios/baby/support.html.md): Help and contact for the Baby Tracker feeds and diapers app by Jack Wallner.
 - [Terms | Baby Tracker](https://jackwallner.com/ios/baby/terms.html.md): Terms of use for the Baby Tracker feeds and diapers app by Jack Wallner.

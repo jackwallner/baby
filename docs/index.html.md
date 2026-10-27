@@ -12,7 +12,7 @@ Baby Tracker is a baby tracker app for iPhone and Apple Watch. One tap logs a fe
 time you look, it tells you when she last ate and which side.
 Free to log, free to share with your partner, and free to keep.
 
-See how it works
+[Download on the App Store](https://apps.apple.com/us/app/baby-tracker-feeds-diapers/id6811133796?pt=128748779&ct=jw-baby-home&mt=8)
 
 01
 

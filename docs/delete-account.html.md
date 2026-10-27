@@ -2,7 +2,7 @@
 
 > How to delete the Google sign-in and shared data Baby Tracker's Log together uses on Android.
 
-Web page: https://jackwallner.github.io/baby/delete-account.html
+Web page: https://jackwallner.com/ios/baby/delete-account.html
 
 Baby Tracker for Android
 
