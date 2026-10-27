@@ -1,0 +1,19 @@
+# Baby Tracker: Feeds & Diapers
+
+> Baby Tracker is a free baby tracker app for iPhone and Apple Watch. Log feeds, diapers and sleep in one tap and share with your partner. No ads, no account.
+
+## App
+
+- [Baby Tracker: Feeds & Diapers | Free Baby Tracker App](https://jackwallner.com/ios/baby/index.html.md): Baby Tracker is a free baby tracker app for iPhone and Apple Watch. Log feeds, diapers and sleep in one tap and share with your partner. No ads, no account.
+
+## Guides
+
+- [Best Baby Tracker App (2026): 5 iPhone Apps Compared](https://jackwallner.com/ios/baby/best-baby-tracker-app.html.md): The best baby tracker apps for iPhone compared: Huckleberry, Baby Tracker - Newborn Log, Nara, Baby Connect and Baby Tracker: Feeds & Diapers, for both parents.
+- [Newborn Wet and Dirty Diapers by Day: First Week Guide](https://jackwallner.com/ios/baby/newborn-wet-dirty-diapers-first-week.html.md): Day-by-day newborn diaper count for the first week: 1 wet diaper on day 1 rising to 6 or more by day 6, plus what the stools look like and when to call.
+
+## Optional
+
+- [Delete your sharing sign-in | Baby Tracker](https://jackwallner.github.io/baby/delete-account.html.md): How to delete the Google sign-in and shared data Baby Tracker's Log together uses on Android.
+- [Privacy Policy | Baby Tracker](https://jackwallner.com/ios/baby/privacy-policy.html.md): Privacy policy for the Baby Tracker feeds and diapers app by Jack Wallner.
+- [Support | Baby Tracker](https://jackwallner.com/ios/baby/support.html.md): Help and contact for the Baby Tracker feeds and diapers app by Jack Wallner.
+- [Terms | Baby Tracker](https://jackwallner.com/ios/baby/terms.html.md): Terms of use for the Baby Tracker feeds and diapers app by Jack Wallner.
