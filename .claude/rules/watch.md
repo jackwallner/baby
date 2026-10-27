@@ -58,6 +58,17 @@ transfers and application context took minutes, which hid both gaps.
 `WatchStore.receive` ignores a summary older than the one it has, since a
 reply and a pushed context can cross.
 
+WatchConnectivity calls `sendMessage`'s reply and error handlers on its own
+queue, and its headers mark neither as Sendable. Written inside a
+`@MainActor` method they inherit the main actor, and Swift 6 traps on entry,
+so both are `@Sendable` (2026-10-27). Before that, every reply crashed the
+Watch app and the tap was never cleared, which also showed as desync (a
+sleep toggle blocking the next one, a phone delete coming back on the wrist).
+On the phone, applying a Watch tap and the reload after an iCloud change hold
+`BackgroundTime`, since being suspended mid-reload with the shared store
+locked was a 0xdead10cc kill in build 66. `watch-e2e.sh` builds into
+`build/watch-e2e`: a `Baby-*` DerivedData glob installed stale builds.
+
 `scripts/watch-e2e.sh <owner>` (a `--watch` lease) runs the real path:
 phone seeded with `-SeedScreenshotData`, Watch app reinstalled, then
 `WatchPhoneSyncUITests` taps Poop, then Pee and Undo, and the script reads the

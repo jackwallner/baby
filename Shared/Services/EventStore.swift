@@ -143,7 +143,9 @@ final class EventStore: ObservableObject {
 
     private func scheduleReload() {
         guard pendingReload == nil else { return }
+        let hold = BackgroundTime.begin("Reload log")
         pendingReload = Task { @MainActor [weak self] in
+            defer { hold.end() }
             try? await Task.sleep(for: Self.remoteChangeDelay)
             guard !Task.isCancelled else { return }
             self?.refresh(force: false)
@@ -938,5 +940,26 @@ final class EventStore: ObservableObject {
         WidgetCloudSync.enqueue([WidgetCloudOp(action: .delete, recordName: entry.id.uuidString, target: target)])
         guard persistence.cloudKitEnabled else { return }
         Task { await WidgetCloudSync.flush() }
+    }
+}
+
+/// Keeps the app running until a piece of log work finishes. An iCloud push
+/// or a Watch transfer wakes it in the background for a moment, and being
+/// suspended mid-reload with the shared store locked gets it killed
+/// (0xdead10cc, build 66).
+@MainActor
+final class BackgroundTime {
+    private var id = UIBackgroundTaskIdentifier.invalid
+
+    static func begin(_ name: String) -> BackgroundTime {
+        let hold = BackgroundTime()
+        hold.id = UIApplication.shared.beginBackgroundTask(withName: name) { hold.end() }
+        return hold
+    }
+
+    func end() {
+        guard id != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(id)
+        id = .invalid
     }
 }

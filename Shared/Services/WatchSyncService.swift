@@ -77,6 +77,8 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
             return
         }
         Task { @MainActor in
+            let hold = BackgroundTime.begin("Watch tap")
+            defer { hold.end() }
             let saved = EventStore.shared.apply(payload, forChildID: payload.childID)
             reply.send(saved ? Self.receipt(for: payload.id, summary: EventStore.shared.summary) : [:])
         }
@@ -113,13 +115,16 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
             queue(payload, on: session)
             return
         }
-        session.sendMessage(payload.dictionary, replyHandler: { [weak self] reply in
+        // Both handlers run on WatchConnectivity's queue. Without @Sendable
+        // they inherit this method's main actor, and Swift 6 traps on entry:
+        // the Watch app crashed on every reply and never cleared the tap.
+        session.sendMessage(payload.dictionary, replyHandler: { @Sendable [weak self] reply in
             guard (reply[Self.savedActionKey] as? String).flatMap(UUID.init) == payload.id else {
                 Task { @MainActor in self?.queue(payload, on: .default) }
                 return
             }
             self?.applyContext(reply)
-        }, errorHandler: { [weak self] _ in
+        }, errorHandler: { @Sendable [weak self] _ in
             Task { @MainActor in self?.queue(payload, on: .default) }
         })
     }
@@ -142,9 +147,9 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         guard session.activationState == .activated else { return }
         requestSummaryIfNeeded(session)
         guard session.isReachable else { return }
-        session.sendMessage([Self.needsSummaryKey: true], replyHandler: { [weak self] reply in
+        session.sendMessage([Self.needsSummaryKey: true], replyHandler: { @Sendable [weak self] reply in
             self?.applyContext(reply)
-        }, errorHandler: { error in
+        }, errorHandler: { @Sendable error in
             watchSyncLogger.info("Summary request failed: \(String(describing: error), privacy: .public)")
         })
     }
@@ -209,6 +214,8 @@ final class WatchSyncService: NSObject, WCSessionDelegate, @unchecked Sendable {
         }
         guard let payload = Self.payload(from: userInfo) else { return }
         Task { @MainActor in
+            let hold = BackgroundTime.begin("Watch tap")
+            defer { hold.end() }
             guard EventStore.shared.apply(payload, forChildID: payload.childID) else { return }
             WCSession.default.transferUserInfo(Self.receipt(for: payload.id, summary: EventStore.shared.summary))
         }

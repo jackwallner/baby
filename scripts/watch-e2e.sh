@@ -9,14 +9,12 @@ OWNER=${1:?lease owner}
 PHONE=$(agent-sim udid "$OWNER")
 WATCH=$(agent-sim watch-udid "$OWNER")
 agent-sim boot "$OWNER" --watch >/dev/null
-# DERIVED_DATA=<dir> builds into its own folder, for a second pair running
-# beside another build of this project.
-DD_ARGS=()
-PRODUCTS=~/Library/Developer/Xcode/DerivedData/Baby-*/Build/Products
-if [[ -n "${DERIVED_DATA:-}" ]]; then
-  DD_ARGS=(-derivedDataPath "$DERIVED_DATA")
-  PRODUCTS="$DERIVED_DATA/Build/Products"
-fi
+# Builds into its own folder: with several Baby-* DerivedData folders on the
+# Mac, a glob installed whichever came first, often an older build.
+# DERIVED_DATA=<dir> picks another, for a second pair running beside this one.
+DERIVED_DATA=${DERIVED_DATA:-build/watch-e2e}
+DD_ARGS=(-derivedDataPath "$DERIVED_DATA")
+PRODUCTS="$DERIVED_DATA/Build/Products"
 
 xcodebuild -project Baby.xcodeproj -scheme Baby -destination "id=$PHONE" "${DD_ARGS[@]}" build -quiet
 PHONE_APP=$(eval find $PRODUCTS/Debug-iphonesimulator -maxdepth 1 -name "Baby.app" | head -1)
