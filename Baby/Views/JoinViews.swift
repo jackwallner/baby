@@ -240,7 +240,11 @@ struct JoiningSharedLogView: View {
         .padding(AppTheme.margin)
         .background(AppTheme.paper)
         .task {
+            #if DEBUG
             try? await Task.sleep(for: .seconds(ProcessInfo.processInfo.arguments.contains("-FastJoinTimeout") ? 1 : 60))
+            #else
+            try? await Task.sleep(for: .seconds(60))
+            #endif
             isTakingLong = true
         }
     }

@@ -72,7 +72,11 @@ final class Persistence: @unchecked Sendable {
     /// Only the app process mirrors to CloudKit. Extensions are short-lived and
     /// memory-capped, and two exporters on one zone gain nothing.
     private static var processWantsCloudKit: Bool {
-        Bundle.main.bundleIdentifier == AppGroup.bundleID && !ProcessInfo.processInfo.arguments.contains("-NoCloudKit")
+        #if DEBUG
+        return Bundle.main.bundleIdentifier == AppGroup.bundleID && !ProcessInfo.processInfo.arguments.contains("-NoCloudKit")
+        #else
+        return Bundle.main.bundleIdentifier == AppGroup.bundleID
+        #endif
     }
 
     init(
