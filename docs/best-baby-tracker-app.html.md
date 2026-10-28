@@ -6,7 +6,7 @@ Web page: https://jackwallner.com/ios/baby/best-baby-tracker-app.html
 
 ## Best Baby Tracker App for iPhone
 
-By Jack Wallner · Last updated October 18, 2026
+By Jack Wallner · Last updated October 28, 2026
 
 **Best for sleep timing and parenting guidance:** Huckleberry, though its SweetSpot nap predictions are in the paid tiers. **Best for logging nearly everything, from pumping to vaccines, with core tracking free:** Baby Tracker - Newborn Log. **Best for twins and for tracking the parent too:** Nara. **Best for daycare or a nanny on any device, including a web browser:** Baby Connect. **Best for two iPhone parents who want four buttons and no account:** Baby Tracker: Feeds & Diapers, the app I make.
 

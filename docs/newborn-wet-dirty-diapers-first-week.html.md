@@ -6,7 +6,7 @@ Web page: https://jackwallner.com/ios/baby/newborn-wet-dirty-diapers-first-week.
 
 ## How many wet and dirty diapers should a newborn have each day in the first week?
 
-By [Jack Wallner](https://jackwallner.com/) · Last updated October 18, 2026
+By [Jack Wallner](https://jackwallner.com/) · Last updated October 28, 2026
 
 For a breastfed newborn, a common guide is at least 1 wet diaper on day 1, 2 on day 2, 3 on day 3, 4 on day 4, 5 on day 5 and 6 or more from day 6, with at least 1 to 2 dirty diapers a day. The American Academy of Pediatrics describes 6 or more wet diapers a day by 5 to 7 days old as one sign of a well-fed baby. These are general ranges, and your pediatrician's advice for your baby comes first.
 
