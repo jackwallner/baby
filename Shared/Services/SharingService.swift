@@ -245,7 +245,9 @@ final class SharingService: ObservableObject {
         invitationError = nil
         isAcceptingInvitation = true
         let zoneID = metadata.share.recordID.zoneID
-        persistence.container.acceptShareInvitations(from: [metadata], into: persistence.sharedStore) { _, error in
+        // Core Data calls this off the main thread. Without @Sendable it
+        // inherits this method's main actor and Swift 6 traps on entry.
+        persistence.container.acceptShareInvitations(from: [metadata], into: persistence.sharedStore) { @Sendable _, error in
             Task { @MainActor in
                 self.finishAcceptingInvitation(in: zoneID, error: error)
             }
