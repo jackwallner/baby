@@ -14,6 +14,8 @@ Free to log, free to share with your partner, and free to keep.
 
 [Download on the App Store](https://apps.apple.com/us/app/baby-tracker-feeds-diapers/id6811133796?pt=128748779&ct=jw-baby-home&mt=8)
 
+## How it works
+
 01
 
 ### Four buttons
