@@ -35,19 +35,20 @@ struct WidgetCloudRecordKey: Hashable, Sendable {
 
 /// Advisory file locks coordinate separate app and extension processes. A
 /// process-local actor or a UserDefaults read/modify/write cannot do that.
+/// iOS kills a process suspended while holding one in the App Group
+/// (0xdead10cc, build 66), so a lease only ever spans one quick file write.
 private final class WidgetCloudLease: Sendable {
     private let descriptor: Int32
 
     private init(_ descriptor: Int32) { self.descriptor = descriptor }
 
-    static func acquire(at url: URL, blocking: Bool = true) throws -> WidgetCloudLease? {
+    static func acquire(at url: URL) throws -> WidgetCloudLease {
         let descriptor = open(url.path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
         guard descriptor >= 0 else { throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno)) }
-        while flock(descriptor, LOCK_EX | (blocking ? 0 : LOCK_NB)) != 0 {
+        while flock(descriptor, LOCK_EX) != 0 {
             if errno == EINTR { continue }
             let code = errno
             close(descriptor)
-            if !blocking && code == EWOULDBLOCK { return nil }
             throw NSError(domain: NSPOSIXErrorDomain, code: Int(code))
         }
         return WidgetCloudLease(descriptor)
@@ -78,6 +79,9 @@ enum WidgetCloudSync {
     static let queueLifetime: TimeInterval = 24 * 60 * 60
     /// How long an Undo keeps removing an entry that comes back.
     static let tombstoneLifetime: TimeInterval = 3 * 24 * 60 * 60
+    /// How long one upload pass keeps others out. Each pass renews it, and a
+    /// pass is at most two databases of 6 second requests, fetch and save.
+    static let uploadClaimLifetime: TimeInterval = 30
 
     // MARK: - Published by the app
 
@@ -110,20 +114,28 @@ enum WidgetCloudSync {
 
     static let queueDirectory = AppGroup.containerURL.appendingPathComponent("WidgetCloudSync", isDirectory: true)
 
-    private struct State: Codable {
-        var ops: [WidgetCloudOp] = []
-        var tombstones: [String: Date] = [:]
+    private struct UploadClaim: Codable, Equatable {
+        var id: UUID
+        var until: Date
     }
 
-    /// Reads the latest disk state while locked, then atomically replaces it.
-    /// UserDefaults is read only once, to migrate an older installed build.
+    private struct State: Codable, Equatable {
+        var ops: [WidgetCloudOp] = []
+        var tombstones: [String: Date] = [:]
+        var upload: UploadClaim?
+    }
+
+    /// Reads the latest disk state while locked, then atomically replaces it
+    /// if it changed. UserDefaults is read only once, to migrate an older
+    /// installed build.
     private static func transaction<T>(_ body: (inout State) -> T) throws -> T {
         try FileManager.default.createDirectory(at: queueDirectory, withIntermediateDirectories: true)
         let lease = try WidgetCloudLease.acquire(at: queueDirectory.appendingPathComponent("state.lock"))
         defer { withExtendedLifetime(lease) {} }
         let url = queueDirectory.appendingPathComponent("state.json")
         var state: State
-        if FileManager.default.fileExists(atPath: url.path) {
+        let migrating = !FileManager.default.fileExists(atPath: url.path)
+        if !migrating {
             state = try JSONDecoder().decode(State.self, from: Data(contentsOf: url))
         } else {
             let legacy = AppGroup.defaults.data(forKey: AppGroup.Key.widgetCloudOps)
@@ -131,10 +143,14 @@ enum WidgetCloudSync {
             let stones = AppGroup.defaults.dictionary(forKey: AppGroup.Key.undoneEventIDs) as? [String: Date] ?? [:]
             state = State(ops: legacy, tombstones: stones)
         }
+        let before = state
         let result = body(&state)
+        guard migrating || state != before else { return result }
         try JSONEncoder().encode(state).write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
-        AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetCloudOps)
-        AppGroup.defaults.removeObject(forKey: AppGroup.Key.undoneEventIDs)
+        if migrating {
+            AppGroup.defaults.removeObject(forKey: AppGroup.Key.widgetCloudOps)
+            AppGroup.defaults.removeObject(forKey: AppGroup.Key.undoneEventIDs)
+        }
         return result
     }
 
@@ -231,19 +247,25 @@ enum WidgetCloudSync {
     }
 
     /// One uploader across processes, including while its network calls are
-    /// suspended. Queue transactions use a separate short-lived file lock.
+    /// suspended. The claim is a dated entry in the queue, not a held lock,
+    /// so a process suspended mid-request holds nothing iOS kills it for,
+    /// and a claim it never releases lapses on its own.
     @discardableResult
     static func flush(using send: @Sendable ([WidgetCloudOp]) async -> Set<WidgetCloudRecordKey>) async -> Bool {
+        let claim = UUID()
         do {
-            try FileManager.default.createDirectory(at: queueDirectory, withIntermediateDirectories: true)
-            guard let lease = try WidgetCloudLease.acquire(at: queueDirectory.appendingPathComponent("upload.lock"), blocking: false)
-            else { return false }
-            defer { withExtendedLifetime(lease) {} }
+            guard try claimUpload(claim) else { return false }
+            defer { releaseUpload(claim) }
             prune()
             // Drain taps queued while a request was suspended, within the
             // extension's short runtime budget. Failed operations stay queued.
             for _ in 0..<3 {
-                let queue = try transaction { $0.ops }
+                let queue: [WidgetCloudOp]? = try transaction { state in
+                    guard state.upload?.id == claim else { return nil }
+                    state.upload?.until = Date.now.addingTimeInterval(uploadClaimLifetime)
+                    return state.ops
+                }
+                guard let queue else { return false }
                 guard !queue.isEmpty else { return true }
                 let finished = await send(queue)
                 let remaining = try transaction { state in
@@ -255,6 +277,19 @@ enum WidgetCloudSync {
             }
         } catch { logger.error("Widget cloud flush failed: \(String(describing: error), privacy: .public)") }
         return false
+    }
+
+    private static func claimUpload(_ id: UUID, now: Date = .now) throws -> Bool {
+        try transaction { state in
+            if let held = state.upload, held.until > now { return false }
+            state.upload = UploadClaim(id: id, until: now.addingTimeInterval(uploadClaimLifetime))
+            return true
+        }
+    }
+
+    private static func releaseUpload(_ id: UUID) {
+        do { try transaction { state in if state.upload?.id == id { state.upload = nil } } }
+        catch { logger.error("Could not release widget upload: \(String(describing: error), privacy: .public)") }
     }
 
     /// Returns the record names that are done with: saved, deleted, or gone

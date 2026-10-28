@@ -228,6 +228,29 @@ final class WidgetCloudSyncTests: XCTestCase {
         XCTAssertTrue(WidgetCloudSync.pending().isEmpty)
     }
 
+    /// A process killed mid-upload never releases its claim. It must lapse
+    /// rather than stop every later upload, and a live one must still block.
+    func testAnAbandonedUploadClaimLapses() async throws {
+        WidgetCloudSync.enqueue([WidgetCloudOp(action: .create, recordName: "one", target: target)])
+        let url = WidgetCloudSync.queueDirectory.appendingPathComponent("state.json")
+        func claim(until: Date) throws {
+            var state = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+            state["upload"] = ["id": UUID().uuidString, "until": until.timeIntervalSinceReferenceDate]
+            try JSONSerialization.data(withJSONObject: state).write(to: url)
+        }
+        try claim(until: .now.addingTimeInterval(WidgetCloudSync.uploadClaimLifetime))
+        let blocked = await WidgetCloudSync.flush { Set($0.map(\.key)) }
+        XCTAssertFalse(blocked)
+        XCTAssertEqual(WidgetCloudSync.pending().count, 1)
+
+        try claim(until: .now.addingTimeInterval(-1))
+        let sent = await WidgetCloudSync.flush { Set($0.map(\.key)) }
+        XCTAssertTrue(sent)
+        XCTAssertTrue(WidgetCloudSync.pending().isEmpty)
+        let again = await WidgetCloudSync.flush { Set($0.map(\.key)) }
+        XCTAssertTrue(again, "a finished upload releases its claim")
+    }
+
     func testConcurrentUndoTombstonesKeepEveryID() {
         let ids = (0..<64).map { _ in UUID() }
         DispatchQueue.concurrentPerform(iterations: ids.count) { index in WidgetCloudSync.markUndone(ids[index]) }

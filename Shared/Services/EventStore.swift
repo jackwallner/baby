@@ -244,6 +244,8 @@ final class EventStore: ObservableObject {
     /// A reload came while a pass was running, after its fetch, so the
     /// copies it brought would wait for some later reload. Run once more.
     private var needsReconcile = false
+    /// The duplicate cleanup plus one widget upload pass.
+    static let widgetWorkTime: TimeInterval = 10
 
     private func reconcileWidgetCloudWrites() {
         guard persistence.cloudKitEnabled, !persistence.isStandingIn else { return }
@@ -251,6 +253,10 @@ final class EventStore: ObservableObject {
             needsReconcile = true
             return
         }
+        // The widget queue lives in the App Group behind a file lock, so this
+        // work runs only with time to finish it. A background wake with none
+        // left leaves it to the next reload.
+        guard let hold = BackgroundTime.begin("Widget cloud writes", needing: Self.widgetWorkTime) else { return }
         WidgetCloudSync.prune()
         let undone = WidgetCloudSync.undoneDates()
         let persistence = persistence
@@ -272,6 +278,7 @@ final class EventStore: ObservableObject {
             // records. Retry its durable queue as well as the native export.
             await WidgetCloudSync.flush()
             await MainActor.run {
+                hold.end()
                 guard let self else { return }
                 self.isReconciling = false
                 if !saved { self.logger.error("Could not save the widget duplicate cleanup") }
@@ -954,6 +961,16 @@ final class BackgroundTime {
     static func begin(_ name: String) -> BackgroundTime {
         let hold = BackgroundTime()
         hold.id = UIApplication.shared.beginBackgroundTask(withName: name) { hold.end() }
+        return hold
+    }
+
+    /// Nil when iOS will not keep the app running that long.
+    static func begin(_ name: String, needing seconds: TimeInterval) -> BackgroundTime? {
+        let hold = begin(name)
+        guard hold.id != .invalid, UIApplication.shared.backgroundTimeRemaining >= seconds else {
+            hold.end()
+            return nil
+        }
         return hold
     }
 
