@@ -13,7 +13,9 @@ import os
 /// to, which is the usual reason a second parent "can't get in".
 @MainActor
 final class SharingService: ObservableObject {
-    static let shared = SharingService(persistence: .shared, events: .shared)
+    static let shared = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil && !ProcessInfo.processInfo.arguments.contains("-NoCloudKit")
+        ? SharingService(persistence: .shared, events: .shared)
+        : SharingService(persistence: .shared, events: .shared, accountAvailable: { false }) // SCRATCH audit patch, never committed
 
     @Published private(set) var share: CKShare?
     /// The baby `share` was looked up for.

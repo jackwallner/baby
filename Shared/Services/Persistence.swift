@@ -74,6 +74,7 @@ final class Persistence: @unchecked Sendable {
     private static var processWantsCloudKit: Bool {
         #if DEBUG
         return Bundle.main.bundleIdentifier == AppGroup.bundleID && !ProcessInfo.processInfo.arguments.contains("-NoCloudKit")
+            && ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil // SCRATCH audit patch, never committed
         #else
         return Bundle.main.bundleIdentifier == AppGroup.bundleID
         #endif

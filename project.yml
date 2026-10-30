@@ -45,9 +45,11 @@ schemes:
         Baby: all
         BabyWatch: all
         BabyTests: [test]
+        BabyUITests: [test]
     test:
       targets:
         - BabyTests
+        - BabyUITests
       config: Debug
       storeKitConfiguration: Baby.storekit
     run:

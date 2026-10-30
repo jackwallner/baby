@@ -273,3 +273,33 @@ final class SharingTests: XCTestCase {
         XCTAssertEqual(model.phase, .failed(SharingService.JoinError.notAnInvite.message))
     }
 }
+
+// SCRATCH (audit 2026-10-30), never committed.
+@MainActor
+extension SharingTests {
+    // Joining with nothing to move leaves the one-time "Bring your entries"
+    // offer armed for the rest of the session. The first entry later logged
+    // for any other baby on this phone raises it, and Move folds that baby
+    // into the shared one and deletes it.
+    func testScratchArrivalOfferIsSpentWhenThereIsNothingToMove() throws {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let zone = CKRecordZone.ID(zoneName: "Invited", ownerName: "Partner")
+        let events = EventStore(persistence: persistence, sharedZoneID: { $0.name == "Shared Nora" ? zone : nil })
+        events.createChild(name: "Twin B", birthDate: nil)
+        let other = try XCTUnwrap(events.child)
+        let sharing = SharingService(persistence: persistence, events: events)
+        sharing.finishAcceptingInvitation(in: zone, error: nil)
+        let shared = Child.make(in: persistence.viewContext, name: "Shared Nora", birthDate: nil)
+        persistence.viewContext.assign(shared, to: persistence.sharedStore)
+        persistence.save(persistence.viewContext)
+        events.reload()
+        XCTAssertEqual(events.child?.objectID, shared.objectID)
+        XCTAssertTrue(events.separateLogs(besides: shared).isEmpty, "nothing to move, so the alert stays hidden")
+
+        events.setActive(other)
+        events.log(.wet)
+        XCTAssertEqual(events.separateLogs(besides: shared).count, 1)
+        XCTAssertNil(events.arrivedSharedChild,
+                     "the arrival offer is still armed: RootView now asks to move Twin B's entry into the shared baby and delete Twin B")
+    }
+}

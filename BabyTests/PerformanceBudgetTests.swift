@@ -172,3 +172,48 @@ final class PerformanceBudgetTests: XCTestCase {
         }
     }
 }
+
+// SCRATCH (audit 2026-10-30), never committed.
+@MainActor
+extension PerformanceBudgetTests {
+    // What one SummaryView body costs on the main thread with six months of
+    // logging: its `report` is a computed property read about 35 times per
+    // body, and the export row builds the whole CSV in the body.
+    func testScratchOneReportsRenderOverSixMonths() throws {
+        let child = try XCTUnwrap(store.child)
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        for back in 1...182 {
+            let day = calendar.date(byAdding: .day, value: -back, to: today)!
+            for slot in 0..<8 {
+                let start = day.addingTimeInterval(TimeInterval(slot * 10_800 + 1_800))
+                persistence.insert(kind: .feed, at: start, side: slot % 3 == 0 ? .bottle : .left, ended: start.addingTimeInterval(900), for: child, in: store.context)
+            }
+            for slot in 0..<6 {
+                let start = day.addingTimeInterval(TimeInterval(slot * 14_400 + 600))
+                persistence.insert(kind: slot % 2 == 0 ? .wet : .dirty, at: start, for: child, in: store.context)
+            }
+            for (hour, length) in [(21.0, 5.0), (2.5, 1.0), (13.0, 1.0)] {
+                let start = day.addingTimeInterval(hour * 3_600)
+                persistence.insert(kind: .sleep, at: start, ended: start.addingTimeInterval(length * 3_600), for: child, in: store.context)
+            }
+        }
+        XCTAssertTrue(persistence.save(store.context))
+        store.reload()
+        let since = calendar.date(byAdding: .day, value: -13, to: today)!
+        var oneReport = Duration.seconds(100)
+        var oneRender = Duration.seconds(100)
+        for _ in 0..<3 {
+            var start = ContinuousClock.now
+            _ = store.visitReport(since: since)
+            oneReport = min(oneReport, start.duration(to: .now))
+            start = ContinuousClock.now
+            for _ in 0..<35 { _ = store.visitReport(since: since) }
+            _ = SummaryReport.csv(events: store.events, childName: "Nora")
+            oneRender = min(oneRender, start.duration(to: .now))
+        }
+        print("PERF scratch: \(store.events.count) entries, one report \(oneReport), one Reports body \(oneRender)")
+        XCTAssertLessThan(oneRender, .milliseconds(16),
+                          "\(store.events.count) entries: one report \(oneReport), one Reports body (35 reports + CSV) \(oneRender)")
+    }
+}

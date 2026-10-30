@@ -785,3 +785,21 @@ final class EventStoreTests: XCTestCase {
         XCTAssertEqual(store.summary.recent?.first?.sides, [.left])
     }
 }
+
+// SCRATCH (audit 2026-10-30), never committed.
+@MainActor
+extension EventStoreTests {
+    // A wrist tap for a baby this phone no longer has (moved into a shared log,
+    // left, or stopped by the owner) is refused with no receipt. The Watch keeps
+    // it pending and retries it forever, and a pending sleep toggle holds back
+    // every later one.
+    func testScratchWatchTapForABabyThatIsGoneIsAcknowledged() {
+        let gone = UUID()
+        let stuck = WatchLogPayload(action: .startSleep, kind: .sleep, childID: gone)
+        let next = WatchLogPayload(action: .stopSleep, kind: .sleep, childID: store.child?.id)
+        XCTAssertEqual(WatchLogPayload.sendable(from: [stuck, next]).map(\.id), [stuck.id],
+                       "while it is pending the next sleep toggle never leaves the wrist")
+        XCTAssertTrue(store.apply(stuck, forChildID: gone),
+                      "refused without a receipt, so the Watch can never clear it")
+    }
+}

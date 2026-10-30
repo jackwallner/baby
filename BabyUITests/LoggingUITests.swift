@@ -559,3 +559,45 @@ final class LoggingUITests: XCTestCase {
         add(attachment)
     }
 }
+
+// SCRATCH (audit 2026-10-30), never committed.
+extension LoggingUITests {
+    /// Setup shown again over a log that is already on the phone (a reinstall
+    /// whose iCloud import landed before Start tracking) writes its blank,
+    /// optional fields over the existing baby's name and birth date.
+    func testScratchSetupAgainKeepsTheExistingBabysDetails() {
+        let app = XCUIApplication(bundleIdentifier: "com.jackwallner.baby")
+        app.launchArguments = ["-NoCloudKit", "-hasCompletedSetup", "NO"]
+        app.launch()
+        XCTAssertTrue(app.buttons["onboarding.primary"].waitForExistence(timeout: 15))
+        let name = app.textFields["onboarding.name"]
+        name.tap()
+        name.typeText("Nora\n")
+        let birth = app.switches["Add birth date"]
+        XCTAssertTrue(birth.waitForExistence(timeout: 3))
+        birth.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        attach(app, "scratch-1-first-setup")
+        app.buttons["onboarding.primary"].tap()
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Nora"].waitForExistence(timeout: 5), "first setup named the baby")
+        XCTAssertTrue(app.staticTexts["Day 1"].exists, "first setup gave a birth date")
+        app.buttons["log.feed"].tap()
+        XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 5))
+        let loggedTally = tally(app)
+        attach(app, "scratch-2-logged")
+        app.terminate()
+
+        // Setup not marked done, the log still here: what a reinstall sees
+        // once iCloud has brought the baby back.
+        app.launch()
+        XCTAssertTrue(app.buttons["onboarding.primary"].waitForExistence(timeout: 15))
+        attach(app, "scratch-3-setup-again")
+        app.buttons["onboarding.primary"].tap()
+        XCTAssertTrue(app.buttons["log.feed"].waitForExistence(timeout: 10))
+        sleep(1)
+        attach(app, "scratch-4-after-setup-again")
+        XCTAssertEqual(tally(app), loggedTally, "the same baby and log")
+        XCTAssertTrue(app.navigationBars["Nora"].exists, "the baby's name was erased")
+        XCTAssertTrue(app.staticTexts["Day 1"].exists, "the birth date was erased")
+    }
+}

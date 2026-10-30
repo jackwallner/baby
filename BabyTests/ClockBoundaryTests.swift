@@ -358,3 +358,30 @@ final class ClockBoundaryTests: XCTestCase {
         XCTAssertNil(clock.chosen)
     }
 }
+
+// SCRATCH (audit 2026-10-30), never committed.
+@MainActor
+extension ClockBoundaryTests {
+    // A time-only wheel keeps its own calendar day. Wound back past midnight,
+    // the wheel holds yesterday's date, so turning it forward to 12:05 AM hands
+    // `set` yesterday 12:05 AM, a day before the time the parent picked.
+    func testScratchWheelTurnedForwardPastMidnightLandsOnTheLastOccurrence() {
+        let clock = LogClock()
+        defer { clock.reset() }
+        let now = at(2026, 7, 22, 0, 20)
+        clock.set(at(2026, 7, 22, 23, 45), now: now, calendar: la)
+        XCTAssertEqual(clock.chosen, at(2026, 7, 21, 23, 45))
+        clock.set(at(2026, 7, 21, 0, 5), now: now, calendar: la)
+        XCTAssertEqual(clock.chosen, at(2026, 7, 22, 0, 5),
+                       "chosen \(clock.chosen.map { Format.compactDuration(now.timeIntervalSince($0)) } ?? "nil") before now")
+    }
+
+    // The 25 hour fall-back day has 24 squares, so its last hour is counted in
+    // the totals but drawn in no square.
+    func testScratchHourStripAgreesWithTheTotalsOnAFallBackDay() {
+        let events = [event(.feed, at(2026, 11, 1, 23, 30))]
+        let totals = WindowTotals.make(events: events, window: .midnight, now: at(2026, 11, 1, 23, 45), calendar: la)
+        XCTAssertEqual(totals.feeds, 1)
+        XCTAssertEqual(totals.hours[.feed]?.reduce(0, +), 1, "an 11:30 PM feed on the 25 hour day has no square")
+    }
+}
