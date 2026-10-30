@@ -70,9 +70,11 @@ struct SettingsView: View {
         }
         .onAppear { loadChild() }
         .onChange(of: events.child?.objectID) { _, _ in loadChild() }
-        .onChange(of: name) { _, _ in saveChild() }
-        .onChange(of: hasBirthDate) { _, _ in saveChild() }
-        .onChange(of: birthDate) { _, _ in saveChild() }
+        .onChange(of: events.child?.name) { _, _ in refreshChild() }
+        .onChange(of: events.child?.birthDate) { _, _ in refreshChild() }
+        .onChange(of: name) { _, _ in saveName() }
+        .onChange(of: hasBirthDate) { _, _ in saveBirthDate() }
+        .onChange(of: birthDate) { _, _ in saveBirthDate() }
     }
 
     private var guidesSection: some View {
@@ -149,12 +151,33 @@ struct SettingsView: View {
         birthDate = events.child?.birthDate ?? .now
     }
 
-    private func saveChild() {
+    /// Settings stays alive behind the other tabs, so a partner's rename or a
+    /// new birth date lands here while the form still holds the old values.
+    private func refreshChild() {
         guard let child = events.child else { return }
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !events.update(child: child, name: trimmed.isEmpty ? nil : trimmed, birthDate: hasBirthDate ? birthDate : nil) {
-            showSaveError = true
+        if enteredName != child.name { name = child.name ?? "" }
+        if enteredBirthDate != child.birthDate {
+            hasBirthDate = child.birthDate != nil
+            birthDate = child.birthDate ?? .now
         }
+    }
+
+    private var enteredName: String? {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private var enteredBirthDate: Date? { EventStore.noon(of: hasBirthDate ? birthDate : nil) }
+
+    /// Each field saves alone, so editing one never writes back the other.
+    private func saveName() {
+        guard let child = events.child, enteredName != child.name else { return }
+        if !events.update(child: child, name: enteredName, birthDate: child.birthDate) { showSaveError = true }
+    }
+
+    private func saveBirthDate() {
+        guard let child = events.child, enteredBirthDate != child.birthDate else { return }
+        if !events.update(child: child, name: child.name, birthDate: enteredBirthDate) { showSaveError = true }
     }
 
     private var babySection: some View {

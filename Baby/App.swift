@@ -253,8 +253,7 @@ private struct RootView: View {
     /// the shared one.
     private var separateLog: Child? {
         guard let shared = events.arrivedSharedChild else { return nil }
-        let logs = events.separateLogs(besides: shared)
-        return logs.count == 1 ? logs[0] : nil
+        return events.separateLogToOffer(for: shared)
     }
 
     private var separateLogCount: Int { separateLog?.eventCount ?? 0 }

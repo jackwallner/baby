@@ -262,6 +262,35 @@ final class SharingTests: XCTestCase {
         XCTAssertEqual(events.child?.objectID, shared.objectID)
     }
 
+    /// Joining a newborn's log never offers to pour an older sibling into it.
+    func testAnotherBabysLogIsNeverOfferedForTheSharedBaby() throws {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let events = EventStore(persistence: persistence)
+        let newborn = Calendar.current.date(byAdding: .day, value: -3, to: .now)!
+        events.createChild(name: "Theo", birthDate: Calendar.current.date(byAdding: .year, value: -2, to: .now))
+        let sibling = try XCTUnwrap(events.child)
+        events.log(.wet)
+        events.log(.dirty, at: Calendar.current.date(byAdding: .day, value: -30, to: .now)!)
+        let shared = Child.make(in: persistence.viewContext, name: "Nora", birthDate: newborn)
+        persistence.viewContext.assign(shared, to: persistence.sharedStore)
+        persistence.save(persistence.viewContext)
+        events.reload()
+        XCTAssertNil(events.separateLogToOffer(for: shared), "different names and birth dates")
+
+        sibling.name = nil
+        sibling.birthDate = nil
+        persistence.save(persistence.viewContext)
+        XCTAssertNil(events.separateLogToOffer(for: shared), "entries from before the shared baby was born")
+
+        let unnamed = Child.make(in: persistence.viewContext, name: "My Nora", birthDate: nil)
+        persistence.viewContext.assign(unnamed, to: persistence.privateStore)
+        persistence.viewContext.delete(sibling)
+        persistence.save(persistence.viewContext)
+        events.setActive(unnamed)
+        events.log(.wet)
+        XCTAssertEqual(events.separateLogToOffer(for: shared)?.objectID, unnamed.objectID, "the same baby logged before joining")
+    }
+
     func testJoinFormReportsANonInviteLink() async {
         let persistence = Persistence(cloudKit: false, inMemory: true)
         let sharing = SharingService(persistence: persistence, events: EventStore(persistence: persistence))

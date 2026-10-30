@@ -213,6 +213,28 @@ final class EventStoreTests: XCTestCase {
         XCTAssertNil(store.runningSleep)
     }
 
+    /// Setup's blank form over a restored log keeps the name and birth date.
+    func testSetupOverAnExistingLogKeepsTheProfile() throws {
+        let child = try XCTUnwrap(store.child)
+        let born = child.birthDate
+        XCTAssertTrue(store.finishSetup(name: nil, birthDate: nil))
+        XCTAssertEqual(child.name, "Nora")
+        XCTAssertEqual(child.birthDate, born)
+        XCTAssertTrue(store.finishSetup(name: "Nora Jane", birthDate: nil))
+        XCTAssertEqual(child.name, "Nora Jane")
+        XCTAssertEqual(child.birthDate, born)
+        XCTAssertEqual(store.children.count, 1)
+    }
+
+    /// A sleep toggle the phone never answers holds back every later one.
+    func testWatchTapForAGoneProfileIsAcknowledgedAndDropped() {
+        let orphan = WatchLogPayload(id: UUID(), action: .startSleep, kind: .sleep, side: nil, at: .now, childID: UUID())
+        XCTAssertTrue(store.apply(orphan, forChildID: orphan.childID))
+        XCTAssertNil(store.runningSleep, "a tap for another baby never lands in this one's log")
+        XCTAssertTrue(store.apply(orphan, forChildID: orphan.childID))
+        XCTAssertEqual(store.events.count, 0)
+    }
+
     private func addTwin(of event: LogEvent) throws {
         let twin = LogEvent(context: persistence.viewContext)
         for key in event.entity.attributesByName.keys { twin.setValue(event.value(forKey: key), forKey: key) }

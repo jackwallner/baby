@@ -79,3 +79,8 @@ DEBUG: `-WatchDemo` seeds a night three log; `-WatchPage 1` opens Today.
 `BabyWatchUITests` (scheme `BabyWatch`, lease `baby-watch --watch`) covers
 log, Undo, next side, sleep, Log earlier and Today. `axe` cannot drive the
 watch simulator (missing SimulatorKit), so use the UI tests.
+
+A tap naming a baby profile the phone no longer has (deleted or unshared)
+is acknowledged and dropped (2026-10-30). Unanswered, it stayed first in
+`pending`, and `WatchLogPayload.sendable` held every later Sleep/Wake behind
+it. While the phone's store is still a stand-in it is left to retry.

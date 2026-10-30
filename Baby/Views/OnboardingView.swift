@@ -234,13 +234,7 @@ struct BabyOnboardingView: View {
         isEditingName = false
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let date = hasBirthDate ? birthDate : nil
-        let saved: Bool
-        if let child = events.child {
-            saved = events.update(child: child, name: trimmed.isEmpty ? nil : trimmed, birthDate: date)
-        } else {
-            saved = events.createChild(name: trimmed.isEmpty ? nil : trimmed, birthDate: date)
-        }
-        guard saved else {
+        guard events.finishSetup(name: trimmed.isEmpty ? nil : trimmed, birthDate: date) else {
             showSaveError = true
             return
         }

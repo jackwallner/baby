@@ -394,10 +394,13 @@ final class LogClock: ObservableObject {
 
     func time(now: Date = .now) -> Date { chosen ?? now }
 
-    /// From the wheel. A time-only wheel can land later today, which can only
-    /// mean yesterday; within a minute of now is simply now.
+    /// From the wheel. A time-only wheel keeps the day it was showing, so a
+    /// time wound back to 11:50 PM yesterday and turned to 12:10 AM read as
+    /// yesterday's 12:10. Its hour and minute go on today, and a time later
+    /// than now can only mean yesterday; within a minute of now is simply now.
     func set(_ date: Date, now: Date = .now, calendar: Calendar = .current) {
-        var date = date
+        let picked = calendar.dateComponents([.hour, .minute, .second], from: date)
+        var date = calendar.date(bySettingHour: picked.hour ?? 0, minute: picked.minute ?? 0, second: picked.second ?? 0, of: now) ?? date
         if date > now.addingTimeInterval(60) {
             date = calendar.date(byAdding: .day, value: -1, to: date) ?? date
         }

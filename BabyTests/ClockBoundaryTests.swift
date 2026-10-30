@@ -351,6 +351,16 @@ final class ClockBoundaryTests: XCTestCase {
         XCTAssertFalse(LogClock.label(for: at(2026, 11, 2, 0, 5), now: at(2026, 11, 2, 0, 10), calendar: la).hasSuffix(" yesterday"))
     }
 
+    /// Wound back to last night, the wheel still carries yesterday's day.
+    func testWheelTurnedPastMidnightFromYesterdayLogsToday() {
+        let clock = LogClock()
+        defer { clock.reset() }
+        clock.set(at(2026, 11, 1, 23, 50), now: at(2026, 11, 2, 0, 30), calendar: la)
+        XCTAssertEqual(clock.chosen, at(2026, 11, 1, 23, 50))
+        clock.set(at(2026, 11, 1, 0, 10), now: at(2026, 11, 2, 0, 30), calendar: la)
+        XCTAssertEqual(clock.chosen, at(2026, 11, 2, 0, 10), "12:10 AM is tonight, not the night before")
+    }
+
     func testWheelTimeWithinAMinuteOfNowIsNow() {
         let clock = LogClock()
         defer { clock.reset() }

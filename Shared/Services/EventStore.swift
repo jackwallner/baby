@@ -416,6 +416,14 @@ final class EventStore: ObservableObject {
         return true
     }
 
+    /// Setup's form starts blank, so over an existing log (a restored iCloud
+    /// baby) it fills in only what was entered and never clears the rest.
+    @discardableResult
+    func finishSetup(name: String?, birthDate: Date?) -> Bool {
+        guard let child else { return createChild(name: name, birthDate: birthDate) }
+        return update(child: child, name: name ?? child.name, birthDate: birthDate ?? child.birthDate)
+    }
+
     /// A birth date is a calendar day. Kept at noon, so crossing a time zone
     /// never moves it to the day before or after.
     nonisolated static func noon(of date: Date?, calendar: Calendar = .current) -> Date? {
@@ -475,6 +483,29 @@ final class EventStore: ObservableObject {
     /// logging on their own before joining.
     func separateLogs(besides target: Child) -> [Child] {
         children.filter { !persistence.isShared($0) && $0.objectID != target.objectID && $0.eventCount > 0 }
+    }
+
+    /// The one log worth offering to fold into `shared`: only when there is
+    /// exactly one (twins are never folded together) and nothing says it is
+    /// another baby, such as an older sibling's log met on joining a newborn's.
+    func separateLogToOffer(for shared: Child) -> Child? {
+        let logs = separateLogs(besides: shared)
+        guard logs.count == 1, let log = logs.first, Self.couldBeSameBaby(log, shared) else { return nil }
+        return log
+    }
+
+    static func couldBeSameBaby(_ log: Child, _ shared: Child, calendar: Calendar = .current) -> Bool {
+        func word(_ name: String?) -> String? {
+            let trimmed = (name ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            return trimmed.isEmpty ? nil : trimmed
+        }
+        // "My Nora" and "Nora" are one baby; "Nora" and "Theo" are two.
+        if let a = word(log.name), let b = word(shared.name), !a.contains(b), !b.contains(a) { return false }
+        guard let born = shared.birthDate else { return true }
+        if let other = log.birthDate, abs(calendar.dateComponents([.day], from: other, to: born).day ?? 0) > 1 { return false }
+        let entries = (log.events as? Set<LogEvent>) ?? []
+        guard let dayBefore = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: born)) else { return true }
+        return !entries.contains { ($0.startedAt ?? .distantFuture) < dayBefore }
     }
 
     /// Copies every entry of `source` into `target` (objects cannot change
@@ -845,8 +876,15 @@ final class EventStore: ObservableObject {
             target = child
         }
         guard let target else {
-            logger.error("Watch payload \(payload.id) ignored because its baby profile is unavailable")
-            return false
+            // Before the store loads every profile looks missing, so retry.
+            guard !persistence.isStandingIn else { return false }
+            // The wrist only names profiles this phone sent it, so one that
+            // is gone was deleted or unshared. Acknowledge the drop: an
+            // unanswered sleep toggle holds back every toggle queued after it.
+            logger.error("Watch payload \(payload.id) dropped because its baby profile is gone")
+            applied.append(payload.id.uuidString)
+            AppGroup.defaults.set(Array(applied.suffix(NowSummary.knownEventLimit)), forKey: AppGroup.Key.appliedWatchActions)
+            return true
         }
         let targetEvents = persistence.events(for: target, in: context)
         if let existing = targetEvents.first(where: { $0.id == payload.id }) {
