@@ -50,6 +50,11 @@ schemes:
         - BabyTests
       config: Debug
       storeKitConfiguration: Baby.storekit
+      # Unit tests open their own in-memory stores. The host app mirroring
+      # traps in CKContainer on an unsigned (gh-sim) build with no iCloud
+      # entitlement before a test can connect.
+      commandLineArguments:
+        "-NoCloudKit": true
     run:
       config: Debug
       storeKitConfiguration: Baby.storekit

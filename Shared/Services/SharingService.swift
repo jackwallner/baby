@@ -29,14 +29,22 @@ final class SharingService: ObservableObject {
     private let logger = Logger(subsystem: AppGroup.subsystem, category: "Sharing")
 
     init(persistence: Persistence, share: CKShare? = nil, events: EventStore? = nil,
-         accountAvailable: @escaping @MainActor () async -> Bool = {
-             (try? await CKContainer(identifier: AppGroup.cloudKitContainerID).accountStatus()) == .available
-         }) {
+         accountAvailable: @escaping @MainActor () async -> Bool = SharingService.iCloudAccountAvailable) {
         self.persistence = persistence
         self.share = share
         self.events = events ?? EventStore(persistence: persistence)
         self.accountAvailable = accountAvailable
         shareChildID = self.events.child?.objectID
+    }
+
+    @MainActor
+    static func iCloudAccountAvailable() async -> Bool {
+        #if DEBUG
+        // An unsigned test build has no iCloud entitlement, and CKContainer
+        // traps on it.
+        if ProcessInfo.processInfo.arguments.contains("-NoCloudKit") { return false }
+        #endif
+        return (try? await CKContainer(identifier: AppGroup.cloudKitContainerID).accountStatus()) == .available
     }
 
     var ckContainer: CKContainer { CKContainer(identifier: AppGroup.cloudKitContainerID) }
