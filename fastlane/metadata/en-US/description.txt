@@ -1,37 +1,49 @@
-Ultra simple baby tracking. One tap logs a feed, a pee or poop diaper, or sleep. One glance answers the 3am question: when did the baby last eat, and which side to start on.
+Baby Tracker is a simple newborn log for feeds, diapers and sleep. One tap logs a feed, a pee or poop diaper, or sleep, and one glance shows when the baby last ate and which side to start on. Logging is free, both parents can share one log, and there is no account.
 
 FOUR BUTTONS THAT NEVER MOVE
-Feed (left, right, bottle), Pee, Poop, Sleep. Prefer Wet and Dirty? One setting renames them. One tap logs it now. A long press fixes the time, the side, the bottle amount or the stool colour. Undo sits in a toast for a few seconds. No confirmation sheets, ever.
+• Feed (left, right or bottle), Pee, Poop and Sleep, always in the same place
+• One tap logs it now. A long press sets the time, the side, the bottle amount or the stool colour
+• An All button logs a feed, a pee and a poop together
+• Undo sits in a toast for a few seconds, with no confirmation sheets
+• Rename Pee and Poop to Wet and Dirty, turn off a button you don't use, or limit feeds to breast or bottle
+• Add an older entry you forgot to log
 
 WITHOUT OPENING THE APP
-Lock screen and home screen widgets that log with one tap. An Apple Watch app and a complication that shows how long since the last feed. A Live Activity on the lock screen while a feed or a sleep is running. Siri and the Action button.
+• Home Screen and Lock Screen widgets that log with one tap
+• An Apple Watch app, and a complication that shows how long since the last feed
+• A Live Activity on the Lock Screen while a feed or a sleep is running
+• Siri and the Action button
 
 REMINDERS YOU CHOOSE
-A nudge when the next feed is due, counted from when the last one started, every 2 to 4 hours as you set it, with the side to start on. The evening before a newborn checkup, a note that your summary for the doctor is ready. Both are optional and stay on your phone.
+• A feed reminder 2 to 4 hours after the last feed started, as you set it, with the side to start on
+• A note the evening before a newborn checkup that your summary for the doctor is ready
+• Both are optional and stay on your iPhone
 
 BOTH PARENTS, NO ACCOUNTS
-Log together: your partner, a grandparent or a nanny scans a code from your phone and joins the same log from their own iPhone. You all tap the same four buttons and see the same list, so "did you already change the baby?" answers itself. There is no account to create, and no server of ours in the middle: the records live on your devices and in your own iCloud.
+• A partner, grandparent or nanny scans a code from your phone and joins the same log on their own iPhone
+• Everyone taps the same buttons and sees the same list
+• Records live on your devices and in your own iCloud, with no server of ours in the middle
 
 THE FIRST WEEKS
-The tally sheet the hospital sends home, as a screen: your logged diapers by day of life, beside a breastfeeding reference for the first two weeks from NHS Healthier Together, with the "call your pediatrician if" lines under the table. The reference is general guidance, not a target or a verdict about your baby.
+• The tally sheet the hospital sends home, as a screen: your logged diapers by day of life
+• A breastfeeding reference for the first two weeks from NHS Healthier Together, with the "call your pediatrician if" lines under the table
+• The reference is general guidance, not a target or a verdict about your baby
 
 THE STAIN HELPER
-Tell it once what you have at home, and a blowout, spit-up, breast milk or formula stain gets the steps in order, skipping anything you do not own.
+• Tell it once what you have at home, and a blowout, spit-up, breast milk or formula stain gets the steps in order, skipping anything you don't own
 
-FREE, AND STAYING FREE
-Logging, feed reminders, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, logging together, the stain helper and more than one baby. Nothing you have already logged is ever locked later.
+PRIVACY
+• No account, no ads, no AI and no cross-app tracking
 
-BABY+, OPTIONAL
-- The pediatrician summary: a one-page PDF since the last visit to share or print, with daily feeds and the longest gap between them, wet and dirty counts, sleep, weights in pounds and ounces or kilograms, and your notes
-- Trends: feeds a day, diaper counts, and the longest sleep stretch over the weeks
-- CSV export of every entry
+FREE AND BABY+
+Logging, feed reminders, the first-weeks tally, full history, widgets, the Apple Watch app, the Live Activity, logging together, the stain helper and more than one baby are free and do not expire. Nothing you have logged is ever locked later. Baby+ is optional, as a monthly or yearly subscription or a one-time lifetime purchase. Subscriptions include a free trial for eligible new subscribers, and the app shows its length before you start. Baby+ adds:
+• The pediatrician summary: a one-page PDF since the last visit to share or print, with daily feeds and the longest gap between them, wet and dirty counts, sleep, weights in pounds and ounces or kilograms, and your notes
+• Trends: feeds a day, diaper counts and the longest sleep stretch over the weeks
+• CSV export of every entry
 
-Baby+ is available as a monthly or yearly subscription, or as a one-time lifetime purchase that never renews. New subscribers get a one-week free trial. Payment is charged to your Apple Account when the trial ends unless you cancel at least 24 hours before then. Subscriptions renew automatically for the same period and price unless cancelled at least 24 hours before the end of the current period. Manage or cancel your subscription in Settings, under your Apple Account, then Subscriptions. Prices are shown in the app before you buy and vary by region.
-
-NO ADS, NO AI
-No ads, of any kind. No AI panels or predictions. The four buttons will not move in an update.
+Prices appear in the app before you buy and vary by region. Subscriptions renew automatically unless canceled at least 24 hours before the current period ends. Manage or cancel in Settings > Apple ID > Subscriptions.
 
 Baby Tracker is a log, not medical advice. It does not diagnose, treat or assess your baby, and it is not a medical device. Call your pediatrician with any concern.
 
-Terms of Use (Apple Standard EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Privacy Policy: https://jackwallner.github.io/baby/privacy-policy.html
+Terms (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy: https://jackwallner.com/ios/baby/privacy-policy.html
