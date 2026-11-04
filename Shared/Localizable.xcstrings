@@ -11791,7 +11791,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fläschchen"
+            "value" : "Flasche"
           }
         },
         "en" : {
@@ -15816,7 +15816,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mahlzeit · %@"
+            "value" : "%@"
           }
         },
         "en" : {
@@ -15828,19 +15828,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comió · %@"
+            "value" : "%@"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poppata · %@"
+            "value" : "%@"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mamou · %@"
+            "value" : "%@"
           }
         }
       }
@@ -16131,7 +16131,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mahlzeit: Fläschchen eingetragen"
+            "value" : "Flasche eingetragen"
           }
         },
         "en" : {
@@ -16143,19 +16143,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toma · Biberón registrado"
+            "value" : "Biberón registrado"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poppata al biberon registrata"
+            "value" : "Biberon registrato"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mamada · Mamadeira registrada"
+            "value" : "Mamadeira registrada"
           }
         }
       }
@@ -16166,7 +16166,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mahlzeit: links eingetragen"
+            "value" : "Links eingetragen"
           }
         },
         "en" : {
@@ -16178,19 +16178,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toma · Izq. registrada"
+            "value" : "Izquierdo registrado"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poppata al seno sinistro registrata"
+            "value" : "Sinistro registrato"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mamada · Esq. registrada"
+            "value" : "Esquerdo registrado"
           }
         }
       }
@@ -16201,7 +16201,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mahlzeit: rechts eingetragen"
+            "value" : "Rechts eingetragen"
           }
         },
         "en" : {
@@ -16213,19 +16213,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toma · Der. registrada"
+            "value" : "Derecho registrado"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Poppata al seno destro registrata"
+            "value" : "Destro registrato"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mamada · Dir. registrada"
+            "value" : "Direito registrado"
           }
         }
       }

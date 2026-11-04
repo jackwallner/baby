@@ -1,7 +1,7 @@
 Babytracking, so einfach wie möglich. Ein Tipp erfasst eine Mahlzeit, eine nasse oder volle Windel oder Schlaf. Ein Blick beantwortet die Frage um 3 Uhr nachts: Wann hat das Baby zuletzt getrunken, und auf welcher Seite?
 
 VIER TASTEN, DIE SICH NIE VERSCHIEBEN
-Mahlzeit (links, rechts, Fläschchen), Pipi, Kacka, Schlaf. Ein Tipp erfasst es jetzt. Langes Drücken stellt Uhrzeit, Seite, Flaschenmenge oder Stuhlfarbe ein. Rückgängig steht ein paar Sekunden oben bereit.
+Mahlzeit (links, rechts, Flasche), Pipi, Kacka, Schlaf. Ein Tipp erfasst es jetzt. Langes Drücken stellt Uhrzeit, Seite, Flaschenmenge oder Stuhlfarbe ein. Rückgängig steht ein paar Sekunden oben bereit.
 
 OHNE DIE APP ZU ÖFFNEN
 Widgets für Sperr- und Home-Bildschirm, die mit einem Tipp erfassen, eine Apple Watch App mit Komplikation, eine Live-Aktivität während Stillen oder Schlaf läuft, und Siri.

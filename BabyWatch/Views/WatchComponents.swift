@@ -104,7 +104,7 @@ struct WatchLogGrid: View {
                 Text(title)
                     .font(.body.weight(.semibold))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.55)
             }
             .foregroundStyle(AppTheme.ink)
             .padding(.horizontal, AppTheme.hairSpacing)

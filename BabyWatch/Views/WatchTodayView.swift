@@ -60,7 +60,7 @@ struct WatchTodayView: View {
                         .font(.caption2)
                         .foregroundStyle(AppTheme.ink2)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .minimumScaleFactor(0.6)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, AppTheme.hairSpacing)
@@ -82,7 +82,7 @@ struct WatchTodayView: View {
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(AppTheme.ink)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                    .minimumScaleFactor(0.7)
                 Text(Format.time(entry.at))
                     .font(.caption2)
                     .foregroundStyle(AppTheme.ink2)

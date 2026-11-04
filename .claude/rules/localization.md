@@ -46,3 +46,10 @@ checks source keys, English catalog entries, plural format arguments, variations
 that repeat their host text, spliced fragments, unit options, and raw returned or
 ternary strings. `BabyTests/LocalizationTests.swift` pins the expanded English for
 plurals, units, durations and casing against the app bundle.
+
+Check the tight surfaces by eye in German and Portuguese, the longest languages:
+the PDF table (`PDFReport.table` widens columns, then scales all its text
+together, and never truncates), the Watch's three-across side row and Today
+tiles, and onboarding's feeding chips. The Watch glance shows only the side
+beside the feed icon (`Fed · %@` is just `%@` in translations), because "which
+side" is what must survive the width.
