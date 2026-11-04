@@ -5,8 +5,9 @@
 Each locale carries its own name, subtitle, keywords, promotional text and the
 paragraphs of its description. The description always ends with the
 subscription disclosure, the non-medical disclaimer, a note that the app itself
-is in English, and working Terms of Use and Privacy Policy links (App Review
-3.1.2 checks every storefront, not only en-US).
+is in English (except de, es, it and pt, which the app ships in), and working
+Terms of Use and Privacy Policy links (App Review 3.1.2 checks every storefront,
+not only en-US).
 
 Keywords drop any word already in that locale's name or subtitle (Apple
 indexes those anyway), then keep terms in order until the next one would pass

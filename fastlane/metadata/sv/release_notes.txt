@@ -1,1 +1,1 @@
-Åtgärdar en krasch på Apple Watch, en krasch när du går med i en delad logg via en inbjudningslänk och en krasch när du trycker på en påminnelse.
+Baby Tracker finns nu på tyska, spanska, italienska och portugisiska.

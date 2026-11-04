@@ -1,7 +1,7 @@
 Babytracking, so einfach wie möglich. Ein Tipp erfasst eine Mahlzeit, eine nasse oder volle Windel oder Schlaf. Ein Blick beantwortet die Frage um 3 Uhr nachts: Wann hat das Baby zuletzt getrunken, und auf welcher Seite?
 
 VIER TASTEN, DIE SICH NIE VERSCHIEBEN
-Füttern (links, rechts, Fläschchen), Pipi, Kacka, Schlaf. Ein Tipp erfasst es jetzt. Langes Drücken stellt Uhrzeit, Seite, Flaschenmenge oder Stuhlfarbe ein. Rückgängig steht ein paar Sekunden oben bereit.
+Mahlzeit (links, rechts, Fläschchen), Pipi, Kacka, Schlaf. Ein Tipp erfasst es jetzt. Langes Drücken stellt Uhrzeit, Seite, Flaschenmenge oder Stuhlfarbe ein. Rückgängig steht ein paar Sekunden oben bereit.
 
 OHNE DIE APP ZU ÖFFNEN
 Widgets für Sperr- und Home-Bildschirm, die mit einem Tipp erfassen, eine Apple Watch App mit Komplikation, eine Live-Aktivität während Stillen oder Schlaf läuft, und Siri.
@@ -20,7 +20,7 @@ Eine einseitige Zusammenfassung für den Kinderarzt seit dem letzten Termin zum 
 
 Baby+ gibt es als Monats- oder Jahresabo oder als einmaligen Lifetime-Kauf ohne Verlängerung. Neue Abonnenten erhalten eine einwöchige Gratis-Testphase. Die Zahlung wird am Ende der Testphase über deinen Apple Account belastet, sofern du nicht mindestens 24 Stunden vorher kündigst. Abos verlängern sich automatisch zum gleichen Zeitraum und Preis, sofern sie nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt werden. Verwalten oder kündigen in den Einstellungen unter deinem Apple Account, dann Abonnements. Preise werden vor dem Kauf in der App angezeigt und variieren je nach Region.
 
-Keine Werbung. Keine KI. Baby Tracker ist ein Protokoll, keine medizinische Beratung. Die App stellt keine Diagnosen, behandelt nicht, bewertet dein Baby nicht und ist kein Medizinprodukt. Bei Sorgen wende dich an deinen Kinderarzt. Die App selbst ist auf Englisch.
+Keine Werbung. Keine KI. Baby Tracker ist ein Protokoll, keine medizinische Beratung. Die App stellt keine Diagnosen, behandelt nicht, bewertet dein Baby nicht und ist kein Medizinprodukt. Bei Sorgen wende dich an deinen Kinderarzt.
 
 Nutzungsbedingungen (Apple Standard-EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Datenschutzerklärung: https://jackwallner.github.io/baby/privacy-policy.html

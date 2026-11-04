@@ -1,1 +1,1 @@
-Fixes a crash on Apple Watch, a crash when joining a shared log from an invite link, and a crash when tapping a reminder.
+Baby Tracker is now available in German, Spanish, Italian and Portuguese.

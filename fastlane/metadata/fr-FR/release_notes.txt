@@ -1,1 +1,1 @@
-Corrige un plantage sur l'Apple Watch, un plantage en rejoignant un journal partagé depuis un lien d'invitation et un plantage en touchant un rappel.
+Baby Tracker est désormais disponible en allemand, espagnol, italien et portugais.

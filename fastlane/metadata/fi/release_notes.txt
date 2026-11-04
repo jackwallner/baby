@@ -1,1 +1,1 @@
-Korjaa kaatumisen Apple Watchissa, kaatumisen liityttäessä jaettuun lokiin kutsulinkistä ja kaatumisen muistutusta napautettaessa.
+Baby Tracker on nyt saatavilla saksaksi, espanjaksi, italiaksi ja portugaliksi.

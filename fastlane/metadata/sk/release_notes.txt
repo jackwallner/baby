@@ -1,1 +1,1 @@
-Opravuje pád na Apple Watch, pád pri pripojení k zdieľanému záznamu z odkazu s pozvánkou a pád po klepnutí na pripomienku.
+Baby Tracker je teraz dostupný v nemčine, španielčine, taliančine a portugalčine.

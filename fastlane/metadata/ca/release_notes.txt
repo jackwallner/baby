@@ -1,1 +1,1 @@
-Corregeix un error a l'Apple Watch, un error en unir-se a un registre compartit des d'un enllaç d'invitació i un error en tocar un recordatori.
+Baby Tracker ara està disponible en alemany, espanyol, italià i portuguès.

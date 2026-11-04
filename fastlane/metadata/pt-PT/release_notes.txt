@@ -1,1 +1,1 @@
-Corrige uma falha no Apple Watch, uma falha ao aderir a um registo partilhado a partir de uma ligação de convite e uma falha ao tocar num lembrete.
+O Baby Tracker já está disponível em português.

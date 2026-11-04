@@ -20,7 +20,7 @@ Un resumen de una página para el pediatra desde la última consulta, para compa
 
 Baby+ está disponible como suscripción mensual o anual, o como compra única de por vida que no se renueva. Los nuevos suscriptores tienen una semana de prueba gratis. El pago se cobra a tu cuenta de Apple al terminar la prueba a menos que canceles al menos 24 horas antes. Las suscripciones se renuevan automáticamente por el mismo periodo y precio a menos que se cancelen al menos 24 horas antes del final del periodo actual. Administra o cancela en Configuración, en tu cuenta de Apple, y luego Suscripciones. Los precios se muestran en la app antes de comprar y varían según la región.
 
-Sin anuncios. Sin IA. Baby Tracker es un registro, no un consejo médico. No diagnostica, no trata ni evalúa a tu bebé, y no es un dispositivo médico. Ante cualquier duda, llama a tu pediatra. La app está en inglés.
+Sin anuncios. Sin IA. Baby Tracker es un registro, no un consejo médico. No diagnostica, no trata ni evalúa a tu bebé, y no es un dispositivo médico. Ante cualquier duda, llama a tu pediatra.
 
 Términos de uso (EULA estándar de Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Política de privacidad: https://jackwallner.github.io/baby/privacy-policy.html

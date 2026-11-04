@@ -1,1 +1,1 @@
-Behebt einen Absturz auf der Apple Watch, einen Absturz beim Beitreten zu einem geteilten Protokoll über einen Einladungslink und einen Absturz beim Tippen auf eine Erinnerung.
+Baby Tracker gibt es jetzt auf Deutsch.

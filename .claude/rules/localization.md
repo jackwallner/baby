@@ -17,8 +17,9 @@ notifications, accessibility, guidance and PDF belongs in
 It holds `en`, de, es, it and pt-BR. A new language goes in `CFBundleLocalizations`
 in each Info.plist, `LANGS` in `check.py` and `languages` in `LocalizationTests`.
 Each target keeps its own `InfoPlist.xcstrings` for its display name and any
-purpose strings. English is the only shipped language until a translation run
-is approved. Do not add `CFBundleLocalizations` early.
+purpose strings. Store listings in a language the app does not ship say the app
+is in English; drop that line from a language when it ships
+(`scripts/locale_copy/`).
 
 Use whole sentences and complete labels as catalog keys. Computed `String`
 values must use `String(localized:)`; SwiftUI literals can stay in their local

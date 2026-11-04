@@ -36,7 +36,7 @@ FREE, AND STAYING FREE
 Logging, the first-weeks table, full history, both widgets, the Apple Watch app and complication, the Live Activity, logging together, the stain helper, every appearance and more than one baby.
 
 BABY+ (com.jackwallner.baby.monthly, com.jackwallner.baby.yearly, com.jackwallner.baby.pro.lifetime)
-Reporting to share with a doctor: sharing or exporting the pediatrician PDF (daily feeds, the longest gap between feeds, wet and dirty counts, sleep, weights and notes), the trends charts, and CSV export. Reports shows example previews and the Baby+ plans until Baby+ is active; after purchase it opens the reports. Plans are also in Settings > Baby+. Nothing that ships free is locked later.
+Reporting to share with a doctor: sharing or exporting the pediatrician PDF (daily feeds, the longest gap between feeds, wet and dirty counts, sleep, weights and notes), the trends charts, and CSV export. Upgrade shows example previews and the Baby+ plans until Baby+ is active; after purchase it becomes Reports. Plans are also in Settings > Baby+. Nothing that ships free is locked later.
 
 LOGGING TOGETHER
 Settings > Log together > Invite someone shows a QR code and a link for a CloudKit CKShare on the baby's record zone, with read/write access. The other parent scans it in the app or opens the link, on their own iCloud account. There is no server of ours and no account to create. It needs iCloud on the device; without it, logging is unaffected and the rest of the app works. It cannot be tested with a single Apple ID.

@@ -1,1 +1,1 @@
-Memperbaiki crash di Apple Watch, crash saat bergabung ke log bersama dari tautan undangan, dan crash saat mengetuk pengingat.
+Baby Tracker kini tersedia dalam bahasa Jerman, Spanyol, Italia, dan Portugis.

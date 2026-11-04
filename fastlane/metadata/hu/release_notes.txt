@@ -1,1 +1,1 @@
-Javítja az Apple Watch összeomlását, a megosztott naplóhoz meghívó linkkel való csatlakozáskor jelentkező összeomlást és az emlékeztető koppintásakor jelentkező összeomlást.
+A Baby Tracker mostantól németül, spanyolul, olaszul és portugálul is elérhető.

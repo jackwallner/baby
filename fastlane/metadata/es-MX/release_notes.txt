@@ -1,1 +1,1 @@
-Corrige un cierre inesperado en el Apple Watch, otro al unirse a un registro compartido desde un enlace de invitación y otro al tocar un recordatorio.
+Baby Tracker ya está disponible en español.

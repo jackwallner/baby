@@ -1,1 +1,1 @@
-Sửa lỗi ứng dụng bị thoát trên Apple Watch, khi tham gia nhật ký chung từ liên kết mời và khi chạm vào lời nhắc.
+Baby Tracker hiện đã có bằng tiếng Đức, tiếng Tây Ban Nha, tiếng Ý và tiếng Bồ Đào Nha.
