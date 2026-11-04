@@ -20,12 +20,12 @@ enum StainGuide {
 
         var label: String {
             switch self {
-            case .dishSoap: "Dish soap"
-            case .detergent: "Laundry detergent"
-            case .oxygenBleach: "Oxygen bleach (OxiClean)"
-            case .hydrogenPeroxide: "Hydrogen peroxide 3%"
-            case .whiteVinegar: "White vinegar"
-            case .bakingSoda: "Baking soda"
+            case .dishSoap: String(localized: "Dish soap")
+            case .detergent: String(localized: "Laundry detergent")
+            case .oxygenBleach: String(localized: "Oxygen bleach (OxiClean)")
+            case .hydrogenPeroxide: String(localized: "Hydrogen peroxide 3%")
+            case .whiteVinegar: String(localized: "White vinegar")
+            case .bakingSoda: String(localized: "Baking soda")
             }
         }
 
@@ -43,12 +43,12 @@ enum StainGuide {
         /// Shown under the item at setup, so the choice is not a guess.
         var hint: String {
             switch self {
-            case .dishSoap: "The blue kind by the sink."
-            case .detergent: "Most have enzymes, which is what breaks milk and poop down."
-            case .oxygenBleach: "Colour-safe powder. Not chlorine bleach."
-            case .hydrogenPeroxide: "The brown bottle from the medicine cabinet."
-            case .whiteVinegar: "For the sour-milk smell."
-            case .bakingSoda: "For smell, not for the stain."
+            case .dishSoap: String(localized: "The blue kind by the sink.")
+            case .detergent: String(localized: "Most have enzymes, which is what breaks milk and poop down.")
+            case .oxygenBleach: String(localized: "Colour-safe powder. Not chlorine bleach.")
+            case .hydrogenPeroxide: String(localized: "The brown bottle from the medicine cabinet.")
+            case .whiteVinegar: String(localized: "For the sour-milk smell.")
+            case .bakingSoda: String(localized: "For smell, not for the stain.")
             }
         }
     }
@@ -64,11 +64,11 @@ enum StainGuide {
 
         var label: String {
             switch self {
-            case .blowout: "Blowout"
-            case .poop: "Poop"
-            case .spitUp: "Spit-up"
-            case .breastMilk: "Breast milk"
-            case .formula: "Formula"
+            case .blowout: String(localized: "Blowout")
+            case .poop: String(localized: "Poop")
+            case .spitUp: String(localized: "Spit-up")
+            case .breastMilk: String(localized: "Breast milk")
+            case .formula: String(localized: "Formula")
             }
         }
 
@@ -76,11 +76,11 @@ enum StainGuide {
         /// the short words and the rest of the app gets the real ones.
         var shortLabel: String {
             switch self {
-            case .blowout: "Blowout"
-            case .poop: "Poop"
-            case .spitUp: "Spit-up"
-            case .breastMilk: "Milk"
-            case .formula: "Formula"
+            case .blowout: String(localized: "Blowout")
+            case .poop: String(localized: "Poop")
+            case .spitUp: String(localized: "Spit-up")
+            case .breastMilk: String(localized: "Milk")
+            case .formula: String(localized: "Formula")
             }
         }
 
@@ -97,11 +97,11 @@ enum StainGuide {
         /// The one thing to do in the first ten seconds, before any product.
         var firstMove: String {
             switch self {
-            case .blowout: "Get it off the skin first, then peel the clothes downward if you can, not over the head."
-            case .poop: "Lift the solids off with the edge of a wipe. Don't rub."
-            case .spitUp: "Blot, don't rub. Rubbing pushes it into the weave."
-            case .breastMilk: "Rinse it now if you can. Dried milk is a different job."
-            case .formula: "Rinse it now if you can. Dried formula is a different job."
+            case .blowout: String(localized: "Get it off the skin first, then peel the clothes downward if you can, not over the head.")
+            case .poop: String(localized: "Lift the solids off with the edge of a wipe. Don't rub.")
+            case .spitUp: String(localized: "Blot, don't rub. Rubbing pushes it into the weave.")
+            case .breastMilk: String(localized: "Rinse it now if you can. Dried milk is a different job.")
+            case .formula: String(localized: "Rinse it now if you can. Dried formula is a different job.")
             }
         }
     }
@@ -118,72 +118,72 @@ enum StainGuide {
     }
 
     /// Said once, at the top, never repeated per step.
-    static let careLabelRule = "Check the care label first, and never put two products on the fabric in the same step. Rinse in between."
+    static let careLabelRule = String(localized: "Check the care label first, and never put two products on the fabric in the same step. Rinse in between.")
 
-    static let neverRule = "No chlorine bleach on baby clothes here, and never mix hydrogen peroxide or vinegar with anything else."
+    static let neverRule = String(localized: "No chlorine bleach on baby clothes here, and never mix hydrogen peroxide or vinegar with anything else.")
 
     // MARK: - Steps
 
     private static let rinse = Step(
         supply: nil,
-        title: "Cold water, from the back",
-        detail: "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres.",
+        title: String(localized: "Cold water, from the back"),
+        detail: String(localized: "Hold the fabric wrong side up and run cold water through the back of the stain so it goes out the way it came in. Never hot: heat cooks milk and poop into the fibres."),
         caution: nil
     )
 
     private static let dishSoap = Step(
         supply: .dishSoap,
-        title: "A drop of dish soap",
-        detail: "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is.",
+        title: String(localized: "A drop of dish soap"),
+        detail: String(localized: "Work one drop in with a fingertip, wait five minutes, rinse cold. It is built to lift the fat in milk, which is half of what a baby stain is."),
         caution: nil
     )
 
     private static let detergent = Step(
         supply: .detergent,
-        title: "Rub in a little detergent",
-        detail: "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing.",
+        title: String(localized: "Rub in a little detergent"),
+        detail: String(localized: "Enzymes in ordinary laundry detergent break down protein. Rub a little straight into the damp stain and leave it fifteen minutes before washing."),
         caution: nil
     )
 
     private static let oxygenSoak = Step(
         supply: .oxygenBleach,
-        title: "Soak in oxygen bleach",
-        detail: "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out.",
-        caution: "Colour-safe, but check the label for wool and silk."
+        title: String(localized: "Soak in oxygen bleach"),
+        detail: String(localized: "Dissolve the powder in warm water to the dose on the tub, submerge the garment, and leave it one to eight hours. This is the one that gets old stains out."),
+        caution: String(localized: "Colour-safe, but check the label for wool and silk.")
     )
 
     private static let sun = Step(
         supply: nil,
-        title: "Lay it in the sun, still damp",
-        detail: "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up.",
+        title: String(localized: "Lay it in the sun, still damp"),
+        detail: String(localized: "Sunlight fades the yellow of breastfed poop and milk better than anything in the cupboard, and it is free. A few hours, damp, stain side up."),
         caution: nil
     )
 
     private static let peroxide = Step(
         supply: .hydrogenPeroxide,
-        title: "Dab hydrogen peroxide",
-        detail: "Dab it on, wait ten minutes, rinse cold. Rinse off any earlier product before this one.",
-        caution: "Whites and colourfast fabrics only. Test a hidden seam first."
+        title: String(localized: "Dab hydrogen peroxide"),
+        detail: String(localized: "Dab it on, wait ten minutes, rinse cold. Rinse off any earlier product before this one."),
+        caution: String(localized: "Whites and colourfast fabrics only. Test a hidden seam first.")
     )
 
     private static let vinegarSmell = Step(
         supply: .whiteVinegar,
-        title: "Soak for the sour smell",
-        detail: "One part white vinegar to four parts cool water, thirty minutes, then rinse. This is for the smell that survives the wash, not for the mark.",
-        caution: "On its own, in clean water. Never alongside peroxide or bleach."
+        title: String(localized: "Soak for the sour smell"),
+        detail: String(localized: "One part white vinegar to four parts cool water, thirty minutes, then rinse. This is for the smell that survives the wash, not for the mark."),
+        caution: String(localized: "On its own, in clean water. Never alongside peroxide or bleach.")
     )
 
     private static let bakingSodaSmell = Step(
         supply: .bakingSoda,
-        title: "Baking soda paste for the smell",
-        detail: "A spoon of baking soda with a little water, spread on, thirty minutes, brush off. Again: smell, not stain.",
+        title: String(localized: "Baking soda paste for the smell"),
+        detail: String(localized: "A spoon of baking soda with a little water, spread on, thirty minutes, brush off. Again: smell, not stain."),
         caution: nil
     )
 
     private static let washAndCheck = Step(
         supply: nil,
-        title: "Wash, then look before it dries",
-        detail: "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent.",
+        title: String(localized: "Wash, then look before it dries"),
+        detail: String(localized: "Wash as warm as the care label allows, then check the garment while it is still wet. A dryer sets whatever is left, and after that it is permanent."),
         caution: nil
     )
 

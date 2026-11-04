@@ -129,8 +129,8 @@ struct SettingsView: View {
             Text("Feed types")
         } footer: {
             Text(settings.feedTypes.breast
-                 ? "The sides offered after a Feed tap. Feeds already logged keep theirs."
-                 : "Every Feed tap logs a bottle. Feeds already logged keep their sides.")
+                 ? String(localized: "The sides offered after a Feed tap. Feeds already logged keep theirs.")
+                 : String(localized: "Every Feed tap logs a bottle. Feeds already logged keep their sides."))
         }
     }
 
@@ -192,7 +192,7 @@ struct SettingsView: View {
                 }
             }
             if let day = events.child?.dayOfLife() {
-                LabeledContent("Day of life", value: "\(day)")
+                LabeledContent("Day of life", value: day.formatted(.number))
             }
         }
     }
@@ -207,7 +207,7 @@ struct SettingsView: View {
                         events.setActive(child)
                     } label: {
                         HStack {
-                            Text(child.displayName)
+                            Text(child.localizedDisplayName)
                                 .foregroundStyle(AppTheme.ink)
                             if sharing.isSharedChild(child) {
                                 Image(systemName: "person.2.fill")
@@ -247,18 +247,18 @@ struct SettingsView: View {
     private var sharingSection: some View {
         Section {
             if sharing.share != nil, !sharing.isOwner {
-                LabeledContent("Started by", value: sharing.ownerName ?? "Someone else")
+                LabeledContent("Started by", value: sharing.ownerName ?? String(localized: "Someone else"))
                 Button {
                     showSharing = true
                 } label: {
-                    Label(sharing.inviteURL == nil ? "People and leaving" : "Invite someone or leave", systemImage: "person.2.fill")
+                    Label(sharing.inviteURL == nil ? String(localized: "People and leaving") : String(localized: "Invite someone or leave"), systemImage: "person.2.fill")
                 }
                 .foregroundStyle(AppTheme.accent)
                 .accessibilityIdentifier("settings.partner.share")
             } else {
                 if sharing.share != nil {
                     let names = sharing.participantNames
-                    LabeledContent("Logging with", value: names.isEmpty ? "No one yet" : names.joined(separator: ", "))
+                    LabeledContent("Logging with", value: names.isEmpty ? String(localized: "No one yet") : names.joined(separator: ", "))
                 }
                 Button {
                     showSharing = true
@@ -360,9 +360,9 @@ struct SettingsView: View {
 
     private var plusSection: some View {
         Section("Baby+") {
-            LabeledContent("Status", value: store.isPro ? "Active" : "Free")
+                    LabeledContent("Status", value: store.isPro ? String(localized: "Active") : String(localized: "Free"))
             if store.isPro, store.isLifetime {
-                LabeledContent("Plan", value: "Lifetime, never renews")
+                LabeledContent("Plan", value: String(localized: "Lifetime, never renews"))
             } else if store.isPro {
                 Link("Manage subscription", destination: BabyLinks.manageSubscriptions)
                 .foregroundStyle(AppTheme.accent)
@@ -373,7 +373,7 @@ struct SettingsView: View {
             Button("Restore purchases") {
                 Task {
                     await store.restore()
-                    restoreMessage = store.isPro ? "Baby+ is active on this Apple ID." : (store.errorMessage ?? "No active Baby+ purchase was found for this Apple ID.")
+                    restoreMessage = store.isPro ? String(localized: "Baby+ is active on this Apple ID.") : (store.errorMessage ?? String(localized: "No active Baby+ purchase was found for this Apple ID."))
                 }
             }
             .foregroundStyle(AppTheme.accent)
@@ -432,7 +432,7 @@ extension SettingsView {
     /// "just now" for the last minute, where "in 0 seconds" or "5 seconds ago"
     /// would read as noise.
     static func syncedPhrase(_ date: Date, now: Date) -> String {
-        guard now.timeIntervalSince(date) >= 60 else { return "just now" }
+        guard now.timeIntervalSince(date) >= 60 else { return String(localized: "just now") }
         return date.formatted(.relative(presentation: .named, unitsStyle: .wide))
     }
 }

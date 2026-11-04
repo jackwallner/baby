@@ -33,7 +33,7 @@ struct StainHelperView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditingSupplies ? "Done" : "Close") {
+                    Button(isEditingSupplies ? String(localized: "Done") : String(localized: "Close")) {
                         if isEditingSupplies {
                             StainGuide.store(supplies)
                             isEditingSupplies = false
@@ -95,7 +95,7 @@ struct StainHelperView: View {
 
     private var stainPicker: some View {
         VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            SectionLabel(text: "What happened")
+            SectionLabel(text: String(localized: "What happened"))
             Picker("What happened", selection: $stain) {
                 ForEach(StainGuide.Stain.allCases) { stain in
                     Text(stain.shortLabel).tag(stain)
@@ -128,10 +128,10 @@ struct StainHelperView: View {
 
     private var steps: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            SectionLabel(text: "Then, in this order")
+            SectionLabel(text: String(localized: "Then, in this order"))
             ForEach(Array(StainGuide.steps(for: stain, owning: supplies).enumerated()), id: \.element.id) { index, step in
                 HStack(alignment: .top, spacing: AppTheme.spacing) {
-                    Text("\(index + 1)")
+                    Text((index + 1).formatted(.number))
                         .font(.subheadline.weight(.bold).monospacedDigit())
                         .foregroundStyle(AppTheme.accent)
                         .frame(width: 24, alignment: .leading)

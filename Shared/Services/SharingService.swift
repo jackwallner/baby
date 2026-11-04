@@ -134,6 +134,7 @@ final class SharingService: ObservableObject {
             return existing
         }
         let (_, newShare, _) = try await persistence.container.share([child], to: nil)
+        // CloudKit persists this title on the share record, so keep its stored value stable.
         newShare[CKShare.SystemFieldKey.title] = "\(child.displayName)'s log" as CKRecordValue
         try Task.checkCancellation()
         cache(newShare, for: child.objectID)
@@ -171,10 +172,10 @@ final class SharingService: ObservableObject {
 
         var message: String {
             switch self {
-            case .notAnInvite: "That isn't a Baby Tracker invite link. Copy the whole link your partner sent and try again."
-            case .iCloudUnavailable: "Sign in to iCloud on this iPhone (Settings > your name), then try again."
-            case .ownInvite: "This is your own invite. Show the code or send the link to the person joining."
-            case .unavailable: "That invite couldn't be opened. Check your connection, or ask for a new link if sharing was stopped."
+            case .notAnInvite: String(localized: "That isn't a Baby Tracker invite link. Copy the whole link your partner sent and try again.")
+            case .iCloudUnavailable: String(localized: "Sign in to iCloud on this iPhone (Settings > your name), then try again.")
+            case .ownInvite: String(localized: "This is your own invite. Show the code or send the link to the person joining.")
+            case .unavailable: String(localized: "That invite couldn't be opened. Check your connection, or ask for a new link if sharing was stopped.")
             }
         }
     }
@@ -266,7 +267,7 @@ final class SharingService: ObservableObject {
         isAcceptingInvitation = false
         if let error {
             logger.error("acceptShareInvitations failed: \(String(describing: error), privacy: .public)")
-            invitationError = "That invite couldn't be opened. Check your connection and that iCloud is signed in, or ask for a new link if sharing was stopped. Your existing log is safe."
+            invitationError = String(localized: "That invite couldn't be opened. Check your connection and that iCloud is signed in, or ask for a new link if sharing was stopped. Your existing log is safe.")
             return
         }
         invitationError = nil
@@ -278,7 +279,7 @@ final class SharingService: ObservableObject {
         guard let share else { return [] }
         return share.participants
             .filter { $0.role != .owner && $0.acceptanceStatus == .accepted }
-            .map { Self.displayName($0) ?? "Someone" }
+            .map { Self.displayName($0) ?? String(localized: "Someone") }
     }
 
     /// The person who started a log this account joined.

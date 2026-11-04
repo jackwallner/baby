@@ -72,7 +72,7 @@ struct LogButtons: View {
             // The hidden button keeps the frame the chips fill.
             let feed = sides.event(in: events.events)
             ZStack {
-                kindButton(.feed, label: "Feed") { at in
+                kindButton(.feed, label: String(localized: "Feed")) { at in
                     guard let event = events.log(.feed, at: at) else { return false }
                     sides.open(event.objectID, offersSide: settings.feedTypes.breast)
                     return true
@@ -86,7 +86,7 @@ struct LogButtons: View {
                 }
             }
         case .sleep:
-            kindButton(.sleep, label: events.runningSleep == nil ? "Sleep" : "Wake") { at in
+            kindButton(.sleep, label: events.runningSleep == nil ? String(localized: "Sleep") : String(localized: "Wake")) { at in
                 if events.runningSleep != nil {
                     return events.stopRunning(.sleep, at: at)
                 }
@@ -103,7 +103,9 @@ struct LogButtons: View {
     }
 
     private var allLabel: String {
-        "Feed, \(EventKind.wet.label.lowercased()) and \(EventKind.dirty.label.lowercased())"
+        DiaperWords.current == .peePoop
+            ? String(localized: "Feed, pee and poop")
+            : String(localized: "Feed, wet and dirty")
     }
 
     private var allButton: some View {
@@ -141,9 +143,9 @@ struct LogButtons: View {
 
     private func hint(for kind: EventKind) -> String {
         switch kind {
-        case .feed: "Logs a feed. You can add a side after. Hold to change the time or add details."
-        case .sleep: "Starts or ends sleep. Hold to log an earlier sleep."
-        default: "Logs a diaper. Hold to add details."
+        case .feed: String(localized: "Logs a feed. You can add a side after. Hold to change the time or add details.")
+        case .sleep: String(localized: "Starts or ends sleep. Hold to log an earlier sleep.")
+        default: String(localized: "Logs a diaper. Hold to add details.")
         }
     }
 

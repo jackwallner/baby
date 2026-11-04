@@ -29,7 +29,7 @@ struct FirstWeeksView: View {
                 }
                 if let child = events.child, let birth = child.birthDate {
                     if let day = DateHelpers.dayOfLife(birthDate: birth, on: now), day > Guidance.tallyDays {
-                        Text("The reference covers days 1 to \(Guidance.tallyDays). \(child.displayName) is on day \(day), so the table is for looking back.")
+                        Text("The reference covers days 1 to \(Guidance.tallyDays). \(child.localizedDisplayName) is on day \(day), so the table is for looking back.")
                             .font(.subheadline)
                             .foregroundStyle(AppTheme.ink2)
                             .fixedSize(horizontal: false, vertical: true)
@@ -76,7 +76,7 @@ struct FirstWeeksView: View {
             ForEach(1...6, id: \.self) { day in
                 let range = Guidance.range(forDayOfLife: day)
                 (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.hairSpacing)) : AnyLayout(HStackLayout())) {
-                    Text(day == 6 ? "Day 6 on" : "Day \(day)")
+                    Text(day == 6 ? String(localized: "Day 6 on") : String(localized: "Day \(day)"))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(AppTheme.ink)
                         .frame(minWidth: 80, alignment: .leading)
@@ -142,7 +142,7 @@ struct FirstWeeksView: View {
                 VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
                     Text("Day \(day) · \(date.formatted(.dateTime.month(.abbreviated).day()))")
                         .font(.headline)
-                    Text(dim ? "Not yet logged" : loggedLine(tally))
+                    Text(dim ? String(localized: "Not yet logged") : loggedLine(tally))
                         .font(.body)
                     Text("Breastfeeding reference: \(range.summary)")
                         .font(.subheadline)
@@ -152,7 +152,7 @@ struct FirstWeeksView: View {
             } else {
                 HStack(spacing: AppTheme.tightSpacing) {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("\(day)")
+                        Text(day.formatted(.number))
                             .font(.body.weight(state == .today ? .bold : .medium))
                         Text(date.formatted(.dateTime.month(.abbreviated).day()))
                             .font(.caption2)
@@ -163,8 +163,8 @@ struct FirstWeeksView: View {
                     if settings.tracked.contains(.dirty) { count(dim ? nil : tally.dirty, kind: .dirty, min: range.dirtyMin, complete: state == .past) }
                     if settings.tracked.contains(.feed) { count(dim ? nil : tally.feeds, kind: .feed, min: range.feedsMin, complete: state == .past) }
                     VStack(alignment: .trailing, spacing: 0) {
-                        Text("\(range.wetMin)+ · \(range.dirtyMin)+")
-                        Text("\(range.feedsMin) to \(range.feedsMax)")
+                        Text("\(range.wetMin.formatted(.number))+ · \(range.dirtyMin.formatted(.number))+")
+                        Text("\(range.feedsMin.formatted(.number)) to \(range.feedsMax.formatted(.number))")
                     }
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
@@ -181,21 +181,21 @@ struct FirstWeeksView: View {
         .padding(.horizontal, AppTheme.tightSpacing)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(dim
-            ? "Day \(day), \(state == .future ? "upcoming" : "not logged"). Breastfeeding reference: \(range.summary)."
-            : "Day \(day): \(loggedLine(tally)) logged. Breastfeeding reference: \(range.summary).")
+            ? String(localized: "Day \(day), \(state == .future ? String(localized: "upcoming") : String(localized: "not logged")). Breastfeeding reference: \(range.summary).")
+            : String(localized: "Day \(day): \(loggedLine(tally)) logged. Breastfeeding reference: \(range.summary)."))
     }
 
     /// "3 wet · 1 dirty · 8 feeds", for the counts this family logs.
     private func loggedLine(_ tally: DayTally) -> String {
         var parts: [String] = []
-        if settings.tracked.contains(.wet) { parts.append("\(tally.wet) wet") }
-        if settings.tracked.contains(.dirty) { parts.append("\(tally.dirty) dirty") }
-        if settings.tracked.contains(.feed) { parts.append("\(tally.feeds) feeds") }
-        return parts.isEmpty ? "Nothing counted" : parts.joined(separator: " · ")
+        if settings.tracked.contains(.wet) { parts.append(String(localized: "\(tally.wet) wet")) }
+        if settings.tracked.contains(.dirty) { parts.append(String(localized: "\(tally.dirty) dirty")) }
+        if settings.tracked.contains(.feed) { parts.append(String(localized: "\(tally.feeds) feeds")) }
+        return parts.isEmpty ? String(localized: "Nothing counted") : parts.joined(separator: " · ")
     }
 
     private func count(_ value: Int?, kind: EventKind, min: Int, complete: Bool) -> some View {
-        Text(value.map(String.init) ?? "–")
+        Text(value?.formatted(.number) ?? "–")
             .font(.body.weight(.semibold))
             .monospacedDigit()
             .foregroundStyle(value == nil ? AppTheme.ink3 : AppTheme.color(for: kind))

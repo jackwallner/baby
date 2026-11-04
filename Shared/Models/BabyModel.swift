@@ -34,17 +34,17 @@ enum FeedSide: String, CaseIterable, Codable, Sendable {
 
     var label: String {
         switch self {
-        case .left: "Left"
-        case .right: "Right"
-        case .bottle: "Bottle"
+        case .left: String(localized: "Left")
+        case .right: String(localized: "Right")
+        case .bottle: String(localized: "Bottle")
         }
     }
 
     var shortLabel: String {
         switch self {
-        case .left: "L"
-        case .right: "R"
-        case .bottle: "Bottle"
+        case .left: String(localized: "L")
+        case .right: String(localized: "R")
+        case .bottle: String(localized: "Bottle")
         }
     }
 
@@ -95,11 +95,11 @@ enum StoolColor: String, CaseIterable, Codable, Sendable {
 
     var label: String {
         switch self {
-        case .black: "Black"
-        case .green: "Green"
-        case .yellow: "Yellow"
-        case .brown: "Brown"
-        case .other: "Other"
+        case .black: String(localized: "Black")
+        case .green: String(localized: "Green")
+        case .yellow: String(localized: "Yellow")
+        case .brown: String(localized: "Brown")
+        case .other: String(localized: "Other")
         }
     }
 }
@@ -189,6 +189,11 @@ final class Child: NSManagedObject {
         return trimmed.isEmpty ? "Baby" : trimmed
     }
 
+    var localizedDisplayName: String {
+        let trimmed = (name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? String(localized: "Baby") : trimmed
+    }
+
     var eventCount: Int { events?.count ?? 0 }
 
     /// Day 1 is the calendar day of birth. `nil` before birth or with no date.
@@ -271,7 +276,7 @@ final class LogEvent: NSManagedObject {
         case .dirty:
             return stool?.label
         case .sleep:
-            if isRunning { return "Asleep" }
+            if isRunning { return String(localized: "Asleep") }
             if let duration { return Format.duration(duration) }
             return nil
         case .wet:

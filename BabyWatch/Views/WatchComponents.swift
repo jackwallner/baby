@@ -54,19 +54,23 @@ struct WatchLogGrid: View {
         return button(side.label, symbol: nil, kind: .feed, emphasized: next) {
             store.log(.feed, side: side, at: at ?? .now)
         }
-        .accessibilityLabel(next ? "Feed, \(side.label), next" : "Feed, \(side.label)")
+        .accessibilityLabel(next
+            ? String(localized: "Feed, \(side.label), next")
+            : String(localized: "Feed, \(side.label)"))
         // No double-tap side to guess when the last feed named none.
         .primaryGesture(next)
     }
 
     private var sleepButton: some View {
         let asleep = summary.runningSleepStart
-        let title = asleep.map { "Wake · \(WatchGlance.elapsed(since: $0, now: now))" } ?? "Sleep"
+        let title = asleep.map { String(localized: "Wake · \(WatchGlance.elapsed(since: $0, now: now))") } ?? String(localized: "Sleep")
         return button(title, symbol: asleep == nil ? EventKind.sleep.symbolName : "sun.max.fill", kind: .sleep,
                       emphasized: asleep != nil, height: AppTheme.watchCompactButtonHeight) {
             store.toggleSleep(at: at ?? .now)
         }
-        .accessibilityLabel(asleep == nil ? "Start sleep" : "Wake, asleep \(Format.compactDuration(now.timeIntervalSince(asleep ?? now)))")
+        .accessibilityLabel(asleep == nil
+            ? String(localized: "Start sleep")
+            : String(localized: "Wake, asleep \(Format.compactDuration(now.timeIntervalSince(asleep ?? now)))"))
     }
 
     private func button(
@@ -99,7 +103,7 @@ struct WatchLogGrid: View {
             .contentShape(AppTheme.buttonShape)
         }
         .buttonStyle(WatchTapStyle(fill: emphasized ? AppTheme.strongFill(for: kind) : AppTheme.fill(for: kind)))
-        .accessibilityValue(at.map { "\(Format.compactDuration(now.timeIntervalSince($0))) ago" } ?? "")
+        .accessibilityValue(at.map { String(localized: "\(Format.compactDuration(now.timeIntervalSince($0))) ago") } ?? "")
     }
 }
 
@@ -162,39 +166,46 @@ struct WatchGlance: View {
         let running = summary.runningFeedStart
         let since = running ?? summary.lastFeedAt
         let sides = FeedSide.label(for: running != nil ? summary.runningSides : summary.feedSides)
-        let verb = running != nil ? "Feeding" : "Fed"
+        let label: String
+        if let sides {
+            label = running != nil
+                ? String(localized: "Feeding · \(sides)")
+                : String(localized: "Fed · \(sides)")
+        } else {
+            label = running != nil ? String(localized: "Feeding") : String(localized: "Fed")
+        }
         return WatchGlanceColumn(
-            label: sides.map { "\(verb) · \($0)" } ?? verb,
+            label: label,
             symbol: EventKind.feed.symbolName,
             kind: .feed,
-            value: since.map { Self.elapsed(since: $0, now: now) } ?? "Not yet"
+            value: since.map { Self.elapsed(since: $0, now: now) } ?? String(localized: "Not yet")
         )
     }
 
     private var diaper: some View {
         let kind = summary.lastDiaperKind ?? .wet
         return WatchGlanceColumn(
-            label: summary.lastDiaperKind?.label ?? "Diaper",
+            label: summary.lastDiaperKind?.label ?? String(localized: "Diaper"),
             symbol: kind.symbolName,
             kind: kind,
-            value: summary.lastDiaperAt.map { Self.elapsed(since: $0, now: now) } ?? "Not yet"
+            value: summary.lastDiaperAt.map { Self.elapsed(since: $0, now: now) } ?? String(localized: "Not yet")
         )
     }
 
     private var sleep: some View {
         let asleep = summary.runningSleepStart
         return WatchGlanceColumn(
-            label: asleep != nil ? "Asleep" : "Awake",
+            label: asleep != nil ? String(localized: "Asleep") : String(localized: "Awake"),
             symbol: asleep != nil ? EventKind.sleep.symbolName : "sun.max.fill",
             kind: .sleep,
-            value: (asleep ?? summary.lastWokeAt).map { Self.elapsed(since: $0, now: now) } ?? "Not yet"
+            value: (asleep ?? summary.lastWokeAt).map { Self.elapsed(since: $0, now: now) } ?? String(localized: "Not yet")
         )
     }
 
     /// "just now", "12m", "2h 14m".
     static func elapsed(since date: Date, now: Date) -> String {
         let seconds = now.timeIntervalSince(date)
-        return seconds < 60 ? "just now" : Format.compactDuration(seconds)
+        return seconds < 60 ? String(localized: "just now") : Format.compactDuration(seconds)
     }
 }
 
@@ -228,7 +239,6 @@ struct WatchConfirmationBanner: View {
                         .contentShape(AppTheme.buttonShape)
                 }
                 .buttonStyle(WatchTapStyle(fill: AppTheme.actionFill))
-                .accessibilityHint("Removes this entry")
                     .accessibilityHint("Removes this entry")
             }
         }

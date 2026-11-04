@@ -215,7 +215,7 @@ private struct RootView: View {
                 set: { if !$0 { events.arrivedSharedChild = nil } }
             )
         ) {
-            Button("Move \(Format.count(separateLogCount, "entry", "entries"))") {
+            Button(String(localized: "Move \(separateLogCount) entry")) {
                 if let shared = events.arrivedSharedChild, let separateLog {
                     events.moveEvents(from: separateLog, into: shared)
                 }
@@ -223,7 +223,7 @@ private struct RootView: View {
             }
             Button("Keep them separate", role: .cancel) { events.arrivedSharedChild = nil }
         } message: {
-            Text("You logged on this phone before joining \(events.arrivedSharedChild?.displayName ?? "the shared")'s log. Moving them lets everyone see them, and removes your separate copy.")
+            Text(joiningExistingLogMessage)
         }
         #if DEBUG
         .overlay(alignment: .top) {
@@ -232,6 +232,13 @@ private struct RootView: View {
             }
         }
         #endif
+    }
+
+    private var joiningExistingLogMessage: String {
+        if let child = events.arrivedSharedChild {
+            return String(localized: "You logged on this phone before joining \(child.localizedDisplayName)'s log. Moving them lets everyone see them, and removes your separate copy.")
+        }
+        return String(localized: "You logged on this phone before joining the shared's log. Moving them lets everyone see them, and removes your separate copy.")
     }
 
     private var hasSharedChild: Bool {
@@ -560,10 +567,10 @@ private enum HomeTab: String, CaseIterable, Identifiable {
 
     func label(isPro: Bool) -> String {
         switch self {
-        case .log: "Log"
-        case .history: "History"
-        case .reports: isPro ? "Reports" : "Upgrade"
-        case .settings: "Settings"
+        case .log: String(localized: "Log")
+        case .history: String(localized: "History")
+        case .reports: isPro ? String(localized: "Reports") : String(localized: "Upgrade")
+        case .settings: String(localized: "Settings")
         }
     }
 

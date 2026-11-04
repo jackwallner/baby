@@ -11,9 +11,9 @@ enum CloudSyncProblem: String, Equatable, Sendable {
     var message: String {
         switch self {
         case .iCloudFull:
-            "Your iCloud storage is full, so new entries stay on this iPhone until there is room."
+            String(localized: "Your iCloud storage is full, so new entries stay on this iPhone until there is room.")
         case .signedOut:
-            "Sign in to iCloud in the Settings app to keep this log in step with your other devices."
+            String(localized: "Sign in to iCloud in the Settings app to keep this log in step with your other devices.")
         }
     }
 
