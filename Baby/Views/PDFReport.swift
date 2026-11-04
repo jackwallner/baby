@@ -240,6 +240,13 @@ enum PDFReport {
         var detail: String? = nil
     }
 
+    /// "WEIGHT, SEP 9". Stat labels are capitals, like the rest of the row.
+    static func weightStatLabel(_ date: Date?) -> String {
+        guard let date else { return String(localized: "WEIGHT") }
+        let shortDate = date.formatted(.dateTime.month(.abbreviated).day()).localizedUppercase
+        return String(localized: "WEIGHT, \(shortDate)")
+    }
+
     private static func stats(for report: SummaryReport) -> [Stat] {
         let shortDate = Date.FormatStyle.dateTime.month(.abbreviated).day()
         var all: [Stat] = [
@@ -257,7 +264,7 @@ enum PDFReport {
         all.append(Stat(kind: .sleep, value: report.averageSleepSeconds >= 60 ? Format.compactDuration(report.averageSleepSeconds) : "\u{2014}", label: String(localized: "SLEEP / DAY"),
                         detail: report.longestSleepSeconds >= 60 ? String(localized: "longest stretch \(Format.compactDuration(report.longestSleepSeconds))") : nil))
         all.append(Stat(kind: .weight, value: report.latestWeight.map { Format.grams($0) } ?? "\u{2014}",
-                        label: report.latestWeightDate.map { String(localized: "weight, \($0.formatted(shortDate))") } ?? String(localized: "weight"),
+                        label: weightStatLabel(report.latestWeightDate),
                         detail: report.weightChangeDescription ?? String(localized: "no weigh-ins in this range")))
         return all.filter { report.tracked.contains($0.kind) }
     }

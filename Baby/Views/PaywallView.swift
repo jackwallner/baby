@@ -232,7 +232,7 @@ struct BabyPaywallView: View {
                     Text(selected.babyPackageKind == .lifetime
                          ? "One payment · Never renews"
                          : ConversionCopy.billedNote(
-                            trialLabel: selected.babyIntroOfferLabel,
+                            trial: selected.babyIntroOffer,
                             eligibleForTrial: store.isEligibleForIntroOffer(selected)
                          ))
                     .font(.caption)
@@ -291,7 +291,7 @@ struct BabyPaywallView: View {
             return String(localized: "\(selected.babyPriceLabel). One-time purchase, no subscription and nothing renews. \(Self.hedge)")
         }
         let billing = ConversionCopy.disclosure(
-            trialLabel: selected.babyIntroOfferLabel,
+            trial: selected.babyIntroOffer,
             priceLabel: selected.babyPriceLabel,
             eligibleForTrial: store.isEligibleForIntroOffer(selected)
         )

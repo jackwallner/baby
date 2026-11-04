@@ -224,7 +224,7 @@ struct WetControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: AppGroup.WidgetKind.wetControl, provider: LogControlProvider(kind: .wet)) { result in
             ControlWidgetButton(action: LogEventIntent(what: .wet)) {
-                Label("Log \(EventKind.wet.label.lowercased())", systemImage: EventKind.wet.symbolName)
+                Label(EventKind.wet.logLabel, systemImage: EventKind.wet.symbolName)
             } actionLabel: { isActive in
                 ControlConfirmation(kind: .wet, isActive: isActive, result: result)
             }
@@ -239,7 +239,7 @@ struct DirtyControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: AppGroup.WidgetKind.dirtyControl, provider: LogControlProvider(kind: .dirty)) { result in
             ControlWidgetButton(action: LogEventIntent(what: .dirty)) {
-                Label("Log \(EventKind.dirty.label.lowercased())", systemImage: EventKind.dirty.symbolName)
+                Label(EventKind.dirty.logLabel, systemImage: EventKind.dirty.symbolName)
             } actionLabel: { isActive in
                 ControlConfirmation(kind: .dirty, isActive: isActive, result: result)
             }

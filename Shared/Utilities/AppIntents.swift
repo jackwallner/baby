@@ -64,7 +64,7 @@ struct LogEventIntent: LiveActivityIntent {
         // Action button or Siri says so rather than log something invisible.
         let kind = what.loggedKind ?? .sleep
         if !TrackedKinds.current.contains(kind) {
-            throw WidgetSaveError(message: String(localized: "\(kind.lowercaseLabel) is turned off in Baby Tracker's Settings, so nothing was logged."))
+            throw WidgetSaveError(message: kind.turnedOffMessage)
         }
 #if BABY_WIDGET
         // A widget button runs here, inside the widget extension, so the
@@ -113,7 +113,7 @@ struct LogEventIntent: LiveActivityIntent {
             Self.queueUpload(created: [event], changed: [], child: child)
             if let id = event.id { WidgetUndo(eventID: id, kind: kind, loggedAt: now, childID: child.id).store() }
             WidgetCenter.shared.reloadAllTimelines()
-            return String(localized: "Logged a \(kind.lowercaseLabel) diaper.")
+            return kind.loggedDiaperDialog
         case .sleep:
             let running = persistence.runningEvents(.sleep, for: child, in: context)
             if !running.isEmpty {
@@ -179,7 +179,7 @@ struct LogEventIntent: LiveActivityIntent {
     func log(in store: EventStore, at now: Date) throws -> String {
         let kind = what.loggedKind ?? .sleep
         guard TrackedKinds.current.contains(kind) else {
-            throw WidgetSaveError(message: String(localized: "\(kind.lowercaseLabel) is turned off in Baby Tracker's Settings, so nothing was logged."))
+            throw WidgetSaveError(message: kind.turnedOffMessage)
         }
         guard store.child != nil else {
             throw WidgetSaveError(message: String(localized: "Open Baby Tracker once to set up your baby first."))
@@ -203,7 +203,7 @@ struct LogEventIntent: LiveActivityIntent {
                 throw WidgetSaveError(message: String(localized: "I couldn't save that diaper. Please try again."))
             }
             store.offerWidgetUndo(for: event)
-            return String(localized: "Logged a \(eventKind.lowercaseLabel) diaper.")
+            return eventKind.loggedDiaperDialog
         case .sleep:
             if let sleep = store.runningSleep {
                 guard store.stopRunning(.sleep, at: now) else {
@@ -313,15 +313,20 @@ enum LogChoice: String, AppEnum {
 
     var loggedDialog: String {
         switch self {
-        case .wet, .dirty: String(localized: "Logged a \(loggedKind?.lowercaseLabel ?? "") diaper.")
+        case .wet: EventKind.wet.loggedDiaperDialog
+        case .dirty: EventKind.dirty.loggedDiaperDialog
         case .sleep: WidgetUndo.load()?.reopensTimer == true ? String(localized: "Sleep ended.") : String(localized: "Sleep started.")
         default: feedDialog
         }
     }
 
     var feedDialog: String {
-        guard let feedSide else { return String(localized: "Logged a feed.") }
-        return String(localized: "Logged a feed, \(feedSide.label).")
+        switch feedSide {
+        case .left: String(localized: "Logged a feed, left.")
+        case .right: String(localized: "Logged a feed, right.")
+        case .bottle: String(localized: "Logged a feed, bottle.")
+        case nil: String(localized: "Logged a feed.")
+        }
     }
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("Log"))

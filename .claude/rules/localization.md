@@ -21,9 +21,17 @@ is approved. Do not add `CFBundleLocalizations` early.
 Use whole sentences and complete labels as catalog keys. Computed `String`
 values must use `String(localized:)`; SwiftUI literals can stay in their local
 view APIs. Do not build sentences from translated fragments. Use catalog plural
-variations for count phrases, and `Format.pluralForm(_:)` when code needs to
-choose a separate localized noun label. Keep the format arguments and plural
-forms in sync with the source key.
+variations for count phrases, and `Format.unitLabel(_:count:)` when a count is
+drawn apart from its word. A variation holds only what the host string does not:
+either the host is just `%#@n@` and the variation is the whole phrase, or the
+host keeps the surrounding text and the variation is the count and its noun. A
+fractional average stays a `Double` argument (`%lf` in the key, `lg` in the
+substitution), so the catalog can choose its plural form. Keep the format
+arguments and plural forms in sync with the source key.
+
+A side, a trial length or a lowercase word is never interpolated into a sentence:
+each case gets its own key, so a language can inflect it. `measurement` keeps the
+unit it is given (`.providedUnit`, medium style).
 
 Use Foundation formatters for dates, numbers, units and durations. Prices come
 from StoreKit. Translate stored defaults only when displaying them. Never
@@ -31,6 +39,7 @@ translate or rewrite event values, CloudKit fields, share titles, analytics
 keys, intent identifiers or CSV headers. User-entered notes remain verbatim.
 
 Run `python3 Tools/Localization/check.py` after changing user-facing copy. It
-checks source keys, English catalog entries, plural format arguments, and raw
-returned or ternary strings. `BabyTests/LocalizationTests.swift` checks that
-English plural forms are present in the app bundle.
+checks source keys, English catalog entries, plural format arguments, variations
+that repeat their host text, spliced fragments, unit options, and raw returned or
+ternary strings. `BabyTests/LocalizationTests.swift` pins the expanded English for
+plurals, units, durations and casing against the app bundle.

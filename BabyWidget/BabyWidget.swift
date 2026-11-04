@@ -118,7 +118,7 @@ struct BabyNowWidgetView: View {
         case .wet: s.todayWet
         default: s.todayDirty
         }
-        let unit = kind == .feed ? Format.feedUnit(value) : kind.lowercaseLabel
+        let unit = Format.unitLabel(kind, count: value)
         return Text(value.formatted(.number)).font(.title2.weight(.semibold)).foregroundStyle(AppTheme.color(for: kind))
             + Text(" \(unit)").font(.caption).foregroundStyle(AppTheme.ink2)
     }

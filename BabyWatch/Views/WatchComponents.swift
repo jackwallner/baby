@@ -48,15 +48,24 @@ struct WatchLogGrid: View {
         }
     }
 
+    private func feedButtonLabel(_ side: FeedSide, next: Bool) -> String {
+        switch (side, next) {
+        case (.left, true): String(localized: "Feed, Left, next")
+        case (.left, false): String(localized: "Feed, Left")
+        case (.right, true): String(localized: "Feed, Right, next")
+        case (.right, false): String(localized: "Feed, Right")
+        case (.bottle, true): String(localized: "Feed, Bottle, next")
+        case (.bottle, false): String(localized: "Feed, Bottle")
+        }
+    }
+
     private func feedButton(_ side: FeedSide) -> some View {
         // The other breast after a breastfeed, the bottle again after a bottle.
         let next = at == nil && !summary.feedSides.isEmpty && side == summary.suggestedSide
         return button(side.label, symbol: nil, kind: .feed, emphasized: next) {
             store.log(.feed, side: side, at: at ?? .now)
         }
-        .accessibilityLabel(next
-            ? String(localized: "Feed, \(side.label), next")
-            : String(localized: "Feed, \(side.label)"))
+        .accessibilityLabel(feedButtonLabel(side, next: next))
         // No double-tap side to guess when the last feed named none.
         .primaryGesture(next)
     }

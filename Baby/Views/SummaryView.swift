@@ -686,15 +686,12 @@ struct ReportChart: View {
             }
             return String(localized: "About \(SummaryView.decimal(report.averageFeedsPerDay)) a day, \(latestFeeds) on \(latestDate).")
         case .diapers:
-            let wet = SummaryView.decimal(report.averageWetPerDay)
-            let dirty = SummaryView.decimal(report.averageDirtyPerDay)
-            let wetWord = EventKind.wet.lowercaseLabel
-            let dirtyWord = EventKind.dirty.lowercaseLabel
-            if report.tracked.contains(.wet), report.tracked.contains(.dirty) {
-                return String(localized: "About \(wet) \(wetWord) and \(dirty) \(dirtyWord) a day.")
-            }
-            if report.tracked.contains(.wet) { return String(localized: "About \(wet) \(wetWord) a day.") }
-            return String(localized: "About \(dirty) \(dirtyWord) a day.")
+            return diaperTakeaway(
+                wetAverage: oneDecimal(report.averageWetPerDay),
+                dirtyAverage: oneDecimal(report.averageDirtyPerDay),
+                tracked: report.tracked,
+                words: .current
+            )
         case .sleep:
             guard report.longestSleepSeconds > 0 else { return String(localized: "No sleep logged in this range.") }
             let longest = Format.compactDuration(report.longestSleepSeconds)
@@ -702,6 +699,24 @@ struct ReportChart: View {
             if isToday { return String(localized: "Longest \(longest) in this range, \(latestLongest) today.") }
             return String(localized: "Longest \(longest) in this range, \(latestLongest) on \(latestDate).")
         }
+    }
+
+    /// The numbers stay numbers, so the catalog picks the plural form each
+    /// average needs and prints it with the locale's decimal mark.
+    static func diaperTakeaway(wetAverage: Double, dirtyAverage: Double, tracked: TrackedKinds, words: DiaperWords) -> String {
+        switch (tracked.contains(.wet), tracked.contains(.dirty), words) {
+        case (true, true, .peePoop): String(localized: "About \(wetAverage) pee and \(dirtyAverage) poop a day.")
+        case (true, true, .wetDirty): String(localized: "About \(wetAverage) wet and \(dirtyAverage) dirty a day.")
+        case (true, false, .peePoop): String(localized: "About \(wetAverage) pee a day.")
+        case (true, false, .wetDirty): String(localized: "About \(wetAverage) wet a day.")
+        case (false, _, .peePoop): String(localized: "About \(dirtyAverage) poop a day.")
+        case (false, _, .wetDirty): String(localized: "About \(dirtyAverage) dirty a day.")
+        }
+    }
+
+    /// The same rounding as `SummaryView.decimal`, kept as a number.
+    private static func oneDecimal(_ value: Double) -> Double {
+        (value * 10).rounded(.toNearestOrEven) / 10
     }
 }
 

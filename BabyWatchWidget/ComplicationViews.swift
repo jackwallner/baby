@@ -263,7 +263,7 @@ struct LogDiaperView: View {
             Image(systemName: kind.symbolName)
                 .font(.title3.weight(.semibold))
                 .widgetAccentable()
-                .widgetLabel { Text(String(localized: "Log \(kind.lowercaseLabel)")) }
+                .widgetLabel { Text(kind.logLabel) }
         default:
             ZStack {
                 AccessoryWidgetBackground()

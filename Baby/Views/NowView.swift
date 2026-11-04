@@ -606,7 +606,7 @@ private struct NowStatusCard: View {
             }
             let sides = summary.isFeeding ? summary.runningSides : summary.feedSides
             let label: String? = switch sides.count {
-            case 1: sides[0] == .bottle ? String(localized: "Bottle") : String(localized: "\(sides[0].label) breast")
+            case 1: sides[0].breastLabel
             default: FeedSide.label(for: sides)
             }
             let time = Format.time(date)
@@ -631,8 +631,8 @@ private struct NowStatusCard: View {
         case .feed:
             if let nextSide = summary.nextSideLine { return String(localized: "\(summary.feedLine(now: now)). \(nextSide)") }
             return summary.feedLine(now: now)
-        case .diaper: summary.diaperLine(now: now)
-        case .sleep: summary.awakeLine(now: now)
+        case .diaper: return summary.diaperLine(now: now)
+        case .sleep: return summary.awakeLine(now: now)
         }
     }
 }
@@ -740,11 +740,7 @@ private struct TodayTotalsView: View {
     }
 
     private func unit(_ kind: EventKind, count: Int) -> String {
-        switch kind {
-        case .feed: Format.feedUnit(count)
-        case .sleep: String(localized: "sleep")
-        default: kind.lowercaseLabel
-        }
+        Format.unitLabel(kind, count: count)
     }
 }
 
@@ -816,7 +812,7 @@ private struct HourStrip: View {
             for (index, hour) in filled.enumerated() {
                 let next = index + 1 < filled.count ? filled[index + 1] : nil
                 guard next != hour + 1 else { continue }
-                spans.append(start == hour ? label(hour) : "\(label(start)) to \(label(hour + 1))")
+                spans.append(start == hour ? label(hour) : String(localized: "\(label(start)) to \(label(hour + 1))"))
                 start = next ?? hour
             }
             let spokenHours = spans.joined(separator: ", ")

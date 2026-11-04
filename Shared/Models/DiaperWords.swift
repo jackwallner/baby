@@ -47,6 +47,30 @@ extension EventKind {
         }
     }
 
+    /// Said when a shortcut asks for a button the family turned off.
+    var turnedOffMessage: String {
+        switch self {
+        case .feed: String(localized: "Feed is turned off in Baby Tracker's Settings, so nothing was logged.")
+        case .wet: DiaperWords.current == .peePoop
+            ? String(localized: "Pee is turned off in Baby Tracker's Settings, so nothing was logged.")
+            : String(localized: "Wet is turned off in Baby Tracker's Settings, so nothing was logged.")
+        case .dirty: DiaperWords.current == .peePoop
+            ? String(localized: "Poop is turned off in Baby Tracker's Settings, so nothing was logged.")
+            : String(localized: "Dirty is turned off in Baby Tracker's Settings, so nothing was logged.")
+        case .sleep: String(localized: "Sleep is turned off in Baby Tracker's Settings, so nothing was logged.")
+        case .weight: String(localized: "Weight is turned off in Baby Tracker's Settings, so nothing was logged.")
+        }
+    }
+
+    /// The spoken reply for a logged diaper.
+    var loggedDiaperDialog: String {
+        switch self {
+        case .wet: DiaperWords.current == .peePoop ? String(localized: "Logged a pee diaper.") : String(localized: "Logged a wet diaper.")
+        case .dirty: DiaperWords.current == .peePoop ? String(localized: "Logged a poop diaper.") : String(localized: "Logged a dirty diaper.")
+        default: String(localized: "Logged a feed.")
+        }
+    }
+
     var logLabel: String {
         switch self {
         case .feed: String(localized: "Log feed")

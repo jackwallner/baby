@@ -56,7 +56,7 @@ struct WatchTodayView: View {
                         .font(.system(.title3, design: .rounded).weight(.semibold))
                         .monospacedDigit()
                         .foregroundStyle(AppTheme.ink)
-                    Text(kind == .feed ? Format.feedUnit(count) : kind.lowercaseLabel)
+                    Text(Format.unitLabel(kind, count: count))
                         .font(.caption2)
                         .foregroundStyle(AppTheme.ink2)
                         .lineLimit(1)

@@ -17,6 +17,10 @@ UI_FUNCS = {
     "Summary", "IntentDescription", "LocalizedStringResource", "SharePreview", "LabeledContent",
     "accessibilityAction",
 }
+# A Double reaches the catalog as %lf; %lg prints 5.5 and 6 rather than 6.000000.
+SPEC_ALIASES = {"lg": "lf"}
+# Translated fragments and case changes interpolated into a localized sentence.
+SPLICE_RE = re.compile(r"\bsides?(?:\[\d+\])?\.label\b|\blowercaseLabel\b|\btrialLabel\b|\.lowercased\(\)|\.uppercased\(\)")
 PLIST_TARGETS = ["Baby", "BabyWidget", "BabyWatch", "BabyWatchWidget"]
 RAW_RETURN_EXCEPTIONS = {
     # Stable fallback used in the persistent CloudKit share title.
@@ -192,20 +196,20 @@ def scan(path: Path):
 
 
 def loose(key: str) -> str:
-    return re.sub(r"%(?:\d+\$)?(?:lld|@)", "%*", key)
+    return re.sub(r"%(?:\d+\$)?(?:lld|lf|@)", "%*", key)
 
 
 def specs(value: str, substitutions=None):
     found = []
     automatic = 0
     substitutions = substitutions or {}
-    pattern = r"%(?:(\d+)\$)?(lld|@|%)|%#@(\w+)@|(%arg)"
+    pattern = r"%(?:(\d+)\$)?(lld|lf|@|%)|%#@(\w+)@|(%arg)"
     for match in re.finditer(pattern, value):
         if match.group(2) == "%":
             continue
         if match.group(3):
             sub = substitutions.get(match.group(3), {})
-            found.append((sub.get("argNum"), sub.get("formatSpecifier")))
+            found.append((sub.get("argNum"), SPEC_ALIASES.get(sub.get("formatSpecifier"), sub.get("formatSpecifier"))))
         elif match.group(4):
             sub = next(iter(substitutions.values()), {})
             found.append((sub.get("argNum"), sub.get("formatSpecifier")))
@@ -222,8 +226,15 @@ def raw_source_key(parts):
         if kind == "lit":
             out.append(value.replace("%", "%%") if has_interp else value)
         else:
-            out.append("%lld" if is_integer_expression(value) else "%@")
+            if is_double_expression(value):
+                out.append("%lf")
+            else:
+                out.append("%lld" if is_integer_expression(value) else "%@")
     return "".join(out)
+
+
+def is_double_expression(expression: str) -> bool:
+    return bool(re.search(r"\b(?:wet|dirty)Average\b", expression))
 
 
 def is_integer_expression(expression: str) -> bool:
@@ -298,6 +309,59 @@ def raw_copy_problems():
     return problems
 
 
+def substitution_problems(key: str, loc: dict):
+    """A plural variation must not repeat text its host string already has."""
+    problems = []
+    substitutions = loc.get("substitutions")
+    if not substitutions:
+        return problems
+    host = loc.get("stringUnit", {}).get("value", "")
+    host_words = set(re.findall(r"[^\W\d_]{2,}", re.sub(r"%(?:\d+\$)?(?:#@\w+@|lld|lf|lg|@)", " ", host)))
+    for name, sub in substitutions.items():
+        plural = sub.get("variations", {}).get("plural", {})
+        if not {"one", "other"} <= set(plural):
+            problems.append(f'"{key}" substitution {name} needs one and other')
+        for category, form in plural.items():
+            value = form["stringUnit"]["value"]
+            if re.search(r"%(?:\d+\$)?(?:@|lld|lf|lg)", value):
+                problems.append(f'"{key}" {category} form "{value}" repeats an argument; use only %arg')
+            repeated = host_words & set(re.findall(r"[^\W\d_]{2,}", value.replace("%arg", " ")))
+            if repeated:
+                problems.append(f'"{key}" {category} form "{value}" repeats {sorted(repeated)} from "{host}"')
+    return problems
+
+
+def splice_problems():
+    problems = []
+    for directory in DIRS:
+        root = ROOT / directory
+        if not root.exists():
+            continue
+        for path in sorted(root.rglob("*.swift")):
+            rel = path.relative_to(ROOT).as_posix()
+            for line, context, parts in scan(path):
+                for kind, value in parts:
+                    if kind == "interp" and SPLICE_RE.search(value):
+                        problems.append(f"{rel}:{line}: {value} is spliced into a localized sentence ({context})")
+    return problems
+
+
+def unit_problems():
+    problems = []
+    for directory in DIRS:
+        root = ROOT / directory
+        if not root.exists():
+            continue
+        for path in sorted(root.rglob("*.swift")):
+            rel = path.relative_to(ROOT).as_posix()
+            src = path.read_text()
+            if "MeasurementFormatter()" in src and ".providedUnit" not in src:
+                problems.append(f"{rel}: MeasurementFormatter must keep the unit it is given (.providedUnit)")
+            if "UnitMass(symbol" in src:
+                problems.append(f"{rel}: use UnitMass.pounds and friends, not a custom UnitMass")
+    return problems
+
+
 def validate_catalog(path: Path, problems):
     if not path.exists():
         problems.append(f"missing catalog: {path.relative_to(ROOT)}")
@@ -321,6 +385,7 @@ def validate_catalog(path: Path, problems):
         if loc is None:
             problems.append(f'{path.relative_to(ROOT)}: "{key}" missing en')
             continue
+        problems.extend(f"{path.relative_to(ROOT)}: {problem}" for problem in substitution_problems(key, loc))
         want = specs(key)
         if "variations" in loc:
             values = [unit["stringUnit"]["value"] for unit in loc["variations"].get("plural", {}).values()]
@@ -357,6 +422,8 @@ def main():
             if english != value:
                 problems.append(f'{target}/Info.plist: "{key}" is missing or differs from its English catalog value')
     problems.extend(raw_copy_problems())
+    problems.extend(splice_problems())
+    problems.extend(unit_problems())
     for problem in problems:
         print(problem)
     print(f"{len(shared_catalog)} keys, {len(LANGS)} translated languages, {len(problems)} problems")

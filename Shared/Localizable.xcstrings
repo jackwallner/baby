@@ -73,13 +73,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ / %arg day"
+                      "value": "%arg day"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ / %arg days"
+                      "value": "%arg days"
                     }
                   }
                 }
@@ -106,13 +106,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ / %arg month"
+                      "value": "%arg month"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ / %arg months"
+                      "value": "%arg months"
                     }
                   }
                 }
@@ -139,13 +139,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ / %arg week"
+                      "value": "%arg week"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ / %arg weeks"
+                      "value": "%arg weeks"
                     }
                   }
                 }
@@ -172,13 +172,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ / %arg year"
+                      "value": "%arg year"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ / %arg years"
+                      "value": "%arg years"
                     }
                   }
                 }
@@ -254,24 +254,200 @@
         }
       }
     },
-    "%@ after the %@. %@": {
+    "%@ after the %lld-day free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ after the %@. %@"
+            "value": "%1$@ after the %#@n@ free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-day"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-day"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "%@ after the %@. Auto-renews unless cancelled at least 24 hours before the trial ends.": {
+    "%@ after the %lld-day free trial. Auto-renews unless cancelled at least 24 hours before the trial ends.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ after the %@. Auto-renews unless cancelled at least 24 hours before the trial ends."
+            "value": "%1$@ after the %#@n@ free trial. Auto-renews unless cancelled at least 24 hours before the trial ends."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-day"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-day"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%@ after the %lld-month free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ after the %#@n@ free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-month"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-month"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%@ after the %lld-month free trial. Auto-renews unless cancelled at least 24 hours before the trial ends.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ after the %#@n@ free trial. Auto-renews unless cancelled at least 24 hours before the trial ends."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-month"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-month"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%@ after the %lld-year free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ after the %#@n@ free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-year"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-year"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%@ after the %lld-year free trial. Auto-renews unless cancelled at least 24 hours before the trial ends.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ after the %#@n@ free trial. Auto-renews unless cancelled at least 24 hours before the trial ends."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-year"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-year"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -283,17 +459,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ ago"
-          }
-        }
-      }
-    },
-    "%@ breast": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ breast"
           }
         }
       }
@@ -320,17 +485,6 @@
         }
       }
     },
-    "%@ included · Cancel anytime": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ included · Cancel anytime"
-          }
-        }
-      }
-    },
     "%@ is off in Settings": {
       "extractionState": "manual",
       "localizations": {
@@ -338,17 +492,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ is off in Settings"
-          }
-        }
-      }
-    },
-    "%@ is turned off in Baby Tracker's Settings, so nothing was logged.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ is turned off in Baby Tracker's Settings, so nothing was logged."
           }
         }
       }
@@ -436,13 +579,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ per %arg day"
+                      "value": "%arg day"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ per %arg days"
+                      "value": "%arg days"
                     }
                   }
                 }
@@ -469,13 +612,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ per %arg month"
+                      "value": "%arg month"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ per %arg months"
+                      "value": "%arg months"
                     }
                   }
                 }
@@ -502,13 +645,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ per %arg week"
+                      "value": "%arg week"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ per %arg weeks"
+                      "value": "%arg weeks"
                     }
                   }
                 }
@@ -535,13 +678,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ per %arg year"
+                      "value": "%arg year"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "%1$@ per %arg years"
+                      "value": "%arg years"
                     }
                   }
                 }
@@ -826,6 +969,17 @@
         }
       }
     },
+    "%@. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
+          }
+        }
+      }
+    },
     "%@. One-time purchase, no subscription and nothing renews. %@": {
       "extractionState": "manual",
       "localizations": {
@@ -887,7 +1041,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ complete day"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -920,7 +1074,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ day"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -953,7 +1107,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ day with nothing logged is left out."
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -986,7 +1140,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ dirty"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1013,13 +1167,46 @@
         }
       }
     },
+    "%lld dirty label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@n@"
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "dirty"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "dirty"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld entry": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ entry"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1052,7 +1239,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ feed"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1079,13 +1266,46 @@
         }
       }
     },
+    "%lld feed label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@n@"
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "feed"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "feeds"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld feeds": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ feeds"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1118,7 +1338,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ partial or unlogged day"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1151,7 +1371,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ partial or unlogged day left out."
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1184,7 +1404,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ pee"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1211,13 +1431,13 @@
         }
       }
     },
-    "%lld plural category": {
+    "%lld pee label": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ plural category"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1228,13 +1448,13 @@
                   "one": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "one %arg"
+                      "value": "pee"
                     }
                   },
                   "other": {
                     "stringUnit": {
                       "state": "translated",
-                      "value": "other %arg"
+                      "value": "pee"
                     }
                   }
                 }
@@ -1250,7 +1470,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ poop"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1268,6 +1488,39 @@
                     "stringUnit": {
                       "state": "translated",
                       "value": "%arg poop"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld poop label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@n@"
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "poop"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "poop"
                     }
                   }
                 }
@@ -1305,7 +1558,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%#@n@ wet"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -1323,6 +1576,39 @@
                     "stringUnit": {
                       "state": "translated",
                       "value": "%arg wet"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld wet label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@n@"
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "wet"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "wet"
                     }
                   }
                 }
@@ -1376,6 +1662,39 @@
         }
       }
     },
+    "%lld-day free trial included · Cancel anytime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@n@ free trial included · Cancel anytime"
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-day"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-day"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld-month free trial": {
       "extractionState": "manual",
       "localizations": {
@@ -1387,6 +1706,39 @@
         }
       }
     },
+    "%lld-month free trial included · Cancel anytime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@n@ free trial included · Cancel anytime"
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-month"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-month"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld-year free trial": {
       "extractionState": "manual",
       "localizations": {
@@ -1394,6 +1746,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld-year free trial"
+          }
+        }
+      }
+    },
+    "%lld-year free trial included · Cancel anytime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%#@n@ free trial included · Cancel anytime"
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-year"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg-year"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1695,28 +2080,6 @@
         }
       }
     },
-    "About %@ %@ a day.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About %@ %@ a day."
-          }
-        }
-      }
-    },
-    "About %@ %@ and %@ %@ a day.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "About %@ %@ and %@ %@ a day."
-          }
-        }
-      }
-    },
     "About %@ a bottle": {
       "extractionState": "manual",
       "localizations": {
@@ -1746,6 +2109,244 @@
           "stringUnit": {
             "state": "translated",
             "value": "About %@ a day, %@ today."
+          }
+        }
+      }
+    },
+    "About %lf dirty a day.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %#@n@ a day."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lg",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg dirty"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg dirty"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "About %lf pee a day.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %#@n@ a day."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lg",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg pee"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg pee"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "About %lf pee and %lf poop a day.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %#@first@ and %#@second@ a day."
+          },
+          "substitutions": {
+            "first": {
+              "argNum": 1,
+              "formatSpecifier": "lg",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg pee"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg pee"
+                    }
+                  }
+                }
+              }
+            },
+            "second": {
+              "argNum": 2,
+              "formatSpecifier": "lg",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg poop"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg poop"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "About %lf poop a day.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %#@n@ a day."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lg",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg poop"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg poop"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "About %lf wet a day.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %#@n@ a day."
+          },
+          "substitutions": {
+            "n": {
+              "argNum": 1,
+              "formatSpecifier": "lg",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg wet"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg wet"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "About %lf wet and %lf dirty a day.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About %#@first@ and %#@second@ a day."
+          },
+          "substitutions": {
+            "first": {
+              "argNum": 1,
+              "formatSpecifier": "lg",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg wet"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg wet"
+                    }
+                  }
+                }
+              }
+            },
+            "second": {
+              "argNum": 2,
+              "formatSpecifier": "lg",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg dirty"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg dirty"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1992,24 +2593,13 @@
         }
       }
     },
-    "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions."
-          }
-        }
-      }
-    },
     "Averages use %lld complete day.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Averages use %#@n@ complete day."
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -3191,6 +3781,17 @@
         }
       }
     },
+    "Dirty is turned off in Baby Tracker's Settings, so nothing was logged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dirty is turned off in Baby Tracker's Settings, so nothing was logged."
+          }
+        }
+      }
+    },
     "Dish soap": {
       "extractionState": "manual",
       "localizations": {
@@ -3598,6 +4199,17 @@
         }
       }
     },
+    "Feed is turned off in Baby Tracker's Settings, so nothing was logged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed is turned off in Baby Tracker's Settings, so nothing was logged."
+          }
+        }
+      }
+    },
     "Feed logged. Add a side, optional": {
       "extractionState": "manual",
       "localizations": {
@@ -3642,17 +4254,6 @@
         }
       }
     },
-    "Feed · %@ logged": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feed · %@ logged"
-          }
-        }
-      }
-    },
     "Feed · %@ · %@": {
       "extractionState": "manual",
       "localizations": {
@@ -3664,24 +4265,57 @@
         }
       }
     },
-    "Feed, %@": {
+    "Feed · Bottle logged": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Feed, %@"
+            "value": "Feed · Bottle logged"
           }
         }
       }
     },
-    "Feed, %@, next": {
+    "Feed · Left logged": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Feed, %@, next"
+            "value": "Feed · Left logged"
+          }
+        }
+      }
+    },
+    "Feed · Right logged": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed · Right logged"
+          }
+        }
+      }
+    },
+    "Feed, Bottle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed, Bottle"
+          }
+        }
+      }
+    },
+    "Feed, Bottle, next": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed, Bottle, next"
           }
         }
       }
@@ -3697,6 +4331,17 @@
         }
       }
     },
+    "Feed, Left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed, Left"
+          }
+        }
+      }
+    },
     "Feed, left": {
       "extractionState": "manual",
       "localizations": {
@@ -3704,6 +4349,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Feed, left"
+          }
+        }
+      }
+    },
+    "Feed, Left, next": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed, Left, next"
           }
         }
       }
@@ -3719,6 +4375,17 @@
         }
       }
     },
+    "Feed, Right": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed, Right"
+          }
+        }
+      }
+    },
     "Feed, right": {
       "extractionState": "manual",
       "localizations": {
@@ -3726,6 +4393,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Feed, right"
+          }
+        }
+      }
+    },
+    "Feed, Right, next": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feed, Right, next"
           }
         }
       }
@@ -4566,13 +5244,24 @@
         }
       }
     },
-    "Last feed started at %@. Start on %@.": {
+    "Last feed started at %@. Start on Left.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last feed started at %@. Start on %@."
+            "value": "Last feed started at %@. Start on Left."
+          }
+        }
+      }
+    },
+    "Last feed started at %@. Start on Right.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last feed started at %@. Start on Right."
           }
         }
       }
@@ -4617,6 +5306,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Left"
+          }
+        }
+      }
+    },
+    "Left breast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left breast"
           }
         }
       }
@@ -5116,24 +5816,46 @@
         }
       }
     },
-    "Logged a %@ diaper.": {
+    "Logged a dirty diaper.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logged a %@ diaper."
+            "value": "Logged a dirty diaper."
           }
         }
       }
     },
-    "Logged a feed, %@.": {
+    "Logged a feed, bottle.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Logged a feed, %@."
+            "value": "Logged a feed, bottle."
+          }
+        }
+      }
+    },
+    "Logged a feed, left.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logged a feed, left."
+          }
+        }
+      }
+    },
+    "Logged a feed, right.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logged a feed, right."
           }
         }
       }
@@ -5145,6 +5867,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Logged a feed."
+          }
+        }
+      }
+    },
+    "Logged a pee diaper.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logged a pee diaper."
+          }
+        }
+      }
+    },
+    "Logged a poop diaper.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logged a poop diaper."
+          }
+        }
+      }
+    },
+    "Logged a wet diaper.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logged a wet diaper."
           }
         }
       }
@@ -5534,6 +6289,17 @@
         }
       }
     },
+    "ml": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ml"
+          }
+        }
+      }
+    },
     "Monthly": {
       "extractionState": "manual",
       "localizations": {
@@ -5562,7 +6328,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Move %#@n@ entry"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -6293,6 +7059,17 @@
         }
       }
     },
+    "oz": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "oz"
+          }
+        }
+      }
+    },
     "PAY ONCE": {
       "extractionState": "manual",
       "localizations": {
@@ -6370,6 +7147,17 @@
         }
       }
     },
+    "Pee is turned off in Baby Tracker's Settings, so nothing was logged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pee is turned off in Baby Tracker's Settings, so nothing was logged."
+          }
+        }
+      }
+    },
     "People and leaving": {
       "extractionState": "manual",
       "localizations": {
@@ -6443,6 +7231,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Poop diaper"
+          }
+        }
+      }
+    },
+    "Poop is turned off in Baby Tracker's Settings, so nothing was logged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poop is turned off in Baby Tracker's Settings, so nothing was logged."
           }
         }
       }
@@ -6733,6 +7532,17 @@
         }
       }
     },
+    "Right breast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Right breast"
+          }
+        }
+      }
+    },
     "Right now": {
       "extractionState": "manual",
       "localizations": {
@@ -6806,6 +7616,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "SLEEP / DAY"
+          }
+        }
+      }
+    },
+    "Sleep is turned off in Baby Tracker's Settings, so nothing was logged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep is turned off in Baby Tracker's Settings, so nothing was logged."
+          }
+        }
+      }
+    },
+    "Start on Left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start on Left"
+          }
+        }
+      }
+    },
+    "Start on Right": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start on Right"
           }
         }
       }
@@ -7235,17 +8078,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Start my own log instead"
-          }
-        }
-      }
-    },
-    "Start on %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start on %@"
           }
         }
       }
@@ -7762,7 +8594,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Today %#@n@ feed"
+            "value": "%#@n@"
           },
           "substitutions": {
             "n": {
@@ -8108,6 +8940,28 @@
         }
       }
     },
+    "Weight is turned off in Baby Tracker's Settings, so nothing was logged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight is turned off in Baby Tracker's Settings, so nothing was logged."
+          }
+        }
+      }
+    },
+    "WEIGHT, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WEIGHT, %@"
+          }
+        }
+      }
+    },
     "Weight, %@": {
       "extractionState": "manual",
       "localizations": {
@@ -8159,6 +9013,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wet diaper"
+          }
+        }
+      }
+    },
+    "Wet is turned off in Baby Tracker's Settings, so nothing was logged.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wet is turned off in Baby Tracker's Settings, so nothing was logged."
           }
         }
       }
@@ -8951,17 +9816,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "weight"
-          }
-        }
-      }
-    },
-    "weight, %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "weight, %@"
           }
         }
       }

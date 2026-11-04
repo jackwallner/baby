@@ -74,7 +74,7 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// "Start on Right", between feeds only: mid-feed it answers nothing.
     var nextSideLine: String? {
         guard !isFeeding, let side = nextBreastSide else { return nil }
-        return String(localized: "Start on \(side.label)")
+        return side.startOnLabel
     }
 
     /// Every side of the last feed, including from summaries that only knew one.

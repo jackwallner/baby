@@ -191,19 +191,21 @@ extension Package {
         return storeProduct.localizedPricePerWeek
     }
 
-    var babyIntroOfferLabel: String? {
+    var babyIntroOffer: TrialOffer? {
         guard let intro = storeProduct.introductoryDiscount, intro.paymentMode == .freeTrial else {
             return nil
         }
         let period = intro.subscriptionPeriod
         switch period.unit {
-        case .day: return String(localized: "\(period.value)-day free trial")
-        case .week: return String(localized: "\(period.value * 7)-day free trial")
-        case .month: return String(localized: "\(period.value)-month free trial")
-        case .year: return String(localized: "\(period.value)-year free trial")
+        case .day: return TrialOffer(count: period.value, unit: .day)
+        case .week: return TrialOffer(count: period.value * 7, unit: .day)
+        case .month: return TrialOffer(count: period.value, unit: .month)
+        case .year: return TrialOffer(count: period.value, unit: .year)
         @unknown default: return nil
         }
     }
+
+    var babyIntroOfferLabel: String? { babyIntroOffer?.label }
 }
 
 extension Offering {

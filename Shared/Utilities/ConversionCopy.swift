@@ -4,6 +4,28 @@ import Foundation
 /// the same package. Trial vs paid is eligibility, not a different product.
 /// These helpers keep every pitch surface honest when the user has already used
 /// their free trial.
+/// A free trial's length. Sentences take these raw parts, not the plan card's
+/// label, so each one carries its own trial wording in its own grammar.
+struct TrialOffer: Equatable, Sendable {
+    enum Unit: Sendable {
+        case day
+        case month
+        case year
+    }
+
+    let count: Int
+    let unit: Unit
+
+    /// The standalone label on a plan card: "7-day free trial".
+    var label: String {
+        switch unit {
+        case .day: String(localized: "\(count)-day free trial")
+        case .month: String(localized: "\(count)-month free trial")
+        case .year: String(localized: "\(count)-year free trial")
+        }
+    }
+}
+
 enum ConversionCopy {
     /// Primary button. Deliberately carries no pricing words at all: not the
     /// trial, not the price. Apple 3.1.2(c) weighs pricing elements against each
@@ -26,32 +48,37 @@ enum ConversionCopy {
 
     /// Subordinate line under the billed amount. The trial stays a visible
     /// conversion hook, but the price always leads and gets the stronger type.
-    static func billedNote(trialLabel: String?, eligibleForTrial: Bool) -> String {
-        if eligibleForTrial, let trialLabel, !trialLabel.isEmpty {
-            return String(localized: "\(trialLabel) included · Cancel anytime")
+    static func billedNote(trial: TrialOffer?, eligibleForTrial: Bool) -> String {
+        guard eligibleForTrial, let trial else { return String(localized: "Billed automatically · Cancel anytime") }
+        switch trial.unit {
+        case .day: return String(localized: "\(trial.count)-day free trial included · Cancel anytime")
+        case .month: return String(localized: "\(trial.count)-month free trial included · Cancel anytime")
+        case .year: return String(localized: "\(trial.count)-year free trial included · Cancel anytime")
         }
-        return String(localized: "Billed automatically · Cancel anytime")
     }
 
     /// Apple 3.1.2 disclosure adjacent to the purchase button.
-    static func disclosure(
-        trialLabel: String?,
-        priceLabel: String,
-        eligibleForTrial: Bool,
-        renewClause: String = String(localized: "Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
-    ) -> String {
-        if eligibleForTrial, let trialLabel, !trialLabel.isEmpty {
-            return String(localized: "\(priceLabel) after the \(trialLabel). \(renewClause)")
+    static func disclosure(trial: TrialOffer?, priceLabel: String, eligibleForTrial: Bool) -> String {
+        guard eligibleForTrial, let trial else {
+            return String(localized: "\(priceLabel). Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
         }
-        return String(localized: "\(priceLabel). \(renewClause)")
+        switch trial.unit {
+        case .day: return String(localized: "\(priceLabel) after the \(trial.count)-day free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+        case .month: return String(localized: "\(priceLabel) after the \(trial.count)-month free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+        case .year: return String(localized: "\(priceLabel) after the \(trial.count)-year free trial. Auto-renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple ID › Subscriptions.")
+        }
     }
 
     /// Compact disclosure for the trial offer sheet footer.
-    static func sheetDisclosure(trialLabel: String?, priceLabel: String, eligibleForTrial: Bool) -> String {
-        if eligibleForTrial, let trialLabel, !trialLabel.isEmpty {
-            return String(localized: "\(priceLabel) after the \(trialLabel). Auto-renews unless cancelled at least 24 hours before the trial ends.")
+    static func sheetDisclosure(trial: TrialOffer?, priceLabel: String, eligibleForTrial: Bool) -> String {
+        guard eligibleForTrial, let trial else {
+            return String(localized: "\(priceLabel). Auto-renews unless cancelled 24h before the period ends.")
         }
-        return String(localized: "\(priceLabel). Auto-renews unless cancelled 24h before the period ends.")
+        switch trial.unit {
+        case .day: return String(localized: "\(priceLabel) after the \(trial.count)-day free trial. Auto-renews unless cancelled at least 24 hours before the trial ends.")
+        case .month: return String(localized: "\(priceLabel) after the \(trial.count)-month free trial. Auto-renews unless cancelled at least 24 hours before the trial ends.")
+        case .year: return String(localized: "\(priceLabel) after the \(trial.count)-year free trial. Auto-renews unless cancelled at least 24 hours before the trial ends.")
+        }
     }
 
     /// Cancel / failure copy never blames a "trial" the user wasn't eligible for.

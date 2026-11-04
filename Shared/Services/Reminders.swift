@@ -146,9 +146,12 @@ enum Reminders {
         guard interval != .off, !summary.isFeeding, let last = summary.lastFeedAt else { return nil }
         let due = last.addingTimeInterval(interval.duration)
         guard due > now.addingTimeInterval(30) else { return nil }
-        let body = summary.nextBreastSide.map {
-            String(localized: "Last feed started at \(Format.time(last)). Start on \($0.label).")
-        } ?? String(localized: "Last feed started at \(Format.time(last)).")
+        let started = Format.time(last)
+        let body = switch summary.nextBreastSide {
+        case .left: String(localized: "Last feed started at \(started). Start on Left.")
+        case .right: String(localized: "Last feed started at \(started). Start on Right.")
+        default: String(localized: "Last feed started at \(started).")
+        }
         let title = String(localized: "\(interval.label) since \(summary.displayChildName)'s last feed")
         return Planned(id: feedID, date: due, title: title, body: body, route: nil)
     }

@@ -75,7 +75,12 @@ final class WatchStore: ObservableObject {
         let payload = WatchLogPayload(action: .log, kind: kind, side: kind == .feed ? side : nil, at: date)
         send(payload)
         if kind == .feed, let side {
-            confirm(payload, title: String(localized: "Feed · \(side.label) logged"))
+            let title = switch side {
+            case .left: String(localized: "Feed · Left logged")
+            case .right: String(localized: "Feed · Right logged")
+            case .bottle: String(localized: "Feed · Bottle logged")
+            }
+            confirm(payload, title: title)
         } else {
             confirm(payload, title: String(localized: "\(kind.label) logged"))
         }

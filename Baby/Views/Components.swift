@@ -143,8 +143,10 @@ struct SecondaryButtonStyle: ButtonStyle {
 struct SectionLabel: View {
     let text: String
 
+    var displayText: String { text.localizedUppercase }
+
     var body: some View {
-        Text(text)
+        Text(displayText)
             .font(.caption.weight(.semibold))
             .foregroundStyle(AppTheme.ink2)
             .kerning(0.6)

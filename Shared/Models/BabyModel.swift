@@ -40,6 +40,25 @@ enum FeedSide: String, CaseIterable, Codable, Sendable {
         }
     }
 
+    /// The side named on its own, as a whole label: a language can inflect
+    /// "breast" and the side together.
+    var breastLabel: String {
+        switch self {
+        case .left: String(localized: "Left breast")
+        case .right: String(localized: "Right breast")
+        case .bottle: String(localized: "Bottle")
+        }
+    }
+
+    /// "Start on Right". Nil for a bottle, which is not a side to start on.
+    var startOnLabel: String? {
+        switch self {
+        case .left: String(localized: "Start on Left")
+        case .right: String(localized: "Start on Right")
+        case .bottle: nil
+        }
+    }
+
     var shortLabel: String {
         switch self {
         case .left: String(localized: "L")
