@@ -76,17 +76,53 @@ enum PDFReport {
         },
     ]
 
-    /// The columns for the buttons this family uses, widened in proportion
-    /// so the table still spans the page.
-    private static func columns(for tracked: TrackedKinds) -> [Column] {
-        let kept = allColumns.filter { $0.kind.map(tracked.contains) ?? true }
-        let total = kept.reduce(0) { $0 + $1.width }
-        let full = allColumns.reduce(0) { $0 + $1.width }
-        return kept.map { column in
+    /// The columns for the buttons this family uses, spanning the page, and
+    /// the one text scale they share. A column grows when this report's header
+    /// or values need it, so a longer language or a day with several stool
+    /// colours is never cut off.
+    private static func table(for report: SummaryReport) -> (columns: [Column], textScale: CGFloat) {
+        let kept = allColumns.filter { $0.kind.map(report.tracked.contains) ?? true }
+        let needed = kept.enumerated().map { index, column in
+            let font = index <= 1 ? Font.cellStrong : Font.cell
+            let widest = report.days.map { measure(column.value($0), font: font).width }.max() ?? 0
+            return ceil(max(widest, measure(column.title, font: Font.columnHeader).width)) + gutter
+        }
+        let fit = fittedWidths(
+            preferred: kept.map(\.width),
+            needed: needed,
+            total: allColumns.reduce(0) { $0 + $1.width },
+            gutter: gutter
+        )
+        let columns = zip(kept, fit.widths).map { column, width in
             var column = column
-            column.width *= full / total
+            column.width = width
             return column
         }
+        return (columns, fit.textScale)
+    }
+
+    /// Keeps the preferred proportions when they hold everything; otherwise
+    /// every column gets what it needs and shares what is left. If the page is
+    /// too narrow even for that, the whole table's text scales down together,
+    /// so no cell ends up a different size from its neighbours.
+    static func fittedWidths(
+        preferred: [CGFloat],
+        needed: [CGFloat],
+        total: CGFloat,
+        gutter: CGFloat = 0
+    ) -> (widths: [CGFloat], textScale: CGFloat) {
+        let preferredTotal = preferred.reduce(0, +)
+        let neededTotal = needed.reduce(0, +)
+        guard preferredTotal > 0, neededTotal > 0 else { return (preferred, 1) }
+        let scaled = preferred.map { $0 * total / preferredTotal }
+        if zip(scaled, needed).allSatisfy({ $0 >= $1 }) { return (scaled, 1) }
+        if neededTotal <= total {
+            let spare = total - neededTotal
+            return (zip(needed, preferred).map { $0 + spare * $1 / preferredTotal }, 1)
+        }
+        let gutters = gutter * CGFloat(needed.count)
+        let scale = (total - gutters) / (neededTotal - gutters)
+        return (needed.map { ($0 - gutter) * scale + gutter }, scale)
     }
 
     // MARK: - Rendering
@@ -98,6 +134,7 @@ enum PDFReport {
         return renderer.pdfData { context in
             var rows = report.days[...]
             var page = 1
+            let table = table(for: report)
             repeat {
                 context.beginPage()
                 var y = margin
@@ -105,16 +142,16 @@ enum PDFReport {
                     y = drawHeader(report, isExample: isExample, at: y)
                     y = drawStats(report, at: y)
                 }
-                y = drawTableHeader(columns(for: report.tracked), at: y)
+                y = drawTableHeader(table.columns, textScale: table.textScale, at: y)
                 while let day = rows.first, y + 18 < pageSize.height - margin - 40 {
-                    drawRow(day, columns: columns(for: report.tracked), at: y, striped: (report.days.count - rows.count) % 2 == 1)
+                    drawRow(day, columns: table.columns, textScale: table.textScale, at: y, striped: (report.days.count - rows.count) % 2 == 1)
                     y += 18
                     rows = rows.dropFirst()
                 }
                 if rows.isEmpty {
                     // The key and the notes' first lines move to a new page
                     // rather than run into the footer.
-                    let needed: CGFloat = 32 + (report.notes.isEmpty ? 0 : 56)
+                    let needed = keyHeight(report) + 8 + (report.notes.isEmpty ? 0 : 56)
                     if y + needed > pageSize.height - margin - 40 {
                         drawFooter(report, page: page, isExample: isExample)
                         page += 1
@@ -226,8 +263,9 @@ enum PDFReport {
             }
         }
         var bottom = y + CGFloat((stats.count + perRow - 1) / max(perRow, 1)) * rowHeight
-        draw(report.averagesNote, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: bottom))
-        bottom += 16
+        let noteWidth = pageSize.width - margin * 2
+        drawWrapped(report.averagesNote, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: bottom), width: noteWidth)
+        bottom += wrappedHeight(report.averagesNote, font: Font.footer, width: noteWidth) + 6
         rule(at: bottom)
         return bottom + 16
     }
@@ -268,10 +306,10 @@ enum PDFReport {
         return all.filter { report.tracked.contains($0.kind) }
     }
 
-    private static func drawTableHeader(_ columns: [Column], at y: CGFloat) -> CGFloat {
+    private static func drawTableHeader(_ columns: [Column], textScale: CGFloat, at y: CGFloat) -> CGFloat {
         var x = margin
         for column in columns {
-            draw(column.title, font: Font.columnHeader, color: Ink.secondary,
+            draw(column.title, font: Font.columnHeader.withSize(Font.columnHeader.pointSize * textScale), color: Ink.secondary,
                  at: CGPoint(x: x, y: y), width: column.width - gutter, alignment: column.alignment)
             x += column.width
         }
@@ -279,7 +317,7 @@ enum PDFReport {
         return y + 19
     }
 
-    private static func drawRow(_ day: SummaryReport.Day, columns: [Column], at y: CGFloat, striped: Bool) {
+    private static func drawRow(_ day: SummaryReport.Day, columns: [Column], textScale: CGFloat, at y: CGFloat, striped: Bool) {
         if striped {
             Ink.band.setFill()
             UIBezierPath(rect: CGRect(x: margin - 4, y: y - 3, width: pageSize.width - margin * 2 + 8, height: 18)).fill()
@@ -288,7 +326,8 @@ enum PDFReport {
         let empty = !day.hasEntries
         for (index, column) in columns.enumerated() {
             let value = column.value(day)
-            let font = index <= 1 ? Font.cellStrong : Font.cell
+            let base = index <= 1 ? Font.cellStrong : Font.cell
+            let font = base.withSize(base.pointSize * textScale)
             let color: UIColor = if empty && index > 1 || value.isEmpty {
                 Ink.faint
             } else if !day.isComplete && index > 1 {
@@ -336,33 +375,44 @@ enum PDFReport {
         let left = isExample
             ? String(localized: "Example page from Baby Tracker. The numbers are made up.")
             : String(localized: "Kept in Baby Tracker by the parent. A log of what was recorded, not medical advice.")
-        draw(left, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
         let right = String(localized: "\(Date.now.formatted(.dateTime.month(.abbreviated).day().year())) · page \(page.formatted(.number))")
+        let leftWidth = pageSize.width - margin * 2 - measure(right, font: Font.footer).width - 12
+        draw(left, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y), width: leftWidth)
         draw(right, font: Font.footer, color: Ink.secondary,
              at: CGPoint(x: margin, y: y), width: pageSize.width - margin * 2, alignment: .right)
     }
 
     /// What the columns a parent could misread mean, and what the asterisk is.
-    private static func drawKey(_ report: SummaryReport, at y: CGFloat) -> CGFloat {
+    private static func keyLines(_ report: SummaryReport) -> [String] {
         let tracked = report.tracked
-        let copy: String
+        var lines: [String]
         switch (tracked.contains(.feed), tracked.contains(.sleep)) {
         case (true, true):
-            copy = String(localized: "Gap: longest time between two logged feeds, start to start. Longest: longest single sleep. Only what was logged is counted.")
+            lines = [String(localized: "Gap: longest time between two logged feeds, start to start. Longest: longest single sleep. Only what was logged is counted.")]
         case (true, false):
-            copy = String(localized: "Gap: longest time between two logged feeds, start to start. Only what was logged is counted.")
+            lines = [String(localized: "Gap: longest time between two logged feeds, start to start. Only what was logged is counted.")]
         case (false, true):
-            copy = String(localized: "Longest: longest single sleep. Only what was logged is counted.")
+            lines = [String(localized: "Longest: longest single sleep. Only what was logged is counted.")]
         case (false, false):
-            copy = String(localized: "Only what was logged is counted.")
+            lines = [String(localized: "Only what was logged is counted.")]
         }
-        var y = y
-        draw(copy, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
-        y += 12
         if report.days.contains(where: { !$0.isComplete }) {
-            draw(String(localized: "* Not in the averages: today so far, the day logging began, or a day with nothing logged."),
-                 font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
-            y += 12
+            lines.append(String(localized: "* Not in the averages: today so far, the day logging began, or a day with nothing logged."))
+        }
+        return lines
+    }
+
+    private static func keyHeight(_ report: SummaryReport) -> CGFloat {
+        let width = pageSize.width - margin * 2
+        return keyLines(report).reduce(0) { $0 + wrappedHeight($1, font: Font.footer, width: width) + 3 }
+    }
+
+    private static func drawKey(_ report: SummaryReport, at y: CGFloat) -> CGFloat {
+        let width = pageSize.width - margin * 2
+        var y = y
+        for line in keyLines(report) {
+            drawWrapped(line, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y), width: width)
+            y += wrappedHeight(line, font: Font.footer, width: width) + 3
         }
         return y
     }
@@ -404,10 +454,15 @@ enum PDFReport {
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = alignment
         paragraph.lineBreakMode = .byTruncatingTail
+        let available = width ?? (pageSize.width - point.x - margin)
+        // A number in a report for a doctor shrinks before it loses a digit.
+        let measured = measure(text, font: font).width
+        // The 3% margin keeps text laid out at the new size from just missing the width.
+        let font = measured > available ? font.withSize(max(font.pointSize * available / measured * 0.97, 6)) : font
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font, .foregroundColor: color, .paragraphStyle: paragraph,
         ]
-        let size = CGSize(width: width ?? (pageSize.width - point.x - margin), height: font.lineHeight + 2)
+        let size = CGSize(width: available, height: font.lineHeight + 2)
         text.draw(in: CGRect(origin: point, size: size), withAttributes: attributes)
     }
 

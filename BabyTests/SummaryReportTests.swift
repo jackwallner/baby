@@ -242,4 +242,26 @@ final class SummaryReportTests: XCTestCase {
         let data = PDFReport.render(report())
         XCTAssertGreaterThan(data.count, 1000)
     }
+
+    func testPDFColumnsKeepTheirProportionsWhenEverythingFits() {
+        let fit = PDFReport.fittedWidths(preferred: [50, 50], needed: [40, 45], total: 200)
+        XCTAssertEqual(fit.widths, [100, 100])
+        XCTAssertEqual(fit.textScale, 1)
+    }
+
+    func testPDFColumnsGrowForALongerLanguageAndStillSpanThePage() {
+        let fit = PDFReport.fittedWidths(preferred: [100, 100, 100], needed: [130, 60, 60], total: 300)
+        XCTAssertGreaterThanOrEqual(fit.widths[0], 130)
+        XCTAssertGreaterThanOrEqual(fit.widths[1], 60)
+        XCTAssertEqual(fit.widths.reduce(0, +), 300, accuracy: 0.001)
+        XCTAssertEqual(fit.textScale, 1)
+    }
+
+    func testPDFTextScalesTogetherWhenThePageIsTooNarrow() {
+        let fit = PDFReport.fittedWidths(preferred: [100, 100], needed: [306, 106], total: 212, gutter: 6)
+        XCTAssertEqual(fit.textScale, 0.5, accuracy: 0.001)
+        XCTAssertEqual(fit.widths[0], 156, accuracy: 0.001)
+        XCTAssertEqual(fit.widths[1], 56, accuracy: 0.001)
+        XCTAssertEqual(fit.widths.reduce(0, +), 212, accuracy: 0.001)
+    }
 }

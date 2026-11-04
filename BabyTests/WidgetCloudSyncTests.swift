@@ -57,7 +57,13 @@ final class WidgetCloudSyncTests: XCTestCase {
         XCTAssertNil(record["CD_endedAt"], "a feed with no end has no end field")
     }
 
-    func testSharedBabyWritesToTheSharedDatabase() {
+    func testSharedBabyWritesToTheSharedDatabase() throws {
+        // CKContainer traps in a host app with no iCloud entitlement, such as
+        // the unsigned build on a GitHub Mac.
+        try XCTSkipIf(
+            FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroup.id) == nil,
+            "needs a signed host app"
+        )
         let container = CKContainer(identifier: AppGroup.cloudKitContainerID)
         var shared = target
         shared.isShared = true

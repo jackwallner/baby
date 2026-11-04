@@ -10951,7 +10951,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "FLÄSCHCHEN"
+            "value" : "FLASCHE"
           }
         },
         "en" : {
@@ -15641,7 +15641,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "MAHLZEITEN"
+            "value" : "MAHLZ."
           }
         },
         "en" : {
@@ -22291,7 +22291,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Höchstwert für %@ in diesem Zeitraum: %@ am %@."
+            "value" : "Längste Phase in diesem Zeitraum: %@, %@ am %@."
           }
         },
         "en" : {
@@ -22303,19 +22303,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El período más largo de %@ en este intervalo: %@, el %@."
+            "value" : "El período más largo en este intervalo: %@; %@ el %@."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ più lungo in questo periodo, %@ il %@."
+            "value" : "Il più lungo in questo periodo: %@, %@ il %@."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maior %@ neste período, %@ em %@."
+            "value" : "O maior neste período: %@, %@ em %@."
           }
         }
       }
@@ -22326,7 +22326,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Höchstwert für %@ in diesem Zeitraum: %@ heute."
+            "value" : "Längste Phase in diesem Zeitraum: %@, heute %@."
           }
         },
         "en" : {
@@ -22338,19 +22338,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El período más largo de %@ en este intervalo: %@, hoy."
+            "value" : "El período más largo en este intervalo: %@; hoy, %@."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ più lungo in questo periodo, %@ oggi."
+            "value" : "Il più lungo in questo periodo: %@, oggi %@."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maior %@ neste período, %@ hoje."
+            "value" : "O maior neste período: %@, hoje %@."
           }
         }
       }
@@ -26024,7 +26024,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abgepumpte Muttermilch"
+            "value" : "Abgepumpte Milch"
           }
         },
         "en" : {
