@@ -32,8 +32,8 @@ struct HistoryView: View {
 
         var label: String {
             switch self {
-            case .list: "List"
-            case .calendar: "Calendar"
+            case .list: String(localized: "List")
+            case .calendar: String(localized: "Calendar")
             }
         }
     }
@@ -380,7 +380,8 @@ private struct MonthGrid: View {
 
     private func accessibilityLabel(_ day: Date, kinds: [EventKind]) -> String {
         let date = day.formatted(.dateTime.weekday(.wide).month(.wide).day())
-        return kinds.isEmpty ? date : "\(date), \(kinds.map(\.label).joined(separator: ", "))"
+        guard !kinds.isEmpty else { return date }
+        return String(localized: "\(date), \(kinds.map(\.label).joined(separator: ", "))")
     }
 
     private func week(_ cells: [AnyView]) -> some View {

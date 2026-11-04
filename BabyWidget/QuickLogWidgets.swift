@@ -29,7 +29,7 @@ struct QuickLogWidgetView: View {
                 undoFace
             }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Undo \(kind.label.lowercased())")
+                .accessibilityLabel(kind.undoLabel)
                 .accessibilityValue("Logged just now")
         } else {
             logButton
@@ -109,7 +109,7 @@ struct QuickLogWidgetView: View {
             logFace
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Log \(kind.label.lowercased())")
+        .accessibilityLabel(kind.logLabel)
         .accessibilityValue(detail)
     }
 
@@ -152,11 +152,11 @@ struct QuickLogWidgetView: View {
     private var detail: String {
         switch kind {
         case .feed:
-            if s.isFeeding { return "Feeding now" }
-            guard let last = s.lastFeedAt else { return "Tap to log" }
-            return "Last \(Format.ago(last, now: entry.date))"
-        case .wet: return "\(s.todayWet) \(period)"
-        case .dirty: return "\(s.todayDirty) \(period)"
+            if s.isFeeding { return String(localized: "Feeding now") }
+            guard let last = s.lastFeedAt else { return String(localized: "Tap to log") }
+            return String(localized: "Last \(Format.ago(last, now: entry.date))")
+        case .wet: return String(localized: "\(s.todayWet) \(period)")
+        case .dirty: return String(localized: "\(s.todayDirty) \(period)")
         default: return ""
         }
     }
@@ -164,9 +164,9 @@ struct QuickLogWidgetView: View {
     /// "today", "since 6 AM", "in 24 hours": the phone's totals window.
     private var period: String {
         switch s.window {
-        case .last24Hours: "in 24 hours"
-        case .day(0): "today"
-        case .day(let hour): "since \(TotalsWindow.hourLabel(hour))"
+        case .last24Hours: String(localized: "in 24 hours")
+        case .day(0): String(localized: "today")
+        case .day(let hour): String(localized: "since \(TotalsWindow.hourLabel(hour))")
         }
     }
 }
@@ -184,19 +184,19 @@ private func quickLogConfiguration(kind: EventKind, widgetKind: String, name: St
 
 struct QuickFeedWidget: Widget {
     var body: some WidgetConfiguration {
-        quickLogConfiguration(kind: .feed, widgetKind: AppGroup.WidgetKind.quickFeed, name: "Feed button")
+        quickLogConfiguration(kind: .feed, widgetKind: AppGroup.WidgetKind.quickFeed, name: String(localized: "Feed button"))
     }
 }
 
 struct QuickWetWidget: Widget {
     var body: some WidgetConfiguration {
-        quickLogConfiguration(kind: .wet, widgetKind: AppGroup.WidgetKind.quickWet, name: "\(EventKind.wet.label) button")
+        quickLogConfiguration(kind: .wet, widgetKind: AppGroup.WidgetKind.quickWet, name: String(localized: "\(EventKind.wet.label) button"))
     }
 }
 
 struct QuickDirtyWidget: Widget {
     var body: some WidgetConfiguration {
-        quickLogConfiguration(kind: .dirty, widgetKind: AppGroup.WidgetKind.quickDirty, name: "\(EventKind.dirty.label) button")
+        quickLogConfiguration(kind: .dirty, widgetKind: AppGroup.WidgetKind.quickDirty, name: String(localized: "\(EventKind.dirty.label) button"))
     }
 }
 
@@ -257,7 +257,7 @@ private struct ControlConfirmation: View {
     let isActive: Bool
     let result: WidgetLogResult?
 
-    private var noun: String { kind == .feed ? "feed" : "\(kind.label.lowercased()) diaper" }
+    private var noun: String { kind.diaperNoun }
 
     var body: some View {
         if !TrackedKinds.current.contains(kind) {
@@ -265,7 +265,7 @@ private struct ControlConfirmation: View {
         } else if isActive {
             Label("Logging \(noun)", systemImage: kind.symbolName)
         } else if let result {
-            Label(result.succeeded ? "Logged \(noun)" : "Not logged. Open Baby Tracker.",
+            Label(result.succeeded ? String(localized: "Logged \(noun)") : String(localized: "Not logged. Open Baby Tracker."),
                   systemImage: result.succeeded ? "checkmark" : "exclamationmark.circle")
         } else {
             Label("Log \(noun)", systemImage: kind.symbolName)

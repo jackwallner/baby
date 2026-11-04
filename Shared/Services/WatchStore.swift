@@ -74,8 +74,11 @@ final class WatchStore: ObservableObject {
         guard summary.tracked.contains(kind) else { return }
         let payload = WatchLogPayload(action: .log, kind: kind, side: kind == .feed ? side : nil, at: date)
         send(payload)
-        let what = kind == .feed ? (side.map { "Feed · \($0.label)" } ?? "Feed") : kind.label
-        confirm(payload, title: "\(what) logged")
+        if kind == .feed, let side {
+            confirm(payload, title: String(localized: "Feed · \(side.label) logged"))
+        } else {
+            confirm(payload, title: String(localized: "\(kind.label) logged"))
+        }
     }
 
     /// Sleep if nothing is running, otherwise Wake. A backdated Wake from
@@ -85,11 +88,11 @@ final class WatchStore: ObservableObject {
         if let start = summary.runningSleepStart {
             let payload = WatchLogPayload(action: .stopSleep, kind: .sleep, at: date >= start ? date : max(.now, start))
             send(payload)
-            confirm(payload, title: "Woke up")
+            confirm(payload, title: String(localized: "Woke up"))
         } else {
             let payload = WatchLogPayload(action: .startSleep, kind: .sleep, at: date)
             send(payload)
-            confirm(payload, title: "Sleep started")
+            confirm(payload, title: String(localized: "Sleep started"))
         }
     }
 
@@ -112,7 +115,7 @@ final class WatchStore: ObservableObject {
         guard let confirmation, confirmation.canUndo, let target = lastTap, target.id == confirmation.id else { return }
         lastTap = nil
         send(target.undo)
-        show(Confirmation(id: UUID(), kind: target.kind, title: "Removed", canUndo: false), for: 2)
+        show(Confirmation(id: UUID(), kind: target.kind, title: String(localized: "Removed"), canUndo: false), for: 2)
     }
 
     func dismissConfirmation() {

@@ -75,13 +75,13 @@ struct ReportPreviews: View {
         .id(feature)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(feature.title). \(feature.pitchLine)")
-        .accessibilityValue(isExample ? "Example with made-up numbers" : "Preview of your baby's log, unlocks with Baby+")
+        .accessibilityValue(isExample ? String(localized: "Example with made-up numbers") : String(localized: "Preview of your baby's log, unlocks with Baby+"))
         .accessibilityIdentifier("paywall.preview.\(feature.rawValue)")
     }
 
     /// "Example" beside the title, or the one lock over the blurred part.
     private var badge: some View {
-        Label(isExample ? "Example" : "Baby+", systemImage: isExample ? "doc.text.magnifyingglass" : "lock.fill")
+        Label(isExample ? String(localized: "Example") : String(localized: "Baby+"), systemImage: isExample ? "doc.text.magnifyingglass" : "lock.fill")
             .font(.caption.weight(.semibold))
             .foregroundStyle(isExample ? AppTheme.ink2 : AppTheme.ink)
             .padding(.horizontal, AppTheme.tightSpacing)
@@ -181,9 +181,15 @@ struct ReportPreviews: View {
     /// The newest entries as the spreadsheet will have them, or made-up ones.
     private func rows(_ report: SummaryReport) -> [[String]] {
         if isExample {
+            let calendar = Calendar.current
+            let today = calendar.startOfDay(for: .now)
+            func time(_ hour: Int, _ minute: Int) -> String {
+                let date = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: today) ?? today
+                return date.formatted(date: .omitted, time: .shortened)
+            }
             let example: [(EventKind, String, String)] = [
-                (.feed, "7:40 AM", "left"), (.wet, "7:10 AM", ""), (.dirty, "6:55 AM", "yellow"),
-                (.sleep, "4:20 AM", "2h 10m"), (.feed, "3:50 AM", "bottle"),
+                (.feed, time(7, 40), "left"), (.wet, time(7, 10), ""), (.dirty, time(6, 55), "yellow"),
+                (.sleep, time(4, 20), Format.compactDuration(2 * 3600 + 10 * 60)), (.feed, time(3, 50), "bottle"),
             ]
             return example.filter { report.tracked.contains($0.0) }.map { [$0.1, $0.0.rawValue, $0.2] }
         }

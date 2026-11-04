@@ -59,7 +59,7 @@ struct BabyLiveActivity: Widget {
                     .foregroundStyle(AppTheme.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-                Text("\(context.state.childName ?? context.attributes.childName) · since \(Format.time(context.state.startedAt))")
+                Text(String(localized: "\(context.state.childName ?? context.attributes.childName) · since \(Format.time(context.state.startedAt))"))
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
                     .lineLimit(1)
@@ -79,7 +79,7 @@ struct BabyLiveActivity: Widget {
     private func stopButton(_ context: ActivityViewContext<BabyActivityAttributes>) -> some View {
         if #available(iOS 17.2, *) {
             Button(intent: StopRunningIntent(kind: kind(context), startedAt: context.state.startedAt, childID: context.attributes.childID)) {
-                Text(kind(context) == EventKind.sleep.rawValue ? "Wake" : "Stop")
+                Text(kind(context) == EventKind.sleep.rawValue ? String(localized: "Wake") : String(localized: "Stop"))
                     .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
                     .fixedSize(horizontal: true, vertical: false)
@@ -99,9 +99,11 @@ struct BabyLiveActivity: Widget {
     }
 
     private func title(_ context: ActivityViewContext<BabyActivityAttributes>) -> String {
-        if kind(context) == EventKind.sleep.rawValue { return "Asleep" }
-        if let sides = FeedSide.label(for: FeedSide.decode(context.state.kind == nil ? context.attributes.side : context.state.side)) { return "Feeding · \(sides)" }
-        return "Feeding"
+        if kind(context) == EventKind.sleep.rawValue { return String(localized: "Asleep") }
+        if let sides = FeedSide.label(for: FeedSide.decode(context.state.kind == nil ? context.attributes.side : context.state.side)) {
+            return String(localized: "Feeding · \(sides)")
+        }
+        return String(localized: "Feeding")
     }
 
     private func symbol(_ context: ActivityViewContext<BabyActivityAttributes>) -> String {

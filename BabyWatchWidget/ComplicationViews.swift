@@ -48,9 +48,9 @@ struct WatchBabyProvider: TimelineProvider {
 
 /// "just now", "12m", "2h 14m", or a dash before anything is logged.
 private func elapsed(_ since: Date?, _ now: Date) -> String {
-    guard let since else { return "–" }
+    guard let since else { return String(localized: "–") }
     let seconds = now.timeIntervalSince(since)
-    return seconds < 60 ? "now" : Format.compactDuration(seconds)
+    return seconds < 60 ? String(localized: "now") : Format.compactDuration(seconds)
 }
 
 /// The circular face every complication shares: a symbol, a big value, a caption.
@@ -104,12 +104,12 @@ struct LastFeedView: View {
         } else {
             switch family {
             case .accessoryCircular:
-                CircularFace(symbol: EventKind.feed.symbolName, value: value, caption: FeedSide.shortLabel(for: sides) ?? (running ? "feeding" : "fed"))
+                CircularFace(symbol: EventKind.feed.symbolName, value: value, caption: FeedSide.shortLabel(for: sides) ?? (running ? String(localized: "feeding") : String(localized: "fed")))
             case .accessoryCorner:
                 Image(systemName: EventKind.feed.symbolName)
                     .font(.title3.weight(.semibold))
                     .widgetAccentable()
-                    .widgetLabel { Text([value, FeedSide.shortLabel(for: sides)].compactMap { $0 }.joined(separator: " ")) }
+                    .widgetLabel { Text(feedAccessoryLabel) }
             case .accessoryInline:
                 Label(s.feedLine(now: entry.date), systemImage: EventKind.feed.symbolName)
             default:
@@ -120,11 +120,11 @@ struct LastFeedView: View {
 
     private var rectangular: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Label(running ? "Feeding" : "Last feed", systemImage: EventKind.feed.symbolName)
+            Label(running ? String(localized: "Feeding") : String(localized: "Last feed"), systemImage: EventKind.feed.symbolName)
                 .font(.headline)
                 .foregroundStyle(AppTheme.feed)
                 .widgetAccentable()
-            Text(since == nil ? "Nothing yet" : [value == "now" ? "Just now" : running ? value : "\(value) ago", FeedSide.label(for: sides)].compactMap { $0 }.joined(separator: " · "))
+            Text(feedDetail)
                 .font(.system(.body, design: .rounded).weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -137,13 +137,29 @@ struct LastFeedView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var feedDetail: String {
+        guard let since else { return String(localized: "Nothing yet") }
+        let time = entry.date.timeIntervalSince(since) < 60
+            ? String(localized: "Just now")
+            : running ? value : String(localized: "\(value) ago")
+        guard let side = FeedSide.label(for: sides) else { return time }
+        return String(localized: "\(time) · \(side)")
+    }
+
+    private var feedAccessoryLabel: String {
+        guard let side = FeedSide.shortLabel(for: sides) else { return value }
+        return String(localized: "\(value) \(side)")
+    }
+
     /// The last diaper, or a sleep that is running, or today's feeds.
     private var footer: String {
         if s.tracked.contains(.sleep), let sleep = s.sleepLine(now: entry.date) { return sleep }
         if s.tracked.tracksDiapers, let at = s.lastDiaperAt {
-            return ["Diaper \(elapsed(at, entry.date))", s.lastDiaperKind?.label].compactMap { $0 }.joined(separator: " · ")
+            let time = elapsed(at, entry.date)
+            if let label = s.lastDiaperKind?.label { return String(localized: "Diaper \(time) · \(label)") }
+            return String(localized: "Diaper \(time)")
         }
-        return "Today \(Format.count(s.todayFeeds, "feed"))"
+        return String(localized: "Today \(s.todayFeeds) feed")
     }
 }
 
@@ -166,12 +182,12 @@ struct LastDiaperView: View {
         } else {
             switch family {
             case .accessoryCircular:
-                CircularFace(symbol: kind.symbolName, value: value, caption: s.lastDiaperKind?.label.lowercased() ?? "diaper")
+                CircularFace(symbol: kind.symbolName, value: value, caption: s.lastDiaperKind?.lowercaseLabel ?? String(localized: "diaper"))
             case .accessoryCorner:
                 Image(systemName: kind.symbolName)
                     .font(.title3.weight(.semibold))
                     .widgetAccentable()
-                    .widgetLabel { Text([value, s.lastDiaperKind?.label].compactMap { $0 }.joined(separator: " ")) }
+                    .widgetLabel { Text(diaperAccessoryLabel) }
             case .accessoryInline:
                 Label(s.diaperLine(now: entry.date), systemImage: kind.symbolName)
             default:
@@ -186,7 +202,7 @@ struct LastDiaperView: View {
                 .font(.headline)
                 .foregroundStyle(AppTheme.color(for: kind))
                 .widgetAccentable()
-            Text(s.lastDiaperAt == nil ? "Nothing yet" : [value == "now" ? "Just now" : "\(value) ago", s.lastDiaperKind?.label].compactMap { $0 }.joined(separator: " · "))
+            Text(diaperDetail)
                 .font(.system(.body, design: .rounded).weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -199,12 +215,24 @@ struct LastDiaperView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var diaperDetail: String {
+        guard let at = s.lastDiaperAt else { return String(localized: "Nothing yet") }
+        let time = entry.date.timeIntervalSince(at) < 60 ? String(localized: "Just now") : String(localized: "\(value) ago")
+        guard let label = s.lastDiaperKind?.label else { return time }
+        return String(localized: "\(time) · \(label)")
+    }
+
+    private var diaperAccessoryLabel: String {
+        guard let label = s.lastDiaperKind?.label else { return value }
+        return String(localized: "\(value) \(label)")
+    }
+
     /// "Today 5 pee · 2 poop", only the kinds this family tracks.
     private var today: String {
         var parts: [String] = []
-        if s.tracked.contains(.wet) { parts.append("\(s.todayWet) \(EventKind.wet.label.lowercased())") }
-        if s.tracked.contains(.dirty) { parts.append("\(s.todayDirty) \(EventKind.dirty.label.lowercased())") }
-        return "\(s.window.title()) " + parts.joined(separator: " · ")
+        if s.tracked.contains(.wet) { parts.append(Format.diaperCount(s.todayWet, .wet)) }
+        if s.tracked.contains(.dirty) { parts.append(Format.diaperCount(s.todayDirty, .dirty)) }
+        return String(localized: "\(s.window.title()) \(parts.joined(separator: " · "))")
     }
 }
 
@@ -235,7 +263,7 @@ struct LogDiaperView: View {
             Image(systemName: kind.symbolName)
                 .font(.title3.weight(.semibold))
                 .widgetAccentable()
-                .widgetLabel { Text("Log \(kind.label.lowercased())") }
+                .widgetLabel { Text(String(localized: "Log \(kind.lowercaseLabel)")) }
         default:
             ZStack {
                 AccessoryWidgetBackground()
@@ -280,11 +308,11 @@ struct SleepToggleView: View {
             Image(systemName: asleep == nil ? EventKind.sleep.symbolName : "sun.max.fill")
                 .font(.title3.weight(.semibold))
                 .widgetAccentable()
-                .widgetLabel { Text(asleep.map { "Wake · \(elapsed($0, entry.date))" } ?? "Sleep") }
+                .widgetLabel { Text(asleep.map { String(localized: "Wake · \(elapsed($0, entry.date))") } ?? String(localized: "Sleep")) }
         default:
             if let asleep {
-                CircularFace(symbol: "sun.max.fill", value: elapsed(asleep, entry.date), caption: "Wake")
-                    .accessibilityLabel("Wake. Asleep \(elapsed(asleep, entry.date))")
+                CircularFace(symbol: "sun.max.fill", value: elapsed(asleep, entry.date), caption: String(localized: "Wake"))
+                    .accessibilityLabel(String(localized: "Wake. Asleep \(elapsed(asleep, entry.date))"))
             } else {
                 ZStack {
                     AccessoryWidgetBackground()
@@ -307,16 +335,19 @@ private struct OffFace: View {
     let kind: EventKind
     let family: WidgetFamily
 
+    private var label: String { kind.isDiaper ? String(localized: "Diapers") : kind.label }
+    private var disabledMessage: String { String(localized: "\(label) off in Settings") }
+
     var body: some View {
         switch family {
         case .accessoryCorner:
             Image(systemName: kind.symbolName)
                 .widgetLabel { Text("Off") }
         case .accessoryInline:
-            Text("\(kind.isDiaper ? "Diapers" : kind.label) off in Settings")
+            Text(disabledMessage)
         case .accessoryRectangular:
             VStack(alignment: .leading) {
-                Label(kind.isDiaper ? "Diapers" : kind.label, systemImage: kind.symbolName).font(.headline)
+                Label(label, systemImage: kind.symbolName).font(.headline)
                 Text("Off in Settings on iPhone").font(.caption2).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

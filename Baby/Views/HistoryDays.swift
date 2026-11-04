@@ -6,10 +6,10 @@ import SwiftUI
 enum DayLine {
     static func parts(_ tally: DayTally, tracked: TrackedKinds) -> [String] {
         var parts: [String] = []
-        if tracked.contains(.feed) { parts.append(Format.count(tally.feeds, "feed")) }
-        if tracked.contains(.wet) { parts.append("\(tally.wet) \(EventKind.wet.label.lowercased())") }
-        if tracked.contains(.dirty) { parts.append("\(tally.dirty) \(EventKind.dirty.label.lowercased())") }
-        if tracked.contains(.sleep), tally.sleepSeconds >= 60 { parts.append("\(Format.compactDuration(tally.sleepSeconds)) sleep") }
+        if tracked.contains(.feed) { parts.append(Format.count(tally.feeds, .feed)) }
+        if tracked.contains(.wet) { parts.append(Format.diaperCount(tally.wet, .wet)) }
+        if tracked.contains(.dirty) { parts.append(Format.diaperCount(tally.dirty, .dirty)) }
+        if tracked.contains(.sleep), tally.sleepSeconds >= 60 { parts.append(String(localized: "\(Format.compactDuration(tally.sleepSeconds)) sleep")) }
         return parts
     }
 
@@ -38,9 +38,9 @@ struct DayChartModel: Equatable {
 
         var title: String {
             switch self {
-            case .feeds: "Feeds per day"
-            case .diapers: "Diapers per day"
-            case .sleep: "Sleep per day"
+            case .feeds: String(localized: "Feeds per day")
+            case .diapers: String(localized: "Diapers per day")
+            case .sleep: String(localized: "Sleep per day")
             }
         }
 
@@ -145,7 +145,7 @@ struct DayJumpTiles: View {
                 Text(Format.dayTitle(day))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(AppTheme.ink2)
-                Text(hasEntries ? (parts.first ?? "") : "Nothing logged")
+                Text(hasEntries ? (parts.first ?? "") : String(localized: "Nothing logged"))
                     .font(.title3.weight(.bold))
                     .foregroundStyle(hasEntries ? AppTheme.ink : AppTheme.ink3)
                     .monospacedDigit()
@@ -169,8 +169,8 @@ struct DayJumpTiles: View {
         .accessibilityElement(children: .ignore)
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(Format.dayTitle(day))
-        .accessibilityValue(hasEntries ? parts.joined(separator: ", ") : "Nothing logged")
-        .accessibilityHint(hasEntries ? "Shows that day's entries" : "")
+        .accessibilityValue(hasEntries ? parts.joined(separator: ", ") : String(localized: "Nothing logged"))
+        .accessibilityHint(hasEntries ? String(localized: "Shows that day's entries") : "")
         .accessibilityIdentifier("history.jump.\(id)")
     }
 }
@@ -237,7 +237,7 @@ struct DayScrubChart: View {
                 Text(model.metric.title)
                     .font(.headline)
                     .foregroundStyle(AppTheme.ink)
-                Text(isUnlocked ? "Drag across a day to see it" : "Drag through any day with Baby+")
+                Text(isUnlocked ? String(localized: "Drag across a day to see it") : String(localized: "Drag through any day with Baby+"))
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
             }
@@ -270,7 +270,8 @@ struct DayScrubChart: View {
                 AxisGridLine()
                 AxisValueLabel {
                     if let number = value.as(Double.self) {
-                        Text(model.metric == .sleep ? "\(Int(number))h" : "\(Int(number))")
+                        let value = Int(number).formatted(.number)
+                        Text(model.metric == .sleep ? String(localized: "\(value)h") : value)
                     }
                 }
             }
