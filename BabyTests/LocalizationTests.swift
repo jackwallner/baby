@@ -181,4 +181,38 @@ final class LocalizationTests: XCTestCase {
         XCTAssertEqual(takeaway(6, 2.5, TrackedKinds(hidden: [.wet]), .peePoop), "About 2.5 poop a day.")
         XCTAssertEqual(takeaway(6, 12, TrackedKinds(hidden: [.wet]), .wetDirty), "About 12 dirty a day.")
     }
+
+    static let languages = ["de", "es", "it", "pt-BR"]
+
+    private func languageBundle(_ language: String) throws -> Bundle {
+        let hosts = [Bundle(identifier: "com.jackwallner.baby"), Bundle.main].compactMap { $0 } + Bundle.allBundles
+        for host in hosts {
+            if let path = host.path(forResource: language, ofType: "lproj"), let bundle = Bundle(path: path) {
+                return bundle
+            }
+        }
+        return try XCTUnwrap(nil as Bundle?, "\(language).lproj is missing")
+    }
+
+    func testEveryLanguageTranslatesFeedCounts() throws {
+        for language in Self.languages {
+            let host = try languageBundle(language)
+            let locale = Locale(identifier: language)
+            let one = String(localized: "\(1) feed", bundle: host, locale: locale)
+            let two = String(localized: "\(2) feed", bundle: host, locale: locale)
+            XCTAssertFalse(two.contains("#@"), "\(language): \(two)")
+            XCTAssertNotEqual(two, "2 feeds", language)
+            XCTAssertNotEqual(one, two, language)
+            XCTAssertTrue(two.contains("2"), "\(language): \(two)")
+        }
+    }
+
+    func testEveryLanguageKeepsTheDecimalInDiaperAverages() throws {
+        for language in Self.languages {
+            let host = try languageBundle(language)
+            let text = String(localized: "About \(5.5) wet a day.", bundle: host, locale: Locale(identifier: language))
+            XCTAssertFalse(text.contains("#@"), "\(language): \(text)")
+            XCTAssertTrue(text.contains("5,5") || text.contains("5.5"), "\(language): \(text)")
+        }
+    }
 }

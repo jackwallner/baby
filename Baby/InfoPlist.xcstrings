@@ -4,7 +4,31 @@
     "CFBundleDisplayName": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Tracker"
+          }
+        },
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Tracker"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Tracker"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Tracker"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Baby Tracker"
@@ -15,7 +39,31 @@
     "CFBundleName": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby"
+          }
+        },
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Baby"
@@ -26,10 +74,34 @@
     "NSCameraUsageDescription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Kamera scannt den Einladungscode auf dem Handy eines anderen Elternteils, damit du auf das Protokoll des Babys zugreifen kannst. Es wird nichts aufgenommen oder gespeichert."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The camera scans the invite code on another parent's phone so you can join their baby's log. Nothing is recorded or saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La cámara escanea el código de invitación en el teléfono de otro padre o madre para que puedas acceder al registro de su bebé. No se graba ni se guarda nada."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fotocamera scansiona il codice di invito sul telefono di un altro genitore per permetterti di accedere al diario del suo bambino. Non viene registrato né salvato nulla."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A câmera lê o código de convite no celular de outro responsável para você acessar o registro do bebê dele. Nada é gravado ou salvo."
           }
         }
       }

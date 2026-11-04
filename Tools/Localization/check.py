@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DIRS = ["Baby", "BabyWidget", "BabyWatch", "BabyWatchWidget", "Shared"]
-LANGS = []
+LANGS = ['de', 'es', 'it', 'pt-BR']
 UI_FUNCS = {
     "Text", "Button", "Label", "Section", "Toggle", "TextField", "navigationTitle",
     "accessibilityLabel", "accessibilityValue", "accessibilityHint", "alert", "DatePicker",
@@ -379,8 +379,8 @@ def validate_catalog(path: Path, problems):
             if loc is None:
                 problems.append(f'{path.relative_to(ROOT)}: "{key}" missing {lang}')
                 continue
-        if set(localizations) - {"en"}:
-            problems.append(f'{path.relative_to(ROOT)}: "{key}" has non-English localizations')
+        if extra := set(localizations) - {"en", *LANGS}:
+            problems.append(f'{path.relative_to(ROOT)}: "{key}" has unlisted languages {sorted(extra)}')
         loc = localizations.get("en")
         if loc is None:
             problems.append(f'{path.relative_to(ROOT)}: "{key}" missing en')
@@ -410,8 +410,8 @@ def main():
     for target in PLIST_TARGETS:
         info_catalog = validate_catalog(ROOT / target / "InfoPlist.xcstrings", problems)
         info = plistlib.loads((ROOT / target / "Info.plist").read_bytes())
-        if "CFBundleLocalizations" in info:
-            problems.append(f"{target}/Info.plist: do not add CFBundleLocalizations before translations ship")
+        if missing := {"en", *LANGS} - set(info.get("CFBundleLocalizations", [])):
+            problems.append(f"{target}/Info.plist: CFBundleLocalizations is missing {sorted(missing)}")
         for key, value in info.items():
             if key not in {"CFBundleDisplayName", "CFBundleName"} and not key.endswith("UsageDescription"):
                 continue

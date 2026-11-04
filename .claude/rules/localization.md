@@ -14,6 +14,8 @@ paths:
 All user-facing copy for the app, widgets, Watch, Live Activity, intents,
 notifications, accessibility, guidance and PDF belongs in
 `Shared/Localizable.xcstrings`. XcodeGen compiles that catalog into each target.
+It holds `en`, de, es, it and pt-BR. A new language goes in `CFBundleLocalizations`
+in each Info.plist, `LANGS` in `check.py` and `languages` in `LocalizationTests`.
 Each target keeps its own `InfoPlist.xcstrings` for its display name and any
 purpose strings. English is the only shipped language until a translation run
 is approved. Do not add `CFBundleLocalizations` early.

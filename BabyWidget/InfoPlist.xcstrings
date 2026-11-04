@@ -4,10 +4,34 @@
     "CFBundleDisplayName": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby-Widget"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Baby Widget"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget Baby"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget Baby"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget Baby"
           }
         }
       }
@@ -15,10 +39,34 @@
     "CFBundleName": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby-Widget"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Baby Widget"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget Baby"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget Baby"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widget Baby"
           }
         }
       }

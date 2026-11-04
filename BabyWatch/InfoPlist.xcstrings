@@ -4,7 +4,31 @@
     "CFBundleDisplayName": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Tracker"
+          }
+        },
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Tracker"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Tracker"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Tracker"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Baby Tracker"
@@ -15,7 +39,31 @@
     "CFBundleName": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Watch"
+          }
+        },
         "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Watch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Watch"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baby Watch"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Baby Watch"

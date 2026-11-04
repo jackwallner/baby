@@ -191,9 +191,8 @@ enum PDFReport {
         if let birth = report.birthDate {
             let birthDate = birth.formatted(.dateTime.month(.abbreviated).day().year())
             if let day = DateHelpers.dayOfLife(birthDate: birth, on: report.end) {
-                let lifeDay = day.formatted(.number)
                 let endDate = report.end.formatted(.dateTime.month(.abbreviated).day())
-                draw(String(localized: "\(report.tracked.headline) · born \(birthDate) · day \(lifeDay) on \(endDate)"), font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
+                draw(String(localized: "\(report.tracked.headline) · born \(birthDate) · day \(day) on \(endDate)"), font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
             } else {
                 draw(String(localized: "\(report.tracked.headline) · born \(birthDate)"), font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
             }
