@@ -38,6 +38,7 @@ enum PDFReport {
         let alignment: NSTextAlignment
         /// The button the column belongs to; nil for date, day and weight.
         var kind: EventKind? = nil
+        var isWeight = false
         let value: @Sendable (SummaryReport.Day) -> String
     }
 
@@ -46,31 +47,31 @@ enum PDFReport {
     private static let gutter: CGFloat = 6
 
     private static let allColumns: [Column] = [
-        Column(title: "DATE", width: 52, alignment: .left) {
+        Column(title: String(localized: "DATE"), width: 52, alignment: .left) {
             // The asterisk marks a day the averages leave out; the key says why.
             $0.date.formatted(.dateTime.month(.abbreviated).day()) + ($0.isComplete ? "" : "*")
         },
-        Column(title: "DAY", width: 24, alignment: .right) { $0.dayOfLife.map(String.init) ?? "" },
-        Column(title: "FEEDS", width: 38, alignment: .right, kind: .feed) { String($0.feeds) },
-        Column(title: "GAP", width: 52, alignment: .right, kind: .feed) {
+        Column(title: String(localized: "DAY"), width: 24, alignment: .right) { $0.dayOfLife?.formatted(.number) ?? "" },
+        Column(title: String(localized: "FEEDS"), width: 38, alignment: .right, kind: .feed) { $0.feeds.formatted(.number) },
+        Column(title: String(localized: "GAP"), width: 52, alignment: .right, kind: .feed) {
             $0.longestFeedGapSeconds >= 60 ? Format.compactDuration($0.longestFeedGapSeconds) : ""
         },
-        Column(title: "WET", width: 32, alignment: .right, kind: .wet) { String($0.wet) },
-        Column(title: "DIRTY", width: 38, alignment: .right, kind: .dirty) { String($0.dirty) },
-        Column(title: "BOTTLE", width: 44, alignment: .right, kind: .feed) {
+        Column(title: String(localized: "WET"), width: 32, alignment: .right, kind: .wet) { $0.wet.formatted(.number) },
+        Column(title: String(localized: "DIRTY"), width: 38, alignment: .right, kind: .dirty) { $0.dirty.formatted(.number) },
+        Column(title: String(localized: "BOTTLE"), width: 44, alignment: .right, kind: .feed) {
             $0.bottleMillilitres > 0 ? Format.millilitres($0.bottleMillilitres) : ""
         },
-        Column(title: "SLEEP", width: 56, alignment: .right, kind: .sleep) {
+        Column(title: String(localized: "SLEEP"), width: 56, alignment: .right, kind: .sleep) {
             $0.sleepSeconds >= 60 ? Format.compactDuration($0.sleepSeconds) : ""
         },
-        Column(title: "LONGEST", width: 50, alignment: .right, kind: .sleep) {
+        Column(title: String(localized: "LONGEST"), width: 50, alignment: .right, kind: .sleep) {
             $0.longestSleepSeconds >= 60 ? Format.compactDuration($0.longestSleepSeconds) : ""
         },
-        Column(title: "STOOL", width: 68, alignment: .left, kind: .dirty) {
+        Column(title: String(localized: "STOOL"), width: 68, alignment: .left, kind: .dirty) {
             let colors = Array(Set($0.stoolColors.map(\.label))).sorted()
             return colors.joined(separator: ", ")
         },
-        Column(title: "WEIGHT", width: 62, alignment: .right) {
+        Column(title: String(localized: "WEIGHT"), width: 62, alignment: .right, isWeight: true) {
             $0.weightGrams.map { Format.grams($0) } ?? ""
         },
     ]
@@ -169,8 +170,8 @@ enum PDFReport {
     private static func metadata(for report: SummaryReport) -> UIGraphicsPDFRendererFormat {
         let format = UIGraphicsPDFRendererFormat()
         format.documentInfo = [
-            kCGPDFContextTitle as String: "\(report.childName): \(report.tracked.headline.lowercased())",
-            kCGPDFContextCreator as String: "Baby Tracker",
+            kCGPDFContextTitle as String: String(localized: "\(report.childName): \(report.tracked.metadataHeadline)"),
+            kCGPDFContextCreator as String: String(localized: "Baby Tracker"),
         ]
         return format
     }
@@ -179,7 +180,7 @@ enum PDFReport {
         var y = y
         draw(report.childName, font: Font.title, color: Ink.primary, at: CGPoint(x: margin, y: y))
         if isExample {
-            let badge = "EXAMPLE, NOT YOUR BABY'S DATA"
+            let badge = String(localized: "EXAMPLE, NOT YOUR BABY'S DATA")
             let size = measure(badge, font: Font.sectionLabel)
             let rect = CGRect(x: pageSize.width - margin - size.width - 12, y: y + 4, width: size.width + 12, height: 16)
             UIColor(white: 0.92, alpha: 1).setFill()
@@ -187,16 +188,20 @@ enum PDFReport {
             draw(badge, font: Font.sectionLabel, color: Ink.secondary, at: CGPoint(x: rect.minX + 6, y: rect.minY + 3.5))
         }
         y += 30
-        var line = report.tracked.headline
         if let birth = report.birthDate {
-            line += " · born \(birth.formatted(.dateTime.month(.abbreviated).day().year()))"
+            let birthDate = birth.formatted(.dateTime.month(.abbreviated).day().year())
             if let day = DateHelpers.dayOfLife(birthDate: birth, on: report.end) {
-                line += " · day \(day) on \(report.end.formatted(.dateTime.month(.abbreviated).day()))"
+                let lifeDay = day.formatted(.number)
+                let endDate = report.end.formatted(.dateTime.month(.abbreviated).day())
+                draw(String(localized: "\(report.tracked.headline) · born \(birthDate) · day \(lifeDay) on \(endDate)"), font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
+            } else {
+                draw(String(localized: "\(report.tracked.headline) · born \(birthDate)"), font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
             }
+        } else {
+            draw(report.tracked.headline, font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
         }
-        draw(line, font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
         y += 14
-        draw("\(report.rangeLabel) · \(Format.count(report.dayCount, "day"))", font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
+        draw(String(localized: "\(report.rangeLabel) · \(Format.count(report.dayCount, .day))"), font: Font.subtitle, color: Ink.secondary, at: CGPoint(x: margin, y: y))
         y += 22
         rule(at: y)
         return y + 18
@@ -214,7 +219,7 @@ enum PDFReport {
             let top = y + CGFloat(index / perRow) * rowHeight
             draw(stat.value, font: Font.statValue, color: Ink.primary,
                  at: CGPoint(x: x, y: top), width: width - gutter, alignment: .left)
-            draw(stat.label.uppercased(), font: Font.statLabel, color: Ink.secondary,
+            draw(stat.label, font: Font.statLabel, color: Ink.secondary,
                  at: CGPoint(x: x, y: top + 19), width: width - gutter, alignment: .left)
             if let detail = stat.detail {
                 draw(detail, font: Font.statLabel, color: Ink.secondary,
@@ -238,22 +243,22 @@ enum PDFReport {
     private static func stats(for report: SummaryReport) -> [Stat] {
         let shortDate = Date.FormatStyle.dateTime.month(.abbreviated).day()
         var all: [Stat] = [
-            Stat(kind: .feed, value: oneDecimal(report.averageFeedsPerDay), label: "feeds / day",
-                 detail: report.longestFeedGapSeconds >= 60 ? "longest gap \(Format.compactDuration(report.longestFeedGapSeconds))" : nil),
+            Stat(kind: .feed, value: oneDecimal(report.averageFeedsPerDay), label: String(localized: "FEEDS / DAY"),
+                 detail: report.longestFeedGapSeconds >= 60 ? String(localized: "longest gap \(Format.compactDuration(report.longestFeedGapSeconds))") : nil),
         ]
         if report.averageBottleMillilitresPerDay > 0 {
-            all.append(Stat(kind: .feed, value: Format.millilitres(report.averageBottleMillilitresPerDay), label: "bottle / day",
-                            detail: "about \(Format.millilitres(report.averageBottleMillilitresPerFeed)) a bottle"))
+            all.append(Stat(kind: .feed, value: Format.millilitres(report.averageBottleMillilitresPerDay), label: String(localized: "BOTTLE / DAY"),
+                            detail: String(localized: "about \(Format.millilitres(report.averageBottleMillilitresPerFeed)) a bottle")))
         }
-        all.append(Stat(kind: .wet, value: oneDecimal(report.averageWetPerDay), label: "wet / day",
-                        detail: report.lowestDay(\.wet).map { "lowest day \($0.wet), \($0.date.formatted(shortDate))" }))
-        all.append(Stat(kind: .dirty, value: oneDecimal(report.averageDirtyPerDay), label: "dirty / day",
-                        detail: report.lowestDay(\.dirty).map { "lowest day \($0.dirty), \($0.date.formatted(shortDate))" }))
-        all.append(Stat(kind: .sleep, value: report.averageSleepSeconds >= 60 ? Format.compactDuration(report.averageSleepSeconds) : "—", label: "sleep / day",
-                        detail: report.longestSleepSeconds >= 60 ? "longest stretch \(Format.compactDuration(report.longestSleepSeconds))" : nil))
+        all.append(Stat(kind: .wet, value: oneDecimal(report.averageWetPerDay), label: String(localized: "WET / DAY"),
+                        detail: report.lowestDay(\.wet).map { String(localized: "lowest day \($0.wet.formatted(.number)), \($0.date.formatted(shortDate))") }))
+        all.append(Stat(kind: .dirty, value: oneDecimal(report.averageDirtyPerDay), label: String(localized: "DIRTY / DAY"),
+                        detail: report.lowestDay(\.dirty).map { String(localized: "lowest day \($0.dirty.formatted(.number)), \($0.date.formatted(shortDate))") }))
+        all.append(Stat(kind: .sleep, value: report.averageSleepSeconds >= 60 ? Format.compactDuration(report.averageSleepSeconds) : "—", label: String(localized: "SLEEP / DAY"),
+                        detail: report.longestSleepSeconds >= 60 ? String(localized: "longest stretch \(Format.compactDuration(report.longestSleepSeconds))") : nil))
         all.append(Stat(kind: .weight, value: report.latestWeight.map { Format.grams($0) } ?? "—",
-                        label: report.latestWeightDate.map { "weight, \($0.formatted(shortDate))" } ?? "weight",
-                        detail: report.weightChangeDescription ?? "no weigh-ins in this range"))
+                        label: report.latestWeightDate.map { String(localized: "weight, \($0.formatted(shortDate))") } ?? String(localized: "weight"),
+                        detail: report.weightChangeDescription ?? String(localized: "no weigh-ins in this range")))
         return all.filter { report.tracked.contains($0.kind) }
     }
 
@@ -288,7 +293,7 @@ enum PDFReport {
                 Ink.primary
             }
             // A day with nothing logged reads as a dot, never as 0 diapers.
-            draw((value.isEmpty || empty && column.title != "WEIGHT") && index > 1 ? "·" : value,
+            draw((value.isEmpty || empty && !column.isWeight) && index > 1 ? "·" : value,
                  font: font, color: color,
                  at: CGPoint(x: x, y: y), width: column.width - gutter, alignment: column.alignment)
             x += column.width
@@ -300,15 +305,16 @@ enum PDFReport {
         var y = y
         rule(at: y)
         y += 12
-        draw("NOTES", font: Font.sectionLabel, color: Ink.secondary, at: CGPoint(x: margin, y: y))
+        draw(String(localized: "NOTES"), font: Font.sectionLabel, color: Ink.secondary, at: CGPoint(x: margin, y: y))
         y += 14
         let width = pageSize.width - margin * 2
         let limit = pageSize.height - margin - 40
         for (index, note) in report.notes.enumerated() {
-            let line = "\(note.date.formatted(.dateTime.month(.abbreviated).day())) · \(note.text)"
+            let line = String(localized: "\(note.date.formatted(.dateTime.month(.abbreviated).day())) · \(note.text)")
             let height = wrappedHeight(line, font: Font.note, width: width)
             guard y + height <= limit else {
-                let rest = "\(report.notes.count - index) more in the app's History"
+                let formattedCount = (report.notes.count - index).formatted(.number)
+                let rest = String(localized: "\(formattedCount) more in the app's History")
                 draw(rest, font: Font.note, color: Ink.secondary, at: CGPoint(x: margin, y: y))
                 return y + 13
             }
@@ -322,10 +328,10 @@ enum PDFReport {
         let y = pageSize.height - margin - 16
         rule(at: y - 8)
         let left = isExample
-            ? "Example page from Baby Tracker. The numbers are made up."
-            : "Kept in Baby Tracker by the parent. A log of what was recorded, not medical advice."
+            ? String(localized: "Example page from Baby Tracker. The numbers are made up.")
+            : String(localized: "Kept in Baby Tracker by the parent. A log of what was recorded, not medical advice.")
         draw(left, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
-        let right = "\(Date.now.formatted(.dateTime.month(.abbreviated).day().year())) · page \(page)"
+        let right = String(localized: "\(Date.now.formatted(.dateTime.month(.abbreviated).day().year())) · page \(page.formatted(.number))")
         draw(right, font: Font.footer, color: Ink.secondary,
              at: CGPoint(x: margin, y: y), width: pageSize.width - margin * 2, alignment: .right)
     }
@@ -333,15 +339,22 @@ enum PDFReport {
     /// What the columns a parent could misread mean, and what the asterisk is.
     private static func drawKey(_ report: SummaryReport, at y: CGFloat) -> CGFloat {
         let tracked = report.tracked
-        var key: [String] = []
-        if tracked.contains(.feed) { key.append("Gap: longest time between two logged feeds, start to start.") }
-        if tracked.contains(.sleep) { key.append("Longest: longest single sleep.") }
-        key.append("Only what was logged is counted.")
+        let copy: String
+        switch (tracked.contains(.feed), tracked.contains(.sleep)) {
+        case (true, true):
+            copy = String(localized: "Gap: longest time between two logged feeds, start to start. Longest: longest single sleep. Only what was logged is counted.")
+        case (true, false):
+            copy = String(localized: "Gap: longest time between two logged feeds, start to start. Only what was logged is counted.")
+        case (false, true):
+            copy = String(localized: "Longest: longest single sleep. Only what was logged is counted.")
+        case (false, false):
+            copy = String(localized: "Only what was logged is counted.")
+        }
         var y = y
-        draw(key.joined(separator: " "), font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
+        draw(copy, font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
         y += 12
         if report.days.contains(where: { !$0.isComplete }) {
-            draw("* Not in the averages: today so far, the day logging began, or a day with nothing logged.",
+            draw(String(localized: "* Not in the averages: today so far, the day logging began, or a day with nothing logged."),
                  font: Font.footer, color: Ink.secondary, at: CGPoint(x: margin, y: y))
             y += 12
         }
@@ -397,6 +410,6 @@ enum PDFReport {
     }
 
     private static func oneDecimal(_ value: Double) -> String {
-        value > 0 ? String(format: "%.1f", value) : "—"
+        value > 0 ? value.formatted(.number.precision(.fractionLength(1))) : "—"
     }
 }

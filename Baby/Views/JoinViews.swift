@@ -286,7 +286,7 @@ struct InviteScannerScreen: View {
             InviteScanner(found: found) { problem = $0 }
                 .ignoresSafeArea()
             VStack(spacing: AppTheme.spacing) {
-                Text(problem?.message ?? "Point at the code on their phone")
+                Text(problem?.message ?? String(localized: "Point at the code on their phone"))
                     .font(.headline)
                     .foregroundStyle(AppTheme.ink)
                     .multilineTextAlignment(.center)
@@ -312,8 +312,8 @@ struct InviteScanner: UIViewControllerRepresentable {
 
         var message: String {
             switch self {
-            case .cameraOff: "The camera is off for Baby Tracker. Cancel, then paste the link instead."
-            case .notAnInvite: "That code isn't a Baby Tracker invite. Scan the one in their Log together screen."
+            case .cameraOff: String(localized: "The camera is off for Baby Tracker. Cancel, then paste the link instead.")
+            case .notAnInvite: String(localized: "That code isn't a Baby Tracker invite. Scan the one in their Log together screen.")
             }
         }
     }

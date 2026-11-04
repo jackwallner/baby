@@ -5,6 +5,7 @@ import Foundation
 /// phone can push it to the Watch as-is.
 struct NowSummary: Codable, Equatable, Sendable {
     var childName: String = "Baby"
+    var childNameIsFallback: Bool?
     /// Identifies the profile this summary belongs to. Optional for summaries
     /// written by older builds, and for the empty state before setup.
     var childID: UUID?
@@ -51,6 +52,11 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// The side to offer next: the other breast after a breastfeed.
     var suggestedSide: FeedSide { feedTypes.breast ? feedSides.last?.next ?? .left : .bottle }
 
+    var displayChildName: String {
+        let isFallback = childNameIsFallback ?? (childName == "Baby")
+        return isFallback ? String(localized: "Baby") : childName
+    }
+
     /// The breast to start on next: the other one from where the last
     /// breastfeed ended. A bottle in between does not change it. Nil when no
     /// recent feed named a breast, or when the newest breastfeed has no side
@@ -68,7 +74,7 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// "Start on Right", between feeds only: mid-feed it answers nothing.
     var nextSideLine: String? {
         guard !isFeeding, let side = nextBreastSide else { return nil }
-        return "Start on \(side.label)"
+        return String(localized: "Start on \(side.label)")
     }
 
     /// Every side of the last feed, including from summaries that only knew one.
@@ -97,19 +103,23 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// "Fed 2h 14m ago · Left", or "Feeding · Left · 12m" while a timed feed runs.
     func feedLine(now: Date = .now) -> String {
         if let runningFeedStart {
-            let side = FeedSide.label(for: runningSides).map { " · \($0)" } ?? ""
-            return "Feeding\(side) · \(Format.compactDuration(now.timeIntervalSince(runningFeedStart)))"
+            let side = FeedSide.label(for: runningSides)
+            let duration = Format.compactDuration(now.timeIntervalSince(runningFeedStart))
+            if let side { return String(localized: "Feeding · \(side) · \(duration)") }
+            return String(localized: "Feeding · \(duration)")
         }
-        guard let lastFeedAt else { return "No feed logged yet" }
-        let side = FeedSide.label(for: feedSides).map { " · \($0)" } ?? ""
-        return "Fed \(Format.ago(lastFeedAt, now: now))\(side)"
+        guard let lastFeedAt else { return String(localized: "No feed logged yet") }
+        let elapsed = Format.ago(lastFeedAt, now: now)
+        if let side = FeedSide.label(for: feedSides) { return String(localized: "Fed \(elapsed) · \(side)") }
+        return String(localized: "Fed \(elapsed)")
     }
 
     /// "Last diaper 48m ago · Pee".
     func diaperLine(now: Date = .now) -> String {
-        guard let lastDiaperAt else { return "No diaper logged yet" }
-        let kind = lastDiaperKind.map { " · \($0.label)" } ?? ""
-        return "Last diaper \(Format.ago(lastDiaperAt, now: now))\(kind)"
+        guard let lastDiaperAt else { return String(localized: "No diaper logged yet") }
+        let elapsed = Format.ago(lastDiaperAt, now: now)
+        if let kind = lastDiaperKind?.label { return String(localized: "Last diaper \(elapsed) · \(kind)") }
+        return String(localized: "Last diaper \(elapsed)")
     }
 
     /// "Asleep 1h 05m" while a sleep runs; nil otherwise.
@@ -121,8 +131,8 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// "Awake 2h 10m", or "Asleep 1h 05m" while a sleep runs.
     func awakeLine(now: Date = .now) -> String {
         if let sleep = sleepLine(now: now) { return sleep }
-        guard let lastWokeAt else { return "No sleep logged yet" }
-        return "Awake \(Format.compactDuration(now.timeIntervalSince(lastWokeAt)))"
+        guard let lastWokeAt else { return String(localized: "No sleep logged yet") }
+        return String(localized: "Awake \(Format.compactDuration(now.timeIntervalSince(lastWokeAt)))")
     }
 
     // MARK: - Glances
@@ -163,7 +173,7 @@ struct NowSummary: Codable, Equatable, Sendable {
         case .sleep: runningSleepStart ?? lastWokeAt
         default: lastDiaperAt
         }
-        guard let since else { return "–" }
+        guard let since else { return String(localized: "–") }
         return Format.compactDuration(now.timeIntervalSince(since))
     }
 
@@ -176,9 +186,9 @@ struct NowSummary: Codable, Equatable, Sendable {
     var todayLine: String {
         let tracked = tracked
         var parts: [String] = []
-        if tracked.contains(.feed) { parts.append(Format.count(todayFeeds, "feed")) }
-        if tracked.contains(.wet) { parts.append("\(todayWet) \(EventKind.wet.label.lowercased())") }
-        if tracked.contains(.dirty) { parts.append("\(todayDirty) \(EventKind.dirty.label.lowercased())") }
+        if tracked.contains(.feed) { parts.append(Format.count(todayFeeds, .feed)) }
+        if tracked.contains(.wet) { parts.append(Format.diaperCount(todayWet, .wet)) }
+        if tracked.contains(.dirty) { parts.append(Format.diaperCount(todayDirty, .dirty)) }
         return parts.joined(separator: " · ")
     }
 
@@ -203,6 +213,7 @@ struct NowSummary: Codable, Equatable, Sendable {
         let events = LogEvent.coalesced(events).filter { tracked.contains($0.eventKind) }
         let today = window.interval(at: now, calendar: calendar)
         summary.childName = child.displayName
+        summary.childNameIsFallback = (child.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         summary.childID = child.id
         summary.dayOfLife = child.dayOfLife(on: now, calendar: calendar)
         let sorted = events.sorted { $0.start > $1.start }
@@ -492,14 +503,21 @@ struct RecentEntry: Codable, Equatable, Sendable, Identifiable {
     func title(now: Date = .now) -> String {
         switch kind {
         case .feed:
-            let sides = FeedSide.label(for: sides ?? []).map { " · \($0)" } ?? ""
+            let side = FeedSide.label(for: sides ?? [])
             if let endedAt, endedAt.timeIntervalSince(at) >= 60 {
-                return "Feed\(sides) · \(Format.compactDuration(endedAt.timeIntervalSince(at)))"
+                let duration = Format.compactDuration(endedAt.timeIntervalSince(at))
+                if let side { return String(localized: "Feed · \(side) · \(duration)") }
+                return String(localized: "Feed · \(duration)")
             }
-            return isRunning ? "Feeding\(sides)" : "Feed\(sides)"
+            if isRunning {
+                if let side { return String(localized: "Feeding · \(side)") }
+                return String(localized: "Feeding")
+            }
+            if let side { return String(localized: "Feed · \(side)") }
+            return String(localized: "Feed")
         case .sleep:
-            guard let endedAt else { return "Asleep" }
-            return "Sleep · \(Format.duration(endedAt.timeIntervalSince(at)))"
+            guard let endedAt else { return String(localized: "Asleep") }
+            return String(localized: "Sleep · \(Format.duration(endedAt.timeIntervalSince(at)))")
         default:
             return kind.label
         }
@@ -627,9 +645,17 @@ enum TotalsWindow: Hashable, Sendable {
     /// The label above the totals: "Today", "Since 6 AM", "Last 24 hours".
     func title(calendar: Calendar = .current) -> String {
         switch self {
-        case .last24Hours: return "Last 24 hours"
-        case .day(0): return "Today"
-        case .day(let hour): return "Since \(Self.hourLabel(hour, calendar: calendar))"
+        case .last24Hours: return String(localized: "Last 24 hours")
+        case .day(0): return String(localized: "Today")
+        case .day(let hour): return String(localized: "Since \(Self.hourLabel(hour, calendar: calendar))")
+        }
+    }
+
+    func sectionLabel(calendar: Calendar = .current) -> String {
+        switch self {
+        case .last24Hours: String(localized: "LAST 24 HOURS")
+        case .day(0): String(localized: "TODAY")
+        case .day(let hour): String(localized: "SINCE \(Self.hourLabel(hour, calendar: calendar))")
         }
     }
 
@@ -721,10 +747,10 @@ struct WindowTotals: Equatable, Sendable {
     /// The same, for only the buttons this family uses.
     func line(_ tracked: TrackedKinds) -> String {
         var parts: [String] = []
-        if tracked.contains(.feed) { parts.append(Format.count(feeds, "feed")) }
-        if tracked.contains(.wet) { parts.append("\(wet) \(EventKind.wet.label.lowercased())") }
-        if tracked.contains(.dirty) { parts.append("\(dirty) \(EventKind.dirty.label.lowercased())") }
-        if tracked.contains(.sleep), sleepSeconds >= 60 { parts.append("\(Format.compactDuration(sleepSeconds)) sleep") }
+        if tracked.contains(.feed) { parts.append(Format.count(feeds, .feed)) }
+        if tracked.contains(.wet) { parts.append(Format.diaperCount(wet, .wet)) }
+        if tracked.contains(.dirty) { parts.append(Format.diaperCount(dirty, .dirty)) }
+        if tracked.contains(.sleep), sleepSeconds >= 60 { parts.append(String(localized: "\(Format.compactDuration(sleepSeconds)) sleep")) }
         return parts.joined(separator: " · ")
     }
 }

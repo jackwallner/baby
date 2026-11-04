@@ -144,7 +144,7 @@ struct SectionLabel: View {
     let text: String
 
     var body: some View {
-        Text(text.uppercased())
+        Text(text)
             .font(.caption.weight(.semibold))
             .foregroundStyle(AppTheme.ink2)
             .kerning(0.6)
@@ -211,7 +211,7 @@ private struct UndoToastOverlay: ViewModifier {
             }
             .onChange(of: events.lastLogged) { _, logged in
                 guard let logged else { return }
-                VoiceOver.say("\(UndoToast(logged: logged, undo: {}).title). Undo is at the top of the screen.")
+                VoiceOver.say(String(localized: "\(UndoToast(logged: logged, undo: {}).title). Undo is at the top of the screen."))
             }
             .alert("Couldn't undo this entry", isPresented: $showUndoError) {
                 Button("OK", role: .cancel) {}
@@ -260,44 +260,49 @@ struct UndoToast: View {
 
     /// A whole sleep added from the editor, not one just begun.
     private var isFinishedSleep: Bool {
-        logged.kind == .sleep && !logged.reopensTimer && logged.detail != nil && logged.detail != "Asleep"
+        logged.kind == .sleep && !logged.reopensTimer && logged.detail != nil && logged.detail != String(localized: "Asleep")
     }
 
     /// Short, in the buttons' own words: the toast can sit between two bar buttons.
     var title: String {
         if logged.deleted != nil {
             let base: String = switch logged.kind {
-            case .feed: "Deleted feed"
-            case .wet, .dirty: "Deleted \(logged.kind.label.lowercased())"
-            case .sleep: "Deleted sleep"
-            case .weight: "Deleted weight"
+            case .feed: String(localized: "Deleted feed")
+            case .wet: DiaperWords.current == .peePoop ? String(localized: "Deleted pee") : String(localized: "Deleted wet")
+            case .dirty: DiaperWords.current == .peePoop ? String(localized: "Deleted poop") : String(localized: "Deleted dirty")
+            case .sleep: String(localized: "Deleted sleep")
+            case .weight: String(localized: "Deleted weight")
             }
             guard let detail = logged.detail, !detail.isEmpty else { return base }
-            return "\(base) · \(detail)"
+            return String(localized: "\(base) · \(detail)")
         }
         if !logged.alsoLogged.isEmpty {
-            return "Logged feed, \(EventKind.wet.label.lowercased()) and \(EventKind.dirty.label.lowercased())" + backdated
+            let base = DiaperWords.current == .peePoop
+                ? String(localized: "Logged feed, pee and poop")
+                : String(localized: "Logged feed, wet and dirty")
+            return withBackdatedTime(base)
         }
         let base: String = switch logged.kind {
-        case .feed: "Logged feed"
-        case .wet, .dirty: "Logged \(logged.kind.label.lowercased())"
-        case .sleep: logged.reopensTimer ? "Sleep ended" : (isFinishedSleep ? "Logged sleep" : "Sleep started")
-        case .weight: "Logged weight"
+        case .feed: String(localized: "Logged feed")
+        case .wet: DiaperWords.current == .peePoop ? String(localized: "Logged pee") : String(localized: "Logged wet")
+        case .dirty: DiaperWords.current == .peePoop ? String(localized: "Logged poop") : String(localized: "Logged dirty")
+        case .sleep: logged.reopensTimer ? String(localized: "Sleep ended") : (isFinishedSleep ? String(localized: "Logged sleep") : String(localized: "Sleep started"))
+        case .weight: String(localized: "Logged weight")
         }
-        if logged.kind == .sleep, isFinishedSleep, let detail = logged.detail { return "\(base) · \(detail)" + backdated }
-        if logged.kind == .sleep { return base + backdated }
+        if logged.kind == .sleep, isFinishedSleep, let detail = logged.detail { return withBackdatedTime(String(localized: "\(base) · \(detail)")) }
+        if logged.kind == .sleep { return withBackdatedTime(base) }
         // A finished feed ended the running feed timer. Say so, so the timer
         // vanishing from Now is explained and Undo is known to bring it back.
-        if logged.kind == .feed, !logged.closedTimers.isEmpty { return "\(base), timer ended" }
-        if let detail = logged.detail, !detail.isEmpty { return "\(base) · \(detail)" + backdated }
-        return base + backdated
+        if logged.kind == .feed, !logged.closedTimers.isEmpty { return String(localized: "\(base), timer ended") }
+        if let detail = logged.detail, !detail.isEmpty { return withBackdatedTime(String(localized: "\(base) · \(detail)")) }
+        return withBackdatedTime(base)
     }
 
     /// " · 7:15 AM" when the tap logged at a wound-back time, so the parent
     /// sees the entry landed where they meant it to.
-    private var backdated: String {
-        guard let eventAt = logged.eventAt, logged.at.timeIntervalSince(eventAt) > 90 else { return "" }
-        return " · \(LogClock.label(for: eventAt, now: logged.at))"
+    private func withBackdatedTime(_ title: String) -> String {
+        guard let eventAt = logged.eventAt, logged.at.timeIntervalSince(eventAt) > 90 else { return title }
+        return String(localized: "\(title) · \(LogClock.label(for: eventAt, now: logged.at))")
     }
 }
 

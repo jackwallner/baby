@@ -175,14 +175,14 @@ struct SummaryView: View {
     }
 
     private var rangeLine: String {
-        "\(rangeDates) · \(Format.count(report.dayCount, "day"))"
+        String(localized: "\(rangeDates) · \(Format.count(report.dayCount, .day))")
     }
 
     /// "Sep 28 to today".
     private var rangeDates: String {
         let start = report.start.formatted(.dateTime.month(.abbreviated).day())
-        let end = Calendar.current.isDateInToday(report.end) ? "today" : report.end.formatted(.dateTime.month(.abbreviated).day())
-        return "\(start) to \(end)"
+        let end = Calendar.current.isDateInToday(report.end) ? String(localized: "today") : report.end.formatted(.dateTime.month(.abbreviated).day())
+        return String(localized: "\(start) to \(end)")
     }
 
     // MARK: - At a glance
@@ -216,27 +216,27 @@ struct SummaryView: View {
         var tiles: [StatTile] = []
         let shortDate = Date.FormatStyle.dateTime.month(.abbreviated).day()
         if report.tracked.contains(.feed) {
-            tiles.append(StatTile(kind: .feed, value: Self.decimal(report.averageFeedsPerDay), unit: "Feeds a day",
-                                  detail: report.longestFeedGapSeconds > 0 ? "Longest gap \(Format.compactDuration(report.longestFeedGapSeconds))" : nil))
+            tiles.append(StatTile(kind: .feed, value: Self.decimal(report.averageFeedsPerDay), unit: String(localized: "Feeds a day"),
+                                  detail: report.longestFeedGapSeconds > 0 ? String(localized: "Longest gap \(Format.compactDuration(report.longestFeedGapSeconds))") : nil))
             if report.averageBottleMillilitresPerDay > 0 {
-                tiles.append(StatTile(kind: .feed, value: Format.millilitres(report.averageBottleMillilitresPerDay), unit: "Bottle a day",
-                                      detail: "About \(Format.millilitres(report.averageBottleMillilitresPerFeed)) a bottle"))
+                tiles.append(StatTile(kind: .feed, value: Format.millilitres(report.averageBottleMillilitresPerDay), unit: String(localized: "Bottle a day"),
+                                      detail: String(localized: "About \(Format.millilitres(report.averageBottleMillilitresPerFeed)) a bottle")))
             }
         }
         for kind in [EventKind.wet, .dirty] where report.tracked.contains(kind) {
             let average = kind == .wet ? report.averageWetPerDay : report.averageDirtyPerDay
             // The lowest day is the one a doctor asks about.
             let lowest = kind == .wet ? report.lowestDay(\.wet).map { ($0.wet, $0.date) } : report.lowestDay(\.dirty).map { ($0.dirty, $0.date) }
-            tiles.append(StatTile(kind: kind, value: Self.decimal(average), unit: "\(kind.label) a day",
-                                  detail: lowest.map { "Lowest day \($0.0), \($0.1.formatted(shortDate))" }))
+            tiles.append(StatTile(kind: kind, value: Self.decimal(average), unit: String(localized: "\(kind.label) a day"),
+                                  detail: lowest.map { String(localized: "Lowest day \($0.0.formatted(.number)), \($0.1.formatted(shortDate))") }))
         }
         if report.tracked.contains(.sleep) {
-            tiles.append(StatTile(kind: .sleep, value: Format.compactDuration(report.averageSleepSeconds), unit: "Sleep a day",
-                                  detail: report.longestSleepSeconds > 0 ? "Longest stretch \(Format.compactDuration(report.longestSleepSeconds))" : nil))
+            tiles.append(StatTile(kind: .sleep, value: Format.compactDuration(report.averageSleepSeconds), unit: String(localized: "Sleep a day"),
+                                  detail: report.longestSleepSeconds > 0 ? String(localized: "Longest stretch \(Format.compactDuration(report.longestSleepSeconds))") : nil))
         }
         if let weight = report.latestWeight {
             tiles.append(StatTile(kind: .weight, value: Format.grams(weight),
-                                  unit: report.latestWeightDate.map { "Weight, \($0.formatted(shortDate))" } ?? "Weight",
+                                  unit: report.latestWeightDate.map { String(localized: "Weight, \($0.formatted(shortDate))") } ?? String(localized: "Weight"),
                                   detail: report.weightChangeDescription))
         }
         return tiles
@@ -268,14 +268,14 @@ struct SummaryView: View {
 
     private var doctorCard: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            SectionLabel(text: "For the doctor")
+            SectionLabel(text: String(localized: "FOR THE DOCTOR"))
             Button {
                 showFullPreview = true
             } label: {
                 HStack(spacing: AppTheme.spacing) {
                     pageThumbnail
                     VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
-                        Text(isExample ? "Example summary" : "One-page summary")
+                        Text(isExample ? String(localized: "Example summary") : String(localized: "One-page summary"))
                             .font(.headline)
                             .foregroundStyle(AppTheme.ink)
                         Text("Feeds, diapers, sleep and weights, \(rangeDates). Preview before sharing.")
@@ -394,7 +394,7 @@ struct SummaryView: View {
                 }
             }
             .background(AppTheme.paper)
-            .navigationTitle(isExample ? "Example summary" : "Summary")
+            .navigationTitle(isExample ? String(localized: "Example summary") : String(localized: "Summary"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -419,10 +419,10 @@ enum ReportRange: CaseIterable, Hashable {
 
     var title: String {
         switch self {
-        case .week: "7 days"
-        case .twoWeeks: "14 days"
-        case .month: "30 days"
-        case .custom: "Custom"
+        case .week: String(localized: "7 days")
+        case .twoWeeks: String(localized: "14 days")
+        case .month: String(localized: "30 days")
+        case .custom: String(localized: "Custom")
         }
     }
 
@@ -499,7 +499,7 @@ private struct PDFFile: Transferable {
 
     static var transferRepresentation: some TransferRepresentation {
         DataRepresentation(exportedContentType: .pdf) { file in file.data }
-            .suggestedFileName { "\($0.name) summary \($0.date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())).pdf" }
+        .suggestedFileName { String(localized: "\($0.name) summary \($0.date.formatted(Date.ISO8601FormatStyle(timeZone: .current).year().month().day())).pdf") }
     }
 }
 
@@ -511,7 +511,7 @@ private struct CSVFile: Transferable {
         DataRepresentation(exportedContentType: .commaSeparatedText) { file in
             Data(file.text.utf8)
         }
-        .suggestedFileName { "\($0.name) log.csv" }
+        .suggestedFileName { String(localized: "\($0.name) log.csv") }
     }
 }
 
@@ -534,7 +534,7 @@ extension EventStore {
             return example
         }
         return SummaryReport.make(
-            childName: child.displayName,
+            childName: child.localizedDisplayName,
             birthDate: child.birthDate,
             events: events,
             from: since ?? defaultVisitStart,
@@ -550,9 +550,9 @@ enum ReportMetric: CaseIterable, Hashable {
 
     var title: String {
         switch self {
-        case .feeds: "Feeds a day"
-        case .diapers: "Diapers a day"
-        case .sleep: "Longest sleep stretch"
+        case .feeds: String(localized: "Feeds a day")
+        case .diapers: String(localized: "Diapers a day")
+        case .sleep: String(localized: "Longest sleep stretch")
         }
     }
 
@@ -600,7 +600,8 @@ struct ReportChart: View {
                         AxisGridLine()
                         AxisValueLabel {
                             if let number = value.as(Double.self) {
-                                Text(metric == .sleep ? "\(SummaryView.decimal(number))h" : SummaryView.decimal(number))
+                                let value = SummaryView.decimal(number)
+                                Text(metric == .sleep ? String(localized: "\(value)h") : value)
                             }
                         }
                     }
@@ -610,7 +611,7 @@ struct ReportChart: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(metric.title)
         .accessibilityValue(Self.takeaway(metric, report: report))
-        .accessibilityHint(report.partialDays.isEmpty ? "" : "Lighter bars are partial days, left out of the average.")
+        .accessibilityHint(report.partialDays.isEmpty ? "" : String(localized: "Lighter bars are partial days, left out of the average."))
     }
 
     private var chart: some View {
@@ -674,19 +675,32 @@ struct ReportChart: View {
 
     /// The chart in one sentence, shown above it and read by VoiceOver.
     static func takeaway(_ metric: ReportMetric, report: SummaryReport) -> String {
-        guard let latest = report.days.last else { return "Nothing logged in this range yet." }
-        let latestName = Calendar.current.isDateInToday(latest.date) ? "today" : "on \(latest.date.formatted(.dateTime.month(.abbreviated).day()))"
+        guard let latest = report.days.last else { return String(localized: "Nothing logged in this range yet.") }
+        let isToday = Calendar.current.isDateInToday(latest.date)
+        let latestDate = latest.date.formatted(.dateTime.month(.abbreviated).day())
+        let latestFeeds = latest.feeds.formatted(.number)
         switch metric {
         case .feeds:
-            return "About \(SummaryView.decimal(report.averageFeedsPerDay)) a day, \(latest.feeds) \(latestName)."
+            if isToday {
+                return String(localized: "About \(SummaryView.decimal(report.averageFeedsPerDay)) a day, \(latestFeeds) today.")
+            }
+            return String(localized: "About \(SummaryView.decimal(report.averageFeedsPerDay)) a day, \(latestFeeds) on \(latestDate).")
         case .diapers:
-            let parts = [(EventKind.wet, report.averageWetPerDay), (.dirty, report.averageDirtyPerDay)]
-                .filter { report.tracked.contains($0.0) }
-                .map { "\(SummaryView.decimal($0.1)) \($0.0.label.lowercased())" }
-            return "About \(parts.joined(separator: " and ")) a day."
+            let wet = SummaryView.decimal(report.averageWetPerDay)
+            let dirty = SummaryView.decimal(report.averageDirtyPerDay)
+            let wetWord = EventKind.wet.lowercaseLabel
+            let dirtyWord = EventKind.dirty.lowercaseLabel
+            if report.tracked.contains(.wet), report.tracked.contains(.dirty) {
+                return String(localized: "About \(wet) \(wetWord) and \(dirty) \(dirtyWord) a day.")
+            }
+            if report.tracked.contains(.wet) { return String(localized: "About \(wet) \(wetWord) a day.") }
+            return String(localized: "About \(dirty) \(dirtyWord) a day.")
         case .sleep:
-            guard report.longestSleepSeconds > 0 else { return "No sleep logged in this range." }
-            return "Longest \(Format.compactDuration(report.longestSleepSeconds)) in this range, \(Format.compactDuration(latest.longestSleepSeconds)) \(latestName)."
+            guard report.longestSleepSeconds > 0 else { return String(localized: "No sleep logged in this range.") }
+            let longest = Format.compactDuration(report.longestSleepSeconds)
+            let latestLongest = Format.compactDuration(latest.longestSleepSeconds)
+            if isToday { return String(localized: "Longest \(longest) in this range, \(latestLongest) today.") }
+            return String(localized: "Longest \(longest) in this range, \(latestLongest) on \(latestDate).")
         }
     }
 }

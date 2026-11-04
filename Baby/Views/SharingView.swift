@@ -87,10 +87,10 @@ struct SharingSheet: View {
                 try await sharing.stopped(for: child)
                 dismiss()
             case .failed:
-                errorMessage = "Apple could not save that change. Your existing log is safe. Check your connection and try again."
+                errorMessage = String(localized: "Apple could not save that change. Your existing log is safe. Check your connection and try again.")
             }
         } catch {
-            errorMessage = "iCloud could not save that sharing change. Your existing log is safe. Check your connection and try again."
+            errorMessage = String(localized: "iCloud could not save that sharing change. Your existing log is safe. Check your connection and try again.")
         }
     }
 
@@ -104,7 +104,7 @@ struct SharingSheet: View {
                         Text("Log together")
                             .font(.system(.largeTitle, design: .rounded, weight: .bold))
                             .foregroundStyle(AppTheme.ink)
-                        Text("Invite your partner, a grandparent or a nanny. Everyone logs from their own iPhone into \(child.displayName)'s log, and every phone shows the latest feed.")
+                        Text("Invite your partner, a grandparent or a nanny. Everyone logs from their own iPhone into \(child.localizedDisplayName)'s log, and every phone shows the latest feed.")
                             .font(.body)
                             .foregroundStyle(AppTheme.ink2)
                             .fixedSize(horizontal: false, vertical: true)
@@ -219,7 +219,7 @@ struct SharingSheet: View {
         } catch {
             isPreparing = false
             preparationID = nil
-            errorMessage = "iCloud did not finish preparing this baby's log. Check your connection, wait a moment, then try again. Your existing log is safe."
+            errorMessage = String(localized: "iCloud did not finish preparing this baby's log. Check your connection, wait a moment, then try again. Your existing log is safe.")
         }
     }
 }
@@ -230,7 +230,7 @@ private enum SharingPreparationError: Error {
     var message: String {
         switch self {
         case .iCloudUnavailable:
-            "Sign in to iCloud on this iPhone (Settings > your name) before inviting anyone."
+            String(localized: "Sign in to iCloud on this iPhone (Settings > your name) before inviting anyone.")
         }
     }
 }
@@ -248,7 +248,7 @@ private struct InviteView: View {
         VStack(spacing: AppTheme.spacing) {
             ScrollView {
                 VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-                    Text("Invite to \(child.displayName)'s log")
+                    Text("Invite to \(child.localizedDisplayName)'s log")
                         .font(.system(.title, design: .rounded, weight: .bold))
                         .foregroundStyle(AppTheme.ink)
                         .fixedSize(horizontal: false, vertical: true)
@@ -265,14 +265,14 @@ private struct InviteView: View {
             VStack(spacing: AppTheme.tightSpacing) {
                 ShareLink(
                     item: url,
-                    subject: Text("Join \(child.displayName)'s log"),
-                    message: Text("Join \(child.displayName)'s log in Baby Tracker so we can both log feeds, diapers and sleep.")
+                    subject: Text("Join \(child.localizedDisplayName)'s log"),
+                    message: Text("Join \(child.localizedDisplayName)'s log in Baby Tracker so we can both log feeds, diapers and sleep.")
                 ) {
                     Label("Send invite link", systemImage: "square.and.arrow.up")
                 }
                 .buttonStyle(PrimaryButtonStyle())
                 .accessibilityIdentifier("sharing.sendLink")
-                Button(isOwner ? "Manage people" : "People and leaving", action: manage)
+                Button(isOwner ? String(localized: "Manage people") : String(localized: "People and leaving"), action: manage)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(AppTheme.accent)
                     .frame(minHeight: 44)
@@ -306,7 +306,7 @@ private struct InviteView: View {
 
     private var joinedCard: some View {
         VStack(alignment: .leading, spacing: AppTheme.tightSpacing) {
-            SectionLabel(text: "Logging together")
+            SectionLabel(text: String(localized: "LOGGING TOGETHER"))
             if joined.isEmpty {
                 Text("No one has joined yet. Once they scan the code, their name appears here.")
                     .font(.subheadline)
@@ -339,7 +339,7 @@ private struct ParticipantView: View {
                     Text("You're logging together")
                         .font(.system(.title, design: .rounded, weight: .bold))
                         .foregroundStyle(AppTheme.ink)
-                    Text("Everything you log for \(child.displayName) shows up on \(ownerName ?? "their")\(ownerName == nil ? "" : "'s") phone, and everything they log shows up here.")
+                    Text(ownerMessage)
                         .font(.body)
                         .foregroundStyle(AppTheme.ink2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -355,6 +355,13 @@ private struct ParticipantView: View {
         }
         .padding(AppTheme.margin)
     }
+
+    private var ownerMessage: String {
+        if let ownerName {
+            return String(localized: "Everything you log for \(child.localizedDisplayName) shows up on \(ownerName)'s phone, and everything they log shows up here.")
+        }
+        return String(localized: "Everything you log for \(child.localizedDisplayName) shows up on their phone, and everything they log shows up here.")
+    }
 }
 
 /// The three steps, written for the person holding the other phone.
@@ -363,9 +370,9 @@ struct JoinSteps: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            step(1, "They install Baby Tracker", "On their own iPhone. It's free.")
-            step(2, "They scan your code", "In Baby Tracker, choose Join a shared log. The Camera app or the link you send works too.")
-            step(3, "You both log", "Feeds, diapers and sleep from either phone land in \(child.map { "\($0.displayName)'s" } ?? "the same") log.")
+            step(1, String(localized: "They install Baby Tracker"), String(localized: "On their own iPhone. It's free."))
+            step(2, String(localized: "They scan your code"), String(localized: "In Baby Tracker, choose Join a shared log. The Camera app or the link you send works too."))
+            step(3, String(localized: "You both log"), stepThreeDetail)
         }
         .card()
         .accessibilityIdentifier("sharing.steps")
@@ -373,7 +380,7 @@ struct JoinSteps: View {
 
     private func step(_ number: Int, _ title: String, _ detail: String) -> some View {
         HStack(alignment: .top, spacing: AppTheme.spacing) {
-            Text("\(number)")
+            Text(number.formatted(.number))
                 .font(.headline.monospacedDigit())
                 .foregroundStyle(AppTheme.buttonInk)
                 .frame(width: AppTheme.iconSize, height: AppTheme.iconSize)
@@ -392,6 +399,13 @@ struct JoinSteps: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Step \(number). \(title). \(detail)")
     }
+
+    private var stepThreeDetail: String {
+        if let child {
+            return String(localized: "Feeds, diapers and sleep from either phone land in \(child.localizedDisplayName)'s log.")
+        }
+        return String(localized: "Feeds, diapers and sleep from either phone land in the same log.")
+    }
 }
 
 private struct AccessNote: View {
@@ -400,8 +414,8 @@ private struct AccessNote: View {
     var body: some View {
         Label {
             Text(isOwner
-                 ? "Anyone with your code or link can join and edit this log, so share it only with people you trust. Remove someone or stop sharing in Manage people. Both phones need iCloud; an offline phone catches up when it reconnects."
-                 : "Everyone in this log can add, edit and delete entries, and anyone with the code or link can join. An offline phone catches up when it reconnects.")
+                 ? String(localized: "Anyone with your code or link can join and edit this log, so share it only with people you trust. Remove someone or stop sharing in Manage people. Both phones need iCloud; an offline phone catches up when it reconnects.")
+                 : String(localized: "Everyone in this log can add, edit and delete entries, and anyone with the code or link can join. An offline phone catches up when it reconnects."))
                 .font(.footnote)
                 .foregroundStyle(AppTheme.ink2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -431,7 +445,7 @@ struct SharedLogGraphic: View {
     private var graphicLayout: some View {
         if dynamicTypeSize.isAccessibilitySize {
             VStack(spacing: AppTheme.tightSpacing) {
-                personBadge(label: "You")
+                personBadge(label: String(localized: "You"))
                 Image(systemName: "arrow.down")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(AppTheme.ink2)
@@ -441,15 +455,15 @@ struct SharedLogGraphic: View {
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(AppTheme.ink2)
                     .accessibilityHidden(true)
-                personBadge(label: "Partner")
+                personBadge(label: String(localized: "Partner"))
             }
         } else {
             HStack(alignment: .center, spacing: AppTheme.tightSpacing) {
-                personBadge(label: "You")
+                personBadge(label: String(localized: "You"))
                 connector
                 notebook
                 connector
-                personBadge(label: "Partner")
+                personBadge(label: String(localized: "Partner"))
             }
         }
     }
@@ -537,7 +551,7 @@ struct CloudSharingController: UIViewControllerRepresentable {
             finished(.failed)
         }
 
-        func itemTitle(for csc: UICloudSharingController) -> String? { title ?? "Baby log" }
+        func itemTitle(for csc: UICloudSharingController) -> String? { title ?? String(localized: "Baby log") }
 
         func cloudSharingControllerDidSaveShare(_ csc: UICloudSharingController) {
             if let share = csc.share { finished(.saved(share)) }

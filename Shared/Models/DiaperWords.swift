@@ -14,8 +14,8 @@ enum DiaperWords: String, CaseIterable, Sendable {
 
     var label: String {
         switch self {
-        case .peePoop: "Pee and Poop"
-        case .wetDirty: "Wet and Dirty"
+        case .peePoop: String(localized: "Pee and Poop")
+        case .wetDirty: String(localized: "Wet and Dirty")
         }
     }
 }
@@ -26,11 +26,54 @@ extension EventKind {
 
     func label(words: DiaperWords) -> String {
         switch self {
-        case .feed: "Feed"
-        case .wet: words == .peePoop ? "Pee" : "Wet"
-        case .dirty: words == .peePoop ? "Poop" : "Dirty"
-        case .sleep: "Sleep"
-        case .weight: "Weight"
+        case .feed: String(localized: "Feed")
+        case .wet: words == .peePoop ? String(localized: "Pee") : String(localized: "Wet")
+        case .dirty: words == .peePoop ? String(localized: "Poop") : String(localized: "Dirty")
+        case .sleep: String(localized: "Sleep")
+        case .weight: String(localized: "Weight")
+        }
+    }
+
+    /// The lowercase word used in compact sentences, independently localized.
+    var lowercaseLabel: String { lowercaseLabel(words: .current) }
+
+    func lowercaseLabel(words: DiaperWords) -> String {
+        switch self {
+        case .feed: String(localized: "feed")
+        case .wet: words == .peePoop ? String(localized: "pee") : String(localized: "wet")
+        case .dirty: words == .peePoop ? String(localized: "poop") : String(localized: "dirty")
+        case .sleep: String(localized: "sleep")
+        case .weight: String(localized: "weight")
+        }
+    }
+
+    var logLabel: String {
+        switch self {
+        case .feed: String(localized: "Log feed")
+        case .wet: DiaperWords.current == .peePoop ? String(localized: "Log pee") : String(localized: "Log wet")
+        case .dirty: DiaperWords.current == .peePoop ? String(localized: "Log poop") : String(localized: "Log dirty")
+        case .sleep: String(localized: "Log sleep")
+        case .weight: String(localized: "Log weight")
+        }
+    }
+
+    var undoLabel: String {
+        switch self {
+        case .feed: String(localized: "Undo feed")
+        case .wet: DiaperWords.current == .peePoop ? String(localized: "Undo pee") : String(localized: "Undo wet")
+        case .dirty: DiaperWords.current == .peePoop ? String(localized: "Undo poop") : String(localized: "Undo dirty")
+        case .sleep: String(localized: "Undo sleep")
+        case .weight: String(localized: "Undo weight")
+        }
+    }
+
+    var diaperNoun: String {
+        switch self {
+        case .feed: String(localized: "feed")
+        case .wet: DiaperWords.current == .peePoop ? String(localized: "pee diaper") : String(localized: "wet diaper")
+        case .dirty: DiaperWords.current == .peePoop ? String(localized: "poop diaper") : String(localized: "dirty diaper")
+        case .sleep: String(localized: "sleep")
+        case .weight: String(localized: "weight")
         }
     }
 }

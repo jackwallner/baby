@@ -75,6 +75,8 @@ schemes:
 targetTemplates:
   SharedCore:
     sources:
+      - path: Shared/Localizable.xcstrings
+        buildPhase: resources
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Models/DiaperWords.swift
       - path: Shared/Models/TrackedKinds.swift
@@ -120,6 +122,8 @@ targets:
       - path: Baby/Views/UnfoldedSplit.swift
       - path: Baby/Assets.xcassets
       - path: Baby/PrivacyInfo.xcprivacy
+        buildPhase: resources
+      - path: Baby/InfoPlist.xcstrings
         buildPhase: resources
       - path: Baby.storekit
         buildPhase: resources
@@ -167,6 +171,8 @@ targets:
       - path: BabyWidget/QuickLogWidgets.swift
       - path: BabyWidget/PrivacyInfo.xcprivacy
         buildPhase: resources
+      - path: BabyWidget/InfoPlist.xcstrings
+        buildPhase: resources
       - path: Shared/Models/BabyActivityAttributes.swift
       - path: Shared/Utilities/AppIntents.swift
     settings:
@@ -180,6 +186,8 @@ targets:
     type: application
     platform: watchOS
     sources:
+      - path: Shared/Localizable.xcstrings
+        buildPhase: resources
       - path: BabyWatch/App.swift
       - path: BabyWatch/Views/WatchNowView.swift
       - path: BabyWatch/Views/WatchTodayView.swift
@@ -189,6 +197,8 @@ targets:
       - path: BabyWatchWidget/ComplicationViews.swift
       - path: BabyWatch/Assets.xcassets
       - path: BabyWatch/PrivacyInfo.xcprivacy
+        buildPhase: resources
+      - path: BabyWatch/InfoPlist.xcstrings
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Models/DiaperWords.swift
@@ -217,9 +227,13 @@ targets:
     type: app-extension
     platform: watchOS
     sources:
+      - path: Shared/Localizable.xcstrings
+        buildPhase: resources
       - path: BabyWatchWidget/WatchComplication.swift
       - path: BabyWatchWidget/ComplicationViews.swift
       - path: BabyWatchWidget/PrivacyInfo.xcprivacy
+        buildPhase: resources
+      - path: BabyWatchWidget/InfoPlist.xcstrings
         buildPhase: resources
       - path: Shared/Models/BabyModel.swift
       - path: Shared/Models/DiaperWords.swift

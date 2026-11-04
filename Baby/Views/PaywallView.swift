@@ -88,7 +88,7 @@ struct BabyPaywallView: View {
             Text("Couldn't load plans")
                 .font(.headline)
                 .foregroundStyle(AppTheme.ink)
-            Text(store.errorMessage ?? "Check your connection and try again.")
+            Text(store.errorMessage ?? String(localized: "Check your connection and try again."))
                 .font(.subheadline)
                 .foregroundStyle(AppTheme.ink2)
                 .multilineTextAlignment(.center)
@@ -162,7 +162,7 @@ struct BabyPaywallView: View {
 
     private var hero: some View {
         VStack(spacing: AppTheme.tightSpacing) {
-            SectionLabel(text: "Baby+")
+            SectionLabel(text: String(localized: "BABY+"))
             Text(headline)
                 .font(.title2.bold())
                 .foregroundStyle(AppTheme.ink)
@@ -178,11 +178,11 @@ struct BabyPaywallView: View {
 
     private var headline: String {
         if let focus { return focus.pitchHeadline }
-        return "Reports for the pediatrician"
+        return String(localized: "Reports for the pediatrician")
     }
 
     private var subhead: String {
-        "Logging and everything else stay free. Baby+ turns your log into what the doctor asks for."
+        String(localized: "Logging and everything else stay free. Baby+ turns your log into what the doctor asks for.")
     }
 
     private func benefitRow(_ feature: PlusFeature, unlocked: Bool) -> some View {
@@ -225,7 +225,7 @@ struct BabyPaywallView: View {
         VStack(spacing: AppTheme.tightSpacing) {
             if let selected {
                 VStack(spacing: AppTheme.hairSpacing) {
-                    Text(ConversionCopy.billedAmount(priceLabel: selected.babyPriceLabel))
+                    Text(selected.babyBilledAmount)
                         .font(.title3.bold())
                         .foregroundStyle(AppTheme.ink)
                         .accessibilityIdentifier("paywall.billedAmount")
@@ -285,20 +285,20 @@ struct BabyPaywallView: View {
 
     private var disclosureText: String {
         guard let selected else {
-            return "Prices are shown in your local currency before you buy. Subscriptions renew automatically until cancelled. \(Self.hedge)"
+            return String(localized: "Prices are shown in your local currency before you buy. Subscriptions renew automatically until cancelled. \(Self.hedge)")
         }
         if selected.babyPackageKind == .lifetime {
-            return "\(selected.babyPriceLabel). One-time purchase, no subscription and nothing renews. \(Self.hedge)"
+            return String(localized: "\(selected.babyPriceLabel). One-time purchase, no subscription and nothing renews. \(Self.hedge)")
         }
         let billing = ConversionCopy.disclosure(
             trialLabel: selected.babyIntroOfferLabel,
             priceLabel: selected.babyPriceLabel,
             eligibleForTrial: store.isEligibleForIntroOffer(selected)
         )
-        return "\(billing) \(Self.hedge)"
+        return String(localized: "\(billing) \(Self.hedge)")
     }
 
-    private static let hedge = "Baby Tracker is a log, not medical advice."
+    private static let hedge = String(localized: "Baby Tracker is a log, not medical advice.")
 
     /// Loading and failure still say how Baby+ bills (App Review 3.1.2).
     private var plainDisclosure: some View {
@@ -319,11 +319,11 @@ struct BabyPaywallView: View {
                     isRestoring = false
                     // A failed restore's own error already shows above.
                     if !store.isPro, store.errorMessage == nil {
-                        restoreMessage = "No active Baby+ purchase was found for this Apple ID."
+                        restoreMessage = String(localized: "No active Baby+ purchase was found for this Apple ID.")
                     }
                 }
             } label: {
-                Text(isRestoring ? "Restoring…" : "Restore purchases")
+                Text(isRestoring ? String(localized: "Restoring…") : String(localized: "Restore purchases"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(AppTheme.ink2)
                     .frame(minHeight: 44)
@@ -386,7 +386,7 @@ struct BabyPaywallView: View {
             return value
         }()
         guard let text = formatter.string(from: monthly) else { return nil }
-        return "\(text) / mo"
+        return String(localized: "\(text) / mo")
     }
 
     private func savingsPercent(for package: Package) -> Int? {
@@ -415,17 +415,17 @@ enum PlusFeature: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .pediatricianSummary: "Pediatrician summary"
-        case .trends: "Trends"
-        case .export: "CSV export"
+        case .pediatricianSummary: String(localized: "Pediatrician summary")
+        case .trends: String(localized: "Trends")
+        case .export: String(localized: "CSV export")
         }
     }
 
     var detail: String {
         switch self {
-        case .pediatricianSummary: "A one-page PDF since the last visit: feeds and the longest gap between them, wet and dirty counts, sleep, weights. Hand it over or AirDrop it in the exam room."
-        case .trends: "Feeds per day, longest sleep stretch and diaper counts over the weeks."
-        case .export: "Every entry as a spreadsheet, for your records or a specialist."
+        case .pediatricianSummary: String(localized: "A one-page PDF since the last visit: feeds and the longest gap between them, wet and dirty counts, sleep, weights. Hand it over or AirDrop it in the exam room.")
+        case .trends: String(localized: "Feeds per day, longest sleep stretch and diaper counts over the weeks.")
+        case .export: String(localized: "Every entry as a spreadsheet, for your records or a specialist.")
         }
     }
 
@@ -439,17 +439,17 @@ enum PlusFeature: String, CaseIterable, Identifiable {
 
     var pitchLine: String {
         switch self {
-        case .pediatricianSummary: "One page for every visit, to AirDrop or print"
-        case .trends: "Feeds, diapers and sleep week over week"
-        case .export: "Every entry as a spreadsheet"
+        case .pediatricianSummary: String(localized: "One page for every visit, to AirDrop or print")
+        case .trends: String(localized: "Feeds, diapers and sleep week over week")
+        case .export: String(localized: "Every entry as a spreadsheet")
         }
     }
 
     var pitchHeadline: String {
         switch self {
-        case .pediatricianSummary: "Walk into the pediatrician\nwith a clean summary"
-        case .trends: "See the weeks,\nnot just today"
-        case .export: "Take the whole log\nwith you"
+        case .pediatricianSummary: String(localized: "Walk into the pediatrician\nwith a clean summary")
+        case .trends: String(localized: "See the weeks,\nnot just today")
+        case .export: String(localized: "Take the whole log\nwith you")
         }
     }
 }
@@ -481,9 +481,9 @@ private struct PlanCard: View {
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(AppTheme.ink)
                         if let savingsPercent {
-                            badge("SAVE \(savingsPercent)%")
+                            badge(String(localized: "SAVE \(savingsPercent)%"))
                         } else if package.babyPackageKind == .lifetime {
-                            badge("PAY ONCE")
+                            badge(String(localized: "PAY ONCE"))
                         }
                     }
                     if let secondary {
@@ -515,7 +515,7 @@ private struct PlanCard: View {
         if let trialLabel { parts.append(trialLabel) }
         if let perMonthLabel { parts.append(perMonthLabel) }
         if parts.isEmpty, package.babyPackageKind == .lifetime {
-            return "One-time purchase, never renews"
+            return String(localized: "One-time purchase, never renews")
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }

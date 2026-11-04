@@ -90,8 +90,8 @@ struct NowView: View {
     }
 
     private var title: String {
-        guard let child = events.child else { return "Now" }
-        return child.displayName
+        guard let child = events.child else { return String(localized: "Now") }
+        return child.localizedDisplayName
     }
 
     /// A phone: everything on one screen. The buttons take whatever height
@@ -270,7 +270,7 @@ private struct LogTimeRow: View {
                 status
                 if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
                 HStack(spacing: AppTheme.tightSpacing) {
-                    nudge("minus", label: "5 minutes earlier", id: "logTime.earlier") { clock.nudge(earlier: true) }
+                    nudge("minus", label: String(localized: "5 minutes earlier"), id: "logTime.earlier") { clock.nudge(earlier: true) }
                     DatePicker(
                         "Log time",
                         selection: Binding(get: { clock.time(now: context.date) }, set: { date in animate { clock.set(date) } }),
@@ -279,7 +279,7 @@ private struct LogTimeRow: View {
                     .labelsHidden()
                     .themedDatePicker()
                     .accessibilityIdentifier("logTime")
-                    nudge("plus", label: "5 minutes later", id: "logTime.later") { clock.nudge(earlier: false) }
+                    nudge("plus", label: String(localized: "5 minutes later"), id: "logTime.later") { clock.nudge(earlier: false) }
                         .disabled(!clock.isAdjusted)
                         .opacity(clock.isAdjusted ? 1 : 0.35)
                 }
@@ -333,8 +333,8 @@ private struct LogTimeRow: View {
             Haptics.selected()
             animate(action)
             VoiceOver.say(clock.isAdjusted
-                ? "Logging at \(clock.time().formatted(date: .omitted, time: .shortened))"
-                : "Logging now")
+                ? String(localized: "Logging at \(clock.time().formatted(date: .omitted, time: .shortened))")
+                : String(localized: "Logging now"))
         } label: {
             Image(systemName: symbol)
                 .font(.body.weight(.bold))
@@ -372,7 +372,11 @@ private struct LogCountdown: View {
 
     static func countdown(_ seconds: TimeInterval) -> String {
         let whole = max(0, Int(seconds.rounded(.up)))
-        return String(format: "%d:%02d", whole / 60, whole % 60)
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.minute, .second]
+        formatter.unitsStyle = .positional
+        formatter.zeroFormattingBehavior = .pad
+        return formatter.string(from: TimeInterval(whole)) ?? "0:00"
     }
 }
 
@@ -437,7 +441,7 @@ final class LogClock: ObservableObject {
     static func label(for date: Date, now: Date = .now, calendar: Calendar = .current) -> String {
         if calendar.isDate(date, inSameDayAs: now) { return Format.time(date) }
         if let yesterday = calendar.date(byAdding: .day, value: -1, to: now), calendar.isDate(date, inSameDayAs: yesterday) {
-            return "\(Format.time(date)) yesterday"
+            return String(localized: "\(Format.time(date)) yesterday")
         }
         return date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
     }
@@ -458,7 +462,7 @@ final class LogClock: ObservableObject {
             try? await Task.sleep(for: .seconds(Self.hold))
             guard !Task.isCancelled else { return }
             self?.reset()
-            VoiceOver.say("Back to logging now")
+        VoiceOver.say(String(localized: "Back to logging now"))
         }
     }
 }
@@ -572,9 +576,9 @@ private struct NowStatusCard: View {
 
     private var heading: String {
         switch lead {
-        case .feed: summary.isFeeding ? "Feeding now" : "Last feed"
-        case .diaper: "Last diaper"
-        case .sleep: summary.isSleeping ? "Asleep" : "Awake"
+        case .feed: summary.isFeeding ? String(localized: "Feeding now") : String(localized: "Last feed")
+        case .diaper: String(localized: "Last diaper")
+        case .sleep: summary.isSleeping ? String(localized: "Asleep") : String(localized: "Awake")
         }
     }
 
@@ -582,14 +586,14 @@ private struct NowStatusCard: View {
         switch lead {
         case .feed:
             if let start = summary.runningFeedStart { return Format.compactDuration(now.timeIntervalSince(start)) }
-            guard let date = summary.lastFeedAt else { return "A fresh start" }
+            guard let date = summary.lastFeedAt else { return String(localized: "A fresh start") }
             return Format.ago(date, now: now)
         case .diaper:
-            guard let date = summary.lastDiaperAt else { return "A fresh start" }
+            guard let date = summary.lastDiaperAt else { return String(localized: "A fresh start") }
             return Format.ago(date, now: now)
         case .sleep:
             if let start = summary.runningSleepStart { return Format.compactDuration(now.timeIntervalSince(start)) }
-            guard let woke = summary.lastWokeAt else { return "A fresh start" }
+            guard let woke = summary.lastWokeAt else { return String(localized: "A fresh start") }
             return Format.compactDuration(now.timeIntervalSince(woke))
         }
     }
@@ -598,27 +602,35 @@ private struct NowStatusCard: View {
         switch lead {
         case .feed:
             guard let date = summary.runningFeedStart ?? summary.lastFeedAt else {
-                return "Log a first feed below."
+                return String(localized: "Log a first feed below.")
             }
             let sides = summary.isFeeding ? summary.runningSides : summary.feedSides
             let label: String? = switch sides.count {
-            case 1: sides[0] == .bottle ? "Bottle" : "\(sides[0].label) breast"
+            case 1: sides[0] == .bottle ? String(localized: "Bottle") : String(localized: "\(sides[0].label) breast")
             default: FeedSide.label(for: sides)
             }
-            return [label, Format.time(date), summary.nextSideLine].compactMap { $0 }.joined(separator: " · ")
+            let time = Format.time(date)
+            if let label, let nextSide = summary.nextSideLine { return String(localized: "\(label) · \(time) · \(nextSide)") }
+            if let label { return String(localized: "\(label) · \(time)") }
+            if let nextSide = summary.nextSideLine { return String(localized: "\(time) · \(nextSide)") }
+            return time
         case .diaper:
-            guard let date = summary.lastDiaperAt else { return "Log a first diaper below." }
-            return [summary.lastDiaperKind?.label, Format.time(date)].compactMap { $0 }.joined(separator: " · ")
+            guard let date = summary.lastDiaperAt else { return String(localized: "Log a first diaper below.") }
+            let time = Format.time(date)
+            if let kind = summary.lastDiaperKind?.label { return String(localized: "\(kind) · \(time)") }
+            return time
         case .sleep:
-            if let start = summary.runningSleepStart { return "Since \(Format.time(start))" }
-            guard let woke = summary.lastWokeAt else { return "Tap Sleep when the baby falls asleep." }
-            return "Woke at \(Format.time(woke))"
+            if let start = summary.runningSleepStart { return String(localized: "Since \(Format.time(start))") }
+            guard let woke = summary.lastWokeAt else { return String(localized: "Tap Sleep when the baby falls asleep.") }
+            return String(localized: "Woke at \(Format.time(woke))")
         }
     }
 
     private var accessibilityLine: String {
         switch lead {
-        case .feed: [summary.feedLine(now: now), summary.nextSideLine].compactMap { $0 }.joined(separator: ". ")
+        case .feed:
+            if let nextSide = summary.nextSideLine { return String(localized: "\(summary.feedLine(now: now)). \(nextSide)") }
+            return summary.feedLine(now: now)
         case .diaper: summary.diaperLine(now: now)
         case .sleep: summary.awakeLine(now: now)
         }
@@ -665,7 +677,7 @@ private struct TodayTotalsView: View {
         let title = settings.totalsWindow.title()
         let kinds = settings.tracked.buttons
         VStack(alignment: .leading, spacing: compact ? AppTheme.tightSpacing : AppTheme.spacing) {
-            SectionLabel(text: title)
+            SectionLabel(text: settings.totalsWindow.sectionLabel())
             (dynamicTypeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
                 : AnyLayout(HStackLayout(alignment: .top, spacing: AppTheme.tightSpacing))) {
@@ -729,9 +741,9 @@ private struct TodayTotalsView: View {
 
     private func unit(_ kind: EventKind, count: Int) -> String {
         switch kind {
-        case .feed: count == 1 ? "feed" : "feeds"
-        case .sleep: "sleep"
-        default: kind.label.lowercased()
+        case .feed: Format.feedUnit(count)
+        case .sleep: String(localized: "sleep")
+        default: kind.lowercaseLabel
         }
     }
 }
@@ -807,9 +819,16 @@ private struct HourStrip: View {
                 spans.append(start == hour ? label(hour) : "\(label(start)) to \(label(hour + 1))")
                 start = next ?? hour
             }
-            return "\(kind.label): \(spans.joined(separator: ", "))"
+            let spokenHours = spans.joined(separator: ", ")
+            switch kind {
+            case .feed: return String(localized: "Feed: \(spokenHours)")
+            case .wet: return String(localized: "\(kind.label): \(spokenHours)")
+            case .dirty: return String(localized: "\(kind.label): \(spokenHours)")
+            case .sleep: return String(localized: "Sleep: \(spokenHours)")
+            case .weight: return nil
+            }
         }
-        return parts.isEmpty ? "Nothing logged yet" : parts.joined(separator: ". ")
+        return parts.isEmpty ? String(localized: "Nothing logged yet") : parts.joined(separator: ". ")
     }
 
     private func label(_ hour: Int) -> String {

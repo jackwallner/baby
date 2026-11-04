@@ -147,7 +147,7 @@ struct EventEditorView: View {
                                 if events.delete(existing) {
                                     dismiss()
                                 } else {
-                                    saveError = "Your log was not deleted. Please try again."
+                                    saveError = String(localized: "Your log was not deleted. Please try again.")
                                 }
                             }
                             .foregroundStyle(.red)
@@ -207,23 +207,34 @@ struct EventEditorView: View {
         ) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text(saveError ?? "Your changes were not saved. Please try again.")
+            Text(saveError ?? String(localized: "Your changes were not saved. Please try again."))
         }
     }
 
     private var title: String {
         switch kind {
-        case .feed: isNew ? "Log a feed" : "Feed"
-        case .wet, .dirty: isNew ? "Log a \(kind.label.lowercased()) diaper" : "\(kind.label) diaper"
-        case .sleep: isNew ? "Log sleep" : "Sleep"
-        case .weight: isNew ? "Log a weight" : "Weight"
+        case .feed: isNew ? String(localized: "Log a feed") : String(localized: "Feed")
+        case .wet:
+            if isNew {
+                DiaperWords.current == .peePoop ? String(localized: "Log a pee diaper") : String(localized: "Log a wet diaper")
+            } else {
+                DiaperWords.current == .peePoop ? String(localized: "Pee diaper") : String(localized: "Wet diaper")
+            }
+        case .dirty:
+            if isNew {
+                DiaperWords.current == .peePoop ? String(localized: "Log a poop diaper") : String(localized: "Log a dirty diaper")
+            } else {
+                DiaperWords.current == .peePoop ? String(localized: "Poop diaper") : String(localized: "Dirty diaper")
+            }
+        case .sleep: isNew ? String(localized: "Log sleep") : String(localized: "Sleep")
+        case .weight: isNew ? String(localized: "Log a weight") : String(localized: "Weight")
         }
     }
 
     /// "Time · 12m ago", so the wheel's answer reads back in plain words.
     private var timeHeader: String {
         let seconds = Date.now.timeIntervalSince(draft.startedAt)
-        return seconds < 60 ? "Time · now" : "Time · \(Format.ago(draft.startedAt))"
+        return seconds < 60 ? String(localized: "Time · now") : String(localized: "Time · \(Format.ago(draft.startedAt))")
     }
 
     // MARK: - Saving
@@ -248,7 +259,7 @@ struct EventEditorView: View {
         applyEdits(to: existing)
         guard existing.hasChanges else { return true }
         guard events.save() else {
-            saveError = "Your changes were not saved. Please try again."
+            saveError = String(localized: "Your changes were not saved. Please try again.")
             return false
         }
         return true
@@ -264,7 +275,7 @@ struct EventEditorView: View {
             events.log(kind, at: draft.startedAt, configure: configure)
         }
         guard event != nil else {
-            saveError = "Your log was not saved. Please try again."
+            saveError = String(localized: "Your log was not saved. Please try again.")
             return
         }
         Haptics.logged()
@@ -303,7 +314,7 @@ struct NewEntryMenuItems: View {
 
     var body: some View {
         ForEach(settings.tracked.buttons, id: \.self) { kind in
-            Button(kind.isDiaper ? "\(kind.label) diaper" : kind.label) { editor = EditorRequest(kind: kind, at: at) }
+            Button(kind.isDiaper ? String(localized: "\(kind.label) diaper") : kind.label) { editor = EditorRequest(kind: kind, at: at) }
         }
         Button("Weight") { editor = EditorRequest(kind: .weight, at: at) }
     }
@@ -318,13 +329,19 @@ private struct WeightPicker: View {
     var body: some View {
         HStack(spacing: 0) {
             if Format.usesImperial {
-                wheel("Pounds", selection: pounds, values: Array(1...30)) { "\($0) lb" }
-                wheel("Ounces", selection: halfOunces, values: Array(0...31)) {
-                    "\((Double($0) / 2).formatted(.number.precision(.fractionLength(0...1)))) oz"
+                wheel(String(localized: "Pounds"), selection: pounds, values: Array(1...30)) {
+                    Format.measurement(Double($0), unit: UnitMass.pounds, fractionDigits: 0...0)
+                }
+                wheel(String(localized: "Ounces"), selection: halfOunces, values: Array(0...31)) {
+                    Format.measurement(Double($0) / 2, unit: UnitMass.ounces, fractionDigits: 0...1)
                 }
             } else {
-                wheel("Kilograms", selection: kilograms, values: Array(0...20)) { "\($0) kg" }
-                wheel("Grams", selection: tensOfGrams, values: Array(0...99)) { "\($0 * 10) g" }
+                wheel(String(localized: "Kilograms"), selection: kilograms, values: Array(0...20)) {
+                    Format.measurement(Double($0), unit: UnitMass.kilograms, fractionDigits: 0...0)
+                }
+                wheel(String(localized: "Grams"), selection: tensOfGrams, values: Array(0...99)) {
+                    Format.measurement(Double($0 * 10), unit: UnitMass.grams, fractionDigits: 0...0)
+                }
             }
         }
         .frame(height: 150)
