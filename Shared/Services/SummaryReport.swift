@@ -46,9 +46,9 @@ struct SummaryReport: Equatable, Sendable {
 
         var label: String {
             switch self {
-            case .loggingBegan(let at): "from \(Format.time(at))"
-            case .today: "so far"
-            case .nothingLogged: "not logged"
+            case .loggingBegan(let at): String(localized: "from \(Format.time(at))")
+            case .today: String(localized: "so far")
+            case .nothingLogged: String(localized: "not logged")
             }
         }
     }
@@ -148,38 +148,38 @@ struct SummaryReport: Equatable, Sendable {
             guard latestWeight != nil else { return nil }
             // Two days that read the same are no change, not one weigh-in.
             if let since = firstWeightDate, latestWeightDate != since {
-                return "No change since \(since.formatted(.dateTime.month(.abbreviated).day()))"
+                return String(localized: "No change since \(since.formatted(.dateTime.month(.abbreviated).day()))")
             }
-            return "One weigh-in"
+            return String(localized: "One weigh-in")
         }
         let sign = percent > 0 ? "+" : "−"
-        let share = "\(sign)\(abs(percent).formatted(.number.precision(.fractionLength(1))))%"
-        return "\(Format.gramsChange(change)) (\(share)) since \(since.formatted(.dateTime.month(.abbreviated).day()))"
+        let share = String(localized: "\(sign)\(abs(percent).formatted(.number.precision(.fractionLength(1))))%")
+        return String(localized: "\(Format.gramsChange(change)) (\(share)) since \(since.formatted(.dateTime.month(.abbreviated).day()))")
     }
 
     /// "Averages use 6 complete days." with the days left out named, or the
     /// fallback spelled out. Shown wherever an average is.
     var averagesNote: String {
         guard hasCompleteDays else {
-            return "No complete day yet, so averages use every day logged so far."
+            return String(localized: "No complete day yet, so averages use every day logged so far.")
         }
-        var note = "Averages use \(Format.count(completeDays.count, "complete day"))."
+        var note = String(localized: "Averages use \(completeDays.count) complete day.")
         let partial = partialDays
         guard !partial.isEmpty else { return note }
         let skipped = partial.map { day -> String in
             switch day.partial {
-            case .today: "today (so far)"
-            case .loggingBegan(let at): "\(day.date.formatted(.dateTime.month(.abbreviated).day())) (logging began \(Format.time(at)))"
+            case .today: String(localized: "today (so far)")
+            case .loggingBegan(let at): String(localized: "\(day.date.formatted(.dateTime.month(.abbreviated).day())) (logging began \(Format.time(at)))")
             case .nothingLogged, .none: day.date.formatted(.dateTime.month(.abbreviated).day())
             }
         }
         let unlogged = partial.filter { $0.partial == .nothingLogged }.count
         if unlogged == partial.count {
-            note += " \(Format.count(unlogged, "day")) with nothing logged \(unlogged == 1 ? "is" : "are") left out."
+            note += " " + String(localized: "\(unlogged) day with nothing logged is left out.")
         } else if skipped.count <= 3 {
-            note += " Left out: \(skipped.joined(separator: ", "))."
+            note += " " + String(localized: "Left out: \(skipped.joined(separator: ", ")).")
         } else {
-            note += " \(Format.count(partial.count, "partial or unlogged day")) left out."
+            note += " " + String(localized: "\(partial.count) partial or unlogged day left out.")
         }
         return note
     }
@@ -192,7 +192,7 @@ struct SummaryReport: Equatable, Sendable {
 
     var rangeLabel: String {
         let formatter = Date.FormatStyle.dateTime.month(.abbreviated).day().year()
-        return "\(start.formatted(formatter)) to \(end.formatted(formatter))"
+        return String(localized: "\(start.formatted(formatter)) to \(end.formatted(formatter))")
     }
 
     // MARK: - Building
@@ -284,7 +284,7 @@ struct SummaryReport: Equatable, Sendable {
             .filter { $0.start >= firstDay && $0.start < (calendar.date(byAdding: .day, value: 1, to: lastDay) ?? lastDay) }
             .compactMap { event -> (date: Date, text: String)? in
                 guard let note = event.note?.trimmingCharacters(in: .whitespacesAndNewlines), !note.isEmpty else { return nil }
-                return (date: event.start, text: "\(event.eventKind.label(words: .wetDirty)): \(note)")
+                return (date: event.start, text: String(localized: "\(event.eventKind.label(words: .wetDirty)): \(note)"))
             }
             .sorted { $0.date < $1.date }
         return SummaryReport(

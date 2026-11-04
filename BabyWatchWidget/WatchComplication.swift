@@ -29,7 +29,9 @@ struct LastDiaperComplication: Widget {
 
 struct LogWetComplication: Widget {
     /// A plain String: WidgetKit traps on an interpolated display name.
-    static let name = "Log " + EventKind.wet.label.lowercased()
+    static var name: String {
+        DiaperWords.current == .peePoop ? String(localized: "Log pee") : String(localized: "Log wet")
+    }
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: AppGroup.WidgetKind.watchLogWet, provider: WatchBabyProvider()) { entry in
@@ -43,7 +45,9 @@ struct LogWetComplication: Widget {
 }
 
 struct LogDirtyComplication: Widget {
-    static let name = "Log " + EventKind.dirty.label.lowercased()
+    static var name: String {
+        DiaperWords.current == .peePoop ? String(localized: "Log poop") : String(localized: "Log dirty")
+    }
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: AppGroup.WidgetKind.watchLogDirty, provider: WatchBabyProvider()) { entry in

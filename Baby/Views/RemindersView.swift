@@ -87,7 +87,7 @@ struct FeedReminderOfferView: View {
             }
             .scrollBounceBehavior(.basedOnSize)
             VStack(spacing: AppTheme.tightSpacing) {
-                Button(isAsking ? "Turning on…" : "Turn on reminders") { accept() }
+                Button(isAsking ? String(localized: "Turning on…") : String(localized: "Turn on reminders")) { accept() }
                     .buttonStyle(PrimaryButtonStyle())
                     .disabled(isAsking)
                     .accessibilityIdentifier("reminderOffer.accept")
@@ -130,8 +130,8 @@ struct FeedReminderOfferView: View {
                     Text("Before checkups too")
                         .font(.subheadline.weight(.semibold))
                     Text(events.child?.birthDate == nil && Reminders.nextCheckup == nil
-                        ? "The evening before a newborn visit. Add the birth date in Settings > Baby, or the visit date in Settings > Reminders."
-                        : "The evening before a newborn visit, a note with what you have logged since the last one.")
+                        ? String(localized: "The evening before a newborn visit. Add the birth date in Settings > Baby, or the visit date in Settings > Reminders.")
+                        : String(localized: "The evening before a newborn visit, a note with what you have logged since the last one."))
                         .font(.footnote)
                         .foregroundStyle(AppTheme.ink2)
                         .fixedSize(horizontal: false, vertical: true)
@@ -255,9 +255,9 @@ struct RemindersSection: View {
 
     private var footer: String {
         if isDenied, interval != .off || checkups {
-            return "Notifications are off for Baby Tracker, so these can't arrive."
+            return String(localized: "Notifications are off for Baby Tracker, so these can't arrive.")
         }
-        return "On this phone only. The feed reminder counts from when the last feed started. Checkup reminders arrive the evening before the date you add, or before the usual newborn visits when there is a birth date."
+        return String(localized: "On this phone only. The feed reminder counts from when the last feed started. Checkup reminders arrive the evening before the date you add, or before the usual newborn visits when there is a birth date.")
     }
 
     private func saveDate() {

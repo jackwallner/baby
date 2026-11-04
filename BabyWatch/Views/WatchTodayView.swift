@@ -32,14 +32,14 @@ struct WatchTodayView: View {
                     }
                 }
             }
-            .navigationTitle(summary.childName)
+            .navigationTitle(summary.displayChildName)
         }
     }
 
     /// "Today · Day 3" in the first weeks, "Since 6 AM" with a custom day.
     private func heading(_ summary: NowSummary) -> String {
         guard let day = summary.dayOfLife, day <= 28 else { return summary.window.title() }
-        return "\(summary.window.title()) · Day \(day)"
+        return String(localized: "\(summary.window.title()) · Day \(day)")
     }
 
     private func counts(_ summary: NowSummary) -> some View {
@@ -52,11 +52,11 @@ struct WatchTodayView: View {
                 default: summary.todayDirty
                 }
                 VStack(spacing: 0) {
-                    Text("\(count)")
+                    Text(count.formatted(.number))
                         .font(.system(.title3, design: .rounded).weight(.semibold))
                         .monospacedDigit()
                         .foregroundStyle(AppTheme.ink)
-                    Text(kind == .feed ? (count == 1 ? "feed" : "feeds") : kind.label.lowercased())
+                    Text(kind == .feed ? Format.feedUnit(count) : kind.lowercaseLabel)
                         .font(.caption2)
                         .foregroundStyle(AppTheme.ink2)
                         .lineLimit(1)

@@ -20,24 +20,24 @@ enum FeedReminderInterval: Int, CaseIterable, Identifiable, Sendable {
     /// "2½ hours".
     var label: String {
         switch self {
-        case .off: "Off"
-        case .twoHours: "2 hours"
-        case .twoAndAHalfHours: "2½ hours"
-        case .threeHours: "3 hours"
-        case .threeAndAHalfHours: "3½ hours"
-        case .fourHours: "4 hours"
+        case .off: String(localized: "Off")
+        case .twoHours: String(localized: "2 hours")
+        case .twoAndAHalfHours: String(localized: "2½ hours")
+        case .threeHours: String(localized: "3 hours")
+        case .threeAndAHalfHours: String(localized: "3½ hours")
+        case .fourHours: String(localized: "4 hours")
         }
     }
 
     /// "2½h", for the chips.
     var shortLabel: String {
         switch self {
-        case .off: "Off"
-        case .twoHours: "2h"
-        case .twoAndAHalfHours: "2½h"
-        case .threeHours: "3h"
-        case .threeAndAHalfHours: "3½h"
-        case .fourHours: "4h"
+        case .off: String(localized: "Off")
+        case .twoHours: String(localized: "2h")
+        case .twoAndAHalfHours: String(localized: "2½h")
+        case .threeHours: String(localized: "3h")
+        case .threeAndAHalfHours: String(localized: "3½h")
+        case .fourHours: String(localized: "4h")
         }
     }
 }
@@ -55,11 +55,11 @@ enum FeedingStyle: String, CaseIterable, Identifiable, Sendable {
 
     var label: String {
         switch self {
-        case .breast: "Breast"
-        case .bottle: "Formula"
-        case .both: "Both"
-        case .pumped: "Pumped milk"
-        case .expecting: "Not born yet"
+        case .breast: String(localized: "Breast")
+        case .bottle: String(localized: "Formula")
+        case .both: String(localized: "Both")
+        case .pumped: String(localized: "Pumped milk")
+        case .expecting: String(localized: "Not born yet")
         }
     }
 
@@ -146,9 +146,11 @@ enum Reminders {
         guard interval != .off, !summary.isFeeding, let last = summary.lastFeedAt else { return nil }
         let due = last.addingTimeInterval(interval.duration)
         guard due > now.addingTimeInterval(30) else { return nil }
-        let started = "Last feed started at \(Format.time(last))."
-        let body = summary.nextBreastSide.map { "\(started) Start on \($0.label)." } ?? started
-        return Planned(id: feedID, date: due, title: "\(interval.label) since \(summary.childName)'s last feed", body: body, route: nil)
+        let body = summary.nextBreastSide.map {
+            String(localized: "Last feed started at \(Format.time(last)). Start on \($0.label).")
+        } ?? String(localized: "Last feed started at \(Format.time(last)).")
+        let title = String(localized: "\(interval.label) since \(summary.displayChildName)'s last feed")
+        return Planned(id: feedID, date: due, title: title, body: body, route: nil)
     }
 
     /// The evening before a checkup: the date the parent entered, else the
@@ -165,8 +167,8 @@ enum Reminders {
             return [Planned(
                 id: checkupPrefix + "entered",
                 date: evening,
-                title: "Checkup tomorrow",
-                body: "Feeds, diapers, sleep and weight since the last visit are in Baby Tracker.",
+                title: String(localized: "Checkup tomorrow"),
+                body: String(localized: "Feeds, diapers, sleep and weight since the last visit are in Baby Tracker."),
                 route: checkupRoute
             )]
         }
@@ -177,8 +179,8 @@ enum Reminders {
             return Planned(
                 id: checkupPrefix + "day\(day)",
                 date: evening,
-                title: "Checkup coming up?",
-                body: "Newborn visits come often in the first month. Your log has the feeds, diapers and sleep to bring.",
+                title: String(localized: "Checkup coming up?"),
+                body: String(localized: "Newborn visits come often in the first month. Your log has the feeds, diapers and sleep to bring."),
                 route: checkupRoute
             )
         }
