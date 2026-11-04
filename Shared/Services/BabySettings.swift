@@ -11,10 +11,10 @@ enum AppAppearance: String, CaseIterable {
 
     var label: String {
         switch self {
-        case .system: "System"
-        case .light: "Light"
-        case .dark: "Dark"
-        case .night: "Night light"
+        case .system: String(localized: "System")
+        case .light: String(localized: "Light")
+        case .dark: String(localized: "Dark")
+        case .night: String(localized: "Night light")
         }
     }
 

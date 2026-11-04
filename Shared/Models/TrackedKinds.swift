@@ -33,12 +33,29 @@ struct TrackedKinds: Equatable, Sendable {
 
     /// The kinds in sentence form, for headings: "Feeds, diapers and sleep".
     var headline: String {
-        var parts: [String] = []
-        if contains(.feed) { parts.append("feeds") }
-        if tracksDiapers { parts.append("diapers") }
-        if contains(.sleep) { parts.append("sleep") }
-        let joined = parts.count > 1 ? parts.dropLast().joined(separator: ", ") + " and " + (parts.last ?? "") : parts.joined()
-        return joined.prefix(1).uppercased() + joined.dropFirst()
+        switch (contains(.feed), tracksDiapers, contains(.sleep)) {
+        case (true, true, true): String(localized: "Feeds, diapers and sleep")
+        case (true, true, false): String(localized: "Feeds and diapers")
+        case (true, false, true): String(localized: "Feeds and sleep")
+        case (false, true, true): String(localized: "Diapers and sleep")
+        case (true, false, false): String(localized: "Feeds")
+        case (false, true, false): String(localized: "Diapers")
+        case (false, false, true): String(localized: "Sleep")
+        case (false, false, false): ""
+        }
+    }
+
+    var metadataHeadline: String {
+        switch (contains(.feed), tracksDiapers, contains(.sleep)) {
+        case (true, true, true): String(localized: "feeds, diapers and sleep")
+        case (true, true, false): String(localized: "feeds and diapers")
+        case (true, false, true): String(localized: "feeds and sleep")
+        case (false, true, true): String(localized: "diapers and sleep")
+        case (true, false, false): String(localized: "feeds")
+        case (false, true, false): String(localized: "diapers")
+        case (false, false, true): String(localized: "sleep")
+        case (false, false, false): ""
+        }
     }
 
     func store() {

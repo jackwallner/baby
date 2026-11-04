@@ -118,8 +118,8 @@ struct BabyNowWidgetView: View {
         case .wet: s.todayWet
         default: s.todayDirty
         }
-        let unit = kind == .feed ? (value == 1 ? "feed" : "feeds") : kind.label.lowercased()
-        return Text("\(value)").font(.title2.weight(.semibold)).foregroundStyle(AppTheme.color(for: kind))
+        let unit = kind == .feed ? Format.feedUnit(value) : kind.lowercaseLabel
+        return Text(value.formatted(.number)).font(.title2.weight(.semibold)).foregroundStyle(AppTheme.color(for: kind))
             + Text(" \(unit)").font(.caption).foregroundStyle(AppTheme.ink2)
     }
 
@@ -127,7 +127,7 @@ struct BabyNowWidgetView: View {
         VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
             HStack(spacing: AppTheme.hairSpacing) {
                 Image(systemName: s.leadKind.symbolName).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.color(for: s.leadKind))
-                Text(s.childName).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.ink2).lineLimit(1)
+                Text(s.displayChildName).font(.caption.weight(.semibold)).foregroundStyle(AppTheme.ink2).lineLimit(1)
             }
             Text(s.leadLine(now: entry.date))
                 .font(.headline)
@@ -230,10 +230,10 @@ struct BabyLogWidgetView: View {
     private func logButton(_ kind: EventKind) -> some View {
         if let undo = undo(for: kind) {
             Button(intent: UndoWidgetLogIntent(eventID: undo.eventID)) {
-                face(kind, symbol: "checkmark", label: "Undo")
+                face(kind, symbol: "checkmark", label: String(localized: "Undo"))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Undo \(kind.label.lowercased())")
+            .accessibilityLabel(kind.undoLabel)
             .accessibilityValue("Logged just now")
         } else {
             tapButton(kind)
@@ -241,7 +241,9 @@ struct BabyLogWidgetView: View {
     }
 
     private func tapButton(_ kind: EventKind) -> some View {
-        let label = kind == .sleep ? (s.isSleeping ? "Wake" : "Sleep") : kind.label
+        let label = kind == .sleep
+            ? (s.isSleeping ? String(localized: "Wake") : String(localized: "Sleep"))
+            : kind.label
         let choice: LogChoice = switch kind {
         case .feed: .feed
         case .wet: .wet
@@ -252,7 +254,7 @@ struct BabyLogWidgetView: View {
             face(kind, symbol: kind.symbolName, label: label)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(kind == .sleep ? label : "Log \(label.lowercased())")
+        .accessibilityLabel(kind == .sleep ? label : kind.logLabel)
     }
 
     private func face(_ kind: EventKind, symbol: String, label: String) -> some View {

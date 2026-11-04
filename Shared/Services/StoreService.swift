@@ -129,27 +129,59 @@ extension Package {
 
     var babyDisplayName: String {
         switch babyPackageKind {
-        case .lifetime: "Lifetime"
-        case .yearly: "Yearly"
-        case .monthly: "Monthly"
+        case .lifetime: String(localized: "Lifetime")
+        case .yearly: String(localized: "Yearly")
+        case .monthly: String(localized: "Monthly")
         case .other: storeProduct.localizedTitle
         }
     }
 
     var babyPriceLabel: String {
         guard let period = storeProduct.subscriptionPeriod else { return storeProduct.localizedPriceString }
-        let unit: String
         switch period.unit {
-        case .day: unit = period.value == 1 ? "day" : "days"
-        case .week: unit = period.value == 1 ? "week" : "weeks"
-        case .month: unit = period.value == 1 ? "month" : "months"
-        case .year: unit = period.value == 1 ? "year" : "years"
-        @unknown default: unit = ""
+        case .day:
+            return period.value == 1
+                ? String(localized: "\(storeProduct.localizedPriceString) / day")
+                : String(localized: "\(storeProduct.localizedPriceString) / \(period.value) days")
+        case .week:
+            return period.value == 1
+                ? String(localized: "\(storeProduct.localizedPriceString) / week")
+                : String(localized: "\(storeProduct.localizedPriceString) / \(period.value) weeks")
+        case .month:
+            return period.value == 1
+                ? String(localized: "\(storeProduct.localizedPriceString) / month")
+                : String(localized: "\(storeProduct.localizedPriceString) / \(period.value) months")
+        case .year:
+            return period.value == 1
+                ? String(localized: "\(storeProduct.localizedPriceString) / year")
+                : String(localized: "\(storeProduct.localizedPriceString) / \(period.value) years")
+        @unknown default:
+            return storeProduct.localizedPriceString
         }
-        if period.value == 1 {
-            return "\(storeProduct.localizedPriceString) / \(unit)"
+    }
+
+    var babyBilledAmount: String {
+        guard let period = storeProduct.subscriptionPeriod else { return storeProduct.localizedPriceString }
+        switch period.unit {
+        case .day:
+            return period.value == 1
+                ? String(localized: "\(storeProduct.localizedPriceString) per day")
+                : String(localized: "\(storeProduct.localizedPriceString) per \(period.value) days")
+        case .week:
+            return period.value == 1
+                ? String(localized: "\(storeProduct.localizedPriceString) per week")
+                : String(localized: "\(storeProduct.localizedPriceString) per \(period.value) weeks")
+        case .month:
+            return period.value == 1
+                ? String(localized: "\(storeProduct.localizedPriceString) per month")
+                : String(localized: "\(storeProduct.localizedPriceString) per \(period.value) months")
+        case .year:
+            return period.value == 1
+                ? String(localized: "\(storeProduct.localizedPriceString) per year")
+                : String(localized: "\(storeProduct.localizedPriceString) per \(period.value) years")
+        @unknown default:
+            return storeProduct.localizedPriceString
         }
-        return "\(storeProduct.localizedPriceString) / \(period.value) \(unit)"
     }
 
     /// Per-week equivalent of the recurring price, shown on the annual card so
@@ -165,10 +197,10 @@ extension Package {
         }
         let period = intro.subscriptionPeriod
         switch period.unit {
-        case .day: return "\(period.value)-day free trial"
-        case .week: return "\(period.value * 7)-day free trial"
-        case .month: return period.value == 1 ? "1-month free trial" : "\(period.value)-month free trial"
-        case .year: return period.value == 1 ? "1-year free trial" : "\(period.value)-year free trial"
+        case .day: return String(localized: "\(period.value)-day free trial")
+        case .week: return String(localized: "\(period.value * 7)-day free trial")
+        case .month: return String(localized: "\(period.value)-month free trial")
+        case .year: return String(localized: "\(period.value)-year free trial")
         @unknown default: return nil
         }
     }
@@ -468,7 +500,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
         if !hasResolvedEntitlements { await refreshStatus() }
         if isPro { return .purchased }
         guard hasResolvedEntitlements else {
-            errorMessage = "Could not verify purchases. Please try again."
+            errorMessage = String(localized: "Could not verify purchases. Please try again.")
             return nil
         }
         isLoading = true
@@ -512,16 +544,16 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
 
     func restore() async {
         guard isConfigured else {
-            errorMessage = "Purchases aren't available right now. Please try again later."
+            errorMessage = String(localized: "Purchases aren't available right now. Please try again later.")
             return
         }
         isLoading = true
         defer { isLoading = false }
         do {
             update(customerInfo: try await client.restorePurchases())
-            errorMessage = isPro ? nil : "No active Baby+ purchase was found for this Apple ID."
+            errorMessage = isPro ? nil : String(localized: "No active Baby+ purchase was found for this Apple ID.")
         } catch {
-            errorMessage = "Restore failed. Please try again."
+            errorMessage = String(localized: "Restore failed. Please try again.")
         }
     }
 
@@ -623,7 +655,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
             update(customerInfo: try await client.customerInfo(fetchPolicy: .fetchCurrent))
         } catch {
             entitlementCheckFailed = true
-            errorMessage = "Could not verify purchases."
+            errorMessage = String(localized: "Could not verify purchases.")
         }
     }
 
@@ -639,7 +671,7 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
             await refreshIntroEligibility()
         } catch {
             logger.error("Product fetch failed: \(String(describing: error), privacy: .public)")
-            errorMessage = "Couldn't load purchase options. Check your connection and try again."
+            errorMessage = String(localized: "Couldn't load purchase options. Check your connection and try again.")
         }
     }
 

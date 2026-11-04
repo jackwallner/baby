@@ -117,8 +117,8 @@ struct BabyOnboardingView: View {
 
     private var pathChoice: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacing) {
-            pathOption(.start, title: "Start a new log", detail: "You're the first to log for this baby.", symbol: "plus")
-            pathOption(.join, title: "Join a shared log", detail: "Your partner or someone else already started. Scan their code.", symbol: "person.2.fill")
+            pathOption(.start, title: String(localized: "Start a new log"), detail: String(localized: "You're the first to log for this baby."), symbol: "plus")
+            pathOption(.join, title: String(localized: "Join a shared log"), detail: String(localized: "Your partner or someone else already started. Scan their code."), symbol: "person.2.fill")
         }
         .accessibilityElement(children: .contain)
     }

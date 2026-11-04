@@ -39,14 +39,14 @@ enum SampleReport {
             ))
         }
         return SummaryReport(
-            childName: "Example baby",
+            childName: String(localized: "Example baby"),
             birthDate: birth,
             start: start,
             end: today,
             days: days,
             notes: [
-                (date: start, text: "Feed: latch felt better on the left"),
-                (date: calendar.date(byAdding: .day, value: 3, to: start) ?? start, text: "Weight: weighed at the lactation clinic"),
+                (date: start, text: String(localized: "Feed: latch felt better on the left")),
+                (date: calendar.date(byAdding: .day, value: 3, to: start) ?? start, text: String(localized: "Weight: weighed at the lactation clinic")),
             ]
         )
     }

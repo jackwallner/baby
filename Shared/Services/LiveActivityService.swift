@@ -22,7 +22,7 @@ struct LiveActivityState: Equatable, Sendable {
         } else {
             return nil
         }
-        childName = summary.childName
+        childName = summary.displayChildName
         childID = summary.childID
     }
 }
