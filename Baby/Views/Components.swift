@@ -247,10 +247,13 @@ struct UndoToast: View {
                     .minimumScaleFactor(0.8)
                 Spacer(minLength: 0)
             }
-            Button("Undo", action: undo)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(AppTheme.accent)
-                .frame(minWidth: 44, minHeight: 44)
+            Button(action: undo) {
+                Text("Undo")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
         }
         .padding(.leading, AppTheme.spacing)
         .padding(.trailing, AppTheme.spacing)
