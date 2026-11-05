@@ -45,6 +45,7 @@ struct ReportsTabView: View {
 /// paywall shows the same reports as previews (the example page in full when
 /// nothing is logged, App Review 4.3).
 struct SummaryView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var store: StoreService
     @EnvironmentObject private var settings: BabySettings
@@ -344,10 +345,12 @@ struct SummaryView: View {
     @ViewBuilder
     private var exportRow: some View {
         let label = HStack(spacing: AppTheme.spacing) {
-            Image(systemName: "tablecells")
-                .font(.title3)
-                .foregroundStyle(AppTheme.accent)
-                .frame(width: AppTheme.pageThumbnailWidth)
+            if !dynamicTypeSize.isAccessibilitySize {
+                Image(systemName: "tablecells")
+                    .font(.title3)
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(width: AppTheme.pageThumbnailWidth)
+            }
             VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
                 Text("Spreadsheet (CSV)")
                     .font(.headline)

@@ -91,7 +91,8 @@ final class ReleaseJourneysUITests: XCTestCase {
         firstWeeks.tap()
         XCTAssertTrue(element("tallyTable", in: app).waitForExistence(timeout: 10))
         QA.checkpoint(app, "first-weeks")
-        let back = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Settings", "Einstellungen"])).firstMatch
+        // The unfolded Duo labels the back button "Back", not the parent title.
+        let back = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@ OR identifier == %@", ["Settings", "Einstellungen", "Back", "Zurück"], "BackButton")).firstMatch
         XCTAssertTrue(back.waitForExistence(timeout: 10))
         back.tap()
         let stains = either("Stain helper", "Fleckenhilfe", in: app)

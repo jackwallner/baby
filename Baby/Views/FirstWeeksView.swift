@@ -135,6 +135,8 @@ struct FirstWeeksView: View {
         .foregroundStyle(AppTheme.ink3)
         .padding(.horizontal, AppTheme.looseSpacing)
         .padding(.vertical, AppTheme.tightSpacing)
+        // Each row's own label names its columns, so the abbreviated heads add nothing.
+        .accessibilityHidden(true)
     }
 
     private func row(day: Int, date: Date, tally: DayTally, range: Guidance.DayRange, state: RowState) -> some View {

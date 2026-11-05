@@ -163,6 +163,14 @@ struct EventEditorView: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // A long translated title wraps between the bar buttons instead of truncating.
+                ToolbarItem(placement: .principal) {
+                    Text(title)
+                        .font(.headline)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                        .multilineTextAlignment(.center)
+                }
                 if isNew {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel") { dismiss() }

@@ -609,11 +609,14 @@ private struct HomeTabButton: View {
             VStack(spacing: AppTheme.hairSpacing) {
                 Image(systemName: icon)
                     .font(.system(size: AppTheme.tabIconSize, weight: .medium))
+                    .foregroundStyle(isSelected ? AppTheme.accent : AppTheme.ink2)
+                // The translucent capsule lets page content through, so the label
+                // uses ink, which holds 4.5:1 over any of it.
                 Text(label)
                     .font(.system(size: AppTheme.tabLabelSize, weight: .semibold))
                     .lineLimit(1)
+                    .foregroundStyle(isSelected ? AppTheme.ink : AppTheme.ink2)
             }
-            .foregroundStyle(isSelected ? AppTheme.accent : AppTheme.ink2)
             .frame(width: AppTheme.tabWidth, height: AppTheme.tabHeight)
             .background(isSelected ? AppTheme.accent.opacity(0.08) : .clear, in: Capsule())
             .contentShape(Capsule())
