@@ -1,0 +1,34 @@
+{
+ "repo": "baby",
+ "github": "jackwallner/baby",
+ "bundle": "com.jackwallner.baby",
+ "family": "scene",
+ "asc_id": "6811133796",
+ "live_version": "1.4.1",
+ "targets": [
+  {
+   "rank": 36,
+   "store_locale": "it",
+   "lang": "it",
+   "apple_languages": "(it)",
+   "apple_locale": "it_IT",
+   "regions": [
+    "Italy"
+   ],
+   "customers": 18.0
+  },
+  {
+   "rank": 51,
+   "store_locale": "pt-BR",
+   "lang": "pt-BR",
+   "apple_languages": "(pt-BR)",
+   "apple_locale": "pt_BR",
+   "regions": [
+    "Brazil"
+   ],
+   "customers": 13.0
+  }
+ ],
+ "store_locales_missing": [],
+ "dest": "artifacts/asc-screenshots/l10n-20261105"
+}
