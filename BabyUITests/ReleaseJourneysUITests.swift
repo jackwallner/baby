@@ -27,6 +27,7 @@ final class ReleaseJourneysUITests: XCTestCase {
         QA.checkpoint(app, "first-log-empty")
         app.buttons["tab.reports"].tap()
         XCTAssertTrue(element("paywall.preview.pediatricianSummary", in: app).waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["paywall.billedAmount"].waitForExistence(timeout: 30))
         QA.checkpoint(app, "upgrade-before-anything-logged", paywall: true)
     }
 
@@ -35,23 +36,26 @@ final class ReleaseJourneysUITests: XCTestCase {
         logHome("log", in: app)
         app.buttons["log.feed"].tap()
         XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 5))
+        toastGone(in: app)
         QA.checkpoint(app, "feed-sides")
         app.buttons["feedSide.left"].tap()
+        toastGone(in: app)
         QA.checkpoint(app, "feed-side-chosen")
         app.buttons["feedSide.done"].tap()
         XCTAssertTrue(app.buttons["log.wet"].waitForExistence(timeout: 5))
         let before = counts(in: app)
         app.buttons["log.wet"].tap()
         XCTAssertTrue(undo(in: app).waitForExistence(timeout: 5))
+        // The audit can't look at the toast: it fails the journey if the toast
+        // expires mid-checkpoint, so its tap target is asserted here instead.
+        XCTAssertGreaterThanOrEqual(undo(in: app).frame.height, 44)
         undo(in: app).tap()
         XCTAssertEqual(counts(in: app), before, "Undo takes the pee back")
-        // A checkpoint outlasts the toast, so it looks at a second tap's toast.
-        app.buttons["log.wet"].tap()
-        XCTAssertTrue(undo(in: app).waitForExistence(timeout: 5))
-        QA.checkpoint(app, "undo-toast")
         app.buttons["log.sleep"].tap()
+        toastGone(in: app)
         QA.checkpoint(app, "sleep-running")
         app.buttons["log.sleep"].tap()
+        toastGone(in: app)
         logHome("log-after-wake", in: app)
         app.buttons["addOlderEntry"].tap()
         QA.checkpoint(app, "older-entry-menu")
@@ -130,12 +134,15 @@ final class ReleaseJourneysUITests: XCTestCase {
 
         app.buttons["log.feed"].tap()
         XCTAssertTrue(app.buttons["feedSide.left"].waitForExistence(timeout: 5))
+        toastGone(in: app)
         QA.checkpoint(app, "core-feed-logged")
         app.buttons["feedSide.left"].tap()
         app.buttons["feedSide.done"].tap()
         app.buttons["log.wet"].tap()
+        toastGone(in: app)
         QA.checkpoint(app, "core-pee-logged")
         app.buttons["log.dirty"].tap()
+        toastGone(in: app)
         QA.checkpoint(app, "core-poop-logged")
 
         let logged = counts(in: app)
@@ -185,14 +192,28 @@ final class ReleaseJourneysUITests: XCTestCase {
         app.buttons.matching(NSPredicate(format: "label IN %@", [english, german])).firstMatch
     }
 
-    /// Scrolls until the target is clear of the floating capsule: isHittable is
-    /// already true beneath it, and a tap there lands on a tab.
+    /// A checkpoint fails the journey if an element it is reading disappears,
+    /// and the Undo toast lasts 8 seconds.
+    private func toastGone(in app: XCUIApplication) {
+        XCTAssertTrue(undo(in: app).waitForNonExistence(timeout: 20))
+    }
+
+    /// Scrolls in short drags, held so nothing coasts, until the target is clear
+    /// of the capsule and the navigation bar: isHittable is already true beneath
+    /// them, and a tap there lands on a tab or scrolls to the top. The drag runs
+    /// under the capsule, which sits over the open pane when unfolded.
     private func scroll(until target: XCUIElement, in app: XCUIApplication) {
         let page = app.windows.firstMatch
         let capsule = app.buttons["tab.settings"].frame
-        for _ in 0..<12 where !(target.exists && target.isHittable && !target.frame.intersects(capsule)) {
-            QA.swipe(page, .up)
+        let bar = app.navigationBars.firstMatch
+        let top = bar.exists ? bar.frame.maxY : 0
+        let x = capsule.midX / page.frame.width
+        let start = page.coordinate(withNormalizedOffset: CGVector(dx: x, dy: 0.65))
+        let end = page.coordinate(withNormalizedOffset: CGVector(dx: x, dy: 0.35))
+        for _ in 0..<40 {
+            if target.exists, target.isHittable, target.frame.minY >= top, !target.frame.intersects(capsule) { return }
+            start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .fast, thenHoldForDuration: 0.3)
         }
-        XCTAssertTrue(target.waitForExistence(timeout: 5))
+        XCTFail("never scrolled clear to \(target)")
     }
 }
