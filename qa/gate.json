@@ -1,0 +1,18 @@
+{
+  "project": "Baby.xcodeproj",
+  "scheme": "BabyUITests",
+  "uitests_dir": "BabyUITests",
+  "journeys": [
+    "BabyUITests/ReleaseJourneysUITests"
+  ],
+  "personas": [
+    "newcomer",
+    "accessibility",
+    "reduce-motion",
+    "german",
+    "duo"
+  ],
+  "persona_overrides": {},
+  "slot": null,
+  "bundle_id": "com.jackwallner.baby"
+}

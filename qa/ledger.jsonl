@@ -1,0 +1,2 @@
+{"created": "2026-11-05T02:03:24+00:00", "id": "Q001", "match": "overlap|test3HistoryListAndCalendar|*|* / tab.*", "reason": "History rows scroll on beneath the translucent floating capsule by design (.claude/rules/interface.md, 2026-10-04); the last row still ends above it", "status": "accepted"}
+{"created": "2026-11-05T02:03:25+00:00", "id": "Q002", "match": "copy|*|first-weeks|\u2013", "reason": "Empty-cell placeholder in the First Weeks number table for days before the first entry (.claude/rules/interface.md, persona pass 2026-10-21), not prose", "status": "accepted"}
