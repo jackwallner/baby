@@ -730,11 +730,19 @@ private struct TodayTotalsView: View {
                 }
             HStack(spacing: AppTheme.hairSpacing) {
                 KindDot(kind: kind, size: AppTheme.legendDotSize)
-                Text(unit(kind, count: totals.count(kind)))
+                // Held the same way: German's "Stuhlgang" and "Stuhlgänge" scale
+                // differently, and a tap must not resize the row.
+                Text(verbatim: "0")
                     .font(.caption)
-                    .foregroundStyle(AppTheme.ink2)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .hidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .overlay(alignment: .leading) {
+                        Text(unit(kind, count: totals.count(kind)))
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.ink2)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
