@@ -91,10 +91,7 @@ final class ReleaseJourneysUITests: XCTestCase {
         firstWeeks.tap()
         XCTAssertTrue(element("tallyTable", in: app).waitForExistence(timeout: 10))
         QA.checkpoint(app, "first-weeks")
-        // The unfolded Duo labels the back button "Back", not the parent title.
-        let back = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@ OR identifier == %@", ["Settings", "Einstellungen", "Back", "Zurück"], "BackButton")).firstMatch
-        XCTAssertTrue(back.waitForExistence(timeout: 10))
-        back.tap()
+        back(in: app).tap()
         let stains = either("Stain helper", "Fleckenhilfe", in: app)
         scroll(until: stains, in: app)
         stains.tap()
@@ -195,6 +192,12 @@ final class ReleaseJourneysUITests: XCTestCase {
         app.buttons.matching(NSPredicate(format: "label IN %@", [english, german])).firstMatch
     }
 
+    /// The bar's back button, which the unfolded iPhone Duo labels "Back".
+    private func back(in app: XCUIApplication) -> XCUIElement {
+        let bar = app.navigationBars.buttons.firstMatch
+        return bar.waitForExistence(timeout: 3) ? bar : either("Back", "Zurück", in: app)
+    }
+
     /// A checkpoint fails the journey if an element it is reading disappears,
     /// and the Undo toast lasts 8 seconds.
     private func toastGone(in app: XCUIApplication) {
@@ -207,7 +210,7 @@ final class ReleaseJourneysUITests: XCTestCase {
     /// under the capsule, which sits over the open pane when unfolded.
     private func scroll(until target: XCUIElement, in app: XCUIApplication) {
         let page = app.windows.firstMatch
-        let capsule = app.buttons["tab.settings"].frame
+        let capsule = app.buttons["tab.log"].frame.union(app.buttons["tab.settings"].frame)
         let bar = app.navigationBars.firstMatch
         let top = bar.exists ? bar.frame.maxY : 0
         let x = capsule.midX / page.frame.width

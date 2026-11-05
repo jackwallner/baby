@@ -75,3 +75,10 @@ paths:
   run 223743). A pane's size class must never change at runtime; with
   `.compact` from launch, gh-sim runs 231043 (Log) and 233930 (First Weeks)
   drew centered titles, a leading back button and full panes.
+- Open (2026-11-05, local iOS 27.1 simulator): the same look came back on every
+  launch, folded first or not. The open tab's pushed screens draw a leading
+  title and a back button at the pane's trailing side, and pages end about
+  100 pt short of the fold (84 pt, the width of the side status column, plus
+  the margin). The back button works, and its label is "Back". Ignoring the
+  trailing safe area inside a narrower frame changed nothing. Phones and the
+  folded Duo are not affected.

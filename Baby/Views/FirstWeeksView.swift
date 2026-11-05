@@ -128,15 +128,13 @@ struct FirstWeeksView: View {
             Text("DAY").frame(width: 44, alignment: .leading)
             if settings.tracked.contains(.wet) { Text("WET").frame(maxWidth: .infinity) }
             if settings.tracked.contains(.dirty) { Text("DIRTY").frame(maxWidth: .infinity) }
-            if settings.tracked.contains(.feed) { Text("FEEDS").frame(maxWidth: .infinity) }
+            if settings.tracked.contains(.feed) { Text("FEEDS").frame(maxWidth: .infinity).accessibilityLabel("Feeds") }
             Text("REFERENCE").frame(width: 92, alignment: .trailing)
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(AppTheme.ink3)
         .padding(.horizontal, AppTheme.looseSpacing)
         .padding(.vertical, AppTheme.tightSpacing)
-        // Each row's own label names its columns, so the abbreviated heads add nothing.
-        .accessibilityHidden(true)
     }
 
     private func row(day: Int, date: Date, tally: DayTally, range: Guidance.DayRange, state: RowState) -> some View {

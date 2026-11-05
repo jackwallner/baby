@@ -18995,6 +18995,78 @@
         }
       }
     },
+    "Log a sleep" : {
+      "comment" : "Title of the editor for a new sleep. Keep it short: it sits between two bar buttons.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlaf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log sleep"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sueño"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonno"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sono"
+          }
+        }
+      }
+    },
+    "Log entry" : {
+      "comment" : "Editor button that saves a new entry. A verb, unlike the Log tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintragen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar"
+          }
+        }
+      }
+    },
     "LONGEST" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -20016,7 +20088,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Volle Windel eintragen"
+            "value" : "Volle Windel"
           }
         },
         "en" : {
@@ -20028,19 +20100,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar pañal sucio"
+            "value" : "Pañal sucio"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registra pannolino sporco"
+            "value" : "Pannolino sporco"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar fralda suja"
+            "value" : "Fralda suja"
           }
         }
       }
@@ -20086,7 +20158,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mahlzeit eintragen"
+            "value" : "Mahlzeit"
           }
         },
         "en" : {
@@ -20098,19 +20170,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar toma"
+            "value" : "Toma"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registra poppata"
+            "value" : "Poppata"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar mamada"
+            "value" : "Mamada"
           }
         }
       }
@@ -20261,7 +20333,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pipi-Windel eintragen"
+            "value" : "Pipi-Windel"
           }
         },
         "en" : {
@@ -20273,19 +20345,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar pañal con pipí"
+            "value" : "Pañal con pipí"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registra pannolino con pipì"
+            "value" : "Pannolino con pipì"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar fralda de xixi"
+            "value" : "Fralda com xixi"
           }
         }
       }
@@ -20331,7 +20403,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kacka-Windel eintragen"
+            "value" : "Kacka-Windel"
           }
         },
         "en" : {
@@ -20343,19 +20415,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar pañal con popó"
+            "value" : "Pañal con popó"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registra pannolino con cacca"
+            "value" : "Pannolino con cacca"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar fralda de cocô"
+            "value" : "Fralda com cocô"
           }
         }
       }
@@ -20401,7 +20473,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gewicht eintragen"
+            "value" : "Gewicht"
           }
         },
         "en" : {
@@ -20413,19 +20485,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar peso"
+            "value" : "Peso"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registra peso"
+            "value" : "Peso"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar peso"
+            "value" : "Peso"
           }
         }
       }
@@ -20436,7 +20508,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nasse Windel eintragen"
+            "value" : "Nasse Windel"
           }
         },
         "en" : {
@@ -20448,19 +20520,19 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar pañal mojado"
+            "value" : "Pañal mojado"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registra pannolino bagnato"
+            "value" : "Pannolino bagnato"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registrar fralda molhada"
+            "value" : "Fralda molhada"
           }
         }
       }

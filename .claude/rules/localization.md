@@ -36,6 +36,11 @@ A side, a trial length or a lowercase word is never interpolated into a sentence
 each case gets its own key, so a language can inflect it. `measurement` keeps the
 unit it is given (`.providedUnit`, medium style).
 
+A word that is both noun and verb gets two keys: `Log` is the tab (German
+"Protokoll"), `Log entry` is the editor's save button ("Eintragen"). Editor titles
+sit between two bar buttons, so translations of `Log a feed` and its siblings are
+the bare noun; the button already says what happens.
+
 Use Foundation formatters for dates, numbers, units and durations. Prices come
 from StoreKit. Translate stored defaults only when displaying them. Never
 translate or rewrite event values, CloudKit fields, share titles, analytics

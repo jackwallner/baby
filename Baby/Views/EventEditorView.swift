@@ -163,20 +163,12 @@ struct EventEditorView: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // A long translated title wraps between the bar buttons instead of truncating.
-                ToolbarItem(placement: .principal) {
-                    Text(title)
-                        .font(.headline)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.8)
-                        .multilineTextAlignment(.center)
-                }
                 if isNew {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel") { dismiss() }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Log") { logNew() }
+                        Button("Log entry") { logNew() }
                             .fontWeight(.semibold)
                             // A sleep of no length is not a sleep: set how long first.
                             .disabled(kind == .sleep && !draft.isTimed && draft.durationMinutes == 0)
@@ -234,7 +226,7 @@ struct EventEditorView: View {
             } else {
                 DiaperWords.current == .peePoop ? String(localized: "Poop diaper") : String(localized: "Dirty diaper")
             }
-        case .sleep: isNew ? String(localized: "Log sleep") : String(localized: "Sleep")
+        case .sleep: isNew ? String(localized: "Log a sleep") : String(localized: "Sleep")
         case .weight: isNew ? String(localized: "Log a weight") : String(localized: "Weight")
         }
     }
