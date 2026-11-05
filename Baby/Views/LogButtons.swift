@@ -296,13 +296,16 @@ struct FeedSideRow: View {
             ? AnyLayout(VStackLayout(spacing: AppTheme.tightSpacing))
             : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))) {
             FeedSideChips(selection: selection)
-            Button("Done") {
+            Button {
                 Haptics.selected()
                 animate { prompt.close() }
+            } label: {
+                Text("Done")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(AppTheme.accent)
-            .frame(minWidth: 44, minHeight: 44)
             .fixedSize()
             .accessibilityLabel("Done adding a side")
             .accessibilityIdentifier("feedSide.done")

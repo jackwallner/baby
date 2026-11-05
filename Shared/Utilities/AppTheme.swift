@@ -132,7 +132,7 @@ enum AppTheme {
     static let cardElevated = Color(uiColor: cardElevatedUIColor)
     static let inkUIColor = UIColor(light: .init(0.11, 0.10, 0.09), dark: .init(0.95, 0.94, 0.92), night: .init(0.86, 0.68, 0.52))
     static let ink = Color(uiColor: inkUIColor)
-    static let ink2 = Color(light: .init(0.42, 0.40, 0.38), dark: .init(0.68, 0.66, 0.63), night: .init(0.64, 0.49, 0.37))
+    static let ink2 = Color(light: .init(0.34, 0.32, 0.30), dark: .init(0.68, 0.66, 0.63), night: .init(0.64, 0.49, 0.37))
     static let ink3 = Color(light: .init(0.43, 0.41, 0.39), dark: .init(0.62, 0.60, 0.58), night: .init(0.61, 0.47, 0.36))
     /// Kind colours. Amber, blue, brown, indigo: distinct at a glance and at 3am.
     /// Night light swaps blue and indigo for warm-shifted slate and mauve.
@@ -141,7 +141,7 @@ enum AppTheme {
     static let dirty = Color(light: .init(0.52, 0.38, 0.22), dark: .init(0.72, 0.58, 0.40), night: .init(0.62, 0.56, 0.36))
     static let sleep = Color(light: .init(0.36, 0.34, 0.78), dark: .init(0.62, 0.60, 0.95), night: .init(0.64, 0.50, 0.58))
     /// Primary actions that are not one of the four kinds: onboarding, paywall.
-    static let accentUIColor = UIColor(light: .init(0.70, 0.30, 0.20), dark: .init(0.95, 0.55, 0.42), night: .init(0.84, 0.48, 0.34))
+    static let accentUIColor = UIColor(light: .init(0.62, 0.25, 0.16), dark: .init(0.95, 0.55, 0.42), night: .init(0.84, 0.48, 0.34))
     static let accent = Color(uiColor: accentUIColor)
     static let notice = Color(light: .init(0.60, 0.36, 0.06), dark: .init(0.95, 0.68, 0.30), night: .init(0.84, 0.56, 0.26))
     /// Strokes inside care graphics and icon rings.

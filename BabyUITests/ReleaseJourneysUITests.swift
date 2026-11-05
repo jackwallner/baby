@@ -91,7 +91,9 @@ final class ReleaseJourneysUITests: XCTestCase {
         firstWeeks.tap()
         XCTAssertTrue(element("tallyTable", in: app).waitForExistence(timeout: 10))
         QA.checkpoint(app, "first-weeks")
-        app.navigationBars.buttons.firstMatch.tap()
+        let back = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Settings", "Einstellungen"])).firstMatch
+        XCTAssertTrue(back.waitForExistence(timeout: 10))
+        back.tap()
         let stains = either("Stain helper", "Fleckenhilfe", in: app)
         scroll(until: stains, in: app)
         stains.tap()

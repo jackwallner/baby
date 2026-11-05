@@ -8,6 +8,7 @@ import SwiftUI
 struct ReportPreviews: View {
     @EnvironmentObject private var events: EventStore
     var focus: PlusFeature?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var page: UIImage?
     @State private var pageData: Data?
@@ -56,12 +57,16 @@ struct ReportPreviews: View {
                 .overlay { if !isExample { badge } }
                 .graphicBorder()
             VStack(alignment: .leading, spacing: AppTheme.hairSpacing) {
-                HStack(spacing: AppTheme.tightSpacing) {
+                // Beside the title, not on the page: the page carries
+                // its own example stamp in that corner.
+                let layout = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing))
+                    : AnyLayout(HStackLayout(spacing: AppTheme.tightSpacing))
+                layout {
                     Text(feature.title)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(AppTheme.ink)
-                    // Beside the title, not on the page: the page carries
-                    // its own example stamp in that corner.
+                        .fixedSize(horizontal: false, vertical: true)
                     if isExample { badge }
                 }
                 Text(feature.pitchLine)
@@ -84,6 +89,8 @@ struct ReportPreviews: View {
         Label(isExample ? String(localized: "Example") : String(localized: "Baby+"), systemImage: isExample ? "doc.text.magnifyingglass" : "lock.fill")
             .font(.caption.weight(.semibold))
             .foregroundStyle(isExample ? AppTheme.ink2 : AppTheme.ink)
+            .lineLimit(1)
+            .fixedSize()
             .padding(.horizontal, AppTheme.tightSpacing)
             .padding(.vertical, AppTheme.hairSpacing)
             .background(AppTheme.cardElevated, in: Capsule())

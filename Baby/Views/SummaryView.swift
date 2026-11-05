@@ -437,6 +437,7 @@ enum ReportRange: CaseIterable, Hashable {
 
 /// A number at a glance: a kind, its daily figure and one supporting line.
 private struct StatTile: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let kind: EventKind
     let value: String
     let unit: String
@@ -449,8 +450,9 @@ private struct StatTile: View {
                 Text(unit)
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(AppTheme.ink2)
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                     .minimumScaleFactor(0.8)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Text(value)
                 .font(.system(.title, design: .rounded, weight: .bold))

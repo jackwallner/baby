@@ -734,6 +734,7 @@ private struct TodayTotalsView: View {
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

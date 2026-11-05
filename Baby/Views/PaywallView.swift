@@ -8,6 +8,7 @@ import SwiftUI
 /// `legalFooter` and `disclosure` render in every state including loading
 /// and failure.
 struct BabyPaywallView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: StoreService
     @EnvironmentObject private var events: EventStore
@@ -110,19 +111,30 @@ struct BabyPaywallView: View {
             VStack(spacing: AppTheme.spacing) {
                 hero
                     .padding(.horizontal, AppTheme.margin)
-                ReportPreviews(focus: focus)
-                Group {
-                    plans
-                    checkout
-                    legalFooter
+                // At accessibility sizes the plans come first, so the billed
+                // amount is on the first screen rather than below the previews.
+                if dynamicTypeSize.isAccessibilitySize {
+                    purchase
+                    ReportPreviews(focus: focus)
+                } else {
+                    ReportPreviews(focus: focus)
+                    purchase
                 }
-                .padding(.horizontal, AppTheme.margin)
             }
             .padding(.top, displayCloseButton ? 44 : AppTheme.tightSpacing)
             .padding(.bottom, AppTheme.tightSpacing)
             .frame(maxWidth: .infinity)
         }
         .scrollBounceBehavior(.basedOnSize)
+    }
+
+    private var purchase: some View {
+        Group {
+            plans
+            checkout
+            legalFooter
+        }
+        .padding(.horizontal, AppTheme.margin)
     }
 
     private var subscriberContent: some View {
@@ -332,17 +344,25 @@ struct BabyPaywallView: View {
 
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: AppTheme.tightSpacing) {
-                    Link("Terms of Use", destination: BabyLinks.standardEULA)
+                    legalLink("Terms of Use", BabyLinks.standardEULA)
                     Text("·").accessibilityHidden(true)
-                    Link("Privacy Policy", destination: BabyLinks.privacyPolicy)
+                    legalLink("Privacy Policy", BabyLinks.privacyPolicy)
                 }
                 VStack(spacing: AppTheme.hairSpacing) {
-                    Link("Terms of Use", destination: BabyLinks.standardEULA)
-                    Link("Privacy Policy", destination: BabyLinks.privacyPolicy)
+                    legalLink("Terms of Use", BabyLinks.standardEULA)
+                    legalLink("Privacy Policy", BabyLinks.privacyPolicy)
                 }
             }
             .font(.caption.weight(.semibold))
             .foregroundStyle(AppTheme.ink2)
+        }
+    }
+
+    private func legalLink(_ title: LocalizedStringKey, _ url: URL) -> some View {
+        Link(destination: url) {
+            Text(title)
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
         }
     }
 

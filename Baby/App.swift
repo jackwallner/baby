@@ -615,7 +615,7 @@ private struct HomeTabButton: View {
             }
             .foregroundStyle(isSelected ? AppTheme.accent : AppTheme.ink2)
             .frame(width: AppTheme.tabWidth, height: AppTheme.tabHeight)
-            .background(isSelected ? AppTheme.accent.opacity(0.12) : .clear, in: Capsule())
+            .background(isSelected ? AppTheme.accent.opacity(0.08) : .clear, in: Capsule())
             .contentShape(Capsule())
         }
         .buttonStyle(HomeTabButtonStyle())

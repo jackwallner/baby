@@ -62,10 +62,13 @@ struct BabyOnboardingView: View {
                 } else {
                     JoinButton(model: joinModel)
                 }
-                Link("Privacy Policy", destination: BabyLinks.privacyPolicy)
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.ink2)
-                    .frame(minHeight: 44)
+                Link(destination: BabyLinks.privacyPolicy) {
+                    Text("Privacy Policy")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.ink2)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
             }
         }
         .padding(AppTheme.margin)

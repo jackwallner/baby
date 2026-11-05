@@ -116,6 +116,8 @@ struct FirstWeeksView: View {
         .padding(.vertical, AppTheme.tightSpacing)
         .background(AppTheme.card, in: AppTheme.cardShape)
         .graphicBorder()
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("First Weeks")
         .accessibilityIdentifier("tallyTable")
     }
 
