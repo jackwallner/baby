@@ -192,10 +192,11 @@ final class ReleaseJourneysUITests: XCTestCase {
         app.buttons.matching(NSPredicate(format: "label IN %@", [english, german])).firstMatch
     }
 
-    /// The bar's back button, which the unfolded iPhone Duo labels "Back".
+    /// The system back button. The unfolded iPhone Duo draws it in a toolbar
+    /// outside the navigation bar, with no label, so it goes by its identifier.
     private func back(in app: XCUIApplication) -> XCUIElement {
-        let bar = app.navigationBars.buttons.firstMatch
-        return bar.waitForExistence(timeout: 3) ? bar : either("Back", "Zurück", in: app)
+        let button = app.buttons["BackButton"]
+        return button.waitForExistence(timeout: 3) ? button : app.navigationBars.buttons.firstMatch
     }
 
     /// A checkpoint fails the journey if an element it is reading disappears,

@@ -79,6 +79,8 @@ paths:
   launch, folded first or not. The open tab's pushed screens draw a leading
   title and a back button at the pane's trailing side, and pages end about
   100 pt short of the fold (84 pt, the width of the side status column, plus
-  the margin). The back button works, and its label is "Back". Ignoring the
+  the margin). The back button works, but it sits in a toolbar outside the navigation
+  bar, identifier `BackButton`, with no label in the accessibility tree. The
+  page's scroll content is 371.7 pt wide in a 455.7 pt pane. Ignoring the
   trailing safe area inside a narrower frame changed nothing. Phones and the
   folded Duo are not affected.
