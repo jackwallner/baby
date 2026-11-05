@@ -59,7 +59,7 @@ final class ReleaseJourneysUITests: XCTestCase {
         logHome("log-after-wake", in: app)
         app.buttons["addOlderEntry"].tap()
         QA.checkpoint(app, "older-entry-menu")
-        either("Pee diaper", "Pipi-Windel", in: app).tap()
+        either("Pee diaper", "Windel: Pipi", in: app).tap()
         XCTAssertTrue(element("editor.time", in: app).waitForExistence(timeout: 10))
         QA.checkpoint(app, "entry-editor")
     }
