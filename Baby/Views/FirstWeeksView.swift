@@ -125,11 +125,11 @@ struct FirstWeeksView: View {
 
     private var header: some View {
         HStack(spacing: AppTheme.tightSpacing) {
-            Text("DAY").frame(width: 44, alignment: .leading)
-            if settings.tracked.contains(.wet) { Text("WET").frame(maxWidth: .infinity) }
-            if settings.tracked.contains(.dirty) { Text("DIRTY").frame(maxWidth: .infinity) }
-            if settings.tracked.contains(.feed) { Text("FEEDS").frame(maxWidth: .infinity).accessibilityLabel("Feeds") }
-            Text("REFERENCE").frame(width: 92, alignment: .trailing)
+            Text("DAY").lineLimit(1).minimumScaleFactor(0.7).frame(width: 44, alignment: .leading)
+            if settings.tracked.contains(.wet) { Text("WET").lineLimit(1).minimumScaleFactor(0.7).frame(maxWidth: .infinity) }
+            if settings.tracked.contains(.dirty) { Text("DIRTY").lineLimit(1).minimumScaleFactor(0.7).frame(maxWidth: .infinity) }
+            if settings.tracked.contains(.feed) { Text("FEEDS").lineLimit(1).minimumScaleFactor(0.7).frame(maxWidth: .infinity).accessibilityLabel("Feeds") }
+            Text("REFERENCE").lineLimit(1).minimumScaleFactor(0.7).frame(width: 92, alignment: .trailing)
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(AppTheme.ink3)
