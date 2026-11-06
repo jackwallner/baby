@@ -7,7 +7,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from common import config, destinations, erase_header, header_job, headline, paste_screen, raw_path, read_json, source
 
@@ -36,15 +36,36 @@ def main() -> None:
             for target in destinations(f):
                 if not raw_path(args.raw_root, args.locale, key, target['raw']).is_file():
                     raise ValueError(f"missing raw {key}/{target['raw']}")
-        plans.append((key, group, jobs, size))
+        extras = []
+        for frame in frames:
+            for extra in frame.get('extras', []):
+                text_key = f"{frame['file']}#{extra['key']}"
+                text = headers[text_key]
+                _, _, width, height = extra['box']
+                extras.append((frame, extra, {
+                    'text': text,
+                    'locale': args.locale,
+                    'font': extra['font'],
+                    'color': extra['color'],
+                    'box': [width, height],
+                    'maxSize': extra.get('max_size', 200),
+                    'minSize': extra.get('min_size', 1),
+                    'align': extra.get('align', 'center'),
+                }))
+        plans.append((key, group, jobs, size, extras))
     with tempfile.TemporaryDirectory() as tmp:
-        for key, group, jobs, size in plans:
+        for key, group, jobs, size, extras in plans:
             frames = group['frames']
             for i, job in enumerate(jobs):
                 job.update(size=size, out=str(Path(tmp) / f'{i}.png'))
-            rendered = headline(jobs)
+            for i, (_, _, job) in enumerate(extras, start=len(jobs)):
+                job['out'] = str(Path(tmp) / f'{i}.png')
+            rendered = headline(jobs + [job for _, _, job in extras])
             if not all(r['fits'] for r in rendered):
                 raise ValueError(f'{key}: uniform header size does not fit')
+            for (_, extra, _), result in zip(extras, rendered[len(jobs):]):
+                if not result['fits'] or result['size'] < extra.get('min_size', 1):
+                    raise ValueError(f"{key}/{extra['key']}: text does not fit its box")
             output = args.out / args.locale / key
             output.mkdir(parents=True, exist_ok=True)
             for frame, job in zip(frames, jobs):
@@ -62,6 +83,18 @@ def main() -> None:
                         paste_screen(canvas, raw, target['rect'], target.get('radius', 0))
                 with Image.open(job['out']) as overlay:
                     canvas.paste(overlay, tuple(frame['header_box'][:2]), overlay)
+                for extra_frame, extra, extra_job in extras:
+                    if extra_frame is not frame:
+                        continue
+                    x, y, width, height = extra['box']
+                    fill = extra.get('fill_color')
+                    if fill is not None:
+                        radius = extra.get('radius', min(width, height) // 2)
+                        ImageDraw.Draw(canvas).rounded_rectangle(
+                            (x, y, x + width - 1, y + height - 1), radius=radius, fill=tuple(fill)
+                        )
+                    with Image.open(extra_job['out']) as overlay:
+                        canvas.paste(overlay, (x, y), overlay)
                 canvas.save(output / frame['file'], format='PNG', optimize=True)
             print(f'{args.locale}/{key}: {len(frames)} frames size={size:g}')
 

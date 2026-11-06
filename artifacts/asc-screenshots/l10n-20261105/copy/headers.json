@@ -1,4 +1,10 @@
 {
+  "en-US": {
+    "01-2_APP_IPHONE_67_log.png": "Log a feed in one\ntap",
+    "02-3_APP_IPHONE_67_history.png": "Keep every feed\nand diaper",
+    "03-4_APP_IPHONE_67_first_weeks.png": "Count diapers by\nday of life",
+    "04-5_APP_IPHONE_67_summary.png": "Hand over one\nclean page"
+  },
   "it": {
     "01-2_APP_IPHONE_67_log.png": "Registra una poppata\ncon un tocco",
     "02-3_APP_IPHONE_67_history.png": "Poppate e pannolini\nsempre in cronologia",

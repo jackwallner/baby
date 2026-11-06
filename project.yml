@@ -284,6 +284,10 @@ targets:
     platform: iOS
     sources:
       - path: BabyUITests
+        excludes:
+          - StoreScreenshotLocales.json
+      - path: BabyUITests/StoreScreenshotLocales.json
+        buildPhase: resources
     dependencies:
       - target: Baby
     settings:

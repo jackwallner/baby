@@ -187,6 +187,7 @@ and a fresh Development-to-Production deploy before the build that ships it.
 - `.claude/rules/interface.md`: simplicity decisions and verification expectations.
 - `.claude/rules/graphic-style.md`: graphic vocabulary, responsive layouts, and guidance scope.
 - `.claude/rules/release-verification.md`: build 16 test, listing and screenshot evidence.
+- `.claude/rules/screenshots.md`: localized store frames, capture commands and screen mapping.
 - `.claude/rules/watch.md`: Watch pages, wrist Undo, complications and their tests.
 - `.claude/rules/iphone-duo.md`: the unfolded two-pane layout (open tab beside History) and its capture tour.
 - `.claude/rules/localization.md`: string catalog routing, plural forms, formatter use, and checks.

@@ -41,7 +41,7 @@ def unchanged_raw(a: Path, b: Path) -> bool:
 
 def normalize(text: str) -> str:
     folded = unicodedata.normalize('NFKC', text).casefold()
-    return ''.join(c for c in folded if c.isalnum())
+    return ''.join(c for c in folded if c.isalnum() or c == '+')
 
 
 def translated_values(node: Any) -> List[str]:

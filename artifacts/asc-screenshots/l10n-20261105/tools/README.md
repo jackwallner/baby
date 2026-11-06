@@ -31,6 +31,10 @@ printf '%s\n' '[{"text":"اختر المزايدة\nالافتتاحية","local
 printf '%s\n' '[{"path":"capture.png","languages":["en-US"]}]' | ./ocr
 ```
 
+For Baby Tracker, `tools/capture.sh` runs one GitHub simulator UI test for the
+English baseline and all target locales, or a comma-separated subset such as
+`tools/capture.sh it,pt-BR`. It writes the raw app screens into `raw/`.
+
 Edit `frames.json` and `headers.json` for each app. Config image paths are relative to the config file. Rectangles use `[x,y,w,h]` in canvas pixels; radius is also in canvas pixels. A photo `plate` must match the full canvas. Keep background pixels immediately outside both header sides; otherwise supply a plate.
 
 Put raws at `RAW_ROOT/LOCALE/SET/RAW.png`, including English references at `en-US` (override with config `english_locale`). Outputs go to `OUT_ROOT/LOCALE/SET/file.png`; sheets go to `OUT_ROOT/sheets/LOCALE-SET.jpg`. Keep the output root app-specific.

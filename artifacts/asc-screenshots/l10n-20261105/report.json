@@ -1,0 +1,23 @@
+{
+  "locales": [
+    "it",
+    "pt-BR"
+  ],
+  "frames": 4,
+  "gate": {
+    "it": "PASS",
+    "pt-BR": "PASS"
+  },
+  "gh_sim_jobs": 4,
+  "app_code_changed": [
+    {
+      "path": "Baby/Views/FirstWeeksView.swift",
+      "debug_only": false
+    }
+  ],
+  "defects": [
+    "The pt-BR First Weeks column heading wrapped; it now scales onto one line and was recaptured."
+  ],
+  "left_out": [],
+  "adapter": "xcuitest"
+}

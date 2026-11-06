@@ -1,0 +1,62 @@
+{
+  "english_locale": "en-US",
+  "sets": {
+    "phone": {
+      "canvas": [1320, 2868],
+      "frames": [
+        {
+          "file": "01-2_APP_IPHONE_67_log.png",
+          "base": "en-live/phone/01-2_APP_IPHONE_67_log.png",
+          "raw": "log",
+          "screen": [130, 521, 1059, 2302],
+          "radius": 100,
+          "header_box": [40, 120, 1240, 380],
+          "font": "AvenirNext-Regular",
+          "color": [28, 26, 23],
+          "max_size": 170,
+          "min_size": 110,
+          "align": "center"
+        },
+        {
+          "file": "02-3_APP_IPHONE_67_history.png",
+          "base": "en-live/phone/02-3_APP_IPHONE_67_history.png",
+          "raw": "history",
+          "screen": [130, 521, 1059, 2302],
+          "radius": 100,
+          "header_box": [40, 120, 1240, 380],
+          "font": "AvenirNext-Regular",
+          "color": [28, 26, 23],
+          "max_size": 170,
+          "min_size": 110,
+          "align": "center"
+        },
+        {
+          "file": "03-4_APP_IPHONE_67_first_weeks.png",
+          "base": "en-live/phone/03-4_APP_IPHONE_67_first_weeks.png",
+          "raw": "first_weeks",
+          "screen": [130, 521, 1059, 2302],
+          "radius": 100,
+          "header_box": [40, 120, 1240, 380],
+          "font": "AvenirNext-Regular",
+          "color": [28, 26, 23],
+          "max_size": 170,
+          "min_size": 110,
+          "align": "center"
+        },
+        {
+          "file": "04-5_APP_IPHONE_67_summary.png",
+          "base": "en-live/phone/04-5_APP_IPHONE_67_summary.png",
+          "raw": "summary",
+          "screen": [130, 521, 1059, 2302],
+          "radius": 100,
+          "header_box": [40, 120, 1240, 380],
+          "font": "AvenirNext-Regular",
+          "color": [28, 26, 23],
+          "max_size": 170,
+          "min_size": 110,
+          "align": "center"
+        }
+      ]
+    }
+  }
+}

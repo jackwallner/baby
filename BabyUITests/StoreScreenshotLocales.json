@@ -1,0 +1,17 @@
+[
+  {
+    "store_locale": "en-US",
+    "apple_languages": "(en)",
+    "apple_locale": "en_US"
+  },
+  {
+    "store_locale": "it",
+    "apple_languages": "(it)",
+    "apple_locale": "it_IT"
+  },
+  {
+    "store_locale": "pt-BR",
+    "apple_languages": "(pt-BR)",
+    "apple_locale": "pt_BR"
+  }
+]
