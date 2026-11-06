@@ -31,9 +31,12 @@ printf '%s\n' '[{"text":"اختر المزايدة\nالافتتاحية","local
 printf '%s\n' '[{"path":"capture.png","languages":["en-US"]}]' | ./ocr
 ```
 
-For Baby Tracker, `tools/capture.sh` runs one GitHub simulator UI test for the
-English baseline and all target locales, or a comma-separated subset such as
-`tools/capture.sh it,pt-BR`. It writes the raw app screens into `raw/`.
+For Baby Tracker, `tools/capture.sh` uses one GitHub simulator launch for the
+English baseline and selected locales, with a 14-second settle wait. It accepts
+comma-separated locale and scene selections, for example
+`tools/capture.sh it,pt-BR summary`. It writes raw app screens into `raw/`.
+When app code changes, set `GH_SIM_ACTION=all` to run the `Baby` unit tests in
+the same GitHub job before capturing.
 
 Edit `frames.json` and `headers.json` for each app. Config image paths are relative to the config file. Rectangles use `[x,y,w,h]` in canvas pixels; radius is also in canvas pixels. A photo `plate` must match the full canvas. Keep background pixels immediately outside both header sides; otherwise supply a plate.
 

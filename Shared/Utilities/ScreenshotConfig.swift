@@ -8,10 +8,16 @@ enum ScreenshotConfig {
     static var isEnabled: Bool {
         let args = ProcessInfo.processInfo.arguments
         return args.contains("-ScreenshotTab")
+            || args.contains("-ScreenshotSummaryPreview")
             || args.contains("-PaywallSnapshot")
             || args.contains("-SeedScreenshotData")
     }
+
+    static var summaryPreview: Bool {
+        ProcessInfo.processInfo.arguments.contains("-ScreenshotSummaryPreview")
+    }
     #else
     static let isEnabled = false
+    static let summaryPreview = false
     #endif
 }

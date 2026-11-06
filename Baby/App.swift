@@ -286,7 +286,9 @@ private struct RootView: View {
     static var screenshotTab: Int? {
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
-        guard let index = arguments.firstIndex(of: "-ScreenshotTab"), index + 1 < arguments.count else { return nil }
+        guard let index = arguments.firstIndex(of: "-ScreenshotTab"), index + 1 < arguments.count else {
+            return ScreenshotConfig.summaryPreview ? 3 : nil
+        }
         return Int(arguments[index + 1])
         #else
         return nil

@@ -15,11 +15,11 @@ private struct StoreScreenshotLocale: Decodable {
 @MainActor
 final class LocalizedStoreScreenshotUITests: XCTestCase {
     private let bundleID = "com.jackwallner.baby"
-    private let scenes: [(name: String, tab: String, identifier: String)] = [
-        ("log", "0", "log.feed"),
-        ("history", "2", "history.layout"),
-        ("first_weeks", "1", "tallyTable"),
-        ("summary", "3", "reportRange"),
+    private let scenes: [(name: String, tab: String, identifier: String, arguments: [String])] = [
+        ("log", "0", "log.feed", []),
+        ("history", "2", "history.layout", []),
+        ("first_weeks", "1", "tallyTable", []),
+        ("summary", "3", "summary.pagePreview", ["-ScreenshotSummaryPreview"]),
     ]
 
     override func setUp() {
@@ -37,7 +37,7 @@ final class LocalizedStoreScreenshotUITests: XCTestCase {
                     "-ScreenshotTab", scene.tab,
                     "-AppleLanguages", locale.appleLanguages,
                     "-AppleLocale", locale.appleLocale,
-                ]
+                ] + scene.arguments
                 app.launch()
 
                 let ready = app.descendants(matching: .any)

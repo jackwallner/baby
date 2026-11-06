@@ -8,16 +8,46 @@
     "it": "PASS",
     "pt-BR": "PASS"
   },
-  "gh_sim_jobs": 4,
+  "gh_sim_jobs": 1,
+  "gh_sim_job_id": "baby-shots@20261105-195339-f4e1-codex-mbpro382db-1105-201056-9598",
+  "reused_raws_from": "baby-shots@20261105-180622-d34a-codex-mbpro336fe-1105-192344-25051",
   "app_code_changed": [
     {
-      "path": "Baby/Views/FirstWeeksView.swift",
-      "debug_only": false
+      "path": "Baby/App.swift",
+      "debug_only": true
+    },
+    {
+      "path": "Baby/Views/SummaryView.swift",
+      "debug_only": true
+    },
+    {
+      "path": "Shared/Utilities/ScreenshotConfig.swift",
+      "debug_only": true
     }
   ],
-  "defects": [
-    "The pt-BR First Weeks column heading wrapped; it now scales onto one line and was recaptured."
+  "defects": [],
+  "fixed_defects": [
+    {
+      "locales": [
+        "it",
+        "pt-BR"
+      ],
+      "file": "04_5_APP_IPHONE_67_summary.png",
+      "what": "The summary capture now shows the date range, PDF action, and rendered pediatrician page preview instead of the trends overview."
+    },
+    {
+      "locales": [
+        "it",
+        "pt-BR"
+      ],
+      "file": "03_4_APP_IPHONE_67_first_weeks.png",
+      "what": "Corrected headers fit on two lines at a uniform font size. The translated table headings remain legible."
+    }
   ],
+  "tests": {
+    "localization": "PASS, 816 keys, 4 translated languages, 0 problems",
+    "unit_tests": "PASS, 286 passed, 0 failed, 1 skipped"
+  },
   "left_out": [],
-  "adapter": "xcuitest"
+  "adapter": "gh-sim all, launch screenshots with a 14-second wait"
 }

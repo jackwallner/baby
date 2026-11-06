@@ -60,32 +60,37 @@ struct SummaryView: View {
 
     private var hasData: Bool { !events.events.isEmpty }
     private var isExample: Bool { !hasData }
+    private var showsScreenshotSummary: Bool { ScreenshotConfig.summaryPreview }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
                 rangeSection
-                if isExample {
-                    Label("Example, not your baby's data. Log a few entries and this fills in.", systemImage: "info.circle")
-                        .font(.footnote)
+                if showsScreenshotSummary {
+                    doctorCard
+                } else {
+                    if isExample {
+                        Label("Example, not your baby's data. Log a few entries and this fills in.", systemImage: "info.circle")
+                            .font(.footnote)
+                            .foregroundStyle(AppTheme.ink2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    statsGrid
+                    ForEach(ReportMetric.shown(for: report.tracked), id: \.self) { metric in
+                        chartCard(metric)
+                    }
+                    doctorCard
+                    Text(Guidance.disclaimer)
+                        .font(.caption)
                         .foregroundStyle(AppTheme.ink2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                statsGrid
-                ForEach(ReportMetric.shown(for: report.tracked), id: \.self) { metric in
-                    chartCard(metric)
-                }
-                doctorCard
-                Text(Guidance.disclaimer)
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, AppTheme.margin)
             .padding(.vertical, AppTheme.spacing)
         }
         .background(AppTheme.paper)
-        .navigationTitle("Reports")
+        .navigationTitle(showsScreenshotSummary ? String(localized: "Summary") : String(localized: "Reports"))
         .navigationBarTitleDisplayMode(.large)
         .task(id: reportKey) { await rebuild() }
         .onChange(of: events.child?.objectID) { _, _ in chosenRange = nil }
@@ -98,7 +103,7 @@ struct SummaryView: View {
     // MARK: - Range
 
     private var range: ReportRange {
-        chosenRange ?? (events.child?.lastVisitAt == nil ? .twoWeeks : .custom)
+        chosenRange ?? (showsScreenshotSummary || events.child?.lastVisitAt != nil ? .custom : .twoWeeks)
     }
 
     private var rangeBinding: Binding<ReportRange> {
@@ -294,6 +299,7 @@ struct SummaryView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Preview the summary")
+            .accessibilityIdentifier("summary.pagePreview")
             shareButton
             Divider().overlay(AppTheme.separator)
             exportRow
