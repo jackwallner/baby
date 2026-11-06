@@ -58,3 +58,12 @@ together, and never truncates), the Watch's three-across side row and Today
 tiles, and onboarding's feeding chips. The Watch glance shows only the side
 beside the feed icon (`Fed · %@` is just `%@` in translations), because "which
 side" is what must survive the width.
+
+## Language row
+
+Settings has a Language row that names the running localization in itself
+(`Bundle.main.preferredLocalizations`) and opens `openSettingsURLString`, Apple's
+route for a per-app language change. iOS hides the app's Language option on a
+device with one preferred language unless `UIPrefersShowingLanguageSettings` is
+YES in `Info.plist`, so keep that key. The simulator's Settings opens at its root
+for this link; check the landing on a real iPhone.
