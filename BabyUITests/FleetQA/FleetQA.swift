@@ -888,7 +888,7 @@ enum Paywall {
     /// (the `german` persona included), so a localized paywall passes.
     static let words: [String: [String]] = [
         "restore": ["restore", "wiederherstellen"],
-        "terms": ["terms", "EULA", "nutzungsbedingungen", "bedingungen"],
+        "terms": ["terms", "EULA", "nutzungsbedingungen", "bedingungen", "agb"],
         "privacy": ["privacy", "datenschutz"],
     ]
 
