@@ -1,0 +1,49 @@
+{
+  "verdict": "FIX",
+  "header_fixes": [
+    {
+      "locale": "it",
+      "file": "03-4_APP_IPHONE_67_first_weeks.png",
+      "before": "Pannolini contati\ngiorno per giorno",
+      "after": "Conta i pannolini\nper giorno di vita",
+      "why": "Restore the English meaning, counting diapers by day of life rather than an unspecified daily count. Uses the catalog terms for diapers and day of life. Copy corrected here; the orchestrator must render the PNG because reskin.py requires missing raws and has no existing-screen reuse mode."
+    },
+    {
+      "locale": "pt-BR",
+      "file": "03-4_APP_IPHONE_67_first_weeks.png",
+      "before": "Fraldas contadas\ndia após dia",
+      "after": "Conte as fraldas\npor dia de vida",
+      "why": "Restore the English meaning, counting diapers by day of life rather than an unspecified daily count. Uses the catalog terms for diapers and day of life. Copy corrected here; the orchestrator must render the PNG because reskin.py requires missing raws and has no existing-screen reuse mode."
+    }
+  ],
+  "ui_defects": [
+    {
+      "locale": "it",
+      "file": "04_5_APP_IPHONE_67_summary.png",
+      "what": "The screen is the trends overview (Riepiloghi), with daily averages and charts. The English frame shows the one-page pediatrician summary, its date selector, PDF action and page preview. The localized header promises a clear summary to share, but none of those controls or the page is visible. The capture test targets reportRange rather than the summary preview. The orchestrator must replace this screen with the localized pediatrician summary; no recapture or app-code edits made in this review.",
+      "severity": "blocker"
+    },
+    {
+      "locale": "pt-BR",
+      "file": "04_5_APP_IPHONE_67_summary.png",
+      "what": "The screen is the trends overview (Relatórios), with daily averages and charts. The English frame shows the one-page pediatrician summary, its date selector, PDF action and page preview. The localized header promises a clear summary to share, but none of those controls or the page is visible. The capture test targets reportRange rather than the summary preview. The orchestrator must replace this screen with the localized pediatrician summary; no recapture or app-code edits made in this review.",
+      "severity": "blocker"
+    }
+  ],
+  "unsure": [
+    {
+      "locale": "it",
+      "file": "03-4_APP_IPHONE_67_first_weeks.png",
+      "what": "Corrected header has not been rendered. Verify fit and uniform font size across all four frames when rendering on macOS."
+    },
+    {
+      "locale": "pt-BR",
+      "file": "03-4_APP_IPHONE_67_first_weeks.png",
+      "what": "Corrected header has not been rendered. Verify fit and uniform font size across all four frames when rendering on macOS."
+    },
+    {
+      "locale": "it,pt-BR",
+      "what": "Reviewed one English/localized phone sheet per target, all eight localized frames. Confirmed both summary-screen mismatches and the pt-BR First Weeks title/table at full-frame size. No additional English leaks, broken labels, incorrect local formats, exposed personal data, clipping, seams, alignment or header-size defects found. Nora is the seeded screenshot fixture. Existing First Weeks date wrapping remains legible. Raw checks skipped because raws are absent. Sheet labels used Pillow because macOS CoreText is unavailable; screenshot pixels were unchanged. Config/header keys use 03-4 while fastlane filenames use 03_4; the same first-separator mapping applies to all four frames."
+    }
+  ]
+}
