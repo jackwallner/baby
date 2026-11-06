@@ -21,6 +21,11 @@ paths:
   `TabView`, so History can be either a tab or a pane without being rebuilt.
   Folding only moves frames: scroll, settings path and History layout survive.
   Hidden screens are hit-test and accessibility hidden, as the tabs were.
+  `accessibilityHidden` outside a NavigationStack does not reach its page (with
+  it there, VoiceOver could press Log's buttons from History), and neither did
+  `accessibilityElementsHidden` or `isHidden` on the stack's UIKit view, so it
+  sits inside each stack (`reservesNavigationCapsule`, 2026-11-05). A hidden
+  stack's bar title stays in the tree; bar buttons hide themselves.
 - Every screen gets `horizontalSizeClass = .compact` always, not only once
   split, so it lays out as on a phone (the app is iPhone only). The capsule and the Undo toast are framed to the primary pane, never
   across the fold. History's pane drops the capsule's bottom reservation.

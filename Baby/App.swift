@@ -428,6 +428,7 @@ struct BabyHomeView: View {
         return screen(tab)
             .environment(\.horizontalSizeClass, .compact)
             .environment(\.reservesBottomCapsule, split == nil)
+            .environment(\.hidesTabStack, !isShown(tab))
             .padding(.top, headsCapsule ? AppTheme.bottomNavigationReservedHeight : 0)
             .frame(
                 maxWidth: (isHistoryPane ? split?.secondaryWidth : split?.primaryWidth) ?? .infinity,
@@ -436,7 +437,6 @@ struct BabyHomeView: View {
             .padding(.leading, isHistoryPane ? split?.secondaryX ?? 0 : 0)
             .opacity(isShown(tab) ? 1 : 0)
             .allowsHitTesting(isShown(tab))
-            .accessibilityHidden(!isShown(tab))
     }
 
     @ViewBuilder
@@ -544,14 +544,21 @@ extension View {
 extension EnvironmentValues {
     /// False while the capsule heads the unfolded pane rather than its foot.
     @Entry var reservesBottomCapsule = true
+    /// True while this tab's screen is kept alive but not showing.
+    @Entry var hidesTabStack = false
 }
 
 private struct NavigationCapsuleReservation: ViewModifier {
     @Environment(\.reservesBottomCapsule) private var atBottom
+    @Environment(\.hidesTabStack) private var hidesStack
     let isReserved: Bool
 
     func body(content: Content) -> some View {
-        content.safeAreaPadding(.bottom, isReserved && atBottom ? AppTheme.bottomNavigationReservedHeight : 0)
+        content
+            .safeAreaPadding(.bottom, isReserved && atBottom ? AppTheme.bottomNavigationReservedHeight : 0)
+            // Outside the NavigationStack this does not reach the page: VoiceOver
+            // could read and press Log's buttons from another tab.
+            .accessibilityHidden(hidesStack)
     }
 }
 

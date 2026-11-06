@@ -442,6 +442,7 @@ final class LoggingUITests: XCTestCase {
         tabs[1].tap()
         XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 3))
         XCTAssertTrue(tabs[1].isSelected)
+        // The hidden Log stays alive but out of VoiceOver's reach.
         XCTAssertFalse(app.buttons["log.feed"].exists)
         attach(app, "compact-navigation-history")
         let recentEntry = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Pee,")).firstMatch
@@ -452,6 +453,7 @@ final class LoggingUITests: XCTestCase {
         tabs[3].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.buttons["Done"].exists)
+        XCTAssertFalse(app.buttons["Add an entry"].exists)
         let diaperWord = app.buttons["Pee and Poop"]
         // Feed types sits above it, so it can start just below the fold.
         for _ in 0..<3 where !diaperWord.isHittable { app.swipeUp() }

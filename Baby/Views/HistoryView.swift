@@ -9,6 +9,7 @@ struct HistoryView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var events: EventStore
     @EnvironmentObject private var settings: BabySettings
+    @Environment(\.hidesTabStack) private var hidesStack
     @AppStorage("historyLayout") private var layout = HistoryLayout.list
     @State private var editor: EditorRequest?
     @State private var month = Calendar.current.startOfMonth(for: .now)
@@ -60,6 +61,7 @@ struct HistoryView: View {
                     Image(systemName: "plus")
                 }
                 .accessibilityLabel("Add an entry")
+                .accessibilityHidden(hidesStack)
             }
         }
         // History stays alive across midnight: a calendar left on today
