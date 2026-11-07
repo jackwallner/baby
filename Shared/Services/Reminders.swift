@@ -231,14 +231,22 @@ enum Reminders {
         }
     }
 
-    private static func request(for item: Planned, now: Date) -> UNNotificationRequest {
+    static func request(for item: Planned, now: Date, calendar: Calendar = .current) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
         content.title = item.title
         content.body = item.body
         content.sound = .default
         content.threadIdentifier = item.route ?? "feed"
         if let route = item.route { content.userInfo = [routeKey: route] }
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, item.date.timeIntervalSince(now)), repeats: false)
+        let trigger: UNNotificationTrigger
+        if item.route == checkupRoute {
+            // A wall-clock time with no zone: 7 pm wherever the phone is that
+            // evening, even after travel with no change to the log.
+            let time = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: item.date)
+            trigger = UNCalendarNotificationTrigger(dateMatching: time, repeats: false)
+        } else {
+            trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, item.date.timeIntervalSince(now)), repeats: false)
+        }
         // The same identifier replaces the pending one in place.
         return UNNotificationRequest(identifier: item.id, content: content, trigger: trigger)
     }

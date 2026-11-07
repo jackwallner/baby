@@ -1,3 +1,4 @@
+import UserNotifications
 import XCTest
 @testable import Baby
 
@@ -113,6 +114,22 @@ final class RemindersTests: XCTestCase {
         XCTAssertTrue(Reminders.checkupReminders(birthDate: nil, nextCheckup: nil, now: now, calendar: calendar).isEmpty)
         let midMonth = try XCTUnwrap(calendar.date(byAdding: .day, value: -10, to: now))
         XCTAssertEqual(Reminders.checkupReminders(birthDate: midMonth, nextCheckup: nil, now: now, calendar: calendar).map(\.id), [Reminders.checkupPrefix + "day14", Reminders.checkupPrefix + "day30"])
+    }
+
+    /// A checkup note is 7 pm local time on the evening before, so it keeps
+    /// that hour after the phone changes time zone; the feed reminder stays a
+    /// length of time from the feed.
+    func testACheckupNoteIsAWallClockTimeThatFollowsTheTimeZone() throws {
+        let visit = try XCTUnwrap(calendar.date(byAdding: .day, value: 3, to: now))
+        let note = try XCTUnwrap(Reminders.checkupReminders(birthDate: nil, nextCheckup: visit, now: now, calendar: calendar).first)
+        let trigger = try XCTUnwrap(Reminders.request(for: note, now: now, calendar: calendar).trigger as? UNCalendarNotificationTrigger)
+        XCTAssertEqual(trigger.dateComponents.hour, Reminders.checkupEveningHour)
+        XCTAssertEqual(trigger.dateComponents.minute, 0)
+        XCTAssertNil(trigger.dateComponents.timeZone, "no zone, so it fires at 7 pm wherever the phone is")
+        XCTAssertFalse(trigger.repeats)
+        let feed = try XCTUnwrap(Reminders.feedReminder(for: summary(fedMinutesAgo: 30), interval: .threeHours, now: now))
+        let feedTrigger = try XCTUnwrap(Reminders.request(for: feed, now: now, calendar: calendar).trigger as? UNTimeIntervalNotificationTrigger)
+        XCTAssertEqual(feedTrigger.timeInterval, 150 * 60, accuracy: 1)
     }
 
     // MARK: - Stored choices
