@@ -241,6 +241,11 @@ struct RemindersSection: View {
             checkups = Reminders.checkupRemindersOn
             Task { isDenied = await Reminders.isDenied() }
         }
+        // Settings stays mounted while the parent changes notifications in
+        // iOS Settings, so the warning is read again on the way back.
+        .onReceive(NotificationCenter.default.publisher(for: Reminders.foregrounded)) { _ in
+            Task { isDenied = await Reminders.isDenied() }
+        }
         .onChange(of: interval) { _, value in
             Reminders.feedInterval = value
             apply(asking: value != .off)

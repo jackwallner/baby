@@ -114,4 +114,28 @@ final class StateMachineRegressionTests: XCTestCase {
         let fresh = try summary(window: .last24Hours, at: base)
         XCTAssertFalse(fresh.sameContent(as: old), "the upgraded phone republishes, so the Watch gets the list")
     }
+
+    // MARK: - B1 and B4: coming back to the app hands the reminder plan over
+
+    /// Allowing notifications in iOS Settings leaves the log unchanged, so the
+    /// foreground pass must reschedule without waiting for a summary change.
+    func testReturningToTheAppHandsTheReminderPlanOverWithAnUnchangedLog() throws {
+        Reminders.feedInterval = .threeHours
+        store.log(.feed, at: .now.addingTimeInterval(-600))
+        XCTAssertNotNil(store.summary.lastFeedAt, "precondition: a feed is logged")
+        XCTAssertEqual(Reminders.lastPlanned?.map(\.id), [Reminders.feedID], "precondition: the tap planned the reminder")
+        // What happened while notifications were denied is unknown to the
+        // process; the foreground pass forgets it and must plan again.
+        Reminders.forgetLastSchedule()
+        store.returnToForeground()
+        XCTAssertEqual(Reminders.lastPlanned?.map(\.id), [Reminders.feedID])
+    }
+
+    /// Settings' "Notifications are off" footer reads permission again when
+    /// the app returns, since the Settings screen stays mounted meanwhile.
+    func testReturningToTheAppAsksSettingsToReadPermissionAgain() {
+        let posted = expectation(forNotification: Reminders.foregrounded, object: nil)
+        store.returnToForeground()
+        wait(for: [posted], timeout: 1)
+    }
 }

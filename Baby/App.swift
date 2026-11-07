@@ -109,8 +109,7 @@ struct BabyApp: App {
                 .onChange(of: scenePhase) { _, phase in
                     guard phase == .active else { return }
                     NightLight.apply(settings.appearance.isNightLight)
-                    Reminders.forgetLastSchedule()
-                    events.reload()
+                    events.returnToForeground()
                     // A sleep started from the Watch or a partner while this
                     // app was in the background could not start its Live
                     // Activity then (iOS refuses), and an unchanged summary

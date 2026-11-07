@@ -76,6 +76,9 @@ enum Reminders {
     static let checkupPrefix = "baby.checkup."
     /// Posted when the reminder offer saves, for Settings' copy of the choices.
     static let choicesChanged = Notification.Name("baby.reminders.changed")
+    /// Posted when the app returns to the screen: notifications may have been
+    /// allowed or turned off in Settings meanwhile.
+    static let foregrounded = Notification.Name("baby.reminders.foregrounded")
     /// A tapped notification's `userInfo[routeKey]`.
     static let routeKey = "route"
     static let checkupRoute = "checkup"
@@ -198,7 +201,7 @@ enum Reminders {
 
     /// What this process last handed to the notification center. Nearly every
     /// change to the log (a diaper, a sync) leaves the plan as it was.
-    nonisolated(unsafe) private static var lastPlanned: [Planned]?
+    nonisolated(unsafe) private(set) static var lastPlanned: [Planned]?
 
     /// The widget schedules from its own process, and notifications can be
     /// allowed in Settings meanwhile, so the next pass hands the plan over again.

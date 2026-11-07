@@ -174,6 +174,16 @@ final class EventStore: ObservableObject {
 
     func reload() { refresh(force: true) }
 
+    /// The app is back on screen. Notifications may have been allowed in
+    /// Settings meanwhile, so the reminder plan is handed over again even when
+    /// the log is unchanged and the reload publishes nothing.
+    func returnToForeground() {
+        Reminders.forgetLastSchedule()
+        reload()
+        if !persistence.isStandingIn { Reminders.reschedule(summary: summary, birthDate: child?.birthDate) }
+        NotificationCenter.default.post(name: Reminders.foregrounded, object: nil)
+    }
+
     /// Refetches the log. CloudKit posts a remote change for every export of
     /// this phone's own taps and for batches that touch nothing on screen, so
     /// an unforced refresh that finds the same log redraws nothing and leaves
