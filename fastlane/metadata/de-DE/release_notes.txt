@@ -1,1 +1,1 @@
-Baby Tracker gibt es jetzt auf Deutsch.
+Besser treffbare Tasten, klarerer Text und Korrekturen für VoiceOver und übersetzte Bildschirme.

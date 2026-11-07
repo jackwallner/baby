@@ -1,1 +1,1 @@
-Baby Tracker est désormais disponible en allemand, espagnol, italien et portugais.
+Boutons plus faciles à toucher, texte plus lisible et corrections pour VoiceOver et les écrans traduits.

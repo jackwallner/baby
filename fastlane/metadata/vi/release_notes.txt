@@ -1,1 +1,1 @@
-Baby Tracker hiện đã có bằng tiếng Đức, tiếng Tây Ban Nha, tiếng Ý và tiếng Bồ Đào Nha.
+Nút dễ chạm hơn, chữ rõ hơn và các bản sửa lỗi cho VoiceOver cùng các màn hình đã dịch.

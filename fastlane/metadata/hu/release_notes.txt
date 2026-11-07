@@ -1,1 +1,1 @@
-A Baby Tracker mostantól németül, spanyolul, olaszul és portugálul is elérhető.
+Könnyebben koppintható gombok, tisztább szöveg, valamint javítások a VoiceOverhez és a lefordított képernyőkhöz.

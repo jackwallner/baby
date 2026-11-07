@@ -1,1 +1,1 @@
-Baby Tracker artık Almanca, İspanyolca, İtalyanca ve Portekizce olarak kullanılabilir.
+Dokunması daha kolay düğmeler, daha net metinler ve VoiceOver ile çevrilmiş ekranlar için düzeltmeler.
