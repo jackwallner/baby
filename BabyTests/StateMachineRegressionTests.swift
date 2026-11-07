@@ -138,4 +138,66 @@ final class StateMachineRegressionTests: XCTestCase {
         store.returnToForeground()
         wait(for: [posted], timeout: 1)
     }
+
+    // MARK: - Product call 6: a late pending-list answer deleted a newer feed reminder
+
+    /// Records what `reschedule` hands to the notification center.
+    private final class RecordingCenter: @unchecked Sendable {
+        var pending: Set<String> = []
+        var passes = 0
+
+        var center: Reminders.Center {
+            Reminders.Center(
+                remove: { ids in
+                    self.passes += 1
+                    self.pending.subtract(ids)
+                },
+                add: { request in _ = self.pending.insert(request.identifier) }
+            )
+        }
+    }
+
+    /// Starting a feed timer plans no reminder; stopping it plans one. The
+    /// first pass used to remove stale requests in a pending-list callback;
+    /// answered after the second pass added `baby.feed`, it deleted it, and a
+    /// later identical plan stops early, so nothing put it back. On the old
+    /// code, with the callbacks held and answered after both passes, this
+    /// ends with nothing pending.
+    func testALatePendingAnswerKeepsTheNewerFeedReminder() throws {
+        let fake = RecordingCenter()
+        Reminders.centerOverride = fake.center
+        defer { Reminders.centerOverride = nil }
+        Reminders.feedInterval = .threeHours
+        Reminders.forgetLastSchedule()
+        let now = Date.now
+        var feeding = NowSummary()
+        feeding.lastFeedAt = now.addingTimeInterval(-60)
+        feeding.runningFeedStart = now.addingTimeInterval(-60)
+        var fed = feeding
+        fed.runningFeedStart = nil
+
+        Reminders.reschedule(summary: feeding, birthDate: nil, now: now)
+        XCTAssertEqual(Reminders.lastPlanned?.map(\.id), [], "precondition: no reminder while a feed runs")
+        XCTAssertEqual(fake.passes, 1, "precondition: the first plan reached the center")
+        Reminders.reschedule(summary: fed, birthDate: nil, now: now)
+        XCTAssertEqual(Reminders.lastPlanned?.map(\.id), [Reminders.feedID], "precondition: the stopped feed plans one")
+        XCTAssertEqual(fake.passes, 2, "precondition: the second plan reached the center")
+        Reminders.reschedule(summary: fed, birthDate: nil, now: now)
+        XCTAssertEqual(fake.pending, [Reminders.feedID])
+    }
+
+    /// Stale requests are cleared by identifier, so every one a plan can
+    /// schedule must be in the list a new plan clears.
+    func testEveryPlannedReminderIsOneANewPlanClears() throws {
+        let now = Date.now
+        let birth = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: -1, to: now))
+        let visit = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: 5, to: now))
+        var fed = NowSummary()
+        fed.lastFeedAt = now
+        let planned = [Reminders.feedReminder(for: fed, interval: .threeHours, now: now)].compactMap { $0 }
+            + Reminders.checkupReminders(birthDate: birth, nextCheckup: nil, now: now)
+            + Reminders.checkupReminders(birthDate: nil, nextCheckup: visit, now: now)
+        XCTAssertEqual(planned.count, 5, "precondition: the feed reminder, three newborn visits and an entered date")
+        XCTAssertEqual(Set(planned.map(\.id)), Set(Reminders.ownedIDs))
+    }
 }

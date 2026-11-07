@@ -87,6 +87,8 @@ enum Reminders {
     /// Newborn checkups by day of life when no date was entered: the first
     /// visit a few days after birth, about two weeks, about a month.
     static let typicalCheckupDays = [4, 14, 30]
+    /// Every identifier this phone schedules, so a new plan clears the rest.
+    static let ownedIDs = [feedID, checkupPrefix + "entered"] + typicalCheckupDays.map { checkupPrefix + "day\($0)" }
 
     private enum Key {
         static let feedInterval = "reminder.feedMinutes"
@@ -220,15 +222,31 @@ enum Reminders {
         }
         guard planned != lastPlanned else { return }
         lastPlanned = planned
-        let center = UNUserNotificationCenter.current()
+        let center = Self.center
         let keep = Set(planned.map(\.id))
-        center.getPendingNotificationRequests { pending in
-            let stale = pending.map(\.identifier).filter { ($0 == feedID || $0.hasPrefix(checkupPrefix)) && !keep.contains($0) }
-            center.removePendingNotificationRequests(withIdentifiers: stale)
-        }
+        // Removed at once, not in a pending-list callback: a late answer
+        // would delete a request a newer plan has added since.
+        center.remove(ownedIDs.filter { !keep.contains($0) })
         for item in planned {
             center.add(request(for: item, now: now))
         }
+    }
+
+    /// Where `reschedule` sends its changes. Tests record them instead.
+    struct Center: Sendable {
+        var remove: @Sendable ([String]) -> Void
+        var add: @Sendable (UNNotificationRequest) -> Void
+    }
+
+    nonisolated(unsafe) static var centerOverride: Center?
+
+    private static var center: Center {
+        if let centerOverride { return centerOverride }
+        let live = UNUserNotificationCenter.current()
+        return Center(
+            remove: { live.removePendingNotificationRequests(withIdentifiers: $0) },
+            add: { live.add($0) }
+        )
     }
 
     static func request(for item: Planned, now: Date, calendar: Calendar = .current) -> UNNotificationRequest {
