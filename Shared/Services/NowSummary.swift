@@ -44,6 +44,10 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// The newest entries, newest first, for the Watch's Today list and for
     /// taking back a wrist tap. Optional for summaries from older builds.
     var recent: [RecentEntry]?
+    /// Under "Last 24 hours", the feeds and diapers counted in the totals, so
+    /// a widget or the Watch drops each one once it is a day old. Nil for the
+    /// other windows and for summaries from older builds.
+    var counted: [CountedEntry]?
 
     static let empty = NowSummary()
     static let knownEventLimit = 256
@@ -219,6 +223,7 @@ struct NowSummary: Codable, Equatable, Sendable {
         let sorted = events.sorted { $0.start > $1.start }
         summary.knownEventIDs = Array(sorted.prefix(Self.knownEventLimit).reversed().compactMap(\.id))
         summary.recent = sorted.lazy.compactMap(RecentEntry.init).prefix(Self.recentLimit).map { $0 }
+        if window == .last24Hours { summary.counted = [] }
         for event in sorted {
             switch event.eventKind {
             case .feed:
@@ -250,8 +255,9 @@ struct NowSummary: Codable, Equatable, Sendable {
                 case .feed: summary.todayFeeds += 1
                 case .wet: summary.todayWet += 1
                 case .dirty: summary.todayDirty += 1
-                default: break
+                default: continue
                 }
+                summary.counted?.append(CountedEntry(id: event.id, kind: event.eventKind, at: event.start))
             }
         }
         // A running feed still counts as the most recent feed for "which side".
@@ -320,7 +326,10 @@ extension NowSummary {
                     s.lastFeedAt = payload.at
                     s.setLastFeedSides(payload.side.map { [$0] } ?? [])
                 }
-                if sameDay { s.todayFeeds += 1 }
+                if sameDay {
+                    s.todayFeeds += 1
+                    s.counted?.append(CountedEntry(id: payload.id, kind: .feed, at: payload.at))
+                }
             case .wet, .dirty:
                 if s.lastDiaperAt == nil || payload.at >= (s.lastDiaperAt ?? .distantPast) {
                     s.lastDiaperAt = payload.at
@@ -328,6 +337,7 @@ extension NowSummary {
                 }
                 if sameDay {
                     if payload.kind == .wet { s.todayWet += 1 } else { s.todayDirty += 1 }
+                    s.counted?.append(CountedEntry(id: payload.id, kind: payload.kind, at: payload.at))
                 }
             default:
                 break
@@ -397,6 +407,7 @@ extension NowSummary {
                 case .dirty: s.todayDirty = max(0, s.todayDirty - 1)
                 default: break
                 }
+                s.counted?.removeAll { $0.id == targetID }
             }
             if entry.kind == .feed, s.runningFeedStart == nil,
                let index = s.recent?.firstIndex(where: { $0.kind == .feed && $0.at < undo.at && $0.endedAt.map { abs($0.timeIntervalSince(undo.at)) < 0.001 } == true }) {
@@ -463,14 +474,39 @@ extension NowSummary {
 
     private func resetTodayIfNeeded(calendar: Calendar, now: Date) -> NowSummary {
         let today = window.interval(at: now, calendar: calendar)
-        guard !window.holds(generatedAt, in: today) else { return self }
+        guard !window.holds(generatedAt, in: today) else { return agingOut(in: today) }
         var summary = self
         summary.todayFeeds = 0
         summary.todayWet = 0
         summary.todayDirty = 0
+        if summary.counted != nil { summary.counted = [] }
         summary.generatedAt = now
         return summary
     }
+
+    /// Under "Last 24 hours", the counts without the entries that have
+    /// passed a day old since the summary was made.
+    private func agingOut(in today: DateInterval) -> NowSummary {
+        guard let counted, counted.contains(where: { !window.holds($0.at, in: today) }) else { return self }
+        var summary = self
+        summary.counted = counted.filter { window.holds($0.at, in: today) }
+        for entry in counted where !window.holds(entry.at, in: today) {
+            switch entry.kind {
+            case .feed: summary.todayFeeds = max(0, summary.todayFeeds - 1)
+            case .wet: summary.todayWet = max(0, summary.todayWet - 1)
+            case .dirty: summary.todayDirty = max(0, summary.todayDirty - 1)
+            default: break
+            }
+        }
+        return summary
+    }
+}
+
+/// A feed or diaper the "Last 24 hours" totals counted: enough to age it out.
+struct CountedEntry: Codable, Equatable, Sendable {
+    var id: UUID?
+    var kind: EventKind
+    var at: Date
 }
 
 /// One entry as the Watch lists it: enough to draw a row and to take back a
