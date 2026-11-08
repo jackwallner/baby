@@ -133,6 +133,7 @@ struct FirstWeeksView: View {
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(AppTheme.ink3)
+        .accessibilityElement(children: .combine)
         .padding(.horizontal, AppTheme.looseSpacing)
         .padding(.vertical, AppTheme.tightSpacing)
     }
