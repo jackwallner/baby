@@ -182,6 +182,7 @@ struct FirstWeeksView: View {
         .background(state == .today ? AppTheme.cardElevated : Color.clear, in: RoundedRectangle(cornerRadius: AppTheme.tightSpacing, style: .continuous))
         .padding(.horizontal, AppTheme.tightSpacing)
         .accessibilityElement(children: .combine)
+        .accessibilityValue(date.formatted(.dateTime.month(.abbreviated).day()))
         .accessibilityLabel(dim
             ? String(localized: "Day \(day), \(state == .future ? String(localized: "upcoming") : String(localized: "not logged")). Breastfeeding reference: \(range.summary).")
             : String(localized: "Day \(day): \(loggedLine(tally)) logged. Breastfeeding reference: \(range.summary)."))
