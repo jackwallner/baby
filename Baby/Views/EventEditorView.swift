@@ -282,6 +282,26 @@ struct EventEditorView: View {
         dismiss()
     }
 
+    /// What an edit does to a feed's or sleep's end.
+    enum EndEdit: Equatable {
+        /// Leave the stored end as it is.
+        case keep
+        /// A new timer: no end yet.
+        case running
+        case ends(Date)
+    }
+
+    /// A timer that was running when the editor opened keeps whatever end it
+    /// has now: a Wake from the Watch, a partner or the Live Activity while
+    /// the sheet was open must not be undone by Done or an autosave. A
+    /// finished entry ends its length after its start.
+    static func endEdit(draft: Draft, isNew: Bool, savedSeconds: TimeInterval) -> EndEdit {
+        if draft.isTimed { return isNew ? .running : .keep }
+        let length = draft.durationMinutes == Int((savedSeconds / 60).rounded()) && savedSeconds > 0
+            ? savedSeconds : Double(draft.durationMinutes) * 60
+        return .ends(draft.startedAt.addingTimeInterval(length))
+    }
+
     /// Sets only what differs, so an untouched entry is not marked changed
     /// and never re-uploads.
     private func applyEdits(to event: LogEvent) {
@@ -294,10 +314,11 @@ struct EventEditorView: View {
         if kind == .weight { set(\.amount, draft.amount) }
         if kind == .dirty { set(\.stoolColor, draft.stool?.rawValue) }
         if kind.canRun {
-            let length = draft.durationMinutes == Int((savedSeconds / 60).rounded()) && savedSeconds > 0
-                ? savedSeconds : Double(draft.durationMinutes) * 60
-            let ended: Date? = draft.isTimed ? nil : draft.startedAt.addingTimeInterval(length)
-            set(\.endedAt, ended)
+            switch Self.endEdit(draft: draft, isNew: isNew, savedSeconds: savedSeconds) {
+            case .keep: break
+            case .running: set(\.endedAt, nil)
+            case .ends(let ended): set(\.endedAt, ended)
+            }
         }
         let trimmed = draft.note.trimmingCharacters(in: .whitespacesAndNewlines)
         set(\.note, trimmed.isEmpty ? nil : trimmed)

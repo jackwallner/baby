@@ -806,4 +806,42 @@ final class EventStoreTests: XCTestCase {
         XCTAssertEqual(store.summary.recent?.map(\.kind), [.feed, .wet], "weights are not buttons and stay off the Watch")
         XCTAssertEqual(store.summary.recent?.first?.sides, [.left])
     }
+
+    /// The editor opened on a running sleep; the baby woke and the Watch (or a
+    /// partner, or the Live Activity) ended it while the sheet was open. Done
+    /// used to write the sheet's "still running" back and restart the sleep.
+    func testEditingARunningSleepKeepsAWakeThatLandedMeanwhile() throws {
+        let start = Date.now.addingTimeInterval(-3600)
+        let sleep = try XCTUnwrap(store.startTimed(.sleep, at: start))
+        let draft = EventEditorView.Draft(
+            startedAt: start, sides: [], durationMinutes: 0, amount: 0,
+            stool: nil, note: "Fussy before", isTimed: sleep.isRunning
+        )
+        XCTAssertTrue(draft.isTimed, "the editor opens a running sleep as a timer")
+
+        XCTAssertTrue(store.stopRunning(.sleep))
+        let woke = try XCTUnwrap(sleep.endedAt)
+
+        let edit = EventEditorView.endEdit(draft: draft, isNew: false, savedSeconds: 0)
+        XCTAssertEqual(edit, .keep, "Done must not reopen a sleep that ended while the sheet was open")
+        sleep.note = draft.note
+        XCTAssertTrue(store.save())
+        XCTAssertEqual(sleep.endedAt, woke)
+        XCTAssertNil(store.summary.runningSleepStart, "Now, the widgets and the Watch say awake")
+    }
+
+    func testEditorEndRulesForNewAndFinishedEntries() {
+        let start = Date(timeIntervalSince1970: 1_800_000_000)
+        var draft = EventEditorView.Draft(
+            startedAt: start, sides: [], durationMinutes: 20, amount: 0,
+            stool: nil, note: "", isTimed: true
+        )
+        XCTAssertEqual(EventEditorView.endEdit(draft: draft, isNew: true, savedSeconds: 0), .running)
+        draft.isTimed = false
+        XCTAssertEqual(EventEditorView.endEdit(draft: draft, isNew: true, savedSeconds: 0), .ends(start.addingTimeInterval(1200)))
+        XCTAssertEqual(EventEditorView.endEdit(draft: draft, isNew: false, savedSeconds: 1214),
+                       .ends(start.addingTimeInterval(1214)), "an untouched length keeps its seconds")
+        draft.durationMinutes = 25
+        XCTAssertEqual(EventEditorView.endEdit(draft: draft, isNew: false, savedSeconds: 1214), .ends(start.addingTimeInterval(1500)))
+    }
 }
