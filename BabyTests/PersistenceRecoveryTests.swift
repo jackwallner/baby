@@ -75,4 +75,24 @@ final class PersistenceRecoveryTests: XCTestCase {
             XCTAssertFalse(Persistence.isCorrupt(error), "\(error) must not move a healthy log aside")
         }
     }
+
+    /// Build 83 crashed 0.2 s after launch inside Core Data's mirroring
+    /// delegate: the duplicate cleanup asked for record names before CloudKit
+    /// setup had finished. Lookups wait until both stores report setup.
+    func testRecordLookupsWaitForCloudKitSetupOnBothStores() {
+        let stores: [String?] = ["private", "shared"]
+        XCTAssertFalse(Persistence.cloudKitReady(standingIn: false, stores: stores, setUp: []))
+        XCTAssertFalse(Persistence.cloudKitReady(standingIn: false, stores: stores, setUp: ["private"]))
+        XCTAssertTrue(Persistence.cloudKitReady(standingIn: false, stores: stores, setUp: ["private", "shared"]))
+        XCTAssertFalse(Persistence.cloudKitReady(standingIn: true, stores: stores, setUp: ["private", "shared"]))
+        XCTAssertFalse(Persistence.cloudKitReady(standingIn: false, stores: [nil, "shared"], setUp: ["shared"]))
+    }
+
+    func testAStackWithoutCloudKitNeverAsksForRecordIDs() throws {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let child = Child.make(in: persistence.viewContext, name: "Nora", birthDate: nil)
+        XCTAssertTrue(persistence.save(persistence.viewContext))
+        XCTAssertFalse(persistence.isCloudKitReady)
+        XCTAssertNil(persistence.recordID(for: child.objectID))
+    }
 }

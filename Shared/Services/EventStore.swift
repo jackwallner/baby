@@ -79,9 +79,9 @@ final class EventStore: ObservableObject {
          cloudRecordID: (@Sendable (NSManagedObjectID) -> CKRecord.ID?)? = nil) {
         self.persistence = persistence
         self.liveActivities = liveActivities
-        self.cloudRecordID = cloudRecordID ?? { persistence.container.recordID(for: $0) }
+        self.cloudRecordID = cloudRecordID ?? { persistence.recordID(for: $0) }
         resolvesCloudRecords = cloudRecordID != nil || persistence.cloudKitEnabled
-        self.sharedZoneID = sharedZoneID ?? { persistence.container.recordID(for: $0.objectID)?.zoneID }
+        self.sharedZoneID = sharedZoneID ?? { persistence.recordID(for: $0.objectID)?.zoneID }
         reload()
         let center = NotificationCenter.default
         observers.append(center.addObserver(
@@ -111,6 +111,14 @@ final class EventStore: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in self?.reload() }
+        })
+        // Record lookups wait for CloudKit setup. Once it is done, make them.
+        observers.append(center.addObserver(
+            forName: Persistence.cloudKitDidFinishSetup,
+            object: persistence.container,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.cloudRecordsChanged() }
         })
         // Only a change to an entry or a baby in this context can change what
         // the log shows, so a quiet remote-change reload skips the redraw.
@@ -258,7 +266,9 @@ final class EventStore: ObservableObject {
     static let widgetWorkTime: TimeInterval = 10
 
     private func reconcileWidgetCloudWrites() {
-        guard persistence.cloudKitEnabled, !persistence.isStandingIn else { return }
+        // Record names exist only once CloudKit setup is done; asking during
+        // setup crashed at launch. The setup notice reloads, which runs this.
+        guard persistence.isCloudKitReady else { return }
         guard !isReconciling else {
             needsReconcile = true
             return
@@ -274,8 +284,7 @@ final class EventStore: ObservableObject {
         Task.detached(priority: .utility) { [weak self] in
             let context = persistence.newBackgroundContext()
             let (changed, saved) = context.performAndWait {
-                let container = persistence.container
-                var changed = DuplicateEvents.remove(in: context) { container.recordID(for: $0)?.recordName } > 0
+                var changed = DuplicateEvents.remove(in: context) { persistence.recordID(for: $0)?.recordName } > 0
                 for event in persistence.events(ids: Array(undone.keys), in: context) {
                     guard let id = event.id, let deletedAt = undone[id],
                           (event.updatedAt ?? .distantPast) <= deletedAt else { continue }

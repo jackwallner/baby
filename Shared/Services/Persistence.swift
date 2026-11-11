@@ -67,6 +67,49 @@ final class Persistence: @unchecked Sendable {
     /// nothing a parent logs is written where it would be lost.
     var isStandingIn: Bool { standInLock.withLock { !standIns.isEmpty } }
 
+    /// Posted on the main queue once CloudKit setup succeeds for a store, so
+    /// record lookups skipped while it ran can be made now.
+    static let cloudKitDidFinishSetup = Notification.Name("BabyPersistenceCloudKitDidFinishSetup")
+    /// Stores whose mirroring setup has succeeded in this process. Asking
+    /// Core Data for record IDs or shares before that crashed the app at
+    /// launch (an exception inside the mirroring delegate, build 83), and
+    /// Apple names lookups during setup as a cause of hangs.
+    private let setUpStores: SetUpStores
+    private var setupObserver: Any?
+
+    /// True when record IDs and shares can be asked for: mirroring is on, the
+    /// real files are open, and setup has finished for both of them.
+    var isCloudKitReady: Bool {
+        guard cloudKitEnabled else { return false }
+        let (standingIn, stores) = standInLock.withLock {
+            (!standIns.isEmpty, [storedPrivateStore.identifier, storedSharedStore.identifier])
+        }
+        return Self.cloudKitReady(standingIn: standingIn, stores: stores, setUp: setUpStores.identifiers)
+    }
+
+    static func cloudKitReady(standingIn: Bool, stores: [String?], setUp: Set<String>) -> Bool {
+        guard !standingIn else { return false }
+        return stores.allSatisfy { $0.map(setUp.contains) ?? false }
+    }
+
+    /// The CloudKit record for an object, or nil until setup has finished.
+    func recordID(for objectID: NSManagedObjectID) -> CKRecord.ID? {
+        guard isCloudKitReady else { return nil }
+        return container.recordID(for: objectID)
+    }
+
+    /// Waits for setup, at most `timeout` seconds. First setup on a fresh
+    /// install can take about two minutes.
+    func waitUntilCloudKitReady(timeout: TimeInterval = 150) async -> Bool {
+        guard cloudKitEnabled else { return false }
+        let deadline = Date.now.addingTimeInterval(timeout)
+        while !isCloudKitReady {
+            guard Date.now < deadline, !Task.isCancelled else { return false }
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        return true
+    }
+
     private static let logger = Logger(subsystem: AppGroup.subsystem, category: "Persistence")
 
     /// Only the app process mirrors to CloudKit. Extensions are short-lived and
@@ -121,6 +164,22 @@ final class Persistence: @unchecked Sendable {
             let sharedOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: AppGroup.cloudKitContainerID)
             sharedOptions.databaseScope = .shared
             sharedDescription.cloudKitContainerOptions = sharedOptions
+        }
+
+        // Watch setup before the stores load, so its end is never missed.
+        let setUpStores = SetUpStores()
+        self.setUpStores = setUpStores
+        setupObserver = NotificationCenter.default.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: container,
+            queue: nil
+        ) { [container] note in
+            guard let event = note.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey] as? NSPersistentCloudKitContainer.Event,
+                  event.type == .setup, event.endDate != nil, event.succeeded,
+                  setUpStores.insert(event.storeIdentifier) else { return }
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Persistence.cloudKitDidFinishSetup, object: container)
+            }
         }
 
         var failures = Self.load([privateDescription, sharedDescription], in: container)
@@ -185,6 +244,14 @@ final class Persistence: @unchecked Sendable {
 
     deinit {
         if let unlockObserver { NotificationCenter.default.removeObserver(unlockObserver) }
+        if let setupObserver { NotificationCenter.default.removeObserver(setupObserver) }
+    }
+
+    private final class SetUpStores: @unchecked Sendable {
+        private let lock = NSLock()
+        private var stored: Set<String> = []
+        var identifiers: Set<String> { lock.withLock { stored } }
+        func insert(_ identifier: String) -> Bool { lock.withLock { stored.insert(identifier).inserted } }
     }
 
     // MARK: - Opening

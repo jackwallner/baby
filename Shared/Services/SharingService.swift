@@ -78,8 +78,12 @@ final class SharingService: ObservableObject {
         }
         // Both lookups wait on the CloudKit mirroring queue, which is busy for
         // seconds right after the app opens, so they run off the main thread.
+        // Asking Core Data for shares before CloudKit setup ends crashed at
+        // launch, so wait for it. A setup that never finishes changes nothing.
+        let ready = await persistence.waitUntilCloudKitReady()
+        guard ready, generation == refreshes else { return }
         let objectID = child.objectID
-        let lookup = await Self.lookUpShare(for: objectID, in: persistence.container)
+        let lookup = await Self.lookUpShare(for: objectID, in: persistence)
         guard generation == refreshes else { return }
         switch lookup {
         case .found(let found):
@@ -110,15 +114,15 @@ final class SharingService: ObservableObject {
 
     private nonisolated static func lookUpShare(
         for objectID: NSManagedObjectID,
-        in container: NSPersistentCloudKitContainer
+        in persistence: Persistence
     ) async -> ShareLookup {
         await Task.detached(priority: .userInitiated) {
             do {
-                return .found(try container.fetchShares(matching: [objectID])[objectID])
+                return .found(try persistence.container.fetchShares(matching: [objectID])[objectID])
             } catch {
                 Logger(subsystem: AppGroup.subsystem, category: "Sharing")
                     .error("fetchShares failed: \(String(describing: error), privacy: .public)")
-                return .failed(container.recordID(for: objectID)?.zoneID)
+                return .failed(persistence.recordID(for: objectID)?.zoneID)
             }
         }.value
     }
@@ -216,7 +220,7 @@ final class SharingService: ObservableObject {
         let deadline = Date.now.addingTimeInterval(150)
         while Date.now < deadline {
             try Task.checkCancellation()
-            if persistence.container.recordID(for: child.objectID) != nil { return }
+            if persistence.recordID(for: child.objectID) != nil { return }
             try await Task.sleep(for: .milliseconds(500))
         }
         logger.error("share requested before the first CloudKit export finished")
@@ -236,7 +240,7 @@ final class SharingService: ObservableObject {
         // Leaving someone else's share removes its local copy. Stopping our
         // own share must never purge the baby's original log.
         if persistence.isShared(child) {
-            let lookup = await Self.lookUpShare(for: child.objectID, in: persistence.container)
+            let lookup = await Self.lookUpShare(for: child.objectID, in: persistence)
             guard case .found(let target) = lookup, let target else { throw JoinError.unavailable }
             _ = try await persistence.container.purgeObjectsAndRecordsInZone(with: target.recordID.zoneID, in: store)
         }
