@@ -27,6 +27,15 @@ final class NowFitTests: XCTestCase {
         XCTAssertEqual(fit.slack, 900 - 400 - AppTheme.maxLogButtonHeight * 3)
     }
 
+    func testTallIPadPaneGrowsTheButtonsToItsOwnCap() {
+        let fit = NowFit.make(
+            fixed: 400, available: 1300, rows: 3, strip: strip, drawn: .full,
+            olderLink: link, maxButton: AppTheme.maxLogButtonHeightPad
+        )
+        XCTAssertEqual(fit.buttonHeight, AppTheme.maxLogButtonHeightPad)
+        XCTAssertEqual(fit.slack, 1300 - 400 - AppTheme.maxLogButtonHeightPad * 3)
+    }
+
     func testShortPhoneShedsTheHourLabelsBeforeTheStrip() {
         // Full strip misses the floor by a point; without labels it fits.
         let fit = make(fixed: 500, available: 500 + AppTheme.minLogButtonHeight * 3 - 1, drawn: .full)

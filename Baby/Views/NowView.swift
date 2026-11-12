@@ -136,6 +136,10 @@ struct NowView: View {
         .frame(minHeight: max(0, available), alignment: .top)
     }
 
+    private var maxButtonHeight: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? AppTheme.maxLogButtonHeightPad : AppTheme.maxLogButtonHeight
+    }
+
     private var rows: CGFloat {
         CGFloat(max(1, LogButtons.rows(for: settings.tracked).count))
     }
@@ -143,7 +147,7 @@ struct NowView: View {
     private func refit(fixed: CGFloat, available: CGFloat, drawn: StripStyle, animated: Bool) {
         let next = NowFit.make(
             fixed: fixed, available: available, rows: rows,
-            strip: strip, drawn: drawn, olderLink: olderLinkHeight
+            strip: strip, drawn: drawn, olderLink: olderLinkHeight, maxButton: maxButtonHeight
         )
         guard next.strip != fit.strip || next.isTight != fit.isTight
             || abs(next.buttonHeight - fit.buttonHeight) >= 1 || abs(next.slack - fit.slack) >= 1 else {
@@ -191,7 +195,8 @@ struct NowFit: Equatable {
     /// tap target, so the capsule never sits on the totals.
     static func make(
         fixed: CGFloat, available: CGFloat, rows: CGFloat,
-        strip: StripMetrics, drawn: StripStyle, olderLink: CGFloat
+        strip: StripMetrics, drawn: StripStyle, olderLink: CGFloat,
+        maxButton: CGFloat = AppTheme.maxLogButtonHeight
     ) -> NowFit {
         let withoutStrip = fixed - strip.height(drawn)
         let floor = withoutStrip + AppTheme.minLogButtonHeight * rows
@@ -206,7 +211,7 @@ struct NowFit: Equatable {
         // above the totals instead, so going tight only ever shrinks them.
         let height = isTight
             ? min(AppTheme.minLogButtonHeight, max(AppTheme.tightLogButtonHeight, share))
-            : min(AppTheme.maxLogButtonHeight, max(AppTheme.minLogButtonHeight, share))
+            : min(maxButton, max(AppTheme.minLogButtonHeight, share))
         return NowFit(
             fixed: fittedFixed, buttonHeight: height,
             slack: max(0, available - budget - height * rows),

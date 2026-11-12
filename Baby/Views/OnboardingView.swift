@@ -28,58 +28,90 @@ struct BabyOnboardingView: View {
     @FocusState private var isEditingName: Bool
 
     var body: some View {
+        column
+            .frame(maxWidth: AppTheme.readableWidth)
+            .frame(maxWidth: .infinity)
+            .padding(AppTheme.margin)
+            .background(AppTheme.paper)
+            .tint(AppTheme.accent)
+            // Back from waiting on a baby that never came: a fresh start.
+            .onAppear { if joinModel.phase == .joined { joinModel.reset() } }
+            .alert("Couldn't save setup", isPresented: $showSaveError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Your details are still here. Please try again.")
+            }
+    }
+
+    /// An iPad's tall screen centers the whole setup, button included, while
+    /// it fits; a phone, or a page too tall for it, keeps the button pinned
+    /// under a scrolling form.
+    @ViewBuilder
+    private var column: some View {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            ViewThatFits(in: .vertical) {
+                VStack(spacing: AppTheme.looseSpacing) {
+                    form
+                    footer
+                }
+                .frame(maxHeight: .infinity)
+                pinnedColumn
+            }
+        } else {
+            pinnedColumn
+        }
+    }
+
+    private var pinnedColumn: some View {
         VStack(spacing: AppTheme.looseSpacing) {
             ScrollView {
-                VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
-                    welcomeHeader
-                    pathChoice
-                    if path == .start {
-                        babyDetails
-                        Text("All optional. Invite your partner or anyone else helping from Settings once you're in.")
-                            .font(.footnote)
-                            .foregroundStyle(AppTheme.ink2)
-                            .fixedSize(horizontal: false, vertical: true)
-                    } else {
-                        JoinLogForm(model: joinModel)
-                    }
-                    Text(Guidance.disclaimer)
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.ink2)
-                        .accessibilityIdentifier("onboarding.disclaimer")
-                }
-                .frame(maxWidth: AppTheme.contentWidth, alignment: .leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+                form
+                    .frame(maxWidth: AppTheme.contentWidth, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .scrollBounceBehavior(.basedOnSize)
             .scrollDismissesKeyboard(.interactively)
-
-            VStack(spacing: AppTheme.tightSpacing) {
-                if path == .start {
-                    Button("Start tracking") { finish() }
-                        .buttonStyle(PrimaryButtonStyle())
-                        .accessibilityIdentifier("onboarding.primary")
-                } else {
-                    JoinButton(model: joinModel)
-                }
-                Link(destination: BabyLinks.privacyPolicy) {
-                    Text("Privacy Policy")
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.ink2)
-                        .frame(minWidth: 44, minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-            }
+            footer
         }
-        .padding(AppTheme.margin)
-        .background(AppTheme.paper)
-        .tint(AppTheme.accent)
-        // Back from waiting on a baby that never came: a fresh start.
-        .onAppear { if joinModel.phase == .joined { joinModel.reset() } }
-        .alert("Couldn't save setup", isPresented: $showSaveError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Your details are still here. Please try again.")
+    }
+
+    private var form: some View {
+        VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
+            welcomeHeader
+            pathChoice
+            if path == .start {
+                babyDetails
+                Text("All optional. Invite your partner or anyone else helping from Settings once you're in.")
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                JoinLogForm(model: joinModel)
+            }
+            Text(Guidance.disclaimer)
+                .font(.caption)
+                .foregroundStyle(AppTheme.ink2)
+                .accessibilityIdentifier("onboarding.disclaimer")
+        }
+    }
+
+    private var footer: some View {
+        VStack(spacing: AppTheme.tightSpacing) {
+            if path == .start {
+                Button("Start tracking") { finish() }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityIdentifier("onboarding.primary")
+            } else {
+                JoinButton(model: joinModel)
+            }
+            Link(destination: BabyLinks.privacyPolicy) {
+                Text("Privacy Policy")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.ink2)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
         }
     }
 
