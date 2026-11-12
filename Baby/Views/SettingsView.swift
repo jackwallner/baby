@@ -316,7 +316,7 @@ struct SettingsView: View {
                 }
             } label: {
                 LabeledContent {
-                    HStack(spacing: 6) {
+                    HStack(spacing: AppTheme.hairSpacing) {
                         Text(Self.currentLanguageName).foregroundStyle(Color.secondary)
                         // Leaves the app, so the outward arrow rather than a chevron.
                         Image(systemName: "arrow.up.forward")
