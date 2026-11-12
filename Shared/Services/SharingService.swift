@@ -118,7 +118,10 @@ final class SharingService: ObservableObject {
     ) async -> ShareLookup {
         await Task.detached(priority: .userInitiated) {
             do {
-                return .found(try persistence.container.fetchShares(matching: [objectID])[objectID])
+                guard let shares = try persistence.lookupGuard.run(for: objectID, {
+                    try persistence.container.fetchShares(matching: [objectID])
+                }) else { return .failed(nil) }
+                return .found(shares[objectID])
             } catch {
                 Logger(subsystem: AppGroup.subsystem, category: "Sharing")
                     .error("fetchShares failed: \(String(describing: error), privacy: .public)")
@@ -216,6 +219,7 @@ final class SharingService: ObservableObject {
     /// `scripts/cloudkit-schema` `--verify-share`.
     private func waitForFirstExport(of child: Child) async throws {
         guard persistence.cloudKitEnabled else { return }
+        guard !persistence.lookupGuard.isSkipped(child.objectID) else { throw JoinError.unavailable }
         // First setup on a fresh install can take about two minutes.
         let deadline = Date.now.addingTimeInterval(150)
         while Date.now < deadline {

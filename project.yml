@@ -81,6 +81,7 @@ targetTemplates:
       - path: Shared/Models/DiaperWords.swift
       - path: Shared/Models/TrackedKinds.swift
       - path: Shared/Services/Persistence.swift
+      - path: Shared/Services/CloudKitLookupGuard.swift
       - path: Shared/Services/NowSummary.swift
       - path: Shared/Services/SummaryReport.swift
       - path: Shared/Services/SampleReport.swift

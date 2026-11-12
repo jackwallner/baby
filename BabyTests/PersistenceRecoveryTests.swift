@@ -95,4 +95,59 @@ final class PersistenceRecoveryTests: XCTestCase {
         XCTAssertFalse(persistence.isCloudKitReady)
         XCTAssertNil(persistence.recordID(for: child.objectID))
     }
+
+    /// The build 83 tester could not open the app: every launch died inside
+    /// a record lookup for one entry with broken CloudKit metadata. A launch
+    /// after a death never asks about that entry again, in any build.
+    func testALookupThatKilledTheProcessIsNeverRepeated() throws {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let context = persistence.viewContext
+        let child = Child.make(in: context, name: "Nora", birthDate: nil)
+        let bad = LogEvent.make(in: context, child: child, kind: .feed, at: .now)
+        let good = LogEvent.make(in: context, child: child, kind: .wet, at: .now)
+        try context.obtainPermanentIDs(for: [child, bad, good])
+        let dir = directory!
+
+        // The process dies inside the lookup: the marker is left behind.
+        var guardian = CloudKitLookupGuard(directory: dir, enabled: true)
+        _ = guardian.run(for: bad.objectID) {
+            let markers = (try? FileManager.default.contentsOfDirectory(atPath: dir.path)) ?? []
+            for name in markers where name.hasSuffix(".cloudkit-lookup") {
+                try? FileManager.default.copyItem(
+                    atPath: dir.appendingPathComponent(name).path,
+                    toPath: dir.appendingPathComponent("left-" + name).path
+                )
+            }
+        }
+
+        guardian = CloudKitLookupGuard(directory: dir, enabled: true)
+        XCTAssertTrue(guardian.isSkipped(bad.objectID))
+        XCTAssertNil(guardian.run(for: bad.objectID) { 1 })
+        XCTAssertEqual(guardian.run(for: good.objectID) { 1 }, 1)
+        XCTAssertTrue(CloudKitLookupGuard(directory: dir, enabled: true).isSkipped(bad.objectID),
+                      "the skip outlives the launch that found it")
+    }
+
+    func testAReturnedOrThrownLookupLeavesNoMarker() throws {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let child = Child.make(in: persistence.viewContext, name: "Nora", birthDate: nil)
+        try persistence.viewContext.obtainPermanentIDs(for: [child])
+        let guardian = CloudKitLookupGuard(directory: directory, enabled: true)
+        struct Failed: Error {}
+        XCTAssertEqual(guardian.run(for: child.objectID) { 1 }, 1)
+        XCTAssertThrowsError(try guardian.run(for: child.objectID) { throw Failed() })
+        XCTAssertFalse(CloudKitLookupGuard(directory: directory, enabled: true).isSkipped(child.objectID))
+    }
+
+    func testAWidgetNeverTakesTheAppsRunningLookupForACrash() throws {
+        let persistence = Persistence(cloudKit: false, inMemory: true)
+        let child = Child.make(in: persistence.viewContext, name: "Nora", birthDate: nil)
+        try persistence.viewContext.obtainPermanentIDs(for: [child])
+        let app = CloudKitLookupGuard(directory: directory, enabled: true)
+        _ = app.run(for: child.objectID) {
+            let widget = CloudKitLookupGuard(directory: directory, enabled: false)
+            XCTAssertFalse(widget.isSkipped(child.objectID))
+        }
+        XCTAssertFalse(CloudKitLookupGuard(directory: directory, enabled: true).isSkipped(child.objectID))
+    }
 }

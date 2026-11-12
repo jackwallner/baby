@@ -92,10 +92,13 @@ final class Persistence: @unchecked Sendable {
         return stores.allSatisfy { $0.map(setUp.contains) ?? false }
     }
 
+    /// Never asks again about an object a lookup has died on.
+    let lookupGuard: CloudKitLookupGuard
+
     /// The CloudKit record for an object, or nil until setup has finished.
     func recordID(for objectID: NSManagedObjectID) -> CKRecord.ID? {
         guard isCloudKitReady else { return nil }
-        return container.recordID(for: objectID)
+        return lookupGuard.run(for: objectID) { container.recordID(for: objectID) } ?? nil
     }
 
     /// Waits for setup, at most `timeout` seconds. First setup on a fresh
@@ -165,6 +168,8 @@ final class Persistence: @unchecked Sendable {
             sharedOptions.databaseScope = .shared
             sharedDescription.cloudKitContainerOptions = sharedOptions
         }
+
+        lookupGuard = CloudKitLookupGuard(directory: directory, enabled: wantsCloudKit)
 
         // Watch setup before the stores load, so its end is never missed.
         let setUpStores = SetUpStores()
