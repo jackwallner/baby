@@ -26,6 +26,9 @@ enum AppTheme {
     /// The four log buttons: tall enough to hit while holding a baby.
     static let logButtonHeight: CGFloat = 88
     static let maxLogButtonHeight: CGFloat = 124
+    /// The same cap on an iPad's tall pane, so the buttons fill it instead of
+    /// leaving a gap above the totals.
+    static let maxLogButtonHeightPad: CGFloat = 200
     /// The shortest a log button gets when Now fits a small phone.
     static let minLogButtonHeight: CGFloat = 52
     /// Only when the page cannot fit even at that: Apple's minimum tap target.
@@ -44,6 +47,9 @@ enum AppTheme {
     static let graphicSize: CGFloat = 44
     static let wideLayout: CGFloat = 700
     static let contentWidth: CGFloat = 1000
+    /// One column of forms and single screens on a wide window: a phone's
+    /// width and a little more, so lines stay readable.
+    static let readableWidth: CGFloat = 600
     static let ctaHeight: CGFloat = 52
     /// A floating navigation capsule, with four 48pt touch targets.
     static let tabWidth: CGFloat = 72

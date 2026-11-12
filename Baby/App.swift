@@ -496,6 +496,8 @@ struct BabyHomeView: View {
 enum DuoTour {
     enum Stop: String {
         case log, history, reports, firstWeeks = "firstweeks", settings, night
+        /// iPad captures: Log beside History's calendar, First Weeks beside History's list.
+        case calendar, weeks
     }
 
     static func stop(in arguments: [String]) -> Stop? {
@@ -513,18 +515,18 @@ extension BabyHomeView {
         DuoTour.hasRun = true
         let appearance: AppAppearance = stop == .night ? .night : .system
         if BabySettings.shared.appearance != appearance { BabySettings.shared.appearance = appearance }
-        let layout: HistoryView.HistoryLayout = stop == .firstWeeks ? .calendar : .list
+        let layout: HistoryView.HistoryLayout = stop == .firstWeeks || stop == .calendar ? .calendar : .list
         if UserDefaults.standard.string(forKey: "historyLayout") != layout.rawValue {
             UserDefaults.standard.set(layout.rawValue, forKey: "historyLayout")
         }
         let tab: HomeTab = switch stop {
-        case .log, .night: .log
+        case .log, .night, .calendar: .log
         case .history: .history
         case .reports: .reports
-        case .firstWeeks, .settings: .settings
+        case .firstWeeks, .settings, .weeks: .settings
         }
         show(tab)
-        if stop == .firstWeeks { settingsPath = [.firstWeeks] }
+        if stop == .firstWeeks || stop == .weeks { settingsPath = [.firstWeeks] }
         try? await Task.sleep(for: DuoTour.wetDelay)
         withAnimation(AppTheme.feedbackAnimation) { _ = EventStore.shared.log(.wet) }
     }

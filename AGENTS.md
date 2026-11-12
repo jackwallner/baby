@@ -55,7 +55,7 @@ beyond that setting, or locking something that shipped free.
 - Swift 6, SwiftUI, Core Data + `NSPersistentCloudKitContainer`, WidgetKit,
   ActivityKit, App Intents, WatchConnectivity. **No HealthKit**: it has no
   infant data types.
-- iOS 17+, watchOS 10+, team `YXG4MP6W39`.
+- iOS 17+ (iPhone and iPad), watchOS 10+, team `YXG4MP6W39`.
 - `Persistence` opens two stores against one model: `private.sqlite` mirrored to
   the private CloudKit database, and `shared.sqlite` mirrored to the shared one.
   A baby another parent shared arrives in the second store, and every query runs
@@ -190,6 +190,7 @@ and a fresh Development-to-Production deploy before the build that ships it.
 - `.claude/rules/screenshots.md`: localized store frames, capture commands and screen mapping.
 - `.claude/rules/watch.md`: Watch pages, wrist Undo, complications and their tests.
 - `.claude/rules/iphone-duo.md`: the unfolded two-pane layout (open tab beside History) and its capture tour.
+- `.claude/rules/ipad-layout.md`: iPad support (same two-pane layout), onboarding column, 13 inch store frames.
 - `.claude/rules/localization.md`: string catalog routing, plural forms, formatter use, and checks.
 - `.claude/rules/android.md`: the Kotlin/Compose port in `android/`, its iOS parity tests, Firebase Log together (`firebase/`), deliberate differences and remaining Play steps.
 

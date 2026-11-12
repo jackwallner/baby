@@ -27,7 +27,8 @@ paths:
   sits inside each stack (`reservesNavigationCapsule`, 2026-11-05). A hidden
   stack's bar title stays in the tree; bar buttons hide themselves.
 - Every screen gets `horizontalSizeClass = .compact` always, not only once
-  split, so it lays out as on a phone (the app is iPhone only). The capsule and the Undo toast are framed to the primary pane, never
+  split, so it lays out as on a phone. The same split now serves iPad
+  (2026-11-12, `.claude/rules/ipad-layout.md`). The capsule and the Undo toast are framed to the primary pane, never
   across the fold. History's pane drops the capsule's bottom reservation.
 - Unfolded, the capsule heads the open tab's pane (2026-10-24): the screen
   is padded down by the capsule's reservation and reserves nothing at its
