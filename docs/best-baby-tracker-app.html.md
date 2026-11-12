@@ -6,11 +6,11 @@ Web page: https://jackwallner.com/ios/baby/best-baby-tracker-app.html
 
 ## Best Baby Tracker App for iPhone
 
-By Jack Wallner · Last updated November 11, 2026
+By Jack Wallner · Last updated November 12, 2026
 
 **Best for sleep timing and parenting guidance:** Huckleberry, though its SweetSpot nap predictions are in the paid tiers. **Best for logging nearly everything, from pumping to vaccines, with core tracking free:** Baby Tracker - Newborn Log. **Best for twins and for tracking the parent too:** Nara. **Best for daycare or a nanny on any device, including a web browser:** Baby Connect. **Best for two iPhone parents who want four buttons and no account:** Baby Tracker: Feeds & Diapers, the app I make.
 
-**How we compared (November 11, 2026):** I read each app's US App Store listing and pulled its rating, rating count, supported devices, purchase types and last update from Apple's store data. I did not install or subscribe to the other apps, so what I say about them comes from their own listings. Baby Tracker: Feeds & Diapers' entry comes from its code and listing. Prices are left out on purpose, because they vary by region and change.
+**How we compared (November 12, 2026):** I read each app's US App Store listing and pulled its rating, rating count, supported devices, purchase types and last update from Apple's store data. I did not install or subscribe to the other apps, so what I say about them comes from their own listings. Baby Tracker: Feeds & Diapers' entry comes from its code and listing. Prices are left out on purpose, because they vary by region and change.
 
 **Disclosure:** Jack Wallner makes Baby Tracker: Feeds & Diapers, one of the apps below, so read its entry with that in mind.
 
@@ -20,13 +20,13 @@ Huckleberry and Baby Tracker - Newborn Log have the most ratings, Nara suits twi
 
 | App | Best for | Price model | Apple Watch | iPad | Account | Rating (count) | Last updated |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [Huckleberry: Baby Tracker](https://apps.apple.com/us/app/huckleberry-baby-tracker/id1169136078) | Sleep timing and guidance | Free + Plus or Premium membership | Yes | Yes | Not stated | 4.92 (78,154) | Nov 1, 2026 |
-| [Baby Tracker - Newborn Log](https://apps.apple.com/us/app/baby-tracker-newborn-log/id779656557) | Logging almost everything, free core tracking | Free with ads + subscription | Yes | Yes | Not stated | 4.80 (227,374) | Nov 7, 2026 |
-| [Nara Baby & Pregnancy Tracker](https://apps.apple.com/us/app/nara-baby-pregnancy-tracker/id1444639029) | Twins, routines and parent self-care | Free + monthly or lifetime purchase | Yes | Not listed | Used for sharing (per listing) | 4.85 (24,613) | Nov 5, 2026 |
-| [Baby Connect: Newborn Tracker](https://apps.apple.com/us/app/baby-connect-newborn-tracker/id326574411) | Daycare, nannies and web access | Subscription after a 7-day trial | Yes | Yes | Not stated | 4.79 (14,165) | Nov 5, 2026 |
+| [Huckleberry: Baby Tracker](https://apps.apple.com/us/app/huckleberry-baby-tracker/id1169136078) | Sleep timing and guidance | Free + Plus or Premium membership | Yes | Yes | Not stated | 4.92 (78,394) | Nov 1, 2026 |
+| [Baby Tracker - Newborn Log](https://apps.apple.com/us/app/baby-tracker-newborn-log/id779656557) | Logging almost everything, free core tracking | Free with ads + subscription | Yes | Yes | Not stated | 4.80 (227,379) | Nov 7, 2026 |
+| [Nara Baby & Pregnancy Tracker](https://apps.apple.com/us/app/nara-baby-pregnancy-tracker/id1444639029) | Twins, routines and parent self-care | Free + monthly or lifetime purchase | Yes | Not listed | Used for sharing (per listing) | 4.84 (24,627) | Nov 5, 2026 |
+| [Baby Connect: Newborn Tracker](https://apps.apple.com/us/app/baby-connect-newborn-tracker/id326574411) | Daycare, nannies and web access | Subscription after a 7-day trial | Yes | Yes | Not stated | 4.79 (14,167) | Nov 5, 2026 |
 | [Baby Tracker: Feeds & Diapers](https://apps.apple.com/us/app/baby-tracker-feeds-diapers/id6811133796?pt=128748779&ct=jw-baby-best-baby-tracker-app&mt=8) | Two iPhone parents, one-tap logging, no account | Free + subscription or lifetime | Yes | No | None (shares through iCloud) | No ratings yet | Nov 10, 2026 |
 
-Ratings and counts are US App Store figures as of November 11, 2026. Apple Watch and iPad show the devices each listing supports. "Not stated" means the listing does not say whether an account is needed. Price models describe the structure only.
+Ratings and counts are US App Store figures as of November 12, 2026. Apple Watch and iPad show the devices each listing supports. "Not stated" means the listing does not say whether an account is needed. Price models describe the structure only.
 
 ## What is each baby tracker app best at?
 
@@ -34,7 +34,7 @@ Huckleberry is best for sleep timing, Baby Tracker - Newborn Log for logging eve
 
 ### Huckleberry: Baby Tracker
 
-The highest-rated app in this group. The free tier covers one-touch logging for sleep, diapers, feeds, pumping, growth, milestones and medicine, a breastfeeding timer for both sides, several children and sync between caregivers. Plus adds SweetSpot, which suggests nap and sleep times from 2 months, plus sleep schedules, reports and AI logging; Premium adds an AI chat called Berry and sleep plans. The trade-off: the feature it is best known for is paid, and much of the paid tier leans on AI guidance.
+The highest-rated app in this group. The free tier covers one-touch logging for sleep, diapers, feeds, pumping, growth, milestones and medicine, a breastfeeding timer for both sides, several children and sync between caregivers. Plus adds SweetSpot, which suggests nap and sleep times from 2 months, plus sleep schedules, reports and AI logging; Premium adds an AI chat called Berry and sleep plans. The trade-off: the feature it is best known for, SweetSpot, is paid, and Premium's Berry guidance is an AI chat.
 
 ### Baby Tracker - Newborn Log
 
@@ -108,4 +108,4 @@ Related: [How many wet and dirty diapers should a newborn have each day in the f
 - [Baby Connect: Newborn Tracker on the App Store](https://apps.apple.com/us/app/baby-connect-newborn-tracker/id326574411)
 - [Baby Tracker: Feeds & Diapers on the App Store](https://apps.apple.com/us/app/baby-tracker-feeds-diapers/id6811133796?pt=128748779&ct=jw-baby-best-baby-tracker-app&mt=8)
 
-Baby Tracker: Feeds & Diapers is an independent app and is not affiliated with any app compared here. It is a log, not medical advice. App details were checked on November 11, 2026 and may change.
+Baby Tracker: Feeds & Diapers is an independent app and is not affiliated with any app compared here. It is a log, not medical advice. App details were checked on November 12, 2026 and may change.
