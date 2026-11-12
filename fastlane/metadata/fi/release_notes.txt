@@ -1,1 +1,1 @@
-Helpommin napautettavat painikkeet, selkeämpi teksti sekä korjauksia VoiceOveriin ja käännettyihin näyttöihin.
+Nyt iPadilla. Korjaa kaatumisen, joka saattoi estää apin avautumisen.

@@ -1,1 +1,1 @@
-Knappar som är lättare att trycka på, tydligare text och korrigeringar för VoiceOver och översatta skärmar.
+Nu på iPad. Åtgärdar en krasch som kunde hindra appen från att öppnas.

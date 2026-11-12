@@ -1,1 +1,1 @@
-Easier-to-tap buttons, clearer text, and fixes for VoiceOver and translated screens.
+Now on iPad. Fixes a crash that could stop the app from opening.

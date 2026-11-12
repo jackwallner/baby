@@ -1,1 +1,1 @@
-Botons més fàcils de tocar, text més clar i correccions per a VoiceOver i les pantalles traduïdes.
+Ara també a l’iPad. Corregeix un error que podia impedir que l’app s’obrís.

@@ -1,1 +1,1 @@
-Knoppen die makkelijker te raken zijn, duidelijkere tekst en verbeteringen voor VoiceOver en vertaalde schermen.
+Nu ook op iPad. Verhelpt een crash waardoor de app soms niet opende.

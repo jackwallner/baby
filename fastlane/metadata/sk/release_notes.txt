@@ -1,1 +1,1 @@
-Tlačidlá, na ktoré sa ľahšie klepne, čitateľnejší text a opravy pre VoiceOver a preložené obrazovky.
+Teraz aj na iPade. Opravuje pád, pre ktorý sa aplikácia nemusela otvoriť.

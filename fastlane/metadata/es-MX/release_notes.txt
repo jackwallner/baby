@@ -1,1 +1,1 @@
-Botones más fáciles de tocar, texto más claro y correcciones para VoiceOver y las pantallas traducidas.
+Ahora también en iPad. Corrige un error que podía impedir que la app se abriera.

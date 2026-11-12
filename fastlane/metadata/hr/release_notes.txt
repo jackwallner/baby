@@ -1,1 +1,1 @@
-Gumbi koje je lakše dodirnuti, jasniji tekst i ispravci za VoiceOver i prevedene zaslone.
+Sada i na iPadu. Ispravlja rušenje zbog kojeg se aplikacija možda nije otvarala.

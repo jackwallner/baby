@@ -1,1 +1,1 @@
-Pulsanti più facili da toccare, testo più chiaro e correzioni per VoiceOver e le schermate tradotte.
+Ora anche su iPad. Risolve un arresto anomalo che poteva impedire l’apertura dell’app.

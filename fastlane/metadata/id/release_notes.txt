@@ -1,1 +1,1 @@
-Tombol lebih mudah diketuk, teks lebih jelas, serta perbaikan untuk VoiceOver dan layar terjemahan.
+Kini di iPad. Memperbaiki crash yang dapat membuat app tidak bisa dibuka.

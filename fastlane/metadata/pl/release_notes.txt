@@ -1,1 +1,1 @@
-Przyciski łatwiejsze do naciśnięcia, czytelniejszy tekst oraz poprawki dla VoiceOver i przetłumaczonych ekranów.
+Teraz na iPadzie. Naprawia awarię, przez którą aplikacja mogła się nie otwierać.

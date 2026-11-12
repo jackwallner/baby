@@ -1,1 +1,1 @@
-Dokunması daha kolay düğmeler, daha net metinler ve VoiceOver ile çevrilmiş ekranlar için düzeltmeler.
+Artık iPad’de. Uygulamanın açılmasını engelleyebilen bir çökme düzeltildi.

@@ -1,1 +1,1 @@
-Könnyebben koppintható gombok, tisztább szöveg, valamint javítások a VoiceOverhez és a lefordított képernyőkhöz.
+Most már iPaden is. Javít egy összeomlást, amely miatt az app nem mindig nyílt meg.

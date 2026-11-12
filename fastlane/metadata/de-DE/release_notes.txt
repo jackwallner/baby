@@ -1,1 +1,1 @@
-Besser treffbare Tasten, klarerer Text und Korrekturen für VoiceOver und übersetzte Bildschirme.
+Jetzt auch auf dem iPad. Behebt einen Absturz, der das Öffnen der App verhindern konnte.

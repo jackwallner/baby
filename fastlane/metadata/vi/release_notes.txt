@@ -1,1 +1,1 @@
-Nút dễ chạm hơn, chữ rõ hơn và các bản sửa lỗi cho VoiceOver cùng các màn hình đã dịch.
+Nay đã có trên iPad. Sửa lỗi treo có thể khiến ứng dụng không mở được.
