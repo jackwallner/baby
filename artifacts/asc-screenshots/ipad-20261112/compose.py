@@ -21,10 +21,10 @@ TOP, BOTTOM = (245, 240, 232), (232, 222, 208)
 INK = (28, 26, 23)
 FONT = "/System/Library/Fonts/Avenir Next.ttc"
 HEADER_SIZE = 190
-HEADER_TOP = 120
+HEADER_TOP = 100
 HEADER_WIDTH = 1880
-BEZEL = 34
-DEVICE_X, DEVICE_Y, DEVICE_W = 132, 560, 1800
+BEZEL = 30
+DEVICE_Y, FOOT_MARGIN = 570, 60
 STATUS_STRIP = 62
 SS = 3
 
@@ -52,8 +52,16 @@ def screen_image(path):
     # The simulator's clock, date and window title are not product evidence.
     paper = raw.getpixel((1000, 6))
     ImageDraw.Draw(raw).rectangle((0, 0, raw.width, STATUS_STRIP), fill=paper)
-    inner_w = DEVICE_W - 2 * BEZEL
-    return raw.resize((inner_w, round(raw.height * inner_w / raw.width)), Image.LANCZOS)
+    # So is iPadOS's window-resize grabber in the bottom right corner, which
+    # straddles the History card's edge: fill each side from its own surface.
+    edge = 2024
+    card, page = raw.getpixel((1980, 2736)), raw.getpixel((2056, 2600))
+    pen = ImageDraw.Draw(raw)
+    pen.rectangle((2000, 2684, edge - 1, raw.height), fill=card)
+    pen.rectangle((edge, 2684, raw.width, raw.height), fill=page)
+    # The whole display shows, so no card is cut at the foot.
+    inner_h = CANVAS[1] - DEVICE_Y - FOOT_MARGIN - 2 * BEZEL
+    return raw.resize((round(raw.width * inner_h / raw.height), inner_h), Image.LANCZOS)
 
 
 def fit_size(headers):
@@ -71,10 +79,9 @@ def compose(raw_path, header, out_path, size=HEADER_SIZE):
     font = ImageFont.truetype(FONT, size, index=7)
     draw.multiline_text((CANVAS[0] / 2, HEADER_TOP), header, font=font, fill=INK, anchor="ma", align="center", spacing=-4)
     screen = screen_image(raw_path)
-    device_h = screen.height + 2 * BEZEL
-    bezel = Image.new("RGB", (DEVICE_W, device_h), INK)
-    bezel.paste(screen, (BEZEL, BEZEL), rounded_mask(screen.size, 84))
-    img.paste(bezel, (DEVICE_X, DEVICE_Y), rounded_mask(bezel.size, 118))
+    bezel = Image.new("RGB", (screen.width + 2 * BEZEL, screen.height + 2 * BEZEL), INK)
+    bezel.paste(screen, (BEZEL, BEZEL), rounded_mask(screen.size, 62))
+    img.paste(bezel, ((CANVAS[0] - bezel.width) // 2, DEVICE_Y), rounded_mask(bezel.size, 92))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     img.save(out_path, optimize=True)
 
