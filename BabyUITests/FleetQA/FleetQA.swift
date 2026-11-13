@@ -22,6 +22,8 @@ enum QA {
     static let persona = env["QA_PERSONA"] ?? "local"
     static let outputDir: URL? = env["QA_OUTPUT_DIR"].map { URL(fileURLWithPath: $0) }
     static let strict = env["QA_STRICT"] == "1"
+    /// "portrait" or "landscape" on the iPad personas; nil on every phone persona.
+    static let orientation = env["QA_ORIENTATION"]
     /// Findings of the most recent checkpoint, for FleetQA's own tests.
     static var lastFindings: [(oracle: String, severity: String, detail: String)] = []
 
@@ -33,7 +35,19 @@ enum QA {
         for (key, value) in decode([String: String].self, env["QA_LAUNCH_ENVIRONMENT"]) ?? [:] {
             app.launchEnvironment[key] = value
         }
+        rotate()
         system("launch", journey: journey) { app.launch() }
+    }
+
+    /// Turns the device to the persona's orientation (the iPad personas). Done
+    /// before every launch so the app starts in it, as a user holding the iPad
+    /// that way would see it.
+    static func rotate() {
+        guard let orientation else { return }
+        let target: UIDeviceOrientation = orientation == "landscape" ? .landscapeLeft : .portrait
+        guard XCUIDevice.shared.orientation != target else { return }
+        XCUIDevice.shared.orientation = target
+        sleep(2)  // the rotation animation outlasts the property write
     }
 
     /// Marks a span the OS animates (launch, home, relaunch) so the runner does
@@ -147,6 +161,7 @@ enum QA {
     static func relaunch(_ app: XCUIApplication, journey: String = #function) {
         system("relaunch", journey: journey) {
             app.terminate()
+            rotate()
             app.launch()
         }
     }
@@ -197,14 +212,34 @@ enum QA {
         let image: UIImage
         if let inner = XCUIScreen.screens.first(where: { $0 != XCUIScreen.main }) {
             image = inner.screenshot().image
+        } else if orientation == "landscape" {
+            // On a landscape iPad `app.screenshot()` is turned 90 degrees and clips the
+            // right quarter of the screen; the screen's own capture is whole, turned.
+            image = XCUIScreen.main.screenshot().image
         } else {
             image = app?.screenshot().image ?? XCUIScreen.main.screenshot().image
         }
+        if orientation == "landscape", let cg = image.cgImage, cg.height > cg.width { return turnedUpright(cg, scale: image.scale) }
         guard image.imageOrientation != .up else { return image }
         let format = UIGraphicsImageRendererFormat()
         format.scale = image.scale
         return UIGraphicsImageRenderer(size: image.size, format: format).image { _ in
             image.draw(in: CGRect(origin: .zero, size: image.size))
+        }
+    }
+
+    /// The simulator's landscape iPad capture comes turned 90 degrees clockwise (the
+    /// device's top edge on the right). Turned back a quarter counter-clockwise it
+    /// matches the element frames, which are in the upright landscape space.
+    static func turnedUpright(_ cg: CGImage, scale: CGFloat) -> UIImage {
+        let source = UIImage(cgImage: cg, scale: scale, orientation: .up)
+        let size = CGSize(width: source.size.height, height: source.size.width)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        return UIGraphicsImageRenderer(size: size, format: format).image { context in
+            context.cgContext.translateBy(x: 0, y: size.height)
+            context.cgContext.rotate(by: -.pi / 2)
+            source.draw(at: .zero)
         }
     }
 

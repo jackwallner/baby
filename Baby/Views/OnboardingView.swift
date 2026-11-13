@@ -80,19 +80,37 @@ struct BabyOnboardingView: View {
         VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
             welcomeHeader
             pathChoice
-            if path == .start {
-                babyDetails
-                Text("All optional. Invite your partner or anyone else helping from Settings once you're in.")
-                    .font(.footnote)
-                    .foregroundStyle(AppTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
-            } else {
-                JoinLogForm(model: joinModel)
-            }
+            pathFields
             Text(Guidance.disclaimer)
                 .font(.caption)
                 .foregroundStyle(AppTheme.ink2)
                 .accessibilityIdentifier("onboarding.disclaimer")
+        }
+    }
+
+    /// On an iPad the centered column holds both paths' fields, the other one
+    /// hidden, so switching paths never moves the header or the main button.
+    @ViewBuilder
+    private var pathFields: some View {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            ZStack(alignment: .topLeading) {
+                startFields.hiddenUnless(path == .start)
+                JoinLogForm(model: joinModel).hiddenUnless(path == .join)
+            }
+        } else if path == .start {
+            startFields
+        } else {
+            JoinLogForm(model: joinModel)
+        }
+    }
+
+    private var startFields: some View {
+        VStack(alignment: .leading, spacing: AppTheme.looseSpacing) {
+            babyDetails
+            Text("All optional. Invite your partner or anyone else helping from Settings once you're in.")
+                .font(.footnote)
+                .foregroundStyle(AppTheme.ink2)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -276,5 +294,15 @@ struct BabyOnboardingView: View {
         Reminders.feedingStyle = feeding
         StoreService.shared.recordSetupStage(expecting: feeding == .expecting)
         settings.hasCompletedSetup = true
+    }
+}
+
+private extension View {
+    /// Keeps the view's space but takes it off screen, out of VoiceOver, focus and hit testing.
+    func hiddenUnless(_ shown: Bool) -> some View {
+        opacity(shown ? 1 : 0)
+            .disabled(!shown)
+            .accessibilityHidden(!shown)
+            .allowsHitTesting(shown)
     }
 }

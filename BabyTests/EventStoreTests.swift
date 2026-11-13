@@ -514,17 +514,20 @@ final class EventStoreTests: XCTestCase {
     }
 
     func testTallyCountsByCalendarDayAndSplitsSleepAtMidnight() {
+        // Two days that are both over, so the test never logs past "now"
+        // (run between midnight and 1am, today's 1am was still ahead).
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: .now)
-        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
-        store.log(.wet, at: yesterday.addingTimeInterval(3600))
-        store.log(.wet, at: today.addingTimeInterval(3600))
-        store.startTimed(.sleep, at: yesterday.addingTimeInterval(23 * 3600))
-        store.stopRunning(.sleep, at: today.addingTimeInterval(3600))
-        XCTAssertEqual(store.tally(on: yesterday).wet, 1)
-        XCTAssertEqual(store.tally(on: today).wet, 1)
-        XCTAssertEqual(Int(store.tally(on: yesterday).sleepSeconds), 3600)
-        XCTAssertEqual(Int(store.tally(on: today).sleepSeconds), 3600)
+        let first = calendar.date(byAdding: .day, value: -2, to: today)!
+        let second = calendar.date(byAdding: .day, value: -1, to: today)!
+        store.log(.wet, at: first.addingTimeInterval(3600))
+        store.log(.wet, at: second.addingTimeInterval(3600))
+        store.startTimed(.sleep, at: first.addingTimeInterval(23 * 3600))
+        store.stopRunning(.sleep, at: second.addingTimeInterval(3600))
+        XCTAssertEqual(store.tally(on: first).wet, 1)
+        XCTAssertEqual(store.tally(on: second).wet, 1)
+        XCTAssertEqual(Int(store.tally(on: first).sleepSeconds), 3600)
+        XCTAssertEqual(Int(store.tally(on: second).sleepSeconds), 3600)
         XCTAssertEqual(store.eventsByDay.count, 2)
     }
 

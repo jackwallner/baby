@@ -12069,33 +12069,93 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Protokoll wird auf dieses iPhone übertragen. Das dauert meist weniger als eine Minute. Lass Baby Tracker geöffnet."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Das Protokoll wird auf dieses iPad übertragen. Das dauert meist weniger als eine Minute. Lass Baby Tracker geöffnet."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Das Protokoll wird auf dieses iPhone übertragen. Das dauert meist weniger als eine Minute. Lass Baby Tracker geöffnet."
+                }
+              }
+            }
           }
         },
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bringing the log to this iPhone. It usually takes under a minute; keep Baby Tracker open."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Bringing the log to this iPad. It usually takes under a minute; keep Baby Tracker open."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Bringing the log to this iPhone. It usually takes under a minute; keep Baby Tracker open."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descargando el registro en este iPhone. Suele tardar menos de un minuto; mantén Baby Tracker abierto."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Descargando el registro en este iPad. Suele tardar menos de un minuto; mantén Baby Tracker abierto."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Descargando el registro en este iPhone. Suele tardar menos de un minuto; mantén Baby Tracker abierto."
+                }
+              }
+            }
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trasferimento del registro su questo iPhone. Di solito serve meno di un minuto; tieni aperto Baby Tracker."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Trasferimento del registro su questo iPad. Di solito serve meno di un minuto; tieni aperto Baby Tracker."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Trasferimento del registro su questo iPhone. Di solito serve meno di un minuto; tieni aperto Baby Tracker."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trazendo o registro para este iPhone. Geralmente leva menos de um minuto. Mantenha o Baby Tracker aberto."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Trazendo o registro para este iPad. Geralmente leva menos de um minuto. Mantenha o Baby Tracker aberto."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Trazendo o registro para este iPhone. Geralmente leva menos de um minuto. Mantenha o Baby Tracker aberto."
+                }
+              }
+            }
           }
         }
       }
@@ -25709,33 +25769,93 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Richte die Kamera-App dieses iPhones auf den Code und tippe auf das Banner von Baby Tracker."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Richte die Kamera-App dieses iPads auf den Code und tippe auf das Banner von Baby Tracker."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Richte die Kamera-App dieses iPhones auf den Code und tippe auf das Banner von Baby Tracker."
+                }
+              }
+            }
           }
         },
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Point this iPhone's Camera app at the code and tap the Baby Tracker banner."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Point this iPad's Camera app at the code and tap the Baby Tracker banner."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Point this iPhone's Camera app at the code and tap the Baby Tracker banner."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apunta al código con la app Cámara de este iPhone y toca el aviso de Baby Tracker."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Apunta al código con la app Cámara de este iPad y toca el aviso de Baby Tracker."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Apunta al código con la app Cámara de este iPhone y toca el aviso de Baby Tracker."
+                }
+              }
+            }
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inquadra il codice con Fotocamera su questo iPhone e tocca il banner di Baby Tracker."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inquadra il codice con Fotocamera su questo iPad e tocca il banner di Baby Tracker."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inquadra il codice con Fotocamera su questo iPhone e tocca il banner di Baby Tracker."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aponte a Câmera deste iPhone para o código e toque no banner do Baby Tracker."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Aponte a Câmera deste iPad para o código e toque no banner do Baby Tracker."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Aponte a Câmera deste iPhone para o código e toque no banner do Baby Tracker."
+                }
+              }
+            }
           }
         }
       }
@@ -27564,33 +27684,93 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Melde dich auf diesem iPhone bei iCloud an (Einstellungen > dein Name), bevor du jemanden einlädst."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Melde dich auf diesem iPad bei iCloud an (Einstellungen > dein Name), bevor du jemanden einlädst."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Melde dich auf diesem iPhone bei iCloud an (Einstellungen > dein Name), bevor du jemanden einlädst."
+                }
+              }
+            }
           }
         },
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in to iCloud on this iPhone (Settings > your name) before inviting anyone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sign in to iCloud on this iPad (Settings > your name) before inviting anyone."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sign in to iCloud on this iPhone (Settings > your name) before inviting anyone."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia sesión en iCloud en este iPhone (Configuración > tu nombre) antes de invitar a alguien."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inicia sesión en iCloud en este iPad (Configuración > tu nombre) antes de invitar a alguien."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inicia sesión en iCloud en este iPhone (Configuración > tu nombre) antes de invitar a alguien."
+                }
+              }
+            }
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accedi a iCloud su questo iPhone (Impostazioni > il tuo nome) prima di invitare qualcuno."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Accedi a iCloud su questo iPad (Impostazioni > il tuo nome) prima di invitare qualcuno."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Accedi a iCloud su questo iPhone (Impostazioni > il tuo nome) prima di invitare qualcuno."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicie sessão no iCloud neste iPhone (Ajustes > seu nome) antes de convidar alguém."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inicie sessão no iCloud neste iPad (Ajustes > seu nome) antes de convidar alguém."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inicie sessão no iCloud neste iPhone (Ajustes > seu nome) antes de convidar alguém."
+                }
+              }
+            }
           }
         }
       }
@@ -27599,33 +27779,93 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Melde dich auf diesem iPhone bei iCloud an (Einstellungen > dein Name) und versuche es erneut."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Melde dich auf diesem iPad bei iCloud an (Einstellungen > dein Name) und versuche es erneut."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Melde dich auf diesem iPhone bei iCloud an (Einstellungen > dein Name) und versuche es erneut."
+                }
+              }
+            }
           }
         },
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in to iCloud on this iPhone (Settings > your name), then try again."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sign in to iCloud on this iPad (Settings > your name), then try again."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sign in to iCloud on this iPhone (Settings > your name), then try again."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicia sesión en iCloud en este iPhone (Configuración > tu nombre) y vuelve a intentarlo."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inicia sesión en iCloud en este iPad (Configuración > tu nombre) y vuelve a intentarlo."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inicia sesión en iCloud en este iPhone (Configuración > tu nombre) y vuelve a intentarlo."
+                }
+              }
+            }
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accedi a iCloud su questo iPhone (Impostazioni > il tuo nome), poi riprova."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Accedi a iCloud su questo iPad (Impostazioni > il tuo nome), poi riprova."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Accedi a iCloud su questo iPhone (Impostazioni > il tuo nome), poi riprova."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inicie sessão no iCloud neste iPhone (Ajustes > seu nome) e tente novamente."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inicie sessão no iCloud neste iPad (Ajustes > seu nome) e tente novamente."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Inicie sessão no iCloud neste iPhone (Ajustes > seu nome) e tente novamente."
+                }
+              }
+            }
           }
         }
       }
@@ -32592,33 +32832,93 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dein iCloud-Speicher ist voll. Neue Einträge bleiben auf diesem iPhone, bis wieder Platz ist."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dein iCloud-Speicher ist voll. Neue Einträge bleiben auf diesem iPad, bis wieder Platz ist."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dein iCloud-Speicher ist voll. Neue Einträge bleiben auf diesem iPhone, bis wieder Platz ist."
+                }
+              }
+            }
           }
         },
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your iCloud storage is full, so new entries stay on this iPhone until there is room."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Your iCloud storage is full, so new entries stay on this iPad until there is room."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Your iCloud storage is full, so new entries stay on this iPhone until there is room."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu almacenamiento de iCloud está lleno. Los registros nuevos permanecerán en este iPhone hasta que haya espacio."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Tu almacenamiento de iCloud está lleno. Los registros nuevos permanecerán en este iPad hasta que haya espacio."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Tu almacenamiento de iCloud está lleno. Los registros nuevos permanecerán en este iPhone hasta que haya espacio."
+                }
+              }
+            }
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lo spazio su iCloud è pieno. Le nuove registrazioni resteranno su questo iPhone finché non si libera spazio."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Lo spazio su iCloud è pieno. Le nuove registrazioni resteranno su questo iPad finché non si libera spazio."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Lo spazio su iCloud è pieno. Le nuove registrazioni resteranno su questo iPhone finché non si libera spazio."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O armazenamento do iCloud está cheio. Os novos registros ficam neste iPhone até haver espaço."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "O armazenamento do iCloud está cheio. Os novos registros ficam neste iPad até haver espaço."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "O armazenamento do iCloud está cheio. Os novos registros ficam neste iPhone até haver espaço."
+                }
+              }
+            }
           }
         }
       }
