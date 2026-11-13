@@ -151,7 +151,8 @@ def find_app(client: ASCClient, bundle_id: str) -> dict:
     # Brackets in filter[...] must not be percent-encoded (Apple returns 400 otherwise).
     bid = urllib.parse.quote(bundle_id, safe="")
     data = client.get(f"/apps?filter[bundleId]={bid}")
-    apps = data.get("data", [])
+    # The filter matches prefixes too, so keep only the exact bundle id.
+    apps = [a for a in data.get("data", []) if a["attributes"]["bundleId"] == bundle_id]
     if not apps:
         raise SystemExit(f"error: no app for bundle id {bundle_id}")
     return apps[0]
