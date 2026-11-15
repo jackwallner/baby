@@ -261,8 +261,12 @@ struct DayScrubChart: View {
         }
         .chartXScale(domain: (model.bars.first?.day ?? last)...domainEnd)
         .chartXAxis {
-            AxisMarks(values: .stride(by: .day, count: model.bars.count > 7 ? 2 : 1)) { _ in
-                AxisValueLabel(format: .dateTime.day(), centered: true)
+            AxisMarks(values: .stride(by: .day, count: model.bars.count > 7 ? 2 : 1)) { value in
+                AxisValueLabel(centered: true) {
+                    if let day = value.as(Date.self) {
+                        Text(day, format: .dateTime.day())
+                    }
+                }
             }
         }
         .chartYAxis {

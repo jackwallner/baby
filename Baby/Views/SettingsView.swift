@@ -150,7 +150,7 @@ struct SettingsView: View {
                     newButtonName = ""
                     showAddButton = true
                 } label: {
-                    Label("Add a button", systemImage: "plus")
+                    Label("Add your own", systemImage: "plus")
                 }
                 .accessibilityIdentifier("buttons.add")
             }

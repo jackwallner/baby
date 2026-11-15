@@ -602,8 +602,12 @@ struct ReportChart: View {
             chart
                 .chartXScale(domain: report.start...(Calendar.current.date(byAdding: .day, value: 1, to: report.end) ?? report.end))
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: labelStride)) { _ in
-                        AxisValueLabel(format: labelFormat, centered: true)
+                    AxisMarks(values: .stride(by: .day, count: labelStride)) { value in
+                        AxisValueLabel(centered: true) {
+                            if let day = value.as(Date.self) {
+                                Text(day, format: labelFormat)
+                            }
+                        }
                     }
                 }
                 .chartYAxis {
