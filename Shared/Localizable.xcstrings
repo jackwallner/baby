@@ -10012,6 +10012,41 @@
         }
       }
     },
+    "Add a button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taste hinzufügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a button"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir un botón"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi un pulsante"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar um botão"
+          }
+        }
+      }
+    },
     "Add an entry" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14015,6 +14050,41 @@
         }
       }
     },
+    "Deleted %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gelöscht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminado: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminato %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluído %@"
+          }
+        }
+      }
+    },
     "Deleted dirty" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14151,6 +14221,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cocô apagado"
+          }
+        }
+      }
+    },
+    "Deleted pump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abpumpen gelöscht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted pump"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extracción eliminada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiralatte eliminato"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extração excluída"
           }
         }
       }
@@ -19090,6 +19195,41 @@
         }
       }
     },
+    "Log a pump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abpumpen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log a pump"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extracción"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiralatte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extração"
+          }
+        }
+      }
+    },
     "Log a sleep" : {
       "comment" : "Title of the editor for a new sleep. Keep it short: it sits between two bar buttons.",
       "extractionState" : "manual",
@@ -20947,6 +21087,41 @@
         }
       }
     },
+    "Log pump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abpumpen eintragen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log pump"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar extracción"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra tiralatte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar extração"
+          }
+        }
+      }
+    },
     "Log sleep" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21822,6 +21997,41 @@
         }
       }
     },
+    "Logged pump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abpumpen eingetragen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logged pump"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extracción registrada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiralatte registrato"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extração registrada"
+          }
+        }
+      }
+    },
     "Logged sleep" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -22448,6 +22658,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Registra os três de uma vez. Você pode adicionar o lado depois."
+          }
+        }
+      }
+    },
+    "Logs an entry. Hold to change the time or add details." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trägt einen Eintrag ein. Halten, um die Zeit zu ändern oder Details hinzuzufügen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logs an entry. Hold to change the time or add details."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra una entrada. Mantén pulsado para cambiar la hora o añadir detalles."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra una voce. Tieni premuto per cambiare l'ora o aggiungere dettagli."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra uma entrada. Mantenha pressionado para mudar o horário ou adicionar detalhes."
           }
         }
       }
@@ -23206,6 +23451,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nome (opcional)"
+          }
+        }
+      }
+    },
+    "Name, like Self woke" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name, z. B. Selbst aufgewacht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name, like Self woke"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre, p. ej. Se despertó solo"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome, ad es. Svegliato da solo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome, como Acordou sozinho"
           }
         }
       }
@@ -26276,6 +26556,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Política de privacidade"
+          }
+        }
+      }
+    },
+    "Pump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abpumpen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pump"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extracción"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiralatte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extração"
+          }
+        }
+      }
+    },
+    "Pump is turned off in Baby Tracker's Settings, so nothing was logged." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abpumpen ist in den Einstellungen von Baby Tracker ausgeschaltet, daher wurde nichts eingetragen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pump is turned off in Baby Tracker's Settings, so nothing was logged."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extracción está desactivado en los Ajustes de Baby Tracker, así que no se registró nada."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiralatte è disattivato nelle Impostazioni di Baby Tracker, quindi non è stato registrato nulla."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extração está desativado nos Ajustes do Baby Tracker, então nada foi registrado."
           }
         }
       }
@@ -29480,6 +29830,41 @@
         }
       }
     },
+    "That button is turned off in Baby Tracker's Settings, so nothing was logged." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Taste ist in den Einstellungen von Baby Tracker ausgeschaltet, daher wurde nichts eingetragen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That button is turned off in Baby Tracker's Settings, so nothing was logged."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ese botón está desactivado en los Ajustes de Baby Tracker, así que no se registró nada."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quel pulsante è disattivato nelle Impostazioni di Baby Tracker, quindi non è stato registrato nulla."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esse botão está desativado nos Ajustes do Baby Tracker, então nada foi registrado."
+          }
+        }
+      }
+    },
     "That code isn't a Baby Tracker invite. Scan the one in their Log together screen." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30934,6 +31319,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Desfazer cocô"
+          }
+        }
+      }
+    },
+    "Undo pump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abpumpen widerrufen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo pump"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer extracción"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla tiralatte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desfazer extração"
           }
         }
       }
@@ -33203,6 +33623,41 @@
         }
       }
     },
+    "custom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eigene"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "custom"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "personalizado"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "personalizzato"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "personalizado"
+          }
+        }
+      }
+    },
     "diaper" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -33374,6 +33829,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "fralda suja"
+          }
+        }
+      }
+    },
+    "entry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entrada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "voce"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "registro"
           }
         }
       }
@@ -34249,6 +34739,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "fralda com cocô"
+          }
+        }
+      }
+    },
+    "pump" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "abpumpen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pump"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "extracción"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tiralatte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "extração"
           }
         }
       }

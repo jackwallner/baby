@@ -10,21 +10,61 @@ struct TrackedKinds: Equatable, Sendable {
     static let buttons: [EventKind] = [.feed, .wet, .dirty, .sleep]
 
     var hidden: Set<EventKind>
+    /// The built-in Pump button, off until turned on.
+    var pump: Bool
+    /// The parent's own buttons, by name, in the order added.
+    var custom: [String]
+
+    /// Pump and custom buttons together, so the home screen keeps its fit.
+    static let maxExtras = 4
 
     static let all = TrackedKinds(hidden: [])
 
     static var current: TrackedKinds {
-        let raw = AppGroup.defaults.stringArray(forKey: AppGroup.Key.hiddenKinds) ?? []
-        return TrackedKinds(hidden: Set(raw.compactMap(EventKind.init(rawValue:))))
+        let defaults = AppGroup.defaults
+        let raw = defaults.stringArray(forKey: AppGroup.Key.hiddenKinds) ?? []
+        return TrackedKinds(
+            hidden: Set(raw.compactMap(EventKind.init(rawValue:))),
+            pump: defaults.bool(forKey: AppGroup.Key.showsPump),
+            custom: defaults.stringArray(forKey: AppGroup.Key.customButtons) ?? []
+        )
     }
 
-    init(hidden: Set<EventKind>) {
+    init(hidden: Set<EventKind>, pump: Bool = false, custom: [String] = []) {
         // At least one button always stays, and weight is never hidden.
         let valid = hidden.intersection(Self.buttons)
         self.hidden = valid.count >= Self.buttons.count ? [] : valid
+        self.pump = pump
+        var names: [String] = []
+        for name in custom.map(Self.clean) where !name.isEmpty && !names.contains(where: { $0.caseInsensitiveCompare(name) == .orderedSame }) {
+            names.append(name)
+        }
+        self.custom = Array(names.prefix(Self.maxExtras - (pump ? 1 : 0)))
     }
 
-    func contains(_ kind: EventKind) -> Bool { !hidden.contains(kind) }
+    /// Custom entries always stay in the log: a button that was removed
+    /// still leaves what was logged with it in History.
+    func contains(_ kind: EventKind) -> Bool {
+        switch kind {
+        case .pump: pump
+        case .custom: true
+        default: !hidden.contains(kind)
+        }
+    }
+
+    /// The extra buttons below the four, in order: Pump first, then the
+    /// parent's own.
+    var extras: [ExtraButton] {
+        (pump ? [ExtraButton.pump] : []) + custom.map(ExtraButton.custom)
+    }
+
+    var canAddExtra: Bool { extras.count < Self.maxExtras }
+
+    static let maxNameLength = 24
+
+    static func clean(_ name: String) -> String {
+        String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(maxNameLength))
+    }
 
     /// The buttons still shown, in order.
     var buttons: [EventKind] { Self.buttons.filter(contains) }
@@ -59,7 +99,37 @@ struct TrackedKinds: Equatable, Sendable {
     }
 
     func store() {
-        AppGroup.defaults.set(hidden.map(\.rawValue).sorted(), forKey: AppGroup.Key.hiddenKinds)
+        let defaults = AppGroup.defaults
+        defaults.set(hidden.map(\.rawValue).sorted(), forKey: AppGroup.Key.hiddenKinds)
+        defaults.set(pump, forKey: AppGroup.Key.showsPump)
+        defaults.set(custom, forKey: AppGroup.Key.customButtons)
+    }
+}
+
+/// One button below the four: Pump, or one the parent named.
+enum ExtraButton: Hashable, Sendable {
+    case pump
+    case custom(String)
+
+    var kind: EventKind {
+        switch self {
+        case .pump: .pump
+        case .custom: .custom
+        }
+    }
+
+    var name: String? {
+        if case let .custom(name) = self { return name }
+        return nil
+    }
+
+    var label: String { name ?? kind.label }
+
+    var id: String {
+        switch self {
+        case .pump: "pump"
+        case let .custom(name): "custom.\(name)"
+        }
     }
 }
 

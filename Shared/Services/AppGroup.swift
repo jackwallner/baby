@@ -29,6 +29,8 @@ enum AppGroup {
         static let diaperWords = "diaperWords"
         /// `TrackedKinds`: the buttons this family turned off.
         static let hiddenKinds = "hiddenKinds"
+        static let showsPump = "showsPump"
+        static let customButtons = "customButtons"
         static let hiddenFeedTypes = "hiddenFeedTypes"
         /// `TotalsWindow.storedValue`: the hour the totals day starts, or -1.
         static let totalsWindow = "totalsWindow"

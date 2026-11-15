@@ -96,6 +96,8 @@ final class BabySettings: ObservableObject {
         // Seeded runs start with every button, whatever a previous run left.
         if ProcessInfo.processInfo.arguments.contains("-SeedScreenshotData") {
             AppGroup.defaults.removeObject(forKey: AppGroup.Key.hiddenKinds)
+            AppGroup.defaults.removeObject(forKey: AppGroup.Key.showsPump)
+            AppGroup.defaults.removeObject(forKey: AppGroup.Key.customButtons)
             AppGroup.defaults.removeObject(forKey: AppGroup.Key.hiddenFeedTypes)
         }
         #endif

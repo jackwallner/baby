@@ -277,6 +277,8 @@ struct UndoToast: View {
             case .dirty: DiaperWords.current == .peePoop ? String(localized: "Deleted poop") : String(localized: "Deleted dirty")
             case .sleep: String(localized: "Deleted sleep")
             case .weight: String(localized: "Deleted weight")
+            case .pump: String(localized: "Deleted pump")
+            case .custom: String(localized: "Deleted \(logged.name ?? String(localized: "entry"))")
             }
             guard let detail = logged.detail, !detail.isEmpty else { return base }
             return String(localized: "\(base) · \(detail)")
@@ -293,6 +295,8 @@ struct UndoToast: View {
         case .dirty: DiaperWords.current == .peePoop ? String(localized: "Logged poop") : String(localized: "Logged dirty")
         case .sleep: logged.reopensTimer ? String(localized: "Sleep ended") : (isFinishedSleep ? String(localized: "Logged sleep") : String(localized: "Sleep started"))
         case .weight: String(localized: "Logged weight")
+        case .pump: String(localized: "Logged pump")
+        case .custom: String(localized: "Logged \(logged.name ?? String(localized: "entry"))")
         }
         if logged.kind == .sleep, isFinishedSleep, let detail = logged.detail { return withBackdatedTime(String(localized: "\(base) · \(detail)")) }
         if logged.kind == .sleep { return withBackdatedTime(base) }

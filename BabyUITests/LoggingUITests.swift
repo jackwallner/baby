@@ -219,6 +219,41 @@ final class LoggingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["log.sleep"].waitForExistence(timeout: 3))
     }
 
+    func testPumpAndACustomButtonLogFromNow() {
+        let app = launch()
+        XCTAssertFalse(app.buttons["log.pump"].exists)
+        app.buttons["tab.settings"].tap()
+        let pump = app.switches["track.pump"]
+        XCTAssertTrue(pump.waitForExistence(timeout: 3))
+        pump.coordinate(withNormalizedOffset: CGVector(dx: 0.92, dy: 0.5)).tap()
+        app.buttons["buttons.add"].tap()
+        let name = app.alerts.textFields.firstMatch
+        XCTAssertTrue(name.waitForExistence(timeout: 3))
+        name.typeText("Self woke")
+        app.alerts.buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts["Self woke"].waitForExistence(timeout: 3))
+        attach(app, "buttons-settings")
+
+        app.buttons["tab.log"].tap()
+        let custom = app.buttons["log.custom.Self woke"]
+        XCTAssertTrue(custom.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["log.pump"].isHittable)
+        XCTAssertTrue(custom.isHittable)
+        XCTAssertTrue(app.buttons["log.sleep"].isHittable)
+        let originalTally = tally(app)
+        custom.tap()
+        XCTAssertTrue(app.staticTexts["Logged Self woke"].waitForExistence(timeout: 3))
+        XCTAssertEqual(tally(app), originalTally)
+        attach(app, "buttons-now")
+        app.buttons["log.pump"].tap()
+        XCTAssertTrue(app.staticTexts["Logged pump"].waitForExistence(timeout: 3))
+
+        app.buttons["tab.history"].tap()
+        XCTAssertTrue(app.staticTexts["Self woke"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Pump"].exists)
+        attach(app, "buttons-history")
+    }
+
     /// With Sleep off the two rows grow into the space; a tap still moves nothing.
     func testTapsMoveNothingWithSleepOff() {
         let app = launch()

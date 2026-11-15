@@ -10,7 +10,12 @@ The everyday app is one screen: last feed and side, last diaper, Feed / Pee /
 Poop / Sleep controls, and daily totals. Any of the four buttons can be turned
 off in Settings > Buttons (`TrackedKinds`, at least one stays); an off
 button leaves Now, History, reports, widgets and the Watch, and its entries
-come back when it is turned on. A narrow All beside Feed logs a feed, a pee
+come back when it is turned on. Settings > Buttons also turns on Pump (off by
+default) and adds the parent's own named buttons ("Self woke"), up to four
+extras in all, two to a row below the four (`TrackedKinds.extras`, 2026-11-14).
+They log instant entries (`EventKind.pump`, `.custom` with the name in the
+`side` attribute, so no schema change), show in History, the editor and CSV,
+and stay out of totals, the summary, the doctor report, widgets and the Watch. A narrow All beside Feed logs a feed, a pee
 and a poop with one Undo, and Settings > Feed types limits feeds to breast,
 bottle or both (`FeedTypes`). The diaper pair can read Wet / Dirty instead
 (Settings > Diaper words, `DiaperWords`); reports for a doctor always say wet

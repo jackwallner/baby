@@ -10,6 +10,11 @@ enum EventKind: String, CaseIterable, Codable, Sendable {
     case sleep
     /// Reporting-only kinds. Logged from the editor, never from the four buttons.
     case weight
+    /// Optional extra buttons (Settings > Buttons). Pump is built in and off
+    /// until turned on. A custom button is one the parent named; the entry
+    /// carries that name in `side`, so no schema change was needed.
+    case pump
+    case custom
 
     var symbolName: String {
         switch self {
@@ -18,8 +23,14 @@ enum EventKind: String, CaseIterable, Codable, Sendable {
         case .dirty: "drop.triangle.fill"
         case .sleep: "moon.fill"
         case .weight: "scalemass.fill"
+        case .pump: "drop.circle.fill"
+        case .custom: "star.fill"
         }
     }
+
+    /// Pump and the parent's own buttons: below the four, never in the
+    /// totals, the summary, the reports, the widgets or the Watch.
+    var isExtra: Bool { self == .pump || self == .custom }
 
     var isDiaper: Bool { self == .wet || self == .dirty }
 
@@ -239,7 +250,7 @@ final class LogEvent: NSManagedObject {
     @NSManaged var startedAt: Date?
     @NSManaged var endedAt: Date?
     @NSManaged var side: String?
-    /// Millilitres for a bottle, grams for a weight. Zero means "not entered".
+    /// Millilitres for a bottle or a pump, grams for a weight. Zero means "not entered".
     @NSManaged var amount: Double
     @NSManaged var stoolColor: String?
     @NSManaged var note: String?
@@ -248,8 +259,27 @@ final class LogEvent: NSManagedObject {
     @NSManaged var child: Child?
 
     var eventKind: EventKind {
-        get { EventKind(rawValue: kind ?? "") ?? .feed }
+        get {
+            guard let kind, !kind.isEmpty else { return .feed }
+            // A kind from a newer build reads as a custom entry, never as a feed.
+            return EventKind(rawValue: kind) ?? .custom
+        }
         set { kind = newValue.rawValue }
+    }
+
+    /// A custom button's name, kept in `side` (only feeds use it otherwise).
+    var customName: String? {
+        get {
+            guard eventKind == .custom else { return nil }
+            let trimmed = (side ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : trimmed
+        }
+        set { side = newValue }
+    }
+
+    /// The entry's name on screen: a custom button's own name, else its kind's.
+    var title: String {
+        customName ?? eventKind.label
     }
 
     /// Every side of a feed, in the order chosen. Empty when none was given:
@@ -302,6 +332,10 @@ final class LogEvent: NSManagedObject {
             return nil
         case .weight:
             return amount > 0 ? Format.grams(amount) : nil
+        case .pump:
+            return amount > 0 ? Format.millilitres(amount) : nil
+        case .custom:
+            return nil
         }
     }
 

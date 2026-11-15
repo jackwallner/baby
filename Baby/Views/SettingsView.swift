@@ -26,6 +26,8 @@ struct SettingsView: View {
     @State private var showAddBaby = false
     @State private var newBabyName = ""
     @State private var restoreMessage: String?
+    @State private var showAddButton = false
+    @State private var newButtonName = ""
 
     var body: some View {
         Form {
@@ -69,6 +71,13 @@ struct SettingsView: View {
         } message: {
             Text(restoreMessage ?? "")
         }
+        .alert("Add a button", isPresented: $showAddButton) {
+            TextField("Name, like Self woke", text: $newButtonName)
+                .textInputAutocapitalization(.sentences)
+            Button("Cancel", role: .cancel) {}
+            Button("Add") { addButton() }
+                .disabled(TrackedKinds.clean(newButtonName).isEmpty)
+        }
         .alert("Add a baby", isPresented: $showAddBaby) {
             TextField("Name (optional)", text: $newBabyName)
                 .textInputAutocapitalization(.words)
@@ -111,6 +120,40 @@ struct SettingsView: View {
                 .disabled(settings.tracked.buttons == [kind])
                 .accessibilityIdentifier("track.\(kind.rawValue)")
             }
+            Toggle(isOn: pumpBinding) {
+                HStack(spacing: AppTheme.tightSpacing) {
+                    KindDot(kind: .pump, size: AppTheme.legendDotSize)
+                    Text("Pump")
+                }
+            }
+            .disabled(!settings.tracked.pump && !settings.tracked.canAddExtra)
+            .accessibilityIdentifier("track.pump")
+            ForEach(settings.tracked.custom, id: \.self) { name in
+                HStack(spacing: AppTheme.tightSpacing) {
+                    KindDot(kind: .custom, size: AppTheme.legendDotSize)
+                    Text(name)
+                }
+                .accessibilityIdentifier("track.custom.\(name)")
+            }
+            .onDelete { offsets in
+                var tracked = settings.tracked
+                tracked.custom.remove(atOffsets: offsets)
+                settings.tracked = tracked
+            }
+            .onMove { from, to in
+                var tracked = settings.tracked
+                tracked.custom.move(fromOffsets: from, toOffset: to)
+                settings.tracked = tracked
+            }
+            if settings.tracked.canAddExtra {
+                Button {
+                    newButtonName = ""
+                    showAddButton = true
+                } label: {
+                    Label("Add a button", systemImage: "plus")
+                }
+                .accessibilityIdentifier("buttons.add")
+            }
         } header: {
             Text("Buttons")
         } footer: {
@@ -143,13 +186,30 @@ struct SettingsView: View {
         }
     }
 
+    private var pumpBinding: Binding<Bool> {
+        Binding(
+            get: { settings.tracked.pump },
+            set: { isOn in
+                let tracked = settings.tracked
+                settings.tracked = TrackedKinds(hidden: tracked.hidden, pump: isOn, custom: tracked.custom)
+            }
+        )
+    }
+
+    private func addButton() {
+        let name = TrackedKinds.clean(newButtonName)
+        guard !name.isEmpty else { return }
+        let tracked = settings.tracked
+        settings.tracked = TrackedKinds(hidden: tracked.hidden, pump: tracked.pump, custom: tracked.custom + [name])
+    }
+
     private func trackingBinding(_ kind: EventKind) -> Binding<Bool> {
         Binding(
             get: { settings.tracked.contains(kind) },
             set: { isOn in
                 var hidden = settings.tracked.hidden
                 if isOn { hidden.remove(kind) } else { hidden.insert(kind) }
-                settings.tracked = TrackedKinds(hidden: hidden)
+                settings.tracked = TrackedKinds(hidden: hidden, pump: settings.tracked.pump, custom: settings.tracked.custom)
             }
         )
     }

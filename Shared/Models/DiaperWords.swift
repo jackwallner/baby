@@ -31,6 +31,8 @@ extension EventKind {
         case .dirty: words == .peePoop ? String(localized: "Poop") : String(localized: "Dirty")
         case .sleep: String(localized: "Sleep")
         case .weight: String(localized: "Weight")
+        case .pump: String(localized: "Pump")
+        case .custom: String(localized: "Custom")
         }
     }
 
@@ -44,6 +46,8 @@ extension EventKind {
         case .dirty: words == .peePoop ? String(localized: "poop") : String(localized: "dirty")
         case .sleep: String(localized: "sleep")
         case .weight: String(localized: "weight")
+        case .pump: String(localized: "pump")
+        case .custom: String(localized: "custom")
         }
     }
 
@@ -59,6 +63,8 @@ extension EventKind {
             : String(localized: "Dirty is turned off in Baby Tracker's Settings, so nothing was logged.")
         case .sleep: String(localized: "Sleep is turned off in Baby Tracker's Settings, so nothing was logged.")
         case .weight: String(localized: "Weight is turned off in Baby Tracker's Settings, so nothing was logged.")
+        case .pump: String(localized: "Pump is turned off in Baby Tracker's Settings, so nothing was logged.")
+        case .custom: String(localized: "That button is turned off in Baby Tracker's Settings, so nothing was logged.")
         }
     }
 
@@ -78,6 +84,8 @@ extension EventKind {
         case .dirty: DiaperWords.current == .peePoop ? String(localized: "Log poop") : String(localized: "Log dirty")
         case .sleep: String(localized: "Log sleep")
         case .weight: String(localized: "Log weight")
+        case .pump: String(localized: "Log pump")
+        case .custom: String(localized: "Log entry")
         }
     }
 
@@ -88,6 +96,8 @@ extension EventKind {
         case .dirty: DiaperWords.current == .peePoop ? String(localized: "Undo poop") : String(localized: "Undo dirty")
         case .sleep: String(localized: "Undo sleep")
         case .weight: String(localized: "Undo weight")
+        case .pump: String(localized: "Undo pump")
+        case .custom: String(localized: "Undo")
         }
     }
 
@@ -98,6 +108,8 @@ extension EventKind {
         case .dirty: DiaperWords.current == .peePoop ? String(localized: "poop diaper") : String(localized: "dirty diaper")
         case .sleep: String(localized: "sleep")
         case .weight: String(localized: "weight")
+        case .pump: String(localized: "pump")
+        case .custom: String(localized: "entry")
         }
     }
 }

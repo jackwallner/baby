@@ -256,7 +256,7 @@ struct HistoryView: View {
         (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: AppTheme.tightSpacing)) : AnyLayout(HStackLayout(spacing: AppTheme.spacing))) {
             KindIcon(kind: event.eventKind)
             VStack(alignment: .leading, spacing: 0) {
-                Text(event.eventKind.label)
+                Text(event.title)
                     .font(.body.weight(.medium))
                 if let detail = event.detailText {
                     Text(detail)

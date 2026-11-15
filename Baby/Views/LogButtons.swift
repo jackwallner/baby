@@ -19,7 +19,8 @@ struct LogButtons: View {
     /// Each button's height, fitted to the screen; nil uses the scaled default.
     var height: CGFloat? = nil
     var spacing = AppTheme.spacing
-    let onEdit: (EventKind) -> Void
+    /// The kind to open the editor with, and a custom button's name.
+    let onEdit: (EventKind, String?) -> Void
 
     /// A fitted button can get as short as its graphic allows.
     private var labelPadding: CGFloat {
@@ -41,6 +42,18 @@ struct LogButtons: View {
             .filter { !$0.isEmpty }
     }
 
+    /// Pump and the parent's own buttons, two to a row, below the four.
+    static func extraRows(for tracked: TrackedKinds) -> [[ExtraButton]] {
+        stride(from: 0, to: tracked.extras.count, by: 2).map {
+            Array(tracked.extras[$0..<min($0 + 2, tracked.extras.count)])
+        }
+    }
+
+    /// Every row the fit has to share the screen between.
+    static func rowCount(for tracked: TrackedKinds) -> Int {
+        rows(for: tracked).count + extraRows(for: tracked).count
+    }
+
     var body: some View {
         VStack(spacing: spacing) {
             ForEach(Self.rows(for: settings.tracked), id: \.self) { row in
@@ -49,6 +62,15 @@ struct LogButtons: View {
                         button(for: kind)
                     }
                     if row == [.feed], showsAll { allButton }
+                }
+            }
+            ForEach(Self.extraRows(for: settings.tracked), id: \.self) { row in
+                (dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: spacing)) : AnyLayout(HStackLayout(spacing: spacing))) {
+                    ForEach(row, id: \.self) { extra in
+                        kindButton(extra.kind, label: extra.label, name: extra.name) {
+                            events.log(extra.kind, name: extra.name, at: $0) != nil
+                        }
+                    }
                 }
             }
         }
@@ -145,6 +167,7 @@ struct LogButtons: View {
         switch kind {
         case .feed: String(localized: "Logs a feed. You can add a side after. Hold to change the time or add details.")
         case .sleep: String(localized: "Starts or ends sleep. Hold to log an earlier sleep.")
+        case .pump, .custom: String(localized: "Logs an entry. Hold to change the time or add details.")
         default: String(localized: "Logs a diaper. Hold to add details.")
         }
     }
@@ -164,7 +187,7 @@ struct LogButtons: View {
         }
     }
 
-    private func kindButton(_ kind: EventKind, label: String, action: @escaping (Date) -> Bool) -> some View {
+    private func kindButton(_ kind: EventKind, label: String, name: String? = nil, action: @escaping (Date) -> Bool) -> some View {
         Button {
             // The side row stays: a diaper change mid-feed must not cost the side.
             let at = clock.time()
@@ -184,6 +207,8 @@ struct LogButtons: View {
                     Text(label)
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(AppTheme.ink)
+                        .lineLimit(kind.isExtra ? 1 : nil)
+                        .minimumScaleFactor(kind.isExtra ? 0.7 : 1)
                     if kind == .sleep, let start = events.summary.runningSleepStart {
                         TimelineView(.periodic(from: .now, by: 30)) { context in
                             Text(Format.asleep(context.date.timeIntervalSince(start)))
@@ -204,13 +229,13 @@ struct LogButtons: View {
         .pressableCard()
         .highPriorityGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in
             Haptics.selected()
-            onEdit(kind)
+            onEdit(kind, name)
         })
         .accessibilityLabel(label)
         .accessibilityValue(kind == .sleep ? events.summary.sleepLine() ?? "" : "")
-        .accessibilityIdentifier("log.\(kind.rawValue)")
+        .accessibilityIdentifier(name.map { "log.custom.\($0)" } ?? "log.\(kind.rawValue)")
         .accessibilityHint(hint(for: kind))
-        .accessibilityAction(named: "Add details") { onEdit(kind) }
+        .accessibilityAction(named: "Add details") { onEdit(kind, name) }
     }
 }
 

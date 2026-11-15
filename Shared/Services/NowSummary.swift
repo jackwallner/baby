@@ -247,7 +247,7 @@ struct NowSummary: Codable, Equatable, Sendable {
                 } else if summary.lastWokeAt == nil {
                     summary.lastWokeAt = event.endedAt
                 }
-            case .weight:
+            case .weight, .pump, .custom:
                 break
             }
             if window.holds(event.start, in: today) {
@@ -526,9 +526,10 @@ struct RecentEntry: Codable, Equatable, Sendable, Identifiable {
         self.sides = sides
     }
 
-    /// Nil for a weight, which is never a button, and for a row with no id.
+    /// Nil for a weight or an extra button's entry, which the Watch does not
+    /// show, and for a row with no id.
     init?(_ event: LogEvent) {
-        guard let id = event.id, event.eventKind != .weight else { return nil }
+        guard let id = event.id, event.eventKind != .weight, !event.eventKind.isExtra else { return nil }
         self.init(id: id, kind: event.eventKind, at: event.start, endedAt: event.endedAt,
                   sides: event.eventKind == .feed ? event.feedSides : nil)
     }
@@ -743,7 +744,7 @@ struct WindowTotals: Equatable, Sendable {
                 let clippedStart = max(at, min(interval.start, start))
                 let clippedEnd = min(end, interval.end)
                 if clippedEnd > clippedStart { sleeps.append((clippedStart, clippedEnd)) }
-            case .weight:
+            case .weight, .pump, .custom:
                 break
             }
         }

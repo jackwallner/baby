@@ -124,6 +124,12 @@ struct EventEditorView: View {
                             if isNew, draft.durationMinutes == 0 { Text("Set how long the sleep lasted, then Log.") }
                         }
                     }
+                    if kind == .pump {
+                        Section("Pump") {
+                            Stepper("Amount: \(Format.millilitres(draft.amount))", value: $draft.amount, in: 0...600,
+                                    step: Format.usesImperial ? Format.millilitresPerOunce / 2 : 10)
+                        }
+                    }
                     if kind == .weight {
                         Section("Weight") {
                             WeightPicker(grams: $draft.amount)
@@ -228,6 +234,8 @@ struct EventEditorView: View {
             }
         case .sleep: isNew ? String(localized: "Log a sleep") : String(localized: "Sleep")
         case .weight: isNew ? String(localized: "Log a weight") : String(localized: "Weight")
+        case .pump: isNew ? String(localized: "Log a pump") : String(localized: "Pump")
+        case .custom: request.existing?.title ?? request.name ?? kind.label
         }
     }
 
@@ -272,7 +280,7 @@ struct EventEditorView: View {
         let event = if draft.isTimed, kind.canRun {
             events.startTimed(kind, at: draft.startedAt, configure: configure)
         } else {
-            events.log(kind, at: draft.startedAt, configure: configure)
+            events.log(kind, name: request.name, at: draft.startedAt, configure: configure)
         }
         guard event != nil else {
             saveError = String(localized: "Your log was not saved. Please try again.")
@@ -311,7 +319,7 @@ struct EventEditorView: View {
         set(\.startedAt, draft.startedAt)
         if kind == .feed, event.feedSides != draft.sides { event.feedSides = draft.sides }
         if kind == .feed { set(\.amount, draft.sides.contains(.bottle) ? draft.amount : 0) }
-        if kind == .weight { set(\.amount, draft.amount) }
+        if kind == .weight || kind == .pump { set(\.amount, draft.amount) }
         if kind == .dirty { set(\.stoolColor, draft.stool?.rawValue) }
         if kind.canRun {
             switch Self.endEdit(draft: draft, isNew: isNew, savedSeconds: savedSeconds) {
@@ -338,6 +346,9 @@ struct NewEntryMenuItems: View {
             Button(kind.isDiaper ? String(localized: "\(kind.label) diaper") : kind.label) { editor = EditorRequest(kind: kind, at: at) }
         }
         Button("Weight") { editor = EditorRequest(kind: .weight, at: at) }
+        ForEach(settings.tracked.extras, id: \.self) { extra in
+            Button(extra.label) { editor = EditorRequest(kind: extra.kind, at: at, name: extra.name) }
+        }
     }
 }
 

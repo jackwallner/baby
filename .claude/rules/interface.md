@@ -68,6 +68,14 @@ the widget process and tests. The status card leads with the first tracked of
 feed, diaper, sleep (`NowSummary.leadKind` for widgets and Watch). A placed
 one-button widget for an off kind shows "Off in Settings" and does not log;
 a control, the Action button or Siri answers that the button is off.
+Extra buttons (2026-11-14, Jack: a Pump button, and buttons parents name
+themselves, "we don't need to invent all"): Pump and custom names live in
+`TrackedKinds` (`showsPump`, `customButtons` in the App Group, per phone, not
+synced). `NowFit` counts their rows. A custom entry keeps its name, so a
+partner's phone shows it in History without that button, and a removed
+button's entries stay. A kind string this build does not know reads as a
+custom entry, never as a feed; older builds read pump and custom as
+feeds (no way around it without a schema change), so both phones need the update.
 `-EmptyLog` (DEBUG) opens an in-memory log, for the reviewer's no-data path
 (`testReportsShowTheExampleBeforeAnythingIsLogged`).
 

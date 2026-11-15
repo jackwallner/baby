@@ -283,7 +283,9 @@ struct SummaryReport: Equatable, Sendable {
         let notes = events
             .filter { $0.start >= firstDay && $0.start < (calendar.date(byAdding: .day, value: 1, to: lastDay) ?? lastDay) }
             .compactMap { event -> (date: Date, text: String)? in
-                guard let note = event.note?.trimmingCharacters(in: .whitespacesAndNewlines), !note.isEmpty else { return nil }
+                // The page is for a doctor: extra buttons' notes stay in the app.
+                guard !event.eventKind.isExtra,
+                      let note = event.note?.trimmingCharacters(in: .whitespacesAndNewlines), !note.isEmpty else { return nil }
                 return (date: event.start, text: String(localized: "\(event.eventKind.label(words: .wetDirty)): \(note)"))
             }
             .sorted { $0.date < $1.date }
@@ -307,14 +309,15 @@ struct SummaryReport: Equatable, Sendable {
         for event in events.sorted(by: { $0.start < $1.start }) {
             let start = event.start
             let duration = event.duration.map { String(Int(($0 / 60).rounded())) } ?? ""
-            let amount = event.eventKind == .feed && event.amount > 0 ? String(Int(event.amount.rounded())) : ""
+            let amount = (event.eventKind == .feed || event.eventKind == .pump) && event.amount > 0 ? String(Int(event.amount.rounded())) : ""
             let weight = event.eventKind == .weight && event.amount > 0 ? String(Int(event.amount.rounded())) : ""
             let fields = [
                 childName,
                 start.formatted(Date.ISO8601FormatStyle(timeZone: timeZone).year().month().day()),
                 start.formatted(date: .omitted, time: .shortened),
-                event.eventKind.rawValue,
-                event.feedSides.map(\.rawValue).joined(separator: "+"),
+                // A custom entry's kind is its button's name, as the parent wrote it.
+                event.customName ?? event.eventKind.rawValue,
+                event.eventKind == .feed ? event.feedSides.map(\.rawValue).joined(separator: "+") : "",
                 amount,
                 weight,
                 event.stool?.rawValue ?? "",

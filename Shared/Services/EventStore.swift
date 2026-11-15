@@ -38,6 +38,8 @@ final class EventStore: ObservableObject {
         let kind: EventKind
         let detail: String?
         let at: Date
+        /// A custom button's name, for the toast.
+        var name: String?
         /// When the entry happened (or the timer ended), so a backdated tap
         /// can say which time it was logged at.
         var eventAt: Date?
@@ -560,17 +562,21 @@ final class EventStore: ObservableObject {
     func log(
         _ kind: EventKind,
         side: FeedSide? = nil,
+        name: String? = nil,
         at date: Date = .now,
         configure: ((LogEvent) -> Void)? = nil
     ) -> LogEvent? {
         refresh(force: false)
         guard let child else { return nil }
+        // A custom entry needs its button's name.
+        if kind == .custom, (name ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return nil }
         // A completed feed logged during a running one means the running feed
         // is over, otherwise Now would keep saying "Feeding" for the older row.
         let closed = kind == .feed ? closeRunning(.feed, at: date) : []
         // A bottle-only family's bare Feed is a bottle.
         let side = kind == .feed ? side ?? FeedTypes.current.tapSide : nil
         let event = persistence.insert(kind: kind, at: date, side: side, ended: kind == .feed ? date : nil, for: child, in: context)
+        if kind == .custom { event.customName = name.map(TrackedKinds.clean) }
         configure?(event)
         guard persistence.save(context) else {
             reload()
@@ -678,6 +684,7 @@ final class EventStore: ObservableObject {
         }
         let kind = event.eventKind
         let detail = event.detailText
+        let name = event.customName
         let objectID = event.objectID
         // A widget tap's second CloudKit copy, hidden from the log, goes too,
         // or it would take this one's place until the cleanup ran.
@@ -691,7 +698,7 @@ final class EventStore: ObservableObject {
         }
         if let removed { suppressCloudCopy(removed) }
         if let childID {
-            remember(LoggedEvent(objectID: objectID, kind: kind, detail: detail, at: .now, deleted: DeletedEvent(childID: childID, values: values)))
+            remember(LoggedEvent(objectID: objectID, kind: kind, detail: detail, at: .now, name: name, deleted: DeletedEvent(childID: childID, values: values)))
         } else if lastLogged?.objectID == objectID {
             dismissUndo()
         }
@@ -713,7 +720,7 @@ final class EventStore: ObservableObject {
 
     private func rememberForUndo(_ event: LogEvent, reopensTimer: Bool = false, closedTimers: [NSManagedObjectID] = []) {
         let when = reopensTimer ? (event.endedAt ?? .now) : event.start
-        remember(LoggedEvent(objectID: event.objectID, kind: event.eventKind, detail: event.detailText, at: .now, eventAt: when, reopensTimer: reopensTimer, closedTimers: closedTimers))
+        remember(LoggedEvent(objectID: event.objectID, kind: event.eventKind, detail: event.detailText, at: .now, name: event.customName, eventAt: when, reopensTimer: reopensTimer, closedTimers: closedTimers))
     }
 
     private func remember(_ logged: LoggedEvent) {

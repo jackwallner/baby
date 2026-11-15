@@ -122,6 +122,7 @@ enum AppTheme {
     static let wet = Color(red: 0.45, green: 0.68, blue: 0.95)
     static let dirty = Color(red: 0.72, green: 0.58, blue: 0.40)
     static let sleep = Color(red: 0.62, green: 0.60, blue: 0.95)
+    static let pump = Color(red: 0.42, green: 0.78, blue: 0.68)
     static let accent = Color(red: 0.95, green: 0.55, blue: 0.42)
     static let notice = Color(red: 0.95, green: 0.68, blue: 0.30)
     static let outline = Color(white: 0.62)
@@ -146,6 +147,8 @@ enum AppTheme {
     static let wet = Color(light: .init(0.18, 0.43, 0.76), dark: .init(0.45, 0.68, 0.95), night: .init(0.46, 0.60, 0.58))
     static let dirty = Color(light: .init(0.52, 0.38, 0.22), dark: .init(0.72, 0.58, 0.40), night: .init(0.62, 0.56, 0.36))
     static let sleep = Color(light: .init(0.36, 0.34, 0.78), dark: .init(0.62, 0.60, 0.95), night: .init(0.64, 0.50, 0.58))
+    /// Pump: a green-teal no other kind uses. Night light warms it to olive.
+    static let pump = Color(light: .init(0.14, 0.50, 0.42), dark: .init(0.42, 0.78, 0.68), night: .init(0.56, 0.60, 0.40))
     /// Primary actions that are not one of the four kinds: onboarding, paywall.
     static let accentUIColor = UIColor(light: .init(0.62, 0.25, 0.16), dark: .init(0.95, 0.55, 0.42), night: .init(0.84, 0.48, 0.34))
     static let accent = Color(uiColor: accentUIColor)
@@ -175,7 +178,8 @@ enum AppTheme {
         case .wet: wet
         case .dirty: dirty
         case .sleep: sleep
-        case .weight: ink2
+        case .weight, .custom: ink2
+        case .pump: pump
         }
     }
 
@@ -260,6 +264,33 @@ private struct CareGlyph: Shape {
             p.move(to: point(0.67, 0.07))
             p.addCurve(to: point(0.87, 0.78), control1: point(-0.22, -0.06), control2: point(0.04, 1.31))
             p.addCurve(to: point(0.67, 0.07), control1: point(0.30, 0.91), control2: point(0.23, 0.26))
+            p.closeSubpath()
+        case .pump:
+            // A flange over a small bottle.
+            p.move(to: point(0.14, 0.08))
+            p.addLine(to: point(0.86, 0.08))
+            p.addLine(to: point(0.60, 0.36))
+            p.addLine(to: point(0.40, 0.36))
+            p.closeSubpath()
+            p.move(to: point(0.36, 0.36))
+            p.addLine(to: point(0.64, 0.36))
+            p.addLine(to: point(0.68, 0.46))
+            p.addLine(to: point(0.68, 0.86))
+            p.addQuadCurve(to: point(0.32, 0.86), control: point(0.50, 1.00))
+            p.addLine(to: point(0.32, 0.46))
+            p.closeSubpath()
+            p.move(to: point(0.33, 0.62)); p.addLine(to: point(0.48, 0.62))
+        case .custom:
+            // A five-point star.
+            let center = point(0.50, 0.54)
+            let outer = min(rect.width, rect.height) * 0.48
+            let inner = outer * 0.45
+            for index in 0..<10 {
+                let angle = -CGFloat.pi / 2 + CGFloat(index) * .pi / 5
+                let radius = index.isMultiple(of: 2) ? outer : inner
+                let vertex = CGPoint(x: center.x + cos(angle) * radius, y: center.y + sin(angle) * radius)
+                if index == 0 { p.move(to: vertex) } else { p.addLine(to: vertex) }
+            }
             p.closeSubpath()
         case .weight:
             p.addRoundedRect(in: rect.insetBy(dx: rect.width * 0.12, dy: rect.height * 0.15), cornerSize: CGSize(width: rect.width * 0.15, height: rect.height * 0.15))

@@ -141,7 +141,7 @@ struct NowView: View {
     }
 
     private var rows: CGFloat {
-        CGFloat(max(1, LogButtons.rows(for: settings.tracked).count))
+        CGFloat(max(1, LogButtons.rowCount(for: settings.tracked)))
     }
 
     private func refit(fixed: CGFloat, available: CGFloat, drawn: StripStyle, animated: Bool) {
@@ -251,8 +251,8 @@ private struct LoggingControls: View {
             // The log time stays above the buttons; a feed's side opens
             // inside the Feed button.
             LogTimeRow(clock: clock)
-            LogButtons(clock: clock, sides: sides, height: height, spacing: spacing) { kind in
-                editor = EditorRequest(kind: kind, at: clock.chosen)
+            LogButtons(clock: clock, sides: sides, height: height, spacing: spacing) { kind, name in
+                editor = EditorRequest(kind: kind, at: clock.chosen, name: name)
             }
         }
     }
@@ -835,7 +835,7 @@ private struct HourStrip: View {
             case .wet: return String(localized: "\(kind.label): \(spokenHours)")
             case .dirty: return String(localized: "\(kind.label): \(spokenHours)")
             case .sleep: return String(localized: "Sleep: \(spokenHours)")
-            case .weight: return nil
+            case .weight, .pump, .custom: return nil
             }
         }
         return parts.isEmpty ? String(localized: "Nothing logged yet") : parts.joined(separator: ". ")
@@ -870,5 +870,7 @@ struct EditorRequest: Identifiable {
     var kind: EventKind
     /// The time a new entry starts at: the log clock's, when wound back.
     var at: Date?
+    /// A new custom entry's button name.
+    var name: String?
     var existing: LogEvent?
 }
