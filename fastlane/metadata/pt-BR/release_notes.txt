@@ -1,1 +1,1 @@
-Agora no iPad. Corrige uma falha que podia impedir o app de abrir.
+Novidade: um botão para extração e botões com o nome que você quiser. Adicione em Ajustes.

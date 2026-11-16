@@ -1,1 +1,1 @@
-Nu på iPad. Åtgärdar en krasch som kunde hindra appen från att öppnas.
+Nytt: en knapp för pumpning och knappar du namnger själv. Lägg till dem i Inställningar.

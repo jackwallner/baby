@@ -1,1 +1,1 @@
-Ara també a l’iPad. Corregeix un error que podia impedir que l’app s’obrís.
+Novetat: un botó per a l’extracció i botons amb el nom que vulguis. Afegeix-los a Configuració.

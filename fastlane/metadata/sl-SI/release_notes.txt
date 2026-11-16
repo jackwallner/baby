@@ -1,1 +1,1 @@
-Zdaj tudi na iPadu. Odpravlja zrušitev, zaradi katere se aplikacija morda ni odprla.
+Novo: gumb za črpanje in gumbi z lastnim imenom. Dodajte jih v Nastavitvah.

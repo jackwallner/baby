@@ -1,1 +1,1 @@
-Désormais sur iPad. Corrige un plantage qui pouvait empêcher l’app de s’ouvrir.
+Nouveau : un bouton Tire-lait et des boutons que vous nommez vous-même. Ajoutez-les dans Réglages.

@@ -1,1 +1,1 @@
-Now on iPad. Fixes a crash that could stop the app from opening.
+New: a Pump button, and buttons you name yourself. Add them in Settings.

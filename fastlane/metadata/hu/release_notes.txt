@@ -1,1 +1,1 @@
-Most már iPaden is. Javít egy összeomlást, amely miatt az app nem mindig nyílt meg.
+Új: fejés gomb és saját nevű gombok. A Beállításokban adhatod hozzá őket.

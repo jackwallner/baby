@@ -1,1 +1,1 @@
-Nyt iPadilla. Korjaa kaatumisen, joka saattoi estää apin avautumisen.
+Uutta: pumppauspainike ja itse nimeämäsi painikkeet. Lisää ne asetuksista.

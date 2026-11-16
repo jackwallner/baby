@@ -1,1 +1,1 @@
-Maintenant sur iPad. Corrige un plantage qui pouvait empêcher l’app de s’ouvrir.
+Nouveau : un bouton Tirage du lait et des boutons que vous nommez vous-même. Ajoutez-les dans les Réglages.

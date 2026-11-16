@@ -1,1 +1,1 @@
-Teraz aj na iPade. Opravuje pád, pre ktorý sa aplikácia nemusela otvoriť.
+Novinka: tlačidlo na odsávanie a tlačidlá s vlastným názvom. Pridáte ich v Nastaveniach.

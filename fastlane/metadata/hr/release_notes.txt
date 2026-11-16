@@ -1,1 +1,1 @@
-Sada i na iPadu. Ispravlja rušenje zbog kojeg se aplikacija možda nije otvarala.
+Novo: gumb za izdajanje i gumbi s vašim nazivom. Dodajte ih u Postavkama.

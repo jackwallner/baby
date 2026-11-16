@@ -1,1 +1,1 @@
-Jetzt auch auf dem iPad. Behebt einen Absturz, der das Öffnen der App verhindern konnte.
+Neu: eine Abpumpen-Taste und Tasten mit eigenem Namen. Hinzufügen in den Einstellungen.

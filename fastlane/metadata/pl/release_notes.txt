@@ -1,1 +1,1 @@
-Teraz na iPadzie. Naprawia awarię, przez którą aplikacja mogła się nie otwierać.
+Nowość: przycisk odciągania i przyciski z własną nazwą. Dodasz je w Ustawieniach.
