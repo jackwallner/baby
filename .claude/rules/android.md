@@ -179,8 +179,8 @@ is reachable through the code.
    (Log together collects name, email, user id and the baby log, optional,
    encrypted in transit, deletable in app and at
    `https://jackwallner.github.io/baby/delete-account.html`; purchases go
-   to RevenueCat), Health apps declaration (baby care log, not a medical
-   device), ads: none, target audience: adults (parents), content rating
+   to RevenueCat), Health apps declaration (tick Nutrition and weight
+   management, Sleep management and Other; not a medical device), ads: none, target audience: adults (parents), content rating
    questionnaire, app access: no login needed (Google sign-in optional);
    give the reviewer code and the Settings > long-press Version path for Baby+.
 6. Signed AAB and internal track upload are the Air release worker's job
@@ -189,6 +189,17 @@ is reachable through the code.
 
 Play state: versionCode 1 uploaded (per Jack, 2026-10-24); vc2 adds the reviewer unlock. No Firebase
 project exists yet (2026-10-21); everything was verified on the emulators.
+
+- 2026-11-18: Play rejected a pending change ("Inaccurate Health Apps
+  Declaration"): the declaration ticked only Other while the description
+  talks about logging feeds and sleep. The live version (published
+  2026-11-12) stayed up. Fixed 2026-11-19 on Jack's yes: Nutrition and weight
+  management, Sleep management and Other are ticked (Other keeps the text
+  "Baby care log for parents: feeds, diapers, sleep and weight records. Not a
+  medical device; does not diagnose or treat any condition."), no regional
+  requirements asked. Sent for review the same day together with the app-level
+  Trader status declaration. Console checkboxes on that page ignore scripted
+  clicks on the first box; use a real click and reload to confirm.
 
 ## Signed package (2026-10-23, run shift-android-package-baby-3-1792792548)
 
