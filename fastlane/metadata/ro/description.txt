@@ -18,7 +18,7 @@ GRATUIT, ȘI AȘA RĂMÂNE
 BABY+, OPȚIONAL
 Un rezumat de o pagină pentru pediatru de la ultima vizită, de trimis sau tipărit, tendințe pe săptămâni și export CSV al tuturor înregistrărilor.
 
-Baby+ este disponibil ca abonament lunar sau anual, sau ca achiziție unică pe viață care nu se reînnoiește. Abonații noi primesc o săptămână de probă gratuită. Plata se încasează din contul Apple la finalul perioadei de probă, dacă nu anulezi cu cel puțin 24 de ore înainte. Abonamentele se reînnoiesc automat pentru aceeași perioadă și același preț, dacă nu sunt anulate cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Gestionează sau anulează în Configurări, la contul Apple, apoi Abonamente. Prețurile apar în aplicație înainte de cumpărare și variază în funcție de regiune.
+Baby+ este disponibil ca abonament lunar sau anual, sau ca achiziție unică pe viață care nu se reînnoiește. Abonații noi primesc o săptămână de probă gratuită. Plata se încasează din contul Apple la finalul perioadei de probă, dacă nu anulezi cu cel puțin 24 de ore înainte. Abonamentele se reînnoiesc automat pentru aceeași perioadă și același preț, dacă nu sunt anulate cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Gestionează sau anulează în Setări, la contul Apple, apoi Abonamente. Prețurile apar în aplicație înainte de cumpărare și variază în funcție de regiune.
 
 Fără reclame. Fără AI. Baby Tracker este un jurnal, nu un sfat medical. Nu diagnostichează, nu tratează, nu evaluează bebelușul și nu este un dispozitiv medical. Sună medicul pentru orice îngrijorare. Aplicația în sine este în limba engleză.
 

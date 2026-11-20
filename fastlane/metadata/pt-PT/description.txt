@@ -18,7 +18,7 @@ O registo, a tabela das primeiras semanas, todo o histórico, os widgets, a app 
 BABY+, OPCIONAL
 Um resumo de uma página para o pediatra desde a última consulta, para partilhar ou imprimir, tendências ao longo das semanas e exportação CSV de todos os registos.
 
-O Baby+ está disponível como assinatura mensal ou anual, ou como compra única vitalícia que não renova. Os novos assinantes têm uma semana de teste gratuito. O pagamento é cobrado na sua Conta Apple no fim do teste, a menos que cancele pelo menos 24 horas antes. As assinaturas renovam automaticamente pelo mesmo período e preço, a menos que sejam canceladas pelo menos 24 horas antes do fim do período atual. Faça a gestão ou cancele em Definições, na sua Conta Apple, e depois Assinaturas. Os preços são apresentados na app antes da compra e variam por região.
+O Baby+ está disponível como subscrição mensal ou anual, ou como compra única vitalícia que não renova. Os novos subscritores têm uma semana de teste gratuito. O pagamento é cobrado na sua Conta Apple no fim do teste, a menos que cancele pelo menos 24 horas antes. As subscrições renovam automaticamente pelo mesmo período e preço, a menos que sejam canceladas pelo menos 24 horas antes do fim do período atual. Faça a gestão ou cancele em Definições, na sua Conta Apple, e depois Subscrições. Os preços são apresentados na app antes da compra e variam por região.
 
 Sem anúncios. Sem IA. O Baby Tracker é um registo, não um conselho médico. Não diagnostica, não trata nem avalia o seu bebé, e não é um dispositivo médico. Em caso de dúvida, ligue ao pediatra.
 
