@@ -1,22 +1,42 @@
-Il modo più semplice per seguire il neonato. Un tocco registra una poppata, un pannolino con pipì o cacca, o il sonno. Un'occhiata risponde alla domanda delle 3 di notte: quando ha mangiato l'ultima volta, e da quale lato?
+Il diario del neonato più semplice, e gratuito. Un tocco registra una poppata, un pannolino con pipì o cacca, o il sonno. Un'occhiata risponde alla domanda delle 3 di notte: quando ha mangiato l'ultima volta, e da quale lato? Il diario si condivide con l'altro genitore, senza account.
 
 QUATTRO PULSANTI CHE NON SI SPOSTANO MAI
-Poppata (sinistro, destro, biberon), pipì, cacca, sonno. Un tocco registra adesso. Una pressione prolungata imposta ora, lato, quantità del biberon o colore delle feci. Annulla resta in alto per qualche secondo.
+• Poppata (sinistra, destra o biberon), pipì, cacca e sonno, sempre nello stesso posto
+• Un tocco registra adesso. Una pressione prolungata imposta l'ora, il lato, la quantità del biberon o il colore delle feci
+• Il pulsante Tutti registra una poppata, una pipì e una cacca insieme
+• Annulla resta in alto per qualche secondo, senza finestre di conferma
+• Puoi rinominare Pipì e Cacca in Bagnato e Sporco, spegnere un pulsante che non usi o limitare le poppate al seno o al biberon
+• Aggiungi una voce che avevi dimenticato di registrare
 
 SENZA APRIRE L'APP
-Widget per la schermata di blocco e la Home che registrano con un tocco, un'app per Apple Watch con complicazione, un'attività in tempo reale durante una poppata o un sonnellino, e Siri.
+• Widget per la schermata Home e la schermata di blocco che registrano con un tocco
+• Un'app per Apple Watch, con una complicazione che mostra da quanto tempo è passata l'ultima poppata
+• Un'attività in tempo reale sulla schermata di blocco durante una poppata o un sonno
+• Siri e tasto Azione
+
+PROMEMORIA A TUA SCELTA
+• Un promemoria della poppata da 2 a 4 ore dopo l'inizio dell'ultima, con il lato da cui ricominciare
+• Un avviso la sera prima della visita di controllo, con quello che hai registrato dall'ultima
+• Sono facoltativi e restano sul tuo iPhone
 
 ENTRAMBI I GENITORI, SENZA ACCOUNT
-Il partner, un nonno o la tata inquadra un codice dal tuo telefono e si unisce allo stesso diario dal proprio iPhone. Nessun account, nessun nostro server: i dati restano sui vostri dispositivi e nel vostro iCloud.
+• Partner, nonni o tata inquadrano un codice dal tuo telefono e si uniscono allo stesso diario dal proprio iPhone
+• Tutti toccano gli stessi pulsanti e vedono la stessa lista
+• I dati restano sui vostri dispositivi e nel vostro iCloud, senza alcun server nostro
 
 LE PRIME SETTIMANE
-I pannolini registrati per giorno di vita, accanto a un riferimento per l'allattamento delle prime due settimane (NHS Healthier Together), con quando chiamare il pediatra. Un riferimento, non un obiettivo.
+• Il foglio dei pannolini che l'ospedale manda a casa, come schermata: i pannolini registrati per giorno di vita
+• Un riferimento sull'allattamento delle prime due settimane (NHS Healthier Together), con le indicazioni su quando chiamare il pediatra
+• È una guida generale, senza obiettivi da raggiungere e senza giudizi sul tuo bambino
 
-GRATIS, E RESTERÀ COSÌ
-La registrazione, la tabella delle prime settimane, tutta la cronologia, i widget, l'app per Apple Watch, l'attività in tempo reale, il diario condiviso, l'aiuto per le macchie e più di un bambino.
+L'AIUTO PER LE MACCHIE
+• Dici una volta cosa hai in casa, e per una macchia di pannolino, rigurgito, latte materno o artificiale ricevi i passaggi in ordine, senza quelli che non ti servono
 
-BABY+, FACOLTATIVO
-Un riepilogo di una pagina per il pediatra dall'ultima visita, da condividere o stampare, gli andamenti settimana per settimana e l'esportazione CSV di tutte le voci.
+GRATIS E BABY+
+Registrazione, promemoria delle poppate, tabella delle prime settimane, cronologia completa, widget, app per Apple Watch, attività in tempo reale, diario condiviso, aiuto per le macchie e più bambini sono gratis e non scadono. Niente di ciò che hai registrato viene mai bloccato. Baby+ è facoltativo e aggiunge:
+• Il riepilogo per il pediatra: una pagina dall'ultima visita da condividere o stampare, con poppate al giorno e intervallo più lungo, pannolini bagnati e sporchi, sonno, peso e note
+• Gli andamenti: poppate al giorno, pannolini e sonno più lungo, settimana per settimana
+• L'esportazione CSV di tutte le voci
 
 Baby+ è disponibile come abbonamento mensile o annuale, oppure come acquisto unico a vita che non si rinnova. I nuovi abbonati hanno una settimana di prova gratuita. Il pagamento viene addebitato sul tuo Account Apple al termine della prova, a meno che tu non disdica almeno 24 ore prima. Gli abbonamenti si rinnovano automaticamente per lo stesso periodo e prezzo se non disdetti almeno 24 ore prima della fine del periodo in corso. Gestisci o disdici in Impostazioni, sotto il tuo Account Apple, poi Abbonamenti. I prezzi sono mostrati nell'app prima dell'acquisto e variano in base alla regione.
 

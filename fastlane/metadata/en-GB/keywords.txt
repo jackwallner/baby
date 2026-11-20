@@ -1,1 +1,1 @@
-breastfeeding,bottle,sleep,wee,poo,wet,dirty,feeding,timer,infant,formula,twins,watch,nap,shared
+diaper,breastfeeding,bottle,sleep,nap,feeding,wee,poo,wet,dirty,timer,formula,twins,watch,shared

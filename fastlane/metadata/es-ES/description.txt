@@ -1,22 +1,42 @@
-El seguimiento de bebé más sencillo. Un toque registra una toma, un pañal de pipí o de popó, o el sueño. Un vistazo responde a la pregunta de las 3 de la madrugada: ¿cuándo comió el bebé por última vez, y de qué pecho?
+El registro de bebé más sencillo, y gratis. Un toque registra una toma, un pañal de pipí o de caca, o el sueño. Un vistazo responde la pregunta de las 3 de la madrugada: ¿cuándo comió el bebé por última vez, y de qué lado? El registro se comparte con tu pareja, sin cuentas.
 
 CUATRO BOTONES QUE NUNCA SE MUEVEN
-Toma (izquierdo, derecho, biberón), pipí, popó, sueño. Un toque lo registra ahora. Una pulsación larga ajusta la hora, el lado, la cantidad del biberón o el color de las heces. Deshacer aparece arriba unos segundos.
+• Toma (izquierdo, derecho o biberón), pipí, popó y sueño, siempre en el mismo lugar
+• Un toque lo registra ahora. Una pulsación larga ajusta la hora, el lado, la cantidad del biberón o el color de las heces
+• El botón Todos registra una toma, un pipí y un popó a la vez
+• Deshacer aparece arriba unos segundos, sin pantallas de confirmación
+• Puedes cambiar Pipí y Popó por Mojado y Sucio, apagar un botón que no uses o limitar las tomas a pecho o a biberón
+• Añade una entrada que olvidaste registrar
 
 SIN ABRIR LA APP
-Widgets para la pantalla bloqueada y la de inicio que registran con un toque, una app para Apple Watch con complicación, una actividad en directo mientras dura una toma o una siesta, y Siri.
+• Widgets para la pantalla de inicio y la pantalla bloqueada que registran con un toque
+• Una app para Apple Watch, con una complicación que muestra cuánto hace de la última toma
+• Una actividad en vivo en la pantalla bloqueada mientras corre una toma o una siesta
+• Siri y el botón de acción
+
+RECORDATORIOS QUE TÚ ELIGES
+• Un recordatorio de toma de 2 a 4 horas después de que empezó la última, con el lado por el que empezar
+• Un aviso la noche anterior a la revisión del pediatra, con lo que registraste desde la última
+• Son opcionales y se quedan en tu iPhone
 
 LOS DOS PADRES, SIN CUENTAS
-Tu pareja, un abuelo o una niñera escanea un código de tu teléfono y se une al mismo registro desde su propio iPhone. Sin cuentas ni servidores nuestros: los datos viven en vuestros dispositivos y en vuestro propio iCloud.
+• Tu pareja, los abuelos o la niñera escanean un código de tu móvil y se unen al mismo registro desde su propio iPhone
+• Todos tocan los mismos botones y ven la misma lista
+• Los datos viven en vuestros dispositivos y en vuestro propio iCloud, sin ningún servidor nuestro
 
 LAS PRIMERAS SEMANAS
-Tus pañales registrados por día de vida, junto a una referencia de lactancia para las dos primeras semanas (NHS Healthier Together), con cuándo llamar al pediatra. Una referencia, no un objetivo.
+• La hoja de pañales que el hospital manda a casa, convertida en pantalla: tus pañales registrados por día de vida
+• Una referencia de lactancia para las dos primeras semanas (NHS Healthier Together), con las indicaciones de cuándo llamar al pediatra
+• Es una guía general, sin metas que cumplir y sin juicios sobre tu bebé
 
-GRATIS, Y SEGUIRÁ SIÉNDOLO
-El registro, la tabla de las primeras semanas, todo el historial, los widgets, la app de Apple Watch, la actividad en directo, el registro compartido, la ayuda para manchas y más de un bebé.
+LA AYUDA PARA MANCHAS
+• Dices una vez lo que tienes en casa, y para una mancha de pañal, regurgitación, leche materna o fórmula recibes los pasos en orden, sin los que no necesitas
 
-BABY+, OPCIONAL
-Un resumen de una página para el pediatra desde la última visita, para compartir o imprimir, tendencias semana a semana y exportación CSV de todas las entradas.
+GRATIS Y BABY+
+El registro, los recordatorios de toma, la tabla de las primeras semanas, el historial completo, los widgets, la app de Apple Watch, la actividad en vivo, el registro compartido, la ayuda para manchas y más de un bebé son gratis y no caducan. Nada de lo que registraste se bloquea después. Baby+ es opcional e incluye:
+• El resumen para el pediatra: una página desde la última consulta para compartir o imprimir, con tomas al día y el intervalo más largo entre ellas, pañales mojados y sucios, sueño, peso y notas
+• Las tendencias: tomas al día, pañales y el sueño más largo, semana a semana
+• La exportación CSV de todas las entradas
 
 Baby+ está disponible como suscripción mensual o anual, o como compra única de por vida que no se renueva. Los nuevos suscriptores tienen una semana de prueba gratis. El pago se carga en tu cuenta de Apple al terminar la prueba salvo que canceles al menos 24 horas antes. Las suscripciones se renuevan automáticamente por el mismo periodo y precio salvo que se cancelen al menos 24 horas antes del final del periodo actual. Gestiona o cancela en Ajustes, en tu cuenta de Apple, y luego Suscripciones. Los precios se muestran en la app antes de comprar y varían según la región.
 
