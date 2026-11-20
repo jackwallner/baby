@@ -536,6 +536,12 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
                 )
                 return .cancelled
             }
+            // Ask to Buy or a bank confirmation: StoreKit answers pending and
+            // RevenueCat throws. Baby+ unlocks through the delegate on approval.
+            if nsError.code == ErrorCode.paymentPendingError.rawValue {
+                errorMessage = nil
+                return .pending
+            }
             await refreshIntroEligibility()
             errorMessage = ConversionCopy.purchaseFailedMessage(
                 eligibleForTrial: isEligibleForIntroOffer(package)

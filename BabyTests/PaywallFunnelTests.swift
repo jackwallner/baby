@@ -135,6 +135,7 @@ private final class MockPurchases: RevenueCatClient {
     var purchaseCalls = 0
     var restoreCalls = 0
     var cancelPurchase = false
+    var purchaseError: Error?
     var policies: [CacheFetchPolicy] = []
     var eligibility: [String: IntroEligibilityStatus] = [:]
 
@@ -151,6 +152,7 @@ private final class MockPurchases: RevenueCatClient {
     }
     func purchase(package: Package) async throws -> PurchaseResultData {
         purchaseCalls += 1
+        if let purchaseError { throw purchaseError }
         return (nil, info, cancelPurchase)
     }
     func restorePurchases() async throws -> CustomerInfo {
@@ -248,6 +250,19 @@ final class PurchaseEntitlementTests: XCTestCase {
         XCTAssertEqual(purchased, .purchased)
         XCTAssertTrue(service.isPro)
         XCTAssertEqual(mock.purchaseCalls, 2)
+    }
+
+    /// Ask to Buy: RevenueCat throws paymentPendingError. It is waiting, not failed.
+    func testAskToBuyDeferralIsReportedAsPendingNotAsAFailure() async {
+        let mock = MockPurchases()
+        mock.info = makeInfo(active: false)
+        let service = StoreService(client: mock, defaults: UserDefaults(suiteName: UUID().uuidString)!)
+        await service.refreshStatus()
+        mock.purchaseError = ErrorCode.paymentPendingError as NSError
+        let result = await service.purchase(makePackage())
+        XCTAssertEqual(result, .pending)
+        XCTAssertNil(service.errorMessage)
+        XCTAssertFalse(service.isPro)
     }
 
     func testDelayedFreeFetchCannotRelockACompletedRestore() async throws {
