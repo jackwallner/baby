@@ -1,4 +1,4 @@
-Das Babytagebuch, so einfach wie möglich, und kostenlos. Ein Tipp erfasst eine Mahlzeit, eine nasse oder volle Windel oder den Schlaf. Ein Blick beantwortet die Frage um 3 Uhr nachts: Wann hat das Baby zuletzt getrunken, und auf welcher Seite? Das Protokoll teilst du mit dem anderen Elternteil, ganz ohne Konto.
+Das einfachste Babytagebuch, und kostenlos. Ein Tipp erfasst eine Mahlzeit, eine nasse oder volle Windel oder den Schlaf. Ein Blick beantwortet die Frage um 3 Uhr nachts: Wann hat das Baby zuletzt getrunken, und auf welcher Seite? Das Protokoll teilst du mit dem anderen Elternteil, ganz ohne Konto.
 
 VIER TASTEN, DIE SICH NIE VERSCHIEBEN
 • Mahlzeit (links, rechts oder Flasche), Pipi, Kacka und Schlaf, immer an derselben Stelle
@@ -6,7 +6,7 @@ VIER TASTEN, DIE SICH NIE VERSCHIEBEN
 • Die Taste Alle erfasst Mahlzeit, Pipi und Kacka zusammen
 • Rückgängig steht ein paar Sekunden oben bereit, ohne Bestätigungsdialoge
 • Pipi und Kacka lassen sich in Nass und Voll umbenennen, eine Taste, die du nicht brauchst, abschalten oder Mahlzeiten auf Brust oder Flasche beschränken
-• Trage einen Eintrag nach, den du vergessen hattest
+• Trage einen Eintrag nach, den du nicht erfasst hast
 
 OHNE DIE APP ZU ÖFFNEN
 • Widgets für Home-Bildschirm und Sperrbildschirm, die mit einem Tipp erfassen
@@ -20,19 +20,19 @@ ERINNERUNGEN, DIE DU WÄHLST
 • Beides ist optional und bleibt auf deinem iPhone
 
 BEIDE ELTERN, KEINE KONTEN
-• Partner, Großeltern oder Nanny scannen einen Code von deinem iPhone und führen dasselbe Protokoll auf ihrem eigenen iPhone
-• Die Einträge liegen auf euren Geräten und in eurer eigenen iCloud, ohne einen Server von uns
+• Partner, Großeltern oder Nanny scannen einen Code von deinem iPhone und nutzen dasselbe Protokoll auf ihrem eigenen iPhone
+• Die Einträge liegen auf deinen Geräten und in deiner eigenen iCloud, ohne einen Server von uns
 
 DIE ERSTEN WOCHEN
-• Der Windelzettel, den das Krankenhaus mitgibt, als Bildschirm: deine erfassten Windeln nach Lebenstag
+• Der Windelzettel, den das Krankenhaus mitgibt, als Ansicht: deine erfassten Windeln nach Lebenstag
 • Eine Stillreferenz für die ersten zwei Wochen von NHS Healthier Together, mit den Hinweisen, wann du den Kinderarzt anrufen solltest
 • Sie ist eine allgemeine Orientierung, ohne Sollwerte und ohne Urteil über dein Baby
 
 DER FLECKENHELFER
-• Sag einmal, was du zu Hause hast, und bei Windelunfall, Spucken, Muttermilch oder Milchnahrung bekommst du die Schritte der Reihe nach, ohne das, was du nicht besitzt
+• Sag einmal, was du zu Hause hast, und bei Flecken von Windelunfall, Spucke, Muttermilch oder Milchnahrung bekommst du die Schritte der Reihe nach, ohne Dinge, die du nicht im Haus hast
 
 KOSTENLOS UND BABY+
-Erfassen, Mahlzeit-Erinnerungen, die Tabelle der ersten Wochen, der komplette Verlauf, Widgets, die Apple Watch App, die Live-Aktivität, das gemeinsame Protokoll, der Fleckenhelfer und mehr als ein Baby sind kostenlos und laufen nicht ab. Nichts, was du erfasst hast, wird später gesperrt. Baby+ ist optional und bringt:
+Erfassen, Erinnerungen an Mahlzeiten, die Tabelle der ersten Wochen, der komplette Verlauf, Widgets, die Apple Watch App, die Live-Aktivität, das gemeinsame Protokoll, der Fleckenhelfer und mehr als ein Baby sind kostenlos und laufen nicht ab. Nichts, was du erfasst hast, wird später gesperrt. Baby+ ist optional und umfasst:
 • Die Zusammenfassung für den Kinderarzt: eine Seite seit dem letzten Termin zum Teilen oder Drucken, mit Mahlzeiten pro Tag und dem längsten Abstand dazwischen, nassen und vollen Windeln, Schlaf, Gewicht und deinen Notizen
 • Verläufe: Mahlzeiten pro Tag, Windeln und die längste Schlafphase über die Wochen
 • CSV-Export aller Einträge

@@ -1,45 +1,45 @@
-Le journal de bébé le plus simple, et gratuit. Un toucher enregistre un boire, une couche pipi ou caca, ou le sommeil. Un coup d'œil répond à la question de 3 h du matin : quand bébé a-t-il bu, et de quel côté? Le journal se partage avec l'autre parent, sans compte.
+Le journal de bébé le plus simple, et gratuit. Un appui enregistre un boire, une couche pipi ou caca, ou le sommeil. Un coup d'œil répond à la question de 3 h du matin : quand bébé a-t-il bu, et de quel côté? Le journal se partage avec l'autre parent, sans compte.
 
 QUATRE BOUTONS QUI NE BOUGENT JAMAIS
 • Boire (gauche, droite ou biberon), pipi, caca et sommeil, toujours au même endroit
-• Un toucher enregistre maintenant. Un appui long règle l'heure, le côté, la quantité de biberon ou la couleur des selles
-• Le bouton Tout enregistre un boire, un pipi et un caca en même temps
-• Annuler reste en haut quelques secondes, sans écran de confirmation
-• Vous pouvez renommer pipi et caca en Mouillée et Sale, éteindre un bouton inutile ou limiter les boires au sein ou au biberon
+• Un appui enregistre maintenant. Un appui long règle l'heure, le côté, la quantité de biberon ou la couleur des selles
+• Le bouton « All » enregistre un boire, un pipi et un caca en même temps
+• L'annulation reste en haut quelques secondes, sans écran de confirmation
+• Vous pouvez renommer Pee et Poop en Wet et Dirty (mouillée et sale), désactiver un bouton inutile ou limiter les boires au sein ou au biberon
 • Ajoutez une entrée que vous avez oublié de noter
 
 SANS OUVRIR L'APPLI
-• Des widgets pour l'écran d'accueil et l'écran verrouillé qui enregistrent d'un toucher
+• Des widgets pour l'écran d'accueil et l'écran verrouillé qui enregistrent en un appui
 • Une appli Apple Watch avec une complication qui montre depuis combien de temps date le dernier boire
 • Une activité en direct sur l'écran verrouillé pendant un boire ou un sommeil
 • Siri et le bouton Action
 
 DES RAPPELS QUE VOUS CHOISISSEZ
 • Un rappel de boire de 2 à 4 heures après le début du dernier boire, avec le côté par lequel commencer
-• Une note la veille au soir de la visite de contrôle, avec ce que vous avez noté depuis la dernière
-• Les deux sont facultatifs et restent sur votre iPhone
+• Un rappel la veille au soir du rendez-vous de suivi, avec ce que vous avez noté depuis la dernière
+• Facultatifs, ils restent sur votre iPhone
 
 LES DEUX PARENTS, SANS COMPTE
-• Votre partenaire, un grand-parent ou une gardienne scanne un code sur votre téléphone et rejoint le même journal sur son propre iPhone
+• Votre partenaire, un grand-parent ou la gardienne scannent un code sur votre iPhone et rejoignent le même journal sur leur propre iPhone
 • Les données restent sur vos appareils et dans votre iCloud, sans aucun serveur à nous
 
 LES PREMIÈRES SEMAINES
-• La feuille de couches que l'hôpital remet à la maison, en version écran : vos couches notées par jour de vie
+• La feuille de couches de l'hôpital, en version écran : vos couches notées par jour de vie
 • Une référence d'allaitement pour les deux premières semaines (NHS Healthier Together), avec les situations où appeler le médecin
 • C'est un repère général, sans objectif à atteindre ni jugement sur votre bébé
 
-L'AIDE DÉTACHAGE
-• Dites une fois ce que vous avez à la maison, et pour une tache de fuite, de régurgitation, de lait maternel ou infantile, vous recevez les étapes dans l'ordre, sans celles dont vous n'avez pas besoin
+L'AIDE AU DÉTACHAGE
+• Dites une fois ce que vous avez à la maison, et pour une tache de fuite de couche, de régurgitation, de lait maternel ou maternisé, vous recevez les étapes dans l'ordre, sans celles qui ne servent à rien
 
 GRATUIT ET BABY+
-L'enregistrement, les rappels de boire, le tableau des premières semaines, tout l'historique, les widgets, l'appli Apple Watch, l'activité en direct, le journal partagé, l'aide détachage et plusieurs bébés sont gratuits et n'expirent pas. Rien de ce que vous avez noté n'est verrouillé plus tard. Baby+ est facultatif et ajoute :
-• Le résumé pour le médecin : une page depuis la dernière visite à partager ou imprimer, avec les boires par jour et le plus long intervalle entre elles, les couches mouillées et sales, le sommeil, le poids et vos notes
+L'enregistrement, les rappels de boire, le tableau des premières semaines, tout l'historique, les widgets, l'appli Apple Watch, l'activité en direct, le journal partagé, l'aide au détachage et plusieurs bébés sont gratuits et n'expirent pas. Rien de ce que vous avez noté n'est verrouillé plus tard. Baby+ est facultatif et ajoute :
+• Le résumé pour le pédiatre : une page depuis la dernière visite à partager ou imprimer, avec les boires par jour et le plus long intervalle entre deux boires, les couches mouillées et sales, le sommeil, le poids et vos notes
 • Les tendances : boires par jour, couches et plus longue période de sommeil
-• L'export CSV de toutes les entrées
+• L'exportation CSV de toutes les entrées
 
 Baby+ est offert en abonnement mensuel ou annuel, ou en achat unique à vie sans renouvellement. Les nouveaux abonnés profitent d'un essai gratuit d'une semaine. Le paiement est porté à votre compte Apple à la fin de l'essai, sauf annulation au moins 24 heures avant. Les abonnements se renouvellent automatiquement pour la même durée et le même prix, sauf annulation au moins 24 heures avant la fin de la période en cours. Gérez ou annulez dans Réglages, sous votre compte Apple, puis Abonnements. Les prix sont affichés dans l'appli avant l'achat et varient selon la région.
 
-Sans publicité. Sans IA. Baby Tracker est un journal, pas un avis médical. Il ne pose aucun diagnostic, ne traite pas, n'évalue pas votre bébé et n'est pas un instrument médical. En cas d'inquiétude, appelez votre médecin. L'appli elle-même est en anglais.
+Sans publicité. Sans IA. Baby Tracker est un journal, pas un avis médical. Il ne pose aucun diagnostic, ne soigne pas, n'évalue pas votre bébé et n'est pas un dispositif médical. En cas d'inquiétude, appelez votre médecin. L'appli elle-même est en anglais.
 
 Conditions d'utilisation (CLUF standard d'Apple): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Politique de confidentialité: https://jackwallner.github.io/baby/privacy-policy.html
