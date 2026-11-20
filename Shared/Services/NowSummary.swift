@@ -587,7 +587,7 @@ struct DayTally: Equatable, Sendable {
             case .sleep:
                 // Sleep is credited to the day it happened in, split at midnight,
                 // and never past now: an entry set to end later counts so far.
-                let end = min(event.endedAt ?? (event.isRunning ? now : start), max(now, start))
+                let end = min(event.countedEnd(now: now), max(now, start))
                 let overlapStart = max(start, dayStart)
                 let overlapEnd = min(end, dayEnd)
                 if overlapEnd > overlapStart { sleeps.append((overlapStart, overlapEnd)) }
@@ -740,7 +740,7 @@ struct WindowTotals: Equatable, Sendable {
                 }
                 if let index = column(at) { totals.hours[event.eventKind]?[index] += 1 }
             case .sleep:
-                let end = min(event.endedAt ?? (event.isRunning ? now : at), now)
+                let end = min(event.countedEnd(now: now), now)
                 let clippedStart = max(at, min(interval.start, start))
                 let clippedEnd = min(end, interval.end)
                 if clippedEnd > clippedStart { sleeps.append((clippedStart, clippedEnd)) }

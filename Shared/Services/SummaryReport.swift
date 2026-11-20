@@ -227,7 +227,7 @@ struct SummaryReport: Equatable, Sendable {
         let today = calendar.startOfDay(for: now)
         let events = events.filter { event in
             guard tracked.contains(event.eventKind) else { return false }
-            let finish = event.endedAt ?? (event.isRunning ? now : event.start)
+            let finish = event.countedEnd(now: now)
             return event.start < rangeEnd && max(finish, event.start) >= firstDay
         }
         // A gap that spans a whole calendar day is a day nobody logged, not a
@@ -240,7 +240,7 @@ struct SummaryReport: Equatable, Sendable {
             .map { (at: $0, seconds: $0.timeIntervalSince($1)) }
         let sleepBouts = DayTally.coveredIntervals(events.compactMap { event -> (start: Date, end: Date)? in
             guard event.eventKind == .sleep else { return nil }
-            let finish = event.endedAt ?? (event.isRunning ? now : event.start)
+            let finish = event.countedEnd(now: now)
             guard finish > event.start else { return nil }
             return (event.start, finish)
         })

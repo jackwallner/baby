@@ -175,6 +175,19 @@ final class SummaryReportTests: XCTestCase {
         XCTAssertEqual(slept, 3600, accuracy: 60)
     }
 
+    /// A Wake nobody tapped must not add a full day of sleep to every day since.
+    func testASleepLeftRunningIsCappedAtTwelveHours() {
+        let start = Date.now.addingTimeInterval(-3 * 86400)
+        store.startTimed(.sleep, at: start)
+        let total = (0...3).reduce(0.0) { sum, back in
+            sum + store.tally(on: Date.now.addingTimeInterval(-Double(back) * 86400)).sleepSeconds
+        }
+        XCTAssertEqual(total, LogEvent.maxRunningSleep, accuracy: 60)
+        let report = report(daysBack: 3)
+        XCTAssertEqual(report.days.reduce(0) { $0 + $1.sleepSeconds }, LogEvent.maxRunningSleep, accuracy: 60)
+        XCTAssertEqual(report.longestSleepSeconds, LogEvent.maxRunningSleep, accuracy: 60)
+    }
+
     func testADaysWeightIsItsLastWeighIn() {
         store.log(.weight, at: day(1, hour: 8))?.amount = 3300
         store.log(.weight, at: day(1, hour: 14))?.amount = 3350

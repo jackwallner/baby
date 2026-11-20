@@ -307,6 +307,19 @@ final class LogEvent: NSManagedObject {
     /// running for the kinds that can run.
     var isRunning: Bool { eventKind.canRun && endedAt == nil }
 
+    /// The longest a sleep left running counts toward totals. A forgotten
+    /// Wake would otherwise add a full 24 hours to every day since.
+    static let maxRunningSleep: TimeInterval = 12 * 3600
+
+    /// Where this entry stops counting. A running sleep is held to
+    /// `maxRunningSleep` after it started; every other entry keeps its own end.
+    func countedEnd(now: Date) -> Date {
+        if let endedAt { return endedAt }
+        guard isRunning else { return start }
+        if eventKind == .sleep { return min(now, start.addingTimeInterval(Self.maxRunningSleep)) }
+        return now
+    }
+
     var duration: TimeInterval? {
         guard let endedAt, let startedAt else { return nil }
         return max(0, endedAt.timeIntervalSince(startedAt))
