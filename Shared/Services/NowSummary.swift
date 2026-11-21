@@ -10,6 +10,10 @@ struct NowSummary: Codable, Equatable, Sendable {
     /// written by older builds, and for the empty state before setup.
     var childID: UUID?
     var dayOfLife: Int?
+    /// The calendar day `dayOfLife` was counted on (its midnight), so a Watch,
+    /// widget or Now that outlives midnight can step the number forward.
+    /// Optional for summaries from older builds, which fall back to `generatedAt`.
+    var dayOfLifeOn: Date?
     var lastFeedAt: Date?
     /// The first side of the last feed. Kept beside `lastFeedSides` so a
     /// Watch still running an older build reads a side.
@@ -220,6 +224,7 @@ struct NowSummary: Codable, Equatable, Sendable {
         summary.childNameIsFallback = (child.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         summary.childID = child.id
         summary.dayOfLife = child.dayOfLife(on: now, calendar: calendar)
+        summary.dayOfLifeOn = calendar.startOfDay(for: now)
         let sorted = events.sorted { $0.start > $1.start }
         summary.knownEventIDs = Array(sorted.prefix(Self.knownEventLimit).reversed().compactMap(\.id))
         summary.recent = sorted.lazy.compactMap(RecentEntry.init).prefix(Self.recentLimit).map { $0 }
@@ -469,7 +474,18 @@ extension NowSummary {
     /// The same summary with today's counts cleared once the day it counted
     /// is over, for a Watch that has not heard from the phone since.
     func current(now: Date = .now, calendar: Calendar = .current) -> NowSummary {
-        resetTodayIfNeeded(calendar: calendar, now: now)
+        var summary = resetTodayIfNeeded(calendar: calendar, now: now)
+        summary.dayOfLife = dayOfLife(on: now, calendar: calendar)
+        return summary
+    }
+
+    /// The day of life on `now`'s calendar day, which moves at midnight whatever
+    /// the totals window is, however old this summary is.
+    func dayOfLife(on now: Date, calendar: Calendar = .current) -> Int? {
+        guard let dayOfLife else { return nil }
+        let counted = calendar.startOfDay(for: dayOfLifeOn ?? generatedAt)
+        let passed = calendar.dateComponents([.day], from: counted, to: calendar.startOfDay(for: now)).day ?? 0
+        return dayOfLife + max(0, passed)
     }
 
     private func resetTodayIfNeeded(calendar: Calendar, now: Date) -> NowSummary {

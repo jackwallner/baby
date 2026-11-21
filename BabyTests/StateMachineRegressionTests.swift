@@ -224,4 +224,43 @@ final class StateMachineRegressionTests: XCTestCase {
         let shown = try await offerAfterFeed(undo: false)
         XCTAssertTrue(shown)
     }
+
+    // MARK: - Day of life rolls over at midnight
+
+    private func daySummary(madeAt made: Date, window: TotalsWindow = .midnight, calendar: Calendar) throws -> NowSummary {
+        let child = try XCTUnwrap(store.child)
+        child.birthDate = DateHelpers.birthStamp(of: calendar.date(from: DateComponents(year: 2026, month: 11, day: 18, hour: 9))!, calendar: calendar)
+        return NowSummary.make(child: child, events: [], now: made, calendar: calendar, window: window, tracked: .all, feedTypes: .all)
+    }
+
+    func testDayOfLifeStepsForwardAtMidnightWithoutANewPush() throws {
+        var la = Calendar(identifier: .gregorian)
+        la.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+        let evening = la.date(from: DateComponents(year: 2026, month: 11, day: 20, hour: 23, minute: 30))!
+        let summary = try daySummary(madeAt: evening, calendar: la)
+        XCTAssertEqual(summary.dayOfLife, 3)
+        XCTAssertEqual(summary.current(now: la.date(from: DateComponents(year: 2026, month: 11, day: 20, hour: 23, minute: 59))!, calendar: la).dayOfLife, 3)
+        XCTAssertEqual(summary.current(now: la.date(from: DateComponents(year: 2026, month: 11, day: 21, hour: 0, minute: 5))!, calendar: la).dayOfLife, 4)
+        XCTAssertEqual(summary.dayOfLife(on: la.date(from: DateComponents(year: 2026, month: 11, day: 22, hour: 8))!, calendar: la), 5)
+    }
+
+    func testDayOfLifeStepsAtMidnightEvenWithASixAMTotalsDay() throws {
+        var la = Calendar(identifier: .gregorian)
+        la.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+        let evening = la.date(from: DateComponents(year: 2026, month: 11, day: 20, hour: 23, minute: 30))!
+        let summary = try daySummary(madeAt: evening, window: .day(startHour: 6), calendar: la)
+        let night = la.date(from: DateComponents(year: 2026, month: 11, day: 21, hour: 2))!
+        XCTAssertEqual(summary.dayOfLife(on: night, calendar: la), 4, "Now's label, before the 6 AM totals day starts")
+        XCTAssertEqual(summary.current(now: night, calendar: la).dayOfLife, 4)
+    }
+
+    func testASummaryFromAnOlderBuildStepsFromWhenItWasMade() throws {
+        var la = Calendar(identifier: .gregorian)
+        la.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+        let evening = la.date(from: DateComponents(year: 2026, month: 11, day: 20, hour: 23, minute: 30))!
+        var summary = try daySummary(madeAt: evening, calendar: la)
+        summary.dayOfLifeOn = nil
+        let next = la.date(from: DateComponents(year: 2026, month: 11, day: 21, hour: 0, minute: 5))!
+        XCTAssertEqual(summary.dayOfLife(on: next, calendar: la), 4)
+    }
 }

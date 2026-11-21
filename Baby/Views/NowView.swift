@@ -507,7 +507,7 @@ private struct NowStatusCard: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(AppTheme.color(for: headingKind))
                 if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: AppTheme.tightSpacing) }
-                if let day = summary.dayOfLife {
+                if let day = summary.dayOfLife(on: now) {
                     Text("Day \(day)")
                         .font(.caption.weight(.medium))
                         .foregroundStyle(AppTheme.ink2)
