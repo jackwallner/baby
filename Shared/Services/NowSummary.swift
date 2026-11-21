@@ -663,10 +663,18 @@ enum TotalsWindow: Hashable, Sendable {
             return DateInterval(start: now.addingTimeInterval(-24 * 3600), end: now)
         case .day(let hour):
             let today = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: now) ?? calendar.startOfDay(for: now)
-            let start = today <= now ? today : (calendar.date(byAdding: .day, value: -1, to: today) ?? today)
+            // Step back a day before setting the hour: on a spring-forward morning
+            // `today` is already pushed past the missing hour, and a day earlier
+            // than that is the wrong start.
+            let start = today <= now ? today : Self.dayStart(hour: hour, before: now, today: today, calendar: calendar)
             let end = calendar.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(24 * 3600)
             return DateInterval(start: start, end: end)
         }
+    }
+
+    private static func dayStart(hour: Int, before now: Date, today: Date, calendar: Calendar) -> Date {
+        guard let yesterday = calendar.date(byAdding: .day, value: -1, to: now) else { return today }
+        return calendar.date(bySettingHour: hour, minute: 0, second: 0, of: yesterday) ?? yesterday
     }
 
     /// Whether a moment falls in `interval`. A day ends where the next one

@@ -125,6 +125,27 @@ final class ClockBoundaryTests: XCTestCase {
         XCTAssertEqual(spring.end, at(2027, 3, 15))
     }
 
+    // A 2 AM day start on the US spring-forward morning (2026-03-08, when 02:00 does
+    // not exist): before the jump, yesterday's window still starts at 02:00 on the 7th
+    // and holds the 2:30 AM entry, and it ends where the next window starts.
+    func testTwoAMWindowKeepsYesterdaysTwoAMOnSpringForwardMorning() {
+        let window = TotalsWindow.day(startHour: 2)
+        let beforeJump = window.interval(at: at(2026, 3, 8, 1, 30), calendar: la)
+        XCTAssertEqual(beforeJump.start, at(2026, 3, 7, 2))
+        XCTAssertTrue(window.holds(at(2026, 3, 7, 2, 30), in: beforeJump))
+        let afterJump = window.interval(at: at(2026, 3, 8, 3, 30), calendar: la)
+        XCTAssertEqual(afterJump.start, at(2026, 3, 8, 3), "02:00 does not exist, the day starts at 03:00")
+        XCTAssertEqual(beforeJump.end, afterJump.start, "no gap and no overlap between the two days")
+        XCTAssertFalse(window.holds(at(2026, 3, 8, 3), in: beforeJump))
+        XCTAssertTrue(window.holds(at(2026, 3, 8, 1, 59), in: beforeJump))
+    }
+
+    func testSpringForwardEntryAtTwoThirtyYesterdayIsCountedInTotals() {
+        let fed = [event(.feed, at(2026, 3, 7, 2, 30)), event(.feed, at(2026, 3, 7, 12))]
+        let totals = WindowTotals.make(events: fed, window: .day(startHour: 2), now: at(2026, 3, 8, 1, 30), calendar: la)
+        XCTAssertEqual(totals.feeds, 2, "both feeds of the 7th belong to the window still open at 1:30 AM on the 8th")
+    }
+
     // fed929e5 (widget entries clear today's counts at the day start): the Watch's
     // copy resets the first moment after midnight, and not a minute before.
     func testWatchSummaryClearsTodaysCountsAtMidnight() {
