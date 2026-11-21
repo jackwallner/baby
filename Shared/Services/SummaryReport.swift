@@ -305,6 +305,13 @@ struct SummaryReport: Equatable, Sendable {
     static func csv(events: [LogEvent], childName: String, timeZone: TimeZone = .current) -> String {
         let stamp = ISO8601DateFormatter()
         stamp.formatOptions = [.withInternetDateTime]
+        // A fixed 24 hour time in the date column's zone, so a spreadsheet reads
+        // it as a time in every locale (no AM/PM, no U+202F).
+        let clock = DateFormatter()
+        clock.calendar = Calendar(identifier: .gregorian)
+        clock.locale = Locale(identifier: "en_US_POSIX")
+        clock.timeZone = timeZone
+        clock.dateFormat = "HH:mm"
         var lines = ["baby,date,time,kind,side,amount_ml,weight_g,stool_color,duration_min,note,logged_at"]
         for event in events.sorted(by: { $0.start < $1.start }) {
             let start = event.start
@@ -314,7 +321,7 @@ struct SummaryReport: Equatable, Sendable {
             let fields = [
                 childName,
                 start.formatted(Date.ISO8601FormatStyle(timeZone: timeZone).year().month().day()),
-                start.formatted(date: .omitted, time: .shortened),
+                clock.string(from: start),
                 // A custom entry's kind is its button's name, as the parent wrote it.
                 event.customName ?? event.eventKind.rawValue,
                 event.eventKind == .feed ? event.feedSides.map(\.rawValue).joined(separator: "+") : "",

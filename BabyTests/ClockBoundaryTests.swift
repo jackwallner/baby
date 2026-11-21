@@ -269,6 +269,17 @@ final class ClockBoundaryTests: XCTestCase {
         XCTAssertEqual(rows.map { String($0[1]) }, ["2026-07-21", "2026-07-22"])
     }
 
+    // The time column is a fixed 24 hour HH:mm in the date column's zone, not the
+    // phone's display format (en_US puts a U+202F before PM, which spreadsheets keep as text).
+    func testCSVTimeIsFixedTwentyFourHourInTheExportZone() {
+        let evening = event(.feed, at(2026, 11, 20, 21, 5))
+        let morning = event(.feed, at(2026, 11, 21, 3, 7))
+        let rows = SummaryReport.csv(events: [evening, morning], childName: "Nora", timeZone: la.timeZone)
+            .split(separator: "\n").dropFirst().map { $0.split(separator: ",", omittingEmptySubsequences: false) }
+        XCTAssertEqual(rows.map { String($0[1]) }, ["2026-11-20", "2026-11-21"])
+        XCTAssertEqual(rows.map { String($0[2]) }, ["21:05", "03:07"])
+    }
+
     // MARK: - Partner sync
 
     // fed929e5 / 7125df1c: a partner in another zone logs at 02:30 Eastern, which
