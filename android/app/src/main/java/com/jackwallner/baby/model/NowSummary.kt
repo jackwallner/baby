@@ -294,11 +294,16 @@ sealed class TotalsWindow {
         Last24Hours -> Span(now - 24 * 3600 * 1000L, now)
         is Day -> {
             val nowZoned = DateHelpers.zoned(now, zone)
-            val today: ZonedDateTime = nowZoned.withHour(startHour).withMinute(0).withSecond(0).withNano(0)
-            val start = if (!today.isAfter(nowZoned)) today else today.minusDays(1)
+            val today = dayStart(nowZoned, startHour)
+            // Step back a day before setting the hour: on a spring-forward morning `today`
+            // is already pushed past the missing hour, and a day earlier than that is the wrong start.
+            val start = if (!today.isAfter(nowZoned)) today else dayStart(nowZoned.minusDays(1), startHour)
             Span(start.toInstant().toEpochMilli(), start.plusDays(1).toInstant().toEpochMilli())
         }
     }
+
+    private fun dayStart(on: ZonedDateTime, hour: Int): ZonedDateTime =
+        on.withHour(hour).withMinute(0).withSecond(0).withNano(0)
 
     /** A day ends where the next one starts; the last 24 hours has no future edge. */
     fun holds(date: Long, interval: Span): Boolean = when (this) {
