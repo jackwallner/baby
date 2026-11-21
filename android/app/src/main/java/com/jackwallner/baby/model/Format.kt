@@ -5,6 +5,7 @@ import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -26,15 +27,34 @@ object DateHelpers {
 
     fun dayStartOf(date: LocalDate, zone: ZoneId): Long = date.atStartOfDay(zone).toInstant().toEpochMilli()
 
+    private const val DAY_MILLIS = 86_400_000L
+    private const val NOON_MILLIS = 43_200_000L
+
+    /**
+     * A birth date is a calendar day, not an instant: it is stored as noon UTC of
+     * that day so every time zone reads the same day back (12 hours of room either way).
+     */
+    fun birthStamp(date: LocalDate): Long =
+        date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() + NOON_MILLIS
+
+    /**
+     * The calendar day a stored birth date means. A value at exactly noon UTC is a
+     * [birthStamp]; anything else was stored by an earlier build as the local
+     * midnight of the day it was entered, which can only be read in the current zone.
+     */
+    fun birthDay(stored: Long, zone: ZoneId): LocalDate =
+        if (Math.floorMod(stored, DAY_MILLIS) == NOON_MILLIS) Instant.ofEpochMilli(stored).atZone(ZoneOffset.UTC).toLocalDate()
+        else localDate(stored, zone)
+
     /** Day 1 is the calendar day of birth; null before birth. */
     fun dayOfLife(birthDate: Long, on: Long, zone: ZoneId): Int? {
-        val days = ChronoUnit.DAYS.between(localDate(birthDate, zone), localDate(on, zone))
+        val days = ChronoUnit.DAYS.between(birthDay(birthDate, zone), localDate(on, zone))
         return if (days >= 0) days.toInt() + 1 else null
     }
 
     /** The calendar day for a given day of life, 1-based. */
     fun dateForDayOfLife(day: Int, birthDate: Long, zone: ZoneId): Long =
-        dayStartOf(localDate(birthDate, zone).plusDays((day - 1).toLong()), zone)
+        dayStartOf(birthDay(birthDate, zone).plusDays((day - 1).toLong()), zone)
 
     fun daysBetween(from: Long, to: Long, zone: ZoneId): Long =
         ChronoUnit.DAYS.between(localDate(from, zone), localDate(to, zone))
@@ -82,6 +102,10 @@ object Format {
     /** "Oct 10". */
     fun monthDay(millis: Long, zone: ZoneId, locale: Locale = Locale.getDefault()): String =
         DateTimeFormatter.ofPattern("MMM d", locale).format(DateHelpers.zoned(millis, zone))
+
+    /** A stored birth date as its calendar day, "Oct 10, 2026", in any zone. */
+    fun birthDate(stored: Long, zone: ZoneId, locale: Locale = Locale.getDefault()): String =
+        DateTimeFormatter.ofPattern("MMM d, yyyy", locale).format(DateHelpers.birthDay(stored, zone))
 
     /** "Oct 10, 2026". */
     fun monthDayYear(millis: Long, zone: ZoneId, locale: Locale = Locale.getDefault()): String =

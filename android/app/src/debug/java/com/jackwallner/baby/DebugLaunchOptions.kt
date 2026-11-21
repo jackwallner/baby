@@ -3,6 +3,7 @@ package com.jackwallner.baby
 import android.content.Intent
 import com.jackwallner.baby.data.Appearance
 import com.jackwallner.baby.model.Child
+import com.jackwallner.baby.model.DateHelpers
 import com.jackwallner.baby.model.EventKind
 import com.jackwallner.baby.model.LogEvent
 import com.jackwallner.baby.model.LogState
@@ -52,7 +53,7 @@ object DebugLaunchOptions {
     /** A day-three newborn (born two days ago), with the last feed 1h 40m ago. */
     fun seed(now: Long, zone: ZoneId): LogState {
         val today = LocalDate.now(zone)
-        val birth = today.minusDays(2).atTime(4, 12).atZone(zone).toInstant().toEpochMilli()
+        val birth = DateHelpers.birthStamp(today.minusDays(2))
         val child = Child(id = "seed", name = "Elsa", birthDate = birth, createdAt = birth)
         val events = mutableListOf<LogEvent>()
         var n = 0

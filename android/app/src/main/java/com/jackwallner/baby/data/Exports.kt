@@ -62,7 +62,7 @@ object Exports {
 
         canvas.drawText("${report.childName}: ${report.tracked.headline.lowercase()}", margin, y, title)
         y += 18
-        val born = report.birthDate?.let { " · born ${Format.monthDayYear(it, report.zone)}" } ?: ""
+        val born = report.birthDate?.let { " · born ${Format.birthDate(it, report.zone)}" } ?: ""
         canvas.drawText("${report.rangeLabel()} · ${Format.count(report.dayCount, "day")}$born", margin, y, ink2)
         y += 24
 

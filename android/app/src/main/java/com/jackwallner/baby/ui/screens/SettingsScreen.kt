@@ -136,11 +136,11 @@ fun SettingsScreen(open: (SettingsPage) -> Unit, onSeePlus: () -> Unit) {
             ValueRow("Name", child.name ?: "Add", tag = "settings.name") { editingName = true }
             RowDivider()
             ToggleRow("Born", child.birthDate != null, tag = "settings.born") { born ->
-                events.updateChild(child, child.name, if (born) DateHelpers.startOfDay(System.currentTimeMillis(), zone) else null)
+                events.updateChild(child, child.name, if (born) DateHelpers.birthStamp(LocalDate.now(zone)) else null)
             }
             child.birthDate?.let {
                 RowDivider()
-                ValueRow("Birth date", Format.monthDayYear(it, zone), tag = "settings.birthDate") { pickingBirth = true }
+                ValueRow("Birth date", Format.birthDate(it, zone), tag = "settings.birthDate") { pickingBirth = true }
             }
         }
         Group(header = "Babies", footer = "Each baby keeps its own log, its own first-weeks tally and its own summary.") {
@@ -258,8 +258,8 @@ fun SettingsScreen(open: (SettingsPage) -> Unit, onSeePlus: () -> Unit) {
         )
     }
     if (pickingBirth) {
-        DateDialog(DateHelpers.localDate(child.birthDate ?: System.currentTimeMillis(), zone), zone, allowFuture = false, onDismiss = { pickingBirth = false }) {
-            events.updateChild(child, child.name, DateHelpers.dayStartOf(it, zone))
+        DateDialog(child.birthDate?.let { DateHelpers.birthDay(it, zone) } ?: LocalDate.now(zone), zone, allowFuture = false, onDismiss = { pickingBirth = false }) {
+            events.updateChild(child, child.name, DateHelpers.birthStamp(it))
         }
     }
     restoreMessage?.let { message ->

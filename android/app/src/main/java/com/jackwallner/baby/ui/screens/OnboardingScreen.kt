@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import com.jackwallner.baby.LocalGraph
+import com.jackwallner.baby.model.DateHelpers
 import com.jackwallner.baby.model.EventKind
 import com.jackwallner.baby.model.FeedingStyle
 import com.jackwallner.baby.model.Format
@@ -124,7 +125,7 @@ fun OnboardingScreen() {
                     Column(Modifier.fillMaxWidth()) {
                         ToggleRow("Add birth date", hasBirthDate, tag = "onboarding.birthToggle", inset = 0.dp()) { hasBirthDate = it }
                         if (hasBirthDate) {
-                            TextAction("Birth date: ${Format.monthDayYear(LocalDate.ofEpochDay(birthDate).atStartOfDay(zone).toInstant().toEpochMilli(), zone)}", tag = "onboarding.birthDate") { picking = true }
+                            TextAction("Birth date: ${Format.birthDate(DateHelpers.birthStamp(LocalDate.ofEpochDay(birthDate)), zone)}", tag = "onboarding.birthDate") { picking = true }
                         }
                     }
                 }
@@ -140,7 +141,7 @@ fun OnboardingScreen() {
             if (failed) Text("Your details are still here. Please try again.", color = palette.notice, style = MaterialTheme.typography.bodySmall)
             PrimaryButton("Start tracking", tag = "onboarding.start") {
                 val feeding = FeedingStyle.fromRaw(style)
-                val birth = if (hasBirthDate && !expecting) LocalDate.ofEpochDay(birthDate).atStartOfDay(zone).toInstant().toEpochMilli() else null
+                val birth = if (hasBirthDate && !expecting) DateHelpers.birthStamp(LocalDate.ofEpochDay(birthDate)) else null
                 if (!graph.events.createChild(name, birth)) {
                     failed = true
                     return@PrimaryButton
