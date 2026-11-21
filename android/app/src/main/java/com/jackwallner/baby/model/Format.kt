@@ -75,6 +75,10 @@ object Format {
     fun time(millis: Long, zone: ZoneId, locale: Locale = Locale.getDefault()): String =
         DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale).format(DateHelpers.zoned(millis, zone))
 
+    /** "14:05": fixed 24 hour clock, ASCII digits, Gregorian, whatever the phone's locale (the CSV time column). */
+    fun csvTime(millis: Long, zone: ZoneId): String =
+        DateTimeFormatter.ofPattern("HH:mm", Locale.ROOT).format(DateHelpers.zoned(millis, zone))
+
     /** "Oct 10". */
     fun monthDay(millis: Long, zone: ZoneId, locale: Locale = Locale.getDefault()): String =
         DateTimeFormatter.ofPattern("MMM d", locale).format(DateHelpers.zoned(millis, zone))

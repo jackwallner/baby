@@ -78,10 +78,9 @@ platform allows. First built 2026-10-20 on jmbp2 (fleet run
   Core Data. Android backup may copy it to the user's Google account; the
   privacy policy says so. With Log together on, Firestore's offline cache is
   a second copy and the JSON file stays the app's source for the screen.
-- CSV `date` column is the local calendar day. iOS formats it with
-  `.iso8601.year().month().day()`, which is UTC, so an evening entry in the
-  Americas lands on the next day there. That is an iOS bug worth fixing
-  (`SummaryReport.csv`); the parity test compares every other column.
+- CSV `date` and `time` columns are the local calendar day and a fixed 24 hour
+  `HH:mm` in the same zone (`Format.csvTime`), as on iOS since 2026-11-20, so
+  `GoldenParityTest.csvMatchesIOS` compares every column.
 - Reminders are inexact `AlarmManager` alarms (no exact-alarm permission or
   Play declaration) and are re-armed after reboot by `BootReceiver`.
 - Settings "Rate Baby Tracker" opens the Play listing; "Send Feedback" is a

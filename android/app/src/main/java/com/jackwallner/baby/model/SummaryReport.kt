@@ -239,10 +239,11 @@ data class SummaryReport(
         const val CSV_HEADER = "baby,date,time,kind,side,amount_ml,weight_g,stool_color,duration_min,note,logged_at"
 
         /**
-         * Every entry as a spreadsheet, oldest first. The date column is the
-         * local calendar day; iOS writes it in UTC (see the Android rule).
+         * Every entry as a spreadsheet, oldest first. The date and time columns
+         * are the local calendar day and a fixed 24 hour HH:mm in [zone], as on
+         * iOS, so a spreadsheet reads them the same in every locale.
          */
-        fun csv(events: List<LogEvent>, childName: String, zone: ZoneId, locale: Locale = Locale.getDefault()): String {
+        fun csv(events: List<LogEvent>, childName: String, zone: ZoneId): String {
             val lines = mutableListOf(CSV_HEADER)
             for (event in events.sortedBy { it.start }) {
                 val start = event.start
@@ -252,7 +253,7 @@ data class SummaryReport(
                 val fields = listOf(
                     childName,
                     DateTimeFormatter.ISO_LOCAL_DATE.format(DateHelpers.zoned(start, zone)),
-                    Format.time(start, zone, locale),
+                    Format.csvTime(start, zone),
                     event.kind.raw,
                     event.feedSides.joinToString("+") { it.raw },
                     amount,

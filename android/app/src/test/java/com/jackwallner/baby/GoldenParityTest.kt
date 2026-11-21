@@ -183,17 +183,16 @@ class GoldenParityTest {
     }
 
     @Test
-    fun csvMatchesIOSExceptTheDateColumn() {
+    fun csvMatchesIOS() {
+        // The golden is written with the exporter's zone for both the date and the
+        // time column, so every column, including date and time, must match.
         val expected = golden.getString("csv").trimEnd('\n').split("\n")
-        val actual = SummaryReport.csv(events, child.displayName, zone, locale).trimEnd('\n').split("\n")
+        val actual = SummaryReport.csv(events, child.displayName, zone).trimEnd('\n').split("\n")
         assertEquals(expected.size, actual.size)
         assertEquals(SummaryReport.CSV_HEADER, actual.first())
-        // iOS formats the date column in UTC (an evening entry lands on the next
-        // day); Android writes the local day. Every other column must match.
-        fun withoutDate(line: String) = norm(line).split(",").let { it.take(1) + it.drop(2) }.joinToString(",")
-        expected.zip(actual).forEach { (e, a) -> assertEquals(withoutDate(e), withoutDate(a)) }
-        val evening = actual.first { it.contains("6:10") }
-        assertTrue(evening, evening.startsWith("Elsa,2026-10-10,"))
+        expected.zip(actual).forEach { (e, a) -> assertEquals(e, a) }
+        val evening = actual.first { it.contains(",18:10,") }
+        assertTrue(evening, evening.startsWith("Elsa,2026-10-10,18:10,"))
     }
 
     @Test
