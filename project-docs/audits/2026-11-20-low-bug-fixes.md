@@ -31,3 +31,31 @@ Branch `fleet/20261120-211106-0f99-claude`, base `5aea6d45`.
 
 - B3: whether to warn on turning on Pump or a custom button in a shared log, or add a minimum-version marker (the marker needs a schema change and a CloudKit Production deploy).
 - Android CSV time parity with iOS (decide whether to change Android and regenerate the golden on a Mac).
+
+## Android parity (2026-11-21)
+
+Android code only; no iOS file changed. Settles the "Android CSV time parity" item under Needs Jack and the "Not changed: the Android port" note above.
+
+| Item | Android had it? | Evidence | Commit | Tests |
+|---|---|---|---|---|
+| B4 CSV time column | Yes | `SummaryReport.csv` wrote `Format.time(start, zone, locale)`, the phone's locale format | 0e4a8820 | `CsvTimeTest` (6 locales, same zone as the date), `GoldenParityTest.csvMatchesIOS` |
+| B5 birth date shifts a day | Yes, and worse (any zone west of entry, not only 12 hours) | The birth date was stored as `dayStartOf(date, zone)` (local midnight, `SettingsScreen.kt`, `OnboardingScreen.kt`) and read with `localDate(birthDate, zone)` in `DateHelpers.dayOfLife` and `dateForDayOfLife` | 48355f0a | `BirthDateTest` (11 zones from UTC-11 to UTC+14) |
+| B5 Settings rewrites it on open | No | Nothing in `SettingsScreen` writes on open; `updateChild` runs only from the Born toggle, the name Save and the date dialog's Done, and the name save passes `child.birthDate` back untouched | none | `BirthDateTest.readingABirthDateWritesNothing` |
+| B6 2 AM day start on spring-forward morning | Yes | `TotalsWindow.interval`: `today.minusDays(1)` after `withHour(startHour)` pushed `today` to 3:00 | a9325796 | `ClockBoundaryTest` |
+| B8 Day N does not roll over | Yes on the home screen, no widgets | `NowSummary.dayOfLife` was a value stored at `make` time, shown by `LogScreen` (`summary.dayOfLife`). The screen's `now` ticks but the number did not. Android has no widgets (no Glance or AppWidget code) and no Watch | 9f2b030f | `ClockBoundaryTest.dayOfLife*` |
+
+What changed:
+
+- CSV: `Format.csvTime` writes fixed `HH:mm` (`Locale.ROOT`, ASCII digits) in the date column's zone. `golden.json` could not be regenerated here (the exporter needs Swift 5.9 for the iOS sources; this Mac has 5.7), so its time column was converted by hand from `h:mm a` to `HH:mm`, which is what the iOS code now writes for the same events. The test is renamed `csvMatchesIOS` (was `...ExceptTheDateColumn`) and now compares every column. The old comment that iOS writes the date in UTC was stale: iOS formats it in the same zone as the time and the golden's date column is local, so the date column is compared too. `.claude/rules/android.md` is updated to say so.
+- Birth date: stored as noon UTC of the calendar day (`DateHelpers.birthStamp`), read with `DateHelpers.birthDay`, displayed with `Format.birthDate`. A value that is not exactly noon UTC came from an earlier build (local midnight) and is read in the phone's current zone, as before, so existing logs keep their day on the phone that entered it. A legacy midnight that falls on exactly 12:00 UTC (UTC+12 standard time, e.g. New Zealand winter) is read as the day before until the date is saved again.
+- Day start: steps back a day before setting the hour, as iOS does.
+- Day N: `NowSummary` keeps `birthDate` and `dayOfLife(now, zone)` counts from the time it is read.
+
+Tests (`gh-gradle`, fm-gradle is not installed on jmbp; public snapshot, GitHub Linux, JDK 17):
+
+- Before the fixes (base `82734e0a` plus the new CSV and day-start tests): 61 passed, 5 failed. The failures are the new tests: `CsvTimeTest.timeAndDateAreInTheSameZone` ("11:45 PM"), `CsvTimeTest.timeIsTwentyFourHourInEveryLocale` ("5:05 AM"), `GoldenParityTest.csvMatchesIOS` ("2:05 PM" against "14:05"), `ClockBoundaryTest.twoAMWindowKeepsYesterdaysTwoAMOnSpringForwardMorning` (3:00 instead of 2:00) and `springForwardEntryAtTwoThirtyYesterdayIsCountedInTotals` (0 feeds, expected 1). Run `baby-before-mbpro35897-1121-004806-27841`.
+- B5 and B8 tests use new API (`birthStamp`, `birthDay`, `dayOfLife(now, zone)`), so they have no failing-before run, as on iOS.
+- After all four fixes: `testDebugUnitTest assembleDebug`, 74 passed, 0 failed, 0 skipped, debug APK builds. Run `baby@20261121-004421-ca22-claude-mbpro35897-1121-005103-26296`.
+- Not run: instrumented tests (no emulator on this run), a manual check on a device.
+
+Not changed: the iOS exporter's golden values other than the CSV time column; the "Next checkup" date in Settings > Reminders, which is a local-midnight instant in the zone it was entered and shows the same class of one-day shift when the phone changes zones (not in the iOS fixes, not touched here).
