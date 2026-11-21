@@ -11,7 +11,7 @@ enum SampleReport {
     static func make(now: Date = .now, calendar: Calendar = .current) -> SummaryReport {
         let today = calendar.startOfDay(for: now)
         let start = calendar.date(byAdding: .day, value: -7, to: today) ?? today
-        let birth = calendar.date(byAdding: .day, value: -9, to: today) ?? today
+        let birth = DateHelpers.birthStamp(of: calendar.date(byAdding: .day, value: -9, to: today) ?? today, calendar: calendar)
         let feeds = [9, 10, 8, 9, 11, 9, 8, 6]
         let wet = [5, 6, 7, 6, 8, 7, 6, 4]
         let dirty = [3, 4, 3, 3, 4, 3, 3, 2]
