@@ -358,7 +358,7 @@ later never counts ahead. New History entries from a past calendar day open
 on that day, and the calendar follows midnight; the sleep stepper moves 15
 minutes; a whole sleep added from the editor toasts "Logged sleep". First
 Weeks past day 14 says the table is for looking back, and its column reads
-REFERENCE. Birth dates are stored at noon so a time zone never moves them.
+REFERENCE. Birth dates are stored at noon UTC of their calendar day (2026-11-20; earlier builds used noon in the entry zone, which moved a day beyond 12 hours away), read back with `DateHelpers.birthDay`, so a time zone never moves them.
 The stain helper's first setup stays open until Save (each tap used to end
 it). The paywall opens without a stale error, its spinner uses `buttonInk`,
 and lifetime owners see "Lifetime, never renews" instead of Manage

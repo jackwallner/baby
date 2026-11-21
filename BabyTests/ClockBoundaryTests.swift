@@ -249,14 +249,57 @@ final class ClockBoundaryTests: XCTestCase {
         XCTAssertEqual(DateHelpers.date(forDayOfLife: 3, birthDate: birth, calendar: la), at(2026, 11, 2))
     }
 
-    // fed929e5 (birth dates are stored at noon): a birth picked at the first or
-    // last minute of the day keeps its day, on both DST days.
-    func testBirthDateStoredAtNoonKeepsItsCalendarDay() {
+    private func calendar(_ zone: String) -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: zone)!
+        return calendar
+    }
+
+    // A birth date is a calendar day. It is stored at noon UTC of that day, so
+    // a picked time of day (first or last minute, DST days) never changes it,
+    // and the day reads back the same in every zone.
+    func testBirthDateKeepsItsCalendarDayAtTheDayEdges() {
         for picked in [at(2026, 11, 1, 0, 0, 1), at(2026, 11, 1, 23, 59), at(2027, 3, 14, 0, 30), at(2027, 3, 14, 23, 30)] {
-            let noon = EventStore.noon(of: picked, calendar: la)
-            XCTAssertEqual(noon.map { la.component(.hour, from: $0) }, 12)
-            XCTAssertEqual(noon.map { DateHelpers.dayKey(for: $0, calendar: la) }, DateHelpers.dayKey(for: picked, calendar: la))
+            let stored = DateHelpers.birthStamp(of: picked, calendar: la)
+            XCTAssertEqual(DateHelpers.dayKey(for: DateHelpers.birthDay(stored, calendar: la), calendar: la), DateHelpers.dayKey(for: picked, calendar: la))
         }
+    }
+
+    // A birth date entered in one zone names the same day when the phone is
+    // more than twelve hours away, and the day of life follows it.
+    func testBirthDateKeepsItsCalendarDayInEveryZone() {
+        let zones = ["America/Los_Angeles", "Asia/Tokyo", "Pacific/Auckland", "Europe/London", "Pacific/Honolulu", "Pacific/Tongatapu"]
+        for entered in zones {
+            let there = calendar(entered)
+            let picked = there.date(from: DateComponents(year: 2026, month: 1, day: 1, hour: 9))!
+            let stored = DateHelpers.birthStamp(of: picked, calendar: there)
+            for reader in zones {
+                let here = calendar(reader)
+                XCTAssertEqual(DateHelpers.dayKey(for: DateHelpers.birthDay(stored, calendar: here), calendar: here), "2026-01-01", "entered \(entered), read \(reader)")
+                let jan2 = here.date(from: DateComponents(year: 2026, month: 1, day: 2, hour: 8))!
+                XCTAssertEqual(DateHelpers.dayOfLife(birthDate: stored, on: jan2, calendar: here), 2, "entered \(entered), read \(reader)")
+            }
+        }
+    }
+
+    // Birth dates stored by earlier builds (noon in the zone they were entered
+    // in) still read as that day, including from far-east zones.
+    func testBirthDatesStoredAsLocalNoonStillReadAsTheirDay() {
+        for entered in ["America/Los_Angeles", "Europe/London", "Asia/Tokyo", "Pacific/Auckland", "Pacific/Honolulu"] {
+            let there = calendar(entered)
+            let legacy = there.date(from: DateComponents(year: 2026, month: 1, day: 1, hour: 12))!
+            XCTAssertEqual(DateHelpers.dayKey(for: DateHelpers.birthDay(legacy, calendar: there), calendar: there), "2026-01-01", entered)
+        }
+    }
+
+    // Settings runs refreshChild on appear and compares the entered day with the
+    // stored one. Reading the stored day back must name the same stored value, so
+    // opening Settings in another zone writes nothing.
+    func testBirthStampRoundTripsInAnyZone() {
+        let tokyo = calendar("Asia/Tokyo")
+        let stored = DateHelpers.birthStamp(of: at(2026, 1, 1, 9), calendar: la)
+        let shown = DateHelpers.birthDay(stored, calendar: tokyo)
+        XCTAssertEqual(DateHelpers.birthStamp(of: shown, calendar: tokyo), stored)
     }
 
     // fed929e5 (CSV dates are local days): an entry just before local midnight

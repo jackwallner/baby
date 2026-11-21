@@ -427,7 +427,7 @@ final class EventStore: ObservableObject {
 
     @discardableResult
     func createChild(name: String?, birthDate: Date?) -> Bool {
-        let child = Child.make(in: context, name: name, birthDate: Self.noon(of: birthDate))
+        let child = Child.make(in: context, name: name, birthDate: Self.birthStamp(of: birthDate))
         context.assign(child, to: persistence.privateStore)
         guard persistence.save(context) else {
             reload()
@@ -442,13 +442,13 @@ final class EventStore: ObservableObject {
     @discardableResult
     func finishSetup(name: String?, birthDate: Date?) -> Bool {
         guard let child else { return createChild(name: name, birthDate: birthDate) }
-        return update(child: child, name: name ?? child.name, birthDate: birthDate ?? child.birthDate)
+        return update(child: child, name: name ?? child.name, birthDate: birthDate ?? child.birthDay)
     }
 
-    /// A birth date is a calendar day. Kept at noon, so crossing a time zone
-    /// never moves it to the day before or after.
-    nonisolated static func noon(of date: Date?, calendar: Calendar = .current) -> Date? {
-        date.map { calendar.date(bySettingHour: 12, minute: 0, second: 0, of: $0) ?? $0 }
+    /// A birth date is a calendar day. Stored as noon UTC of that day, so
+    /// crossing any time zone never moves it to the day before or after.
+    nonisolated static func birthStamp(of date: Date?, calendar: Calendar = .current) -> Date? {
+        date.map { DateHelpers.birthStamp(of: $0, calendar: calendar) }
     }
 
     func setActive(_ child: Child) {
@@ -459,7 +459,7 @@ final class EventStore: ObservableObject {
     @discardableResult
     func update(child: Child, name: String?, birthDate: Date?) -> Bool {
         child.name = name
-        child.birthDate = Self.noon(of: birthDate)
+        child.birthDate = Self.birthStamp(of: birthDate)
         guard persistence.save(context) else {
             reload()
             return false

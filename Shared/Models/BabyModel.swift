@@ -226,6 +226,9 @@ final class Child: NSManagedObject {
 
     var eventCount: Int { events?.count ?? 0 }
 
+    /// The birth date as a day on this phone's calendar (noon), whatever zone it was entered in.
+    var birthDay: Date? { birthDate.map { DateHelpers.birthDay($0) } }
+
     /// Day 1 is the calendar day of birth. `nil` before birth or with no date.
     func dayOfLife(on date: Date = .now, calendar: Calendar = .current) -> Int? {
         guard let birthDate else { return nil }

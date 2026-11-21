@@ -217,7 +217,7 @@ struct SettingsView: View {
     private func loadChild() {
         name = events.child?.name ?? ""
         hasBirthDate = events.child?.birthDate != nil
-        birthDate = events.child?.birthDate ?? .now
+        birthDate = events.child?.birthDay ?? .now
     }
 
     /// Settings stays alive behind the other tabs, so a partner's rename or a
@@ -225,9 +225,9 @@ struct SettingsView: View {
     private func refreshChild() {
         guard let child = events.child else { return }
         if enteredName != child.name { name = child.name ?? "" }
-        if enteredBirthDate != child.birthDate {
+        if !DateHelpers.sameBirthDay(hasBirthDate ? birthDate : nil, child.birthDate) {
             hasBirthDate = child.birthDate != nil
-            birthDate = child.birthDate ?? .now
+            birthDate = child.birthDay ?? .now
         }
     }
 
@@ -236,16 +236,16 @@ struct SettingsView: View {
         return trimmed.isEmpty ? nil : trimmed
     }
 
-    private var enteredBirthDate: Date? { EventStore.noon(of: hasBirthDate ? birthDate : nil) }
+    private var enteredBirthDate: Date? { hasBirthDate ? birthDate : nil }
 
     /// Each field saves alone, so editing one never writes back the other.
     private func saveName() {
         guard let child = events.child, enteredName != child.name else { return }
-        if !events.update(child: child, name: enteredName, birthDate: child.birthDate) { showSaveError = true }
+        if !events.update(child: child, name: enteredName, birthDate: child.birthDay) { showSaveError = true }
     }
 
     private func saveBirthDate() {
-        guard let child = events.child, enteredBirthDate != child.birthDate else { return }
+        guard let child = events.child, !DateHelpers.sameBirthDay(enteredBirthDate, child.birthDate) else { return }
         if !events.update(child: child, name: child.name, birthDate: enteredBirthDate) { showSaveError = true }
     }
 

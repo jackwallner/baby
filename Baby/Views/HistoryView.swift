@@ -221,7 +221,7 @@ struct HistoryView: View {
     }
 
     private var firstMonth: Date {
-        let earliest = (events.events.map(\.start) + [events.child?.birthDate].compactMap { $0 }).min() ?? .now
+        let earliest = (events.events.map(\.start) + [events.child?.birthDay].compactMap { $0 }).min() ?? .now
         return Calendar.current.startOfMonth(for: earliest)
     }
 

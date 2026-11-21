@@ -11,9 +11,37 @@ enum DateHelpers {
         return formatter.string(from: date)
     }
 
+    private static func gregorian(in zone: TimeZone) -> Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = zone
+        return calendar
+    }
+
+    /// A birth date is a calendar day, not a moment. It is stored as noon UTC of
+    /// that day, so no time zone the phone travels to can move it.
+    static func birthStamp(of day: Date, calendar: Calendar = .current) -> Date {
+        let parts = gregorian(in: calendar.timeZone).dateComponents([.year, .month, .day], from: day)
+        return gregorian(in: .gmt).date(from: DateComponents(year: parts.year, month: parts.month, day: parts.day, hour: 12)) ?? day
+    }
+
+    /// The day a stored birth date names, as noon on that day in `calendar`'s
+    /// zone. Read from UTC an hour on, which also reads the noon-in-the-entry-zone
+    /// values earlier builds stored (every inhabited zone from Hawaii to Tonga).
+    static func birthDay(_ stored: Date, calendar: Calendar = .current) -> Date {
+        let parts = gregorian(in: .gmt).dateComponents([.year, .month, .day], from: stored.addingTimeInterval(3_600))
+        let local = gregorian(in: calendar.timeZone)
+        return local.date(from: DateComponents(year: parts.year, month: parts.month, day: parts.day, hour: 12)) ?? stored
+    }
+
+    /// Whether the picked day and the stored birth date name the same day.
+    static func sameBirthDay(_ picked: Date?, _ stored: Date?, calendar: Calendar = .current) -> Bool {
+        guard let picked, let stored else { return picked == nil && stored == nil }
+        return dayKey(for: picked, calendar: calendar) == dayKey(for: birthDay(stored, calendar: calendar), calendar: calendar)
+    }
+
     /// Day 1 is the calendar day of birth; nil before birth.
     static func dayOfLife(birthDate: Date, on date: Date, calendar: Calendar = .current) -> Int? {
-        let start = calendar.startOfDay(for: birthDate)
+        let start = calendar.startOfDay(for: birthDay(birthDate, calendar: calendar))
         let today = calendar.startOfDay(for: date)
         guard let days = calendar.dateComponents([.day], from: start, to: today).day, days >= 0 else { return nil }
         return days + 1
@@ -21,7 +49,7 @@ enum DateHelpers {
 
     /// The calendar day for a given day of life, 1-based.
     static func date(forDayOfLife day: Int, birthDate: Date, calendar: Calendar = .current) -> Date {
-        let start = calendar.startOfDay(for: birthDate)
+        let start = calendar.startOfDay(for: birthDay(birthDate, calendar: calendar))
         return calendar.date(byAdding: .day, value: day - 1, to: start) ?? start
     }
 

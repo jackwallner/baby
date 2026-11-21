@@ -531,7 +531,7 @@ extension EventStore {
     /// for a baby under two weeks, else two weeks ago.
     var defaultVisitStart: Date {
         if let stored = child?.lastVisitAt { return stored }
-        if let birth = child?.birthDate, birth > Date.now.addingTimeInterval(-14 * 86_400) { return birth }
+        if let birth = child?.birthDay, birth > Date.now.addingTimeInterval(-14 * 86_400) { return birth }
         return Calendar.current.date(byAdding: .day, value: -13, to: .now) ?? .now
     }
 
