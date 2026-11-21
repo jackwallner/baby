@@ -200,4 +200,28 @@ final class StateMachineRegressionTests: XCTestCase {
         XCTAssertEqual(planned.count, 5, "precondition: the feed reminder, three newborn visits and an entered date")
         XCTAssertEqual(Set(planned.map(\.id)), Set(Reminders.ownedIDs))
     }
+
+    // MARK: - Reminder offer after Undo
+
+    private func offerAfterFeed(undo: Bool) async throws -> Bool {
+        XCTAssertTrue(ReminderOfferGate.isEnabled)
+        Reminders.hasOfferedFeedReminder = false
+        let prompt = FeedSidePrompt(offerDelay: 0.3)
+        let feed = try XCTUnwrap(store.log(.feed, at: .now))
+        prompt.open(feed.objectID) { [store] id in store!.events.contains { $0.objectID == id } }
+        if undo { XCTAssertTrue(store.undoLast()) }
+        try await Task.sleep(for: .seconds(0.8))
+        return prompt.showReminderOffer
+    }
+
+    func testUndoingTheFeedBeforeTheOfferCancelsTheOneTimeOffer() async throws {
+        let shown = try await offerAfterFeed(undo: true)
+        XCTAssertFalse(shown, "the feed is gone, so there is nothing to remind about")
+        XCTAssertFalse(Reminders.hasOfferedFeedReminder, "the one-time offer is still available for the real first feed")
+    }
+
+    func testTheOfferStillAppearsForAFeedThatStays() async throws {
+        let shown = try await offerAfterFeed(undo: false)
+        XCTAssertTrue(shown)
+    }
 }

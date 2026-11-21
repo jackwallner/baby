@@ -96,7 +96,7 @@ struct LogButtons: View {
             ZStack {
                 kindButton(.feed, label: String(localized: "Feed")) { at in
                     guard let event = events.log(.feed, at: at) else { return false }
-                    sides.open(event.objectID, offersSide: settings.feedTypes.breast)
+                    sides.open(event.objectID, offersSide: settings.feedTypes.breast, isLogged: feedIsLogged)
                     return true
                 }
                 .opacity(feed == nil ? 1 : 0)
@@ -119,6 +119,10 @@ struct LogButtons: View {
         }
     }
 
+    private var feedIsLogged: @MainActor (NSManagedObjectID) -> Bool {
+        { @MainActor [events] id in events.events.contains { $0.objectID == id } }
+    }
+
     /// All needs all three of its buttons on.
     private var showsAll: Bool {
         [EventKind.feed, .wet, .dirty].allSatisfy(settings.tracked.contains)
@@ -135,7 +139,7 @@ struct LogButtons: View {
             let at = clock.time()
             reportSave(animate {
                 guard let feed = events.logAll(at: at) else { return false }
-                sides.open(feed.objectID, offersSide: settings.feedTypes.breast)
+                sides.open(feed.objectID, offersSide: settings.feedTypes.breast, isLogged: feedIsLogged)
                 return true
             })
         } label: {
@@ -249,6 +253,15 @@ final class FeedSidePrompt: ObservableObject {
     /// it never lands on a parent mid-choice.
     static let reminderOfferDelay: TimeInterval = 6
 
+    private let offerDelay: TimeInterval
+    /// Whether the feed that raised the offer is still in the log.
+    private var feedIsLogged: @MainActor (NSManagedObjectID) -> Bool = { _ in true }
+    private var offeredFeed: NSManagedObjectID?
+
+    init(offerDelay: TimeInterval = FeedSidePrompt.reminderOfferDelay) {
+        self.offerDelay = offerDelay
+    }
+
     @Published private(set) var target: NSManagedObjectID?
     @Published var showReminderOffer = false
     private var timeout: Task<Void, Never>?
@@ -262,7 +275,9 @@ final class FeedSidePrompt: ObservableObject {
 
     /// Feed just logged: offer its side, unless the family only bottle feeds
     /// and the feed already says Bottle.
-    func open(_ id: NSManagedObjectID, offersSide: Bool = true) {
+    func open(_ id: NSManagedObjectID, offersSide: Bool = true, isLogged: @escaping @MainActor (NSManagedObjectID) -> Bool) {
+        offeredFeed = id
+        feedIsLogged = isLogged
         if offersSide {
             target = id
             hold()
@@ -299,9 +314,13 @@ final class FeedSidePrompt: ObservableObject {
         guard ReminderOfferGate.isEnabled, !Reminders.hasOfferedFeedReminder else { return }
         reminderOffer?.cancel()
         reminderOffer = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(Self.reminderOfferDelay))
-            guard !Task.isCancelled, !Reminders.hasOfferedFeedReminder else { return }
-            self?.showReminderOffer = true
+            guard let delay = self?.offerDelay else { return }
+            try? await Task.sleep(for: .seconds(delay))
+            // Undo or a delete of that feed within the wait leaves nothing to remind about,
+            // and the offer is shown once, so it must not be spent on a feed that is gone.
+            guard !Task.isCancelled, !Reminders.hasOfferedFeedReminder,
+                  let self, let feed = self.offeredFeed, self.feedIsLogged(feed) else { return }
+            self.showReminderOffer = true
         }
     }
 }
