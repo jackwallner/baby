@@ -1,1 +1,35 @@
-{"app_id": "6811133796", "locales": ["it", "pt-BR", "es-MX", "es-ES", "en-CA", "fr-CA", "de-DE", "fr-FR", "en-GB"]}
+{
+  "app_id": "6811133796",
+  "locales": [
+    "it",
+    "pt-BR",
+    "es-MX",
+    "es-ES",
+    "en-CA",
+    "fr-CA",
+    "de-DE",
+    "fr-FR",
+    "en-GB",
+    "bn-BD",
+    "gu-IN",
+    "hi",
+    "ja",
+    "kn-IN",
+    "ko",
+    "mr-IN",
+    "or-IN",
+    "pa-IN",
+    "pl",
+    "pt-PT",
+    "ro",
+    "ru",
+    "te-IN",
+    "th",
+    "tr",
+    "uk",
+    "ur-PK",
+    "vi",
+    "zh-Hans",
+    "zh-Hant"
+  ]
+}
