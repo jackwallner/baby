@@ -204,9 +204,8 @@ final class StateMachineRegressionTests: XCTestCase {
     // MARK: - Reminder offer after Undo
 
     private func offerAfterFeed(undo: Bool) async throws -> Bool {
-        XCTAssertTrue(ReminderOfferGate.isEnabled)
         Reminders.hasOfferedFeedReminder = false
-        let prompt = FeedSidePrompt(offerDelay: 0.3)
+        let prompt = FeedSidePrompt(offerDelay: 0.3, offersEnabled: true)
         let feed = try XCTUnwrap(store.log(.feed, at: .now))
         prompt.open(feed.objectID) { [store] id in store!.events.contains { $0.objectID == id } }
         if undo { XCTAssertTrue(store.undoLast()) }

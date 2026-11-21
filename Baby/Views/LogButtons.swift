@@ -258,8 +258,11 @@ final class FeedSidePrompt: ObservableObject {
     private var feedIsLogged: @MainActor (NSManagedObjectID) -> Bool = { _ in true }
     private var offeredFeed: NSManagedObjectID?
 
-    init(offerDelay: TimeInterval = FeedSidePrompt.reminderOfferDelay) {
+    private let offersEnabled: Bool
+
+    init(offerDelay: TimeInterval = FeedSidePrompt.reminderOfferDelay, offersEnabled: Bool = ReminderOfferGate.isEnabled) {
         self.offerDelay = offerDelay
+        self.offersEnabled = offersEnabled
     }
 
     @Published private(set) var target: NSManagedObjectID?
@@ -311,7 +314,7 @@ final class FeedSidePrompt: ObservableObject {
 
     /// Once per install, a few seconds after a feed: the next feed's reminder.
     private func queueReminderOffer() {
-        guard ReminderOfferGate.isEnabled, !Reminders.hasOfferedFeedReminder else { return }
+        guard offersEnabled, !Reminders.hasOfferedFeedReminder else { return }
         reminderOffer?.cancel()
         reminderOffer = Task { [weak self] in
             guard let delay = self?.offerDelay else { return }
