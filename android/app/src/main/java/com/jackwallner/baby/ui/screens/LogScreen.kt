@@ -221,7 +221,7 @@ private fun StatusCard(summary: NowSummary, now: Long, logTime: () -> Long) {
             KindDot(palette.color(lead))
             Spacer(Modifier.width(Tokens.tight))
             Text(heading, style = MaterialTheme.typography.labelMedium, color = palette.color(lead), modifier = Modifier.weight(1f))
-            summary.dayOfLife?.let { Text("Day $it", style = MaterialTheme.typography.labelMedium, color = palette.ink2) }
+            summary.dayOfLife(now, zone)?.let { Text("Day $it", style = MaterialTheme.typography.labelMedium, color = palette.ink2) }
         }
         Column(Modifier.semantics(mergeDescendants = true) {}) {
             Text(leadTime, style = MaterialTheme.typography.headlineLarge, color = palette.ink, modifier = Modifier.testTag("leadTime"))

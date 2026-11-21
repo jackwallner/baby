@@ -1,12 +1,14 @@
 package com.jackwallner.baby
 
 import com.jackwallner.baby.model.Child
+import com.jackwallner.baby.model.DateHelpers
 import com.jackwallner.baby.model.DiaperWords
 import com.jackwallner.baby.model.EventKind
 import com.jackwallner.baby.model.LogEvent
 import com.jackwallner.baby.model.NowSummary
 import com.jackwallner.baby.model.TotalsWindow
 import com.jackwallner.baby.model.TrackedKinds
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import org.junit.Assert.assertEquals
@@ -53,5 +55,33 @@ class ClockBoundaryTest {
         val window = TotalsWindow.Day(2).interval(now, la)
         assertEquals(at(la, 2026, 6, 9, 2, 0), window.start)
         assertEquals(at(la, 2026, 6, 10, 2, 0), window.end)
+    }
+
+    // Day N on Now: the summary is built once, then read for hours.
+
+    private fun summaryAt(birth: Long, now: Long, zone: ZoneId) =
+        NowSummary.make(Child(id = "c", name = "Elsa", birthDate = birth), emptyList(), now, zone, TotalsWindow.MIDNIGHT, TrackedKinds.ALL, DiaperWords.PEE_POOP)
+
+    @Test
+    fun dayOfLifeStepsForwardAtMidnightWithoutANewSummary() {
+        val birth = DateHelpers.birthStamp(LocalDate.of(2026, 10, 9))
+        val built = at(la, 2026, 10, 13, 23, 50)
+        val summary = summaryAt(birth, built, la)
+        assertEquals(5, summary.dayOfLife(built, la))
+        assertEquals(5, summary.dayOfLife(at(la, 2026, 10, 13, 23, 59), la))
+        assertEquals(6, summary.dayOfLife(at(la, 2026, 10, 14, 0, 1), la))
+    }
+
+    @Test
+    fun dayOfLifeStepsAtMidnightEvenWithASixAMTotalsDay() {
+        val birth = DateHelpers.birthStamp(LocalDate.of(2026, 10, 9))
+        val built = at(la, 2026, 10, 13, 23, 50)
+        val summary = NowSummary.make(Child(id = "c", birthDate = birth), emptyList(), built, la, TotalsWindow.Day(6), TrackedKinds.ALL, DiaperWords.PEE_POOP)
+        assertEquals(6, summary.dayOfLife(at(la, 2026, 10, 14, 0, 1), la))
+    }
+
+    @Test
+    fun noBirthDateMeansNoDay() {
+        assertEquals(null, NowSummary(birthDate = null).dayOfLife(at(la, 2026, 10, 13, 12, 0), la))
     }
 }

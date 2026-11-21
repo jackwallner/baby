@@ -8,7 +8,8 @@ import kotlin.math.ceil
 data class NowSummary(
     val childName: String = "Baby",
     val childId: String? = null,
-    val dayOfLife: Int? = null,
+    /** The baby's stored birth date; the day of life is counted from it at the moment of reading. */
+    val birthDate: Long? = null,
     val lastFeedAt: Long? = null,
     val lastFeedSides: List<FeedSide> = emptyList(),
     val lastDiaperAt: Long? = null,
@@ -24,6 +25,9 @@ data class NowSummary(
     val words: DiaperWords = DiaperWords.PEE_POOP,
     val recent: List<RecentEntry> = emptyList(),
 ) {
+    /** Day 1 is the birthday. Counted from [now], so a summary built before midnight reads the new day after it. */
+    fun dayOfLife(now: Long, zone: ZoneId): Int? = birthDate?.let { DateHelpers.dayOfLife(it, now, zone) }
+
     val isSleeping: Boolean get() = runningSleepStart != null
     val isFeeding: Boolean get() = runningFeedStart != null
 
@@ -172,7 +176,7 @@ data class NowSummary(
             return NowSummary(
                 childName = child.displayName,
                 childId = child.id,
-                dayOfLife = child.dayOfLife(now, zone),
+                birthDate = child.birthDate,
                 lastFeedAt = lastFeedAt,
                 lastFeedSides = lastFeedSides,
                 lastDiaperAt = lastDiaperAt,

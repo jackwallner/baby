@@ -88,7 +88,7 @@ class GoldenParityTest {
             assertEquals(label, e.getString("leadLine"), s.leadLine(now))
             assertEquals(label, e.getJSONArray("supportingLines").strings(), s.supportingLines(now))
             assertEquals(label, e.getString("leadElapsed"), s.leadElapsed(now))
-            assertEquals(label, e.getInt("dayOfLife"), s.dayOfLife)
+            assertEquals(label, e.getInt("dayOfLife"), s.dayOfLife(now, zone))
             assertEquals(label, e.getInt("todayFeeds"), s.todayFeeds)
             assertEquals(label, e.getInt("todayWet"), s.todayWet)
             assertEquals(label, e.getInt("todayDirty"), s.todayDirty)
