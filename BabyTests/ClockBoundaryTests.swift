@@ -303,6 +303,26 @@ final class ClockBoundaryTests: XCTestCase {
         }
     }
 
+    // A checkup picked for Jan 20 late in the evening in Los Angeles is still
+    // Jan 20 after a flight to Tokyo, and the evening-before reminder follows it.
+    func testCheckupDateKeepsItsCalendarDayAcrossZones() {
+        let la = calendar("America/Los_Angeles")
+        let picked = la.date(from: DateComponents(year: 2026, month: 1, day: 20, hour: 22, minute: 30))!
+        let stored = DateHelpers.birthStamp(of: picked, calendar: la).timeIntervalSince1970
+        for reader in ["America/Los_Angeles", "Asia/Tokyo", "Pacific/Auckland", "Europe/London", "Pacific/Honolulu"] {
+            let here = calendar(reader)
+            let day = Reminders.checkupDay(storedAt: stored, calendar: here)
+            XCTAssertEqual(DateHelpers.dayKey(for: day, calendar: here), "2026-01-20", reader)
+        }
+    }
+
+    // A value an earlier build stored (the picker's moment) reads back unchanged.
+    func testCheckupDateFromAnEarlierBuildReadsAsStored() {
+        let la = calendar("America/Los_Angeles")
+        let legacy = la.date(from: DateComponents(year: 2026, month: 1, day: 20, hour: 22, minute: 30))!
+        XCTAssertEqual(Reminders.checkupDay(storedAt: legacy.timeIntervalSince1970, calendar: la), legacy)
+    }
+
     // Birth dates stored by earlier builds (noon in the zone they were entered
     // in) still read as that day, including from far-east zones.
     func testBirthDatesStoredAsLocalNoonStillReadAsTheirDay() {

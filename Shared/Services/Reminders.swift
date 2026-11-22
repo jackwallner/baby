@@ -118,15 +118,30 @@ enum Reminders {
         set { defaults.set(newValue, forKey: Key.checkups) }
     }
 
-    /// This phone only: a visit date is not part of the shared log.
+    /// This phone only: a visit date is not part of the shared log. A visit is
+    /// a calendar day, so it is stored as noon UTC of that day, like the birth
+    /// date, and a trip across time zones cannot move it to another day.
     static var nextCheckup: Date? {
         get {
             let value = defaults.double(forKey: Key.nextCheckup)
-            return value > 0 ? Date(timeIntervalSince1970: value) : nil
+            return value > 0 ? checkupDay(storedAt: value) : nil
         }
         set {
-            if let newValue { defaults.set(newValue.timeIntervalSince1970, forKey: Key.nextCheckup) } else { defaults.removeObject(forKey: Key.nextCheckup) }
+            if let newValue {
+                defaults.set(DateHelpers.birthStamp(of: newValue).timeIntervalSince1970, forKey: Key.nextCheckup)
+            } else {
+                defaults.removeObject(forKey: Key.nextCheckup)
+            }
         }
+    }
+
+    /// The visit day a stored value names, as noon on that day in `calendar`'s
+    /// zone. Earlier builds stored the picker's moment as is; anything that is
+    /// not exactly noon UTC is one of those and is read in the current zone.
+    static func checkupDay(storedAt value: TimeInterval, calendar: Calendar = .current) -> Date {
+        let stored = Date(timeIntervalSince1970: value)
+        guard Int(value.rounded()) % 86_400 == 43_200 else { return stored }
+        return DateHelpers.birthDay(stored, calendar: calendar)
     }
 
     static var feedingStyle: FeedingStyle? {

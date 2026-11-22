@@ -150,7 +150,8 @@ final class RemindersTests: XCTestCase {
         Reminders.nextCheckup = now
         XCTAssertEqual(Reminders.feedInterval, .threeHours)
         XCTAssertEqual(Reminders.feedingStyle?.suggestedInterval, .threeHours)
-        XCTAssertEqual(Reminders.nextCheckup, now)
+        // A visit is a calendar day: it reads back as the same day, at noon.
+        XCTAssertEqual(Reminders.nextCheckup.map { DateHelpers.dayKey(for: $0) }, DateHelpers.dayKey(for: now))
         Reminders.nextCheckup = nil
         XCTAssertNil(Reminders.nextCheckup)
     }

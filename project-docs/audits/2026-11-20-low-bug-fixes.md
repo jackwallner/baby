@@ -59,3 +59,13 @@ Tests (`gh-gradle`, fm-gradle is not installed on jmbp; public snapshot, GitHub 
 - Not run: instrumented tests (no emulator on this run), a manual check on a device.
 
 Not changed: the iOS exporter's golden values other than the CSV time column; the "Next checkup" date in Settings > Reminders, which is a local-midnight instant in the zone it was entered and shows the same class of one-day shift when the phone changes zones (not in the iOS fixes, not touched here).
+
+## Next checkup date (iOS, 2026-11-21)
+
+Found in the Android parity pass: the "Next checkup" date in Reminders was stored
+as the picker's moment, so a trip across time zones could move the visit and its
+evening-before reminder to another day. iOS now stores it as noon UTC of the
+picked day, like the birth date, and reads values from earlier builds as stored.
+Tests: `ClockBoundaryTests.testCheckupDateKeepsItsCalendarDayAcrossZones`,
+`testCheckupDateFromAnEarlierBuildReadsAsStored`; ClockBoundaryTests and
+RemindersTests, 48 passed, on a local simulator.
