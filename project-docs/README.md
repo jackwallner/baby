@@ -16,3 +16,4 @@ Developer notes and historical audits for this repository. The published site re
 - [aso-2026-10-21.md](marketing/aso-2026-10-21.md): keyword, subtitle and What's New check before resubmitting 1.4
 - [2026-11-20-l10n.md](marketing/2026-11-20-l10n.md): keyword research and rewritten metadata for nine locales (it, pt-BR, es-MX, es-ES, en-CA, fr-CA, de-DE, fr-FR, en-GB)
 - [2026-11-20-sweep.md](marketing/2026-11-20-sweep.md): error sweep of the other 40 localized listings (28 edits: em dashes, pt-PT words, ro/ko/th wording, repeated keywords)
+- [2026-11-21-rank-baseline.json](marketing/2026-11-21-rank-baseline.json): rank of every localized name, subtitle and keyword term before the 2026-11-20 localization shipped (rank-baseline.py); the 4-week read compares against it

@@ -1,0 +1,4681 @@
+{
+ "app_id": 6811133796,
+ "base": "d12c598",
+ "taken": "2026-11-22 02:12",
+ "locales": {
+  "it": [
+   {
+    "term": "Neonato: Poppate e Pannolini",
+    "kind": "name",
+    "store": "it",
+    "rank": "-/195"
+   },
+   {
+    "term": "Diario allattamento e sonno",
+    "kind": "subtitle",
+    "store": "it",
+    "rank": "-/193"
+   },
+   {
+    "term": "Diario semplice per il bebè",
+    "kind": "old subtitle",
+    "store": "it",
+    "rank": "-/0"
+   },
+   {
+    "term": "biberon",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/191"
+   },
+   {
+    "term": "pipì",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/154"
+   },
+   {
+    "term": "cacca",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/176"
+   },
+   {
+    "term": "pediatra",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/145"
+   },
+   {
+    "term": "bebè",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/184"
+   },
+   {
+    "term": "registro",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/179"
+   },
+   {
+    "term": "contatore",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/184"
+   },
+   {
+    "term": "gemelli",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/167"
+   },
+   {
+    "term": "tiralatte",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/156"
+   },
+   {
+    "term": "genitori",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/184"
+   },
+   {
+    "term": "condiviso",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/184"
+   },
+   {
+    "term": "gratis",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/166"
+   },
+   {
+    "term": "seno",
+    "kind": "keyword",
+    "store": "it",
+    "rank": "-/172"
+   },
+   {
+    "term": "allattamento",
+    "kind": "dropped keyword",
+    "store": "it",
+    "rank": "-/171"
+   },
+   {
+    "term": "sonno",
+    "kind": "dropped keyword",
+    "store": "it",
+    "rank": "-/179"
+   },
+   {
+    "term": "timer",
+    "kind": "dropped keyword",
+    "store": "it",
+    "rank": "-/180"
+   },
+   {
+    "term": "lattante",
+    "kind": "dropped keyword",
+    "store": "it",
+    "rank": "-/31"
+   },
+   {
+    "term": "latte",
+    "kind": "dropped keyword",
+    "store": "it",
+    "rank": "-/153"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "it",
+    "rank": "-/167"
+   },
+   {
+    "term": "materno",
+    "kind": "dropped keyword",
+    "store": "it",
+    "rank": "-/140"
+   },
+   {
+    "term": "nanna",
+    "kind": "dropped keyword",
+    "store": "it",
+    "rank": "-/180"
+   }
+  ],
+  "pt-BR": [
+   {
+    "term": "Bebê: Mamadas, Fraldas e Sono",
+    "kind": "name",
+    "store": "br",
+    "rank": "4/195"
+   },
+   {
+    "term": "Bebê: Mamadas, Fraldas e Sono",
+    "kind": "name",
+    "store": "us",
+    "rank": "1/180"
+   },
+   {
+    "term": "Diário de amamentação e rotina",
+    "kind": "subtitle",
+    "store": "br",
+    "rank": "-/193"
+   },
+   {
+    "term": "Diário de amamentação e rotina",
+    "kind": "subtitle",
+    "store": "us",
+    "rank": "-/168"
+   },
+   {
+    "term": "Registro do recém-nascido",
+    "kind": "old subtitle",
+    "store": "br",
+    "rank": "25/101"
+   },
+   {
+    "term": "Registro do recém-nascido",
+    "kind": "old subtitle",
+    "store": "us",
+    "rank": "14/168"
+   },
+   {
+    "term": "recém-nascido",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/170"
+   },
+   {
+    "term": "recém-nascido",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/166"
+   },
+   {
+    "term": "soneca",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/178"
+   },
+   {
+    "term": "soneca",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/181"
+   },
+   {
+    "term": "registro",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/189"
+   },
+   {
+    "term": "registro",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/184"
+   },
+   {
+    "term": "contador",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/190"
+   },
+   {
+    "term": "contador",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/189"
+   },
+   {
+    "term": "mamadeira",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "127/195"
+   },
+   {
+    "term": "mamadeira",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "106/172"
+   },
+   {
+    "term": "xixi",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "51/121"
+   },
+   {
+    "term": "xixi",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/173"
+   },
+   {
+    "term": "cocô",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/187"
+   },
+   {
+    "term": "cocô",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/182"
+   },
+   {
+    "term": "pediatra",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/161"
+   },
+   {
+    "term": "pediatra",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/156"
+   },
+   {
+    "term": "gêmeos",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/187"
+   },
+   {
+    "term": "gêmeos",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/164"
+   },
+   {
+    "term": "grátis",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/171"
+   },
+   {
+    "term": "grátis",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/184"
+   },
+   {
+    "term": "compartilhado",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/181"
+   },
+   {
+    "term": "compartilhado",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/177"
+   },
+   {
+    "term": "pais",
+    "kind": "keyword",
+    "store": "br",
+    "rank": "-/184"
+   },
+   {
+    "term": "pais",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/179"
+   },
+   {
+    "term": "amamentação",
+    "kind": "dropped keyword",
+    "store": "br",
+    "rank": "-/185"
+   },
+   {
+    "term": "amamentação",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/175"
+   },
+   {
+    "term": "cronômetro",
+    "kind": "dropped keyword",
+    "store": "br",
+    "rank": "-/195"
+   },
+   {
+    "term": "cronômetro",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/194"
+   },
+   {
+    "term": "lactente",
+    "kind": "dropped keyword",
+    "store": "br",
+    "rank": "9/21"
+   },
+   {
+    "term": "lactente",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "12/41"
+   },
+   {
+    "term": "leite",
+    "kind": "dropped keyword",
+    "store": "br",
+    "rank": "-/187"
+   },
+   {
+    "term": "leite",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/176"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "br",
+    "rank": "-/174"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/170"
+   },
+   {
+    "term": "peito",
+    "kind": "dropped keyword",
+    "store": "br",
+    "rank": "104/127"
+   },
+   {
+    "term": "peito",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "71/137"
+   },
+   {
+    "term": "materno",
+    "kind": "dropped keyword",
+    "store": "br",
+    "rank": "-/138"
+   },
+   {
+    "term": "materno",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/154"
+   },
+   {
+    "term": "diário",
+    "kind": "dropped keyword",
+    "store": "br",
+    "rank": "-/184"
+   },
+   {
+    "term": "diário",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/173"
+   }
+  ],
+  "es-MX": [
+   {
+    "term": "Bebé Tracker: Tomas y Pañales",
+    "kind": "name",
+    "store": "mx",
+    "rank": "1/198"
+   },
+   {
+    "term": "Bebé Tracker: Tomas y Pañales",
+    "kind": "name",
+    "store": "us",
+    "rank": "1/187"
+   },
+   {
+    "term": "Diario del recién nacido",
+    "kind": "subtitle",
+    "store": "mx",
+    "rank": "-/197"
+   },
+   {
+    "term": "Diario del recién nacido",
+    "kind": "subtitle",
+    "store": "us",
+    "rank": "-/169"
+   },
+   {
+    "term": "Registro de lactancia y pañal",
+    "kind": "old subtitle",
+    "store": "mx",
+    "rank": "7/194"
+   },
+   {
+    "term": "Registro de lactancia y pañal",
+    "kind": "old subtitle",
+    "store": "us",
+    "rank": "16/186"
+   },
+   {
+    "term": "lactancia",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "136/182"
+   },
+   {
+    "term": "lactancia",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/183"
+   },
+   {
+    "term": "sueño",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "-/182"
+   },
+   {
+    "term": "sueño",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/169"
+   },
+   {
+    "term": "registro",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "-/184"
+   },
+   {
+    "term": "registro",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/184"
+   },
+   {
+    "term": "contador",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "-/187"
+   },
+   {
+    "term": "contador",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/189"
+   },
+   {
+    "term": "biberón",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "65/190"
+   },
+   {
+    "term": "biberón",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "pipí",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "92/165"
+   },
+   {
+    "term": "pipí",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/160"
+   },
+   {
+    "term": "popó",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "96/151"
+   },
+   {
+    "term": "popó",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "136/143"
+   },
+   {
+    "term": "pediatra",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "-/167"
+   },
+   {
+    "term": "pediatra",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/156"
+   },
+   {
+    "term": "gemelos",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "-/82"
+   },
+   {
+    "term": "gemelos",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/63"
+   },
+   {
+    "term": "siesta",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "-/180"
+   },
+   {
+    "term": "siesta",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/186"
+   },
+   {
+    "term": "compartido",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "-/184"
+   },
+   {
+    "term": "compartido",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/183"
+   },
+   {
+    "term": "seguimiento",
+    "kind": "keyword",
+    "store": "mx",
+    "rank": "-/190"
+   },
+   {
+    "term": "seguimiento",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/190"
+   },
+   {
+    "term": "recién nacido",
+    "kind": "dropped keyword",
+    "store": "mx",
+    "rank": "-/165"
+   },
+   {
+    "term": "recién nacido",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/155"
+   },
+   {
+    "term": "temporizador",
+    "kind": "dropped keyword",
+    "store": "mx",
+    "rank": "-/193"
+   },
+   {
+    "term": "temporizador",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/193"
+   },
+   {
+    "term": "lactante",
+    "kind": "dropped keyword",
+    "store": "mx",
+    "rank": "12/53"
+   },
+   {
+    "term": "lactante",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "15/66"
+   },
+   {
+    "term": "leche",
+    "kind": "dropped keyword",
+    "store": "mx",
+    "rank": "82/142"
+   },
+   {
+    "term": "leche",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/156"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "mx",
+    "rank": "-/168"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/170"
+   },
+   {
+    "term": "pecho",
+    "kind": "dropped keyword",
+    "store": "mx",
+    "rank": "73/149"
+   },
+   {
+    "term": "pecho",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/176"
+   }
+  ],
+  "es-ES": [
+   {
+    "term": "Bebé Tracker: Tomas y Pañales",
+    "kind": "name",
+    "store": "es",
+    "rank": "-/194"
+   },
+   {
+    "term": "Diario de lactancia y sueño",
+    "kind": "subtitle",
+    "store": "es",
+    "rank": "-/194"
+   },
+   {
+    "term": "Registro de recién nacido",
+    "kind": "old subtitle",
+    "store": "es",
+    "rank": "-/183"
+   },
+   {
+    "term": "recién nacido",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/167"
+   },
+   {
+    "term": "seguimiento",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/186"
+   },
+   {
+    "term": "registro",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/183"
+   },
+   {
+    "term": "contador",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/176"
+   },
+   {
+    "term": "biberón",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/179"
+   },
+   {
+    "term": "caca",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/194"
+   },
+   {
+    "term": "pipí",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/163"
+   },
+   {
+    "term": "pediatra",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/173"
+   },
+   {
+    "term": "gemelos",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/73"
+   },
+   {
+    "term": "siesta",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/181"
+   },
+   {
+    "term": "compartido",
+    "kind": "keyword",
+    "store": "es",
+    "rank": "-/189"
+   },
+   {
+    "term": "lactancia",
+    "kind": "dropped keyword",
+    "store": "es",
+    "rank": "-/176"
+   },
+   {
+    "term": "sueño",
+    "kind": "dropped keyword",
+    "store": "es",
+    "rank": "-/184"
+   },
+   {
+    "term": "temporizador",
+    "kind": "dropped keyword",
+    "store": "es",
+    "rank": "-/191"
+   },
+   {
+    "term": "lactante",
+    "kind": "dropped keyword",
+    "store": "es",
+    "rank": "-/59"
+   },
+   {
+    "term": "leche",
+    "kind": "dropped keyword",
+    "store": "es",
+    "rank": "-/148"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "es",
+    "rank": "-/159"
+   },
+   {
+    "term": "pecho",
+    "kind": "dropped keyword",
+    "store": "es",
+    "rank": "-/139"
+   },
+   {
+    "term": "materna",
+    "kind": "dropped keyword",
+    "store": "es",
+    "rank": "-/154"
+   }
+  ],
+  "en-CA": [
+   {
+    "term": "Baby Tracker: Feeds & Diapers",
+    "kind": "name",
+    "store": "ca",
+    "rank": "1/188"
+   },
+   {
+    "term": "Newborn Log & Diaper Count",
+    "kind": "subtitle",
+    "store": "ca",
+    "rank": "57/178"
+   },
+   {
+    "term": "feeding",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/193"
+   },
+   {
+    "term": "breastfeeding",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/179"
+   },
+   {
+    "term": "bottle",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/192"
+   },
+   {
+    "term": "sleep",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/182"
+   },
+   {
+    "term": "timer",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/195"
+   },
+   {
+    "term": "pee",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/176"
+   },
+   {
+    "term": "poop",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/185"
+   },
+   {
+    "term": "wet",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/181"
+   },
+   {
+    "term": "dirty",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/174"
+   },
+   {
+    "term": "pediatrician",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/130"
+   },
+   {
+    "term": "formula",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/181"
+   },
+   {
+    "term": "twins",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/167"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/170"
+   },
+   {
+    "term": "shared",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/190"
+   },
+   {
+    "term": "infant",
+    "kind": "dropped keyword",
+    "store": "ca",
+    "rank": "-/173"
+   }
+  ],
+  "fr-CA": [
+   {
+    "term": "Suivi bébé : boires & couches",
+    "kind": "name",
+    "store": "ca",
+    "rank": "1/103"
+   },
+   {
+    "term": "Allaitement, biberon, sommeil",
+    "kind": "subtitle",
+    "store": "ca",
+    "rank": "-/176"
+   },
+   {
+    "term": "Journal simple du nouveau-né",
+    "kind": "old subtitle",
+    "store": "ca",
+    "rank": "-/174"
+   },
+   {
+    "term": "nouveau-né",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/173"
+   },
+   {
+    "term": "journal",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/187"
+   },
+   {
+    "term": "carnet",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/188"
+   },
+   {
+    "term": "tétée",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "87/191"
+   },
+   {
+    "term": "pipi",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/168"
+   },
+   {
+    "term": "caca",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/182"
+   },
+   {
+    "term": "pédiatre",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/129"
+   },
+   {
+    "term": "sieste",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/189"
+   },
+   {
+    "term": "jumeaux",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "141/165"
+   },
+   {
+    "term": "minuterie",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/185"
+   },
+   {
+    "term": "lait",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/173"
+   },
+   {
+    "term": "partagé",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/185"
+   },
+   {
+    "term": "gratuit",
+    "kind": "keyword",
+    "store": "ca",
+    "rank": "-/190"
+   },
+   {
+    "term": "allaitement",
+    "kind": "dropped keyword",
+    "store": "ca",
+    "rank": "-/179"
+   },
+   {
+    "term": "biberon",
+    "kind": "dropped keyword",
+    "store": "ca",
+    "rank": "176/186"
+   },
+   {
+    "term": "sommeil",
+    "kind": "dropped keyword",
+    "store": "ca",
+    "rank": "-/189"
+   },
+   {
+    "term": "poupon",
+    "kind": "dropped keyword",
+    "store": "ca",
+    "rank": "18/42"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "ca",
+    "rank": "-/170"
+   },
+   {
+    "term": "sein",
+    "kind": "dropped keyword",
+    "store": "ca",
+    "rank": "114/152"
+   },
+   {
+    "term": "change",
+    "kind": "dropped keyword",
+    "store": "ca",
+    "rank": "-/181"
+   }
+  ],
+  "de-DE": [
+   {
+    "term": "Baby Tracker: Stillen & Windel",
+    "kind": "name",
+    "store": "de",
+    "rank": "-/193"
+   },
+   {
+    "term": "Babytagebuch & Windelprotokoll",
+    "kind": "subtitle",
+    "store": "de",
+    "rank": "-/0"
+   },
+   {
+    "term": "Stillprotokoll & Windelzähler",
+    "kind": "old subtitle",
+    "store": "de",
+    "rank": "-/0"
+   },
+   {
+    "term": "stillprotokoll",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/32"
+   },
+   {
+    "term": "windeltagebuch",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/4"
+   },
+   {
+    "term": "fläschchen",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/190"
+   },
+   {
+    "term": "neugeborenes",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/176"
+   },
+   {
+    "term": "säugling",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/166"
+   },
+   {
+    "term": "schlaf",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/178"
+   },
+   {
+    "term": "zwillinge",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/158"
+   },
+   {
+    "term": "kinderarzt",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/111"
+   },
+   {
+    "term": "kostenlos",
+    "kind": "keyword",
+    "store": "de",
+    "rank": "-/193"
+   },
+   {
+    "term": "windeln",
+    "kind": "dropped keyword",
+    "store": "de",
+    "rank": "-/191"
+   },
+   {
+    "term": "pipi",
+    "kind": "dropped keyword",
+    "store": "de",
+    "rank": "-/154"
+   },
+   {
+    "term": "kacka",
+    "kind": "dropped keyword",
+    "store": "de",
+    "rank": "-/164"
+   },
+   {
+    "term": "timer",
+    "kind": "dropped keyword",
+    "store": "de",
+    "rank": "-/179"
+   },
+   {
+    "term": "muttermilch",
+    "kind": "dropped keyword",
+    "store": "de",
+    "rank": "-/75"
+   }
+  ],
+  "fr-FR": [
+   {
+    "term": "Suivi Bébé : Tétées & Couches",
+    "kind": "name",
+    "store": "fr",
+    "rank": "-/73"
+   },
+   {
+    "term": "Suivi Bébé : Tétées & Couches",
+    "kind": "name",
+    "store": "us",
+    "rank": "1/107"
+   },
+   {
+    "term": "Allaitement, biberon, sommeil",
+    "kind": "subtitle",
+    "store": "fr",
+    "rank": "-/193"
+   },
+   {
+    "term": "Allaitement, biberon, sommeil",
+    "kind": "subtitle",
+    "store": "us",
+    "rank": "-/184"
+   },
+   {
+    "term": "Journal nouveau-né et couches",
+    "kind": "old subtitle",
+    "store": "fr",
+    "rank": "-/183"
+   },
+   {
+    "term": "Journal nouveau-né et couches",
+    "kind": "old subtitle",
+    "store": "us",
+    "rank": "26/181"
+   },
+   {
+    "term": "nouveau-né",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/173"
+   },
+   {
+    "term": "nouveau-né",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/171"
+   },
+   {
+    "term": "journal",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/180"
+   },
+   {
+    "term": "journal",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/192"
+   },
+   {
+    "term": "carnet",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/190"
+   },
+   {
+    "term": "carnet",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/186"
+   },
+   {
+    "term": "nourrisson",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/178"
+   },
+   {
+    "term": "nourrisson",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "153/174"
+   },
+   {
+    "term": "pipi",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/181"
+   },
+   {
+    "term": "pipi",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "104/166"
+   },
+   {
+    "term": "caca",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/192"
+   },
+   {
+    "term": "caca",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/183"
+   },
+   {
+    "term": "pédiatre",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/121"
+   },
+   {
+    "term": "pédiatre",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/147"
+   },
+   {
+    "term": "sieste",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/193"
+   },
+   {
+    "term": "sieste",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/192"
+   },
+   {
+    "term": "jumeaux",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/161"
+   },
+   {
+    "term": "jumeaux",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "108/161"
+   },
+   {
+    "term": "minuteur",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/186"
+   },
+   {
+    "term": "minuteur",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/186"
+   },
+   {
+    "term": "lait",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/137"
+   },
+   {
+    "term": "lait",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/144"
+   },
+   {
+    "term": "partagé",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/185"
+   },
+   {
+    "term": "partagé",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/184"
+   },
+   {
+    "term": "gratuit",
+    "kind": "keyword",
+    "store": "fr",
+    "rank": "-/195"
+   },
+   {
+    "term": "gratuit",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "allaitement",
+    "kind": "dropped keyword",
+    "store": "fr",
+    "rank": "-/177"
+   },
+   {
+    "term": "allaitement",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/178"
+   },
+   {
+    "term": "biberon",
+    "kind": "dropped keyword",
+    "store": "fr",
+    "rank": "-/179"
+   },
+   {
+    "term": "biberon",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/167"
+   },
+   {
+    "term": "sommeil",
+    "kind": "dropped keyword",
+    "store": "fr",
+    "rank": "-/185"
+   },
+   {
+    "term": "sommeil",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/187"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "fr",
+    "rank": "-/169"
+   },
+   {
+    "term": "watch",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/170"
+   },
+   {
+    "term": "change",
+    "kind": "dropped keyword",
+    "store": "fr",
+    "rank": "-/173"
+   },
+   {
+    "term": "change",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/176"
+   },
+   {
+    "term": "sein",
+    "kind": "dropped keyword",
+    "store": "fr",
+    "rank": "-/150"
+   },
+   {
+    "term": "sein",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "31/159"
+   }
+  ],
+  "en-GB": [
+   {
+    "term": "Baby Tracker: Feeds & Nappies",
+    "kind": "name",
+    "store": "gb",
+    "rank": "3/183"
+   },
+   {
+    "term": "Newborn Log & Nappy Count",
+    "kind": "subtitle",
+    "store": "gb",
+    "rank": "49/176"
+   },
+   {
+    "term": "diaper",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "70/181"
+   },
+   {
+    "term": "breastfeeding",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/181"
+   },
+   {
+    "term": "bottle",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/192"
+   },
+   {
+    "term": "sleep",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/190"
+   },
+   {
+    "term": "nap",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/186"
+   },
+   {
+    "term": "feeding",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "175/190"
+   },
+   {
+    "term": "wee",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/160"
+   },
+   {
+    "term": "poo",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/179"
+   },
+   {
+    "term": "wet",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/175"
+   },
+   {
+    "term": "dirty",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/182"
+   },
+   {
+    "term": "timer",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/185"
+   },
+   {
+    "term": "formula",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/184"
+   },
+   {
+    "term": "twins",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/166"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/172"
+   },
+   {
+    "term": "shared",
+    "kind": "keyword",
+    "store": "gb",
+    "rank": "-/184"
+   },
+   {
+    "term": "infant",
+    "kind": "dropped keyword",
+    "store": "gb",
+    "rank": "-/115"
+   }
+  ],
+  "bn-BD": [
+   {
+    "term": "বেবি ট্র্যাকার: দুধ ও ডায়াপার",
+    "kind": "name",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "নবজাতক শিশুর সহজ রেকর্ড বই",
+    "kind": "subtitle",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "বুকের",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "বোতল",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "প্রস্রাব",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "পায়খানা",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "ঘুম",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "শিশু বিশেষজ্ঞ",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "টাইমার",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "শিশু",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "যমজ",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "বদল",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "বুকের দুধ",
+    "kind": "dropped keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "ডায়াপার বদল",
+    "kind": "dropped keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "বাচ্চা",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   },
+   {
+    "term": "পাম্প",
+    "kind": "keyword",
+    "store": "bd",
+    "rank": "-/0"
+   }
+  ],
+  "gu-IN": [
+   {
+    "term": "બેબી ટ્રેકર: ફીડ અને ડાયપર",
+    "kind": "name",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "નવજાત શિશુનો સરળ રેકોર્ડ",
+    "kind": "subtitle",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/149"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/184"
+   },
+   {
+    "term": "સ્તનપાન",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "બોટલ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "પેશાબ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "મળ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ઊંઘ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "બાળરોગ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ટાઈમર",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "દૂધ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "જોડિયા",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/178"
+   },
+   {
+    "term": "બદલવું",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ઝોકું",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ડાયરી",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/1"
+   },
+   {
+    "term": "નોંધ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/1"
+   },
+   {
+    "term": "ડાયપર બદલવું",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/0"
+   }
+  ],
+  "hi": [
+   {
+    "term": "बेबी ट्रैकर: फीड और डायपर",
+    "kind": "name",
+    "store": "in",
+    "rank": "1/1"
+   },
+   {
+    "term": "नवजात शिशु का आसान रिकॉर्ड",
+    "kind": "subtitle",
+    "store": "in",
+    "rank": "1/1"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/149"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/184"
+   },
+   {
+    "term": "स्तनपान",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "63/111"
+   },
+   {
+    "term": "बोतल",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "125/187"
+   },
+   {
+    "term": "पेशाब",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "15/24"
+   },
+   {
+    "term": "पॉटी",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/187"
+   },
+   {
+    "term": "नींद",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/188"
+   },
+   {
+    "term": "रोग",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/190"
+   },
+   {
+    "term": "टाइमर",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/197"
+   },
+   {
+    "term": "दूध",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "105/163"
+   },
+   {
+    "term": "जुड़वां",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "66/91"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/178"
+   },
+   {
+    "term": "बदलना",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "73/93"
+   },
+   {
+    "term": "झपकी",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "67/118"
+   },
+   {
+    "term": "डायरी",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/199"
+   },
+   {
+    "term": "शिशु रोग",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/2"
+   },
+   {
+    "term": "डायपर बदलना",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "बच्चा",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/184"
+   },
+   {
+    "term": "साझा",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/194"
+   }
+  ],
+  "ja": [
+   {
+    "term": "赤ちゃん記録：授乳・おむつ",
+    "kind": "name",
+    "store": "jp",
+    "rank": "2/192"
+   },
+   {
+    "term": "新生児の授乳とおむつをワンタップで",
+    "kind": "subtitle",
+    "store": "jp",
+    "rank": "16/32"
+   },
+   {
+    "term": "育児記録",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/169"
+   },
+   {
+    "term": "育児日記",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/172"
+   },
+   {
+    "term": "授乳記録",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/182"
+   },
+   {
+    "term": "ミルク",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/137"
+   },
+   {
+    "term": "おしっこ",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "143/146"
+   },
+   {
+    "term": "うんち",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/179"
+   },
+   {
+    "term": "睡眠",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/177"
+   },
+   {
+    "term": "ねんね",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/185"
+   },
+   {
+    "term": "乳児",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/168"
+   },
+   {
+    "term": "小児科",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/153"
+   },
+   {
+    "term": "タイマー",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/177"
+   },
+   {
+    "term": "双子",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/180"
+   },
+   {
+    "term": "母乳",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/162"
+   },
+   {
+    "term": "哺乳瓶",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "133/146"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/166"
+   },
+   {
+    "term": "新生児",
+    "kind": "dropped keyword",
+    "store": "jp",
+    "rank": "-/182"
+   },
+   {
+    "term": "搾乳",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/176"
+   },
+   {
+    "term": "おむつ替え",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/174"
+   },
+   {
+    "term": "授乳時間",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/166"
+   },
+   {
+    "term": "授乳アラーム",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/164"
+   },
+   {
+    "term": "育児ノート",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/153"
+   },
+   {
+    "term": "ウィジェット",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/186"
+   },
+   {
+    "term": "共有",
+    "kind": "keyword",
+    "store": "jp",
+    "rank": "-/185"
+   }
+  ],
+  "kn-IN": [
+   {
+    "term": "ಬೇಬಿ ಟ್ರ್ಯಾಕರ್: ಹಾಲು & ಡೈಪರ್",
+    "kind": "name",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ನವಜಾತ ಶಿಶುವಿನ ಸುಲಭ ದಾಖಲೆ",
+    "kind": "subtitle",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/149"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/184"
+   },
+   {
+    "term": "ಸ್ತನ್ಯಪಾನ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಬಾಟಲಿ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಮೂತ್ರ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಮಲ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ನಿದ್ರೆ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಮಕ್ಕಳ ವೈದ್ಯ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಟೈಮರ್",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಶಿಶು",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಅವಳಿ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/178"
+   },
+   {
+    "term": "ಬದಲಾವಣೆ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಡೈರಿ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ಡೈಪರ್ ಬದಲಾವಣೆ",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/0"
+   }
+  ],
+  "ko": [
+   {
+    "term": "아기 기록: 수유와 기저귀",
+    "kind": "name",
+    "store": "kr",
+    "rank": "1/195"
+   },
+   {
+    "term": "아기 기록: 수유와 기저귀",
+    "kind": "name",
+    "store": "us",
+    "rank": "1/196"
+   },
+   {
+    "term": "신생아 수유·기저귀 한 번에 기록",
+    "kind": "subtitle",
+    "store": "kr",
+    "rank": "99/197"
+   },
+   {
+    "term": "신생아 수유·기저귀 한 번에 기록",
+    "kind": "subtitle",
+    "store": "us",
+    "rank": "5/196"
+   },
+   {
+    "term": "육아일기",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/182"
+   },
+   {
+    "term": "육아일기",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "94/174"
+   },
+   {
+    "term": "육아기록",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/183"
+   },
+   {
+    "term": "육아기록",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "66/195"
+   },
+   {
+    "term": "수유기록",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "87/192"
+   },
+   {
+    "term": "수유기록",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "17/193"
+   },
+   {
+    "term": "분유",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/179"
+   },
+   {
+    "term": "분유",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "30/190"
+   },
+   {
+    "term": "소변",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "97/108"
+   },
+   {
+    "term": "소변",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "32/105"
+   },
+   {
+    "term": "대변",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/192"
+   },
+   {
+    "term": "대변",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "99/191"
+   },
+   {
+    "term": "수면",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/181"
+   },
+   {
+    "term": "수면",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/176"
+   },
+   {
+    "term": "영아",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/172"
+   },
+   {
+    "term": "영아",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/191"
+   },
+   {
+    "term": "소아과",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "109/113"
+   },
+   {
+    "term": "소아과",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "27/81"
+   },
+   {
+    "term": "타이머",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/185"
+   },
+   {
+    "term": "타이머",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/181"
+   },
+   {
+    "term": "쌍둥이",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/165"
+   },
+   {
+    "term": "쌍둥이",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "106/162"
+   },
+   {
+    "term": "모유",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/175"
+   },
+   {
+    "term": "모유",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "41/184"
+   },
+   {
+    "term": "젖병",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "146/150"
+   },
+   {
+    "term": "젖병",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "42/148"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/162"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/170"
+   },
+   {
+    "term": "낮잠",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/182"
+   },
+   {
+    "term": "낮잠",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "173/185"
+   },
+   {
+    "term": "유축",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/197"
+   },
+   {
+    "term": "유축",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/192"
+   },
+   {
+    "term": "수유텀",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/185"
+   },
+   {
+    "term": "수유텀",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "73/186"
+   },
+   {
+    "term": "수유일지",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/180"
+   },
+   {
+    "term": "수유일지",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "90/185"
+   },
+   {
+    "term": "육아일지",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/172"
+   },
+   {
+    "term": "육아일지",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/187"
+   },
+   {
+    "term": "수유량",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/184"
+   },
+   {
+    "term": "수유량",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "76/185"
+   },
+   {
+    "term": "수유시간",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/181"
+   },
+   {
+    "term": "수유시간",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "69/182"
+   },
+   {
+    "term": "알림",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/181"
+   },
+   {
+    "term": "알림",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/178"
+   },
+   {
+    "term": "위젯",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/173"
+   },
+   {
+    "term": "위젯",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/172"
+   },
+   {
+    "term": "공유",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/190"
+   },
+   {
+    "term": "공유",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "모유수유",
+    "kind": "keyword",
+    "store": "kr",
+    "rank": "-/189"
+   },
+   {
+    "term": "모유수유",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "65/187"
+   }
+  ],
+  "mr-IN": [
+   {
+    "term": "बेबी ट्रॅकर: दूध आणि डायपर",
+    "kind": "name",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "नवजात बाळाची सोपी नोंदवही",
+    "kind": "subtitle",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/149"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/184"
+   },
+   {
+    "term": "स्तनपान",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "63/111"
+   },
+   {
+    "term": "बाटली",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/97"
+   },
+   {
+    "term": "शू",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/152"
+   },
+   {
+    "term": "शी",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/152"
+   },
+   {
+    "term": "झोप",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "बालरोगतज्ज्ञ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "टायमर",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/2"
+   },
+   {
+    "term": "जुळी",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/178"
+   },
+   {
+    "term": "बदलणे",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "डुलकी",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/5"
+   },
+   {
+    "term": "डायरी",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/199"
+   },
+   {
+    "term": "बाळ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "नोंद",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/188"
+   },
+   {
+    "term": "डायपर बदलणे",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/0"
+   }
+  ],
+  "or-IN": [
+   {
+    "term": "ବେବି ଟ୍ରାକର: କ୍ଷୀର ଓ ଡାଇପର",
+    "kind": "name",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ନବଜାତ ଶିଶୁର ସହଜ ରେକର୍ଡ ଖାତା",
+    "kind": "subtitle",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/149"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/184"
+   },
+   {
+    "term": "ସ୍ତନ୍ୟପାନ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ବୋତଲ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ପରିସ୍ରା",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ମଳ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ଶୋଇବା",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ଶିଶୁ ଡାକ୍ତର",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ଟାଇମର",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ଯାଆଁଳା",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/178"
+   },
+   {
+    "term": "ବଦଳ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ଛୋଟ ନିଦ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ଡାଏରୀ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ଡାଇପର ବଦଳ",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/0"
+   }
+  ],
+  "pa-IN": [
+   {
+    "term": "ਬੇਬੀ ਟ੍ਰੈਕਰ: ਦੁੱਧ ਅਤੇ ਡਾਇਪਰ",
+    "kind": "name",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਨਵਜੰਮੇ ਬੱਚੇ ਦਾ ਆਸਾਨ ਰਿਕਾਰਡ",
+    "kind": "subtitle",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/149"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/184"
+   },
+   {
+    "term": "ਛਾਤੀ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਬੋਤਲ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਪਿਸ਼ਾਬ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਟੱਟੀ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/1"
+   },
+   {
+    "term": "ਨੀਂਦ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਬੱਚਿਆਂ ਦਾ ਡਾਕਟਰ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਟਾਈਮਰ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਜੁੜਵਾਂ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/178"
+   },
+   {
+    "term": "ਬਦਲਣਾ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਝਪਕੀ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਛਾਤੀ ਦਾ ਦੁੱਧ",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਡਾਇਪਰ ਬਦਲਣਾ",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "ਬੱਚਾ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/1"
+   },
+   {
+    "term": "ਰਿਮਾਈਂਡਰ",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   }
+  ],
+  "pl": [
+   {
+    "term": "Dziennik Niemowlaka: Karmienie",
+    "kind": "name",
+    "store": "pl",
+    "rank": "-/26"
+   },
+   {
+    "term": "Karmienie, pieluszki i sen",
+    "kind": "subtitle",
+    "store": "pl",
+    "rank": "-/33"
+   },
+   {
+    "term": "noworodek",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/187"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/136"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/175"
+   },
+   {
+    "term": "piersią",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/155"
+   },
+   {
+    "term": "butelka",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/188"
+   },
+   {
+    "term": "siku",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/62"
+   },
+   {
+    "term": "kupa",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/158"
+   },
+   {
+    "term": "pediatra",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/146"
+   },
+   {
+    "term": "minutnik",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/192"
+   },
+   {
+    "term": "mleko",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/118"
+   },
+   {
+    "term": "bliźnięta",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/42"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/165"
+   },
+   {
+    "term": "karmienie piersią",
+    "kind": "dropped keyword",
+    "store": "pl",
+    "rank": "-/151"
+   },
+   {
+    "term": "drzemki",
+    "kind": "keyword",
+    "store": "pl",
+    "rank": "-/87"
+   }
+  ],
+  "pt-PT": [
+   {
+    "term": "Bebé: Mamadas, Fraldas e Sono",
+    "kind": "name",
+    "store": "pt",
+    "rank": "-/130"
+   },
+   {
+    "term": "Registo do recém-nascido",
+    "kind": "subtitle",
+    "store": "pt",
+    "rank": "-/80"
+   },
+   {
+    "term": "amamentação",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/172"
+   },
+   {
+    "term": "biberão",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/145"
+   },
+   {
+    "term": "chichi",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/20"
+   },
+   {
+    "term": "cocó",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/191"
+   },
+   {
+    "term": "pediatra",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/130"
+   },
+   {
+    "term": "temporizador",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/189"
+   },
+   {
+    "term": "lactente",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/16"
+   },
+   {
+    "term": "leite",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/149"
+   },
+   {
+    "term": "gémeos",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/153"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/168"
+   },
+   {
+    "term": "peito",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/182"
+   },
+   {
+    "term": "materno",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/125"
+   },
+   {
+    "term": "muda",
+    "kind": "keyword",
+    "store": "pt",
+    "rank": "-/182"
+   }
+  ],
+  "ro": [
+   {
+    "term": "Jurnal Bebe: Alăptare, Scutece",
+    "kind": "name",
+    "store": "ro",
+    "rank": "-/84"
+   },
+   {
+    "term": "Jurnal simplu pentru bebeluș",
+    "kind": "subtitle",
+    "store": "ro",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/141"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/180"
+   },
+   {
+    "term": "biberon",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/178"
+   },
+   {
+    "term": "somn",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/185"
+   },
+   {
+    "term": "pipi",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/170"
+   },
+   {
+    "term": "caca",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/190"
+   },
+   {
+    "term": "pediatru",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/21"
+   },
+   {
+    "term": "cronometru",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/188"
+   },
+   {
+    "term": "sugar",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/181"
+   },
+   {
+    "term": "lapte",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/122"
+   },
+   {
+    "term": "gemeni",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/179"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/161"
+   },
+   {
+    "term": "sân",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/184"
+   },
+   {
+    "term": "schimbat",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/117"
+   },
+   {
+    "term": "matern",
+    "kind": "keyword",
+    "store": "ro",
+    "rank": "-/130"
+   }
+  ],
+  "ru": [
+   {
+    "term": "Дневник малыша: кормление",
+    "kind": "name",
+    "store": "ru",
+    "rank": "2/182"
+   },
+   {
+    "term": "Дневник малыша: кормление",
+    "kind": "name",
+    "store": "us",
+    "rank": "1/187"
+   },
+   {
+    "term": "Подгузники, сон и кормление",
+    "kind": "subtitle",
+    "store": "ru",
+    "rank": "32/188"
+   },
+   {
+    "term": "Подгузники, сон и кормление",
+    "kind": "subtitle",
+    "store": "us",
+    "rank": "5/192"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "-/144"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/160"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "-/175"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/189"
+   },
+   {
+    "term": "новорожденный",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "-/168"
+   },
+   {
+    "term": "новорожденный",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "167/168"
+   },
+   {
+    "term": "грудное",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "167/174"
+   },
+   {
+    "term": "грудное",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "71/178"
+   },
+   {
+    "term": "бутылочка",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "-/161"
+   },
+   {
+    "term": "бутылочка",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "63/185"
+   },
+   {
+    "term": "пописал",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "4/7"
+   },
+   {
+    "term": "пописал",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "2/7"
+   },
+   {
+    "term": "покакал",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "3/3"
+   },
+   {
+    "term": "покакал",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "2/3"
+   },
+   {
+    "term": "педиатр",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "67/83"
+   },
+   {
+    "term": "педиатр",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "25/78"
+   },
+   {
+    "term": "таймер",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "-/183"
+   },
+   {
+    "term": "таймер",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/186"
+   },
+   {
+    "term": "младенец",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "-/173"
+   },
+   {
+    "term": "младенец",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "161/184"
+   },
+   {
+    "term": "молоко",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "-/145"
+   },
+   {
+    "term": "молоко",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "100/148"
+   },
+   {
+    "term": "двойня",
+    "kind": "keyword",
+    "store": "ru",
+    "rank": "-/170"
+   },
+   {
+    "term": "двойня",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "126/173"
+   }
+  ],
+  "te-IN": [
+   {
+    "term": "బేబీ ట్రాకర్: పాలు & డైపర్",
+    "kind": "name",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "నవజాత శిశువు సులభ రికార్డు",
+    "kind": "subtitle",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/149"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/184"
+   },
+   {
+    "term": "తల్లిపాలు",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "సీసా",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "మూత్రం",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "మలం",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "నిద్ర",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "పిల్లల వైద్యుడు",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "టైమర్",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/1"
+   },
+   {
+    "term": "కవలలు",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/178"
+   },
+   {
+    "term": "మార్పు",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "కునుకు",
+    "kind": "keyword",
+    "store": "in",
+    "rank": "-/0"
+   },
+   {
+    "term": "డైపర్ మార్పు",
+    "kind": "dropped keyword",
+    "store": "in",
+    "rank": "-/0"
+   }
+  ],
+  "th": [
+   {
+    "term": "บันทึกลูกน้อย: นมและผ้าอ้อม",
+    "kind": "name",
+    "store": "th",
+    "rank": "1/68"
+   },
+   {
+    "term": "บันทึกทารกแรกเกิดแบบง่าย",
+    "kind": "subtitle",
+    "store": "th",
+    "rank": "13/77"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/145"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/173"
+   },
+   {
+    "term": "ให้นม",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "104/140"
+   },
+   {
+    "term": "นมแม่",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/172"
+   },
+   {
+    "term": "ขวดนม",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "74/75"
+   },
+   {
+    "term": "ฉี่",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "54/69"
+   },
+   {
+    "term": "อึ",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/172"
+   },
+   {
+    "term": "นอน",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/185"
+   },
+   {
+    "term": "กุมารแพทย์",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "6/6"
+   },
+   {
+    "term": "จับเวลา",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/192"
+   },
+   {
+    "term": "ทารก",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/190"
+   },
+   {
+    "term": "นมผง",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "25/42"
+   },
+   {
+    "term": "แฝด",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "37/47"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/162"
+   },
+   {
+    "term": "เปลี่ยนผ้าอ้อม",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "4/10"
+   },
+   {
+    "term": "งีบ",
+    "kind": "keyword",
+    "store": "th",
+    "rank": "-/179"
+   }
+  ],
+  "tr": [
+   {
+    "term": "Bebek Takibi: Emzirme & Bez",
+    "kind": "name",
+    "store": "tr",
+    "rank": "38/187"
+   },
+   {
+    "term": "Yenidoğan için basit günlük",
+    "kind": "subtitle",
+    "store": "tr",
+    "rank": "1/2"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/146"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/175"
+   },
+   {
+    "term": "biberon",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/180"
+   },
+   {
+    "term": "uyku",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/185"
+   },
+   {
+    "term": "çiş",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/110"
+   },
+   {
+    "term": "kaka",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/171"
+   },
+   {
+    "term": "çocuk doktoru",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/133"
+   },
+   {
+    "term": "zamanlayıcı",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/187"
+   },
+   {
+    "term": "süt",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/177"
+   },
+   {
+    "term": "ikiz",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/187"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/170"
+   },
+   {
+    "term": "göğüs",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "116/136"
+   },
+   {
+    "term": "değişimi",
+    "kind": "keyword",
+    "store": "tr",
+    "rank": "-/169"
+   },
+   {
+    "term": "bez değişimi",
+    "kind": "dropped keyword",
+    "store": "tr",
+    "rank": "4/8"
+   }
+  ],
+  "uk": [
+   {
+    "term": "Щоденник малюка: годування",
+    "kind": "name",
+    "store": "ua",
+    "rank": "2/112"
+   },
+   {
+    "term": "Підгузки, сон і годування",
+    "kind": "subtitle",
+    "store": "ua",
+    "rank": "17/84"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "-/140"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "-/180"
+   },
+   {
+    "term": "новонароджений",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "142/187"
+   },
+   {
+    "term": "грудне",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "132/175"
+   },
+   {
+    "term": "пляшечка",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "65/90"
+   },
+   {
+    "term": "пописав",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "3/7"
+   },
+   {
+    "term": "покакав",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "2/3"
+   },
+   {
+    "term": "педіатр",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "12/22"
+   },
+   {
+    "term": "таймер",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "-/188"
+   },
+   {
+    "term": "немовля",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "-/179"
+   },
+   {
+    "term": "молоко",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "147/153"
+   },
+   {
+    "term": "двійня",
+    "kind": "keyword",
+    "store": "ua",
+    "rank": "14/16"
+   }
+  ],
+  "ur-PK": [
+   {
+    "term": "بے بی ٹریکر: دودھ اور ڈائپر",
+    "kind": "name",
+    "store": "pk",
+    "rank": "-/0"
+   },
+   {
+    "term": "نومولود کا آسان ریکارڈ رجسٹر",
+    "kind": "subtitle",
+    "store": "pk",
+    "rank": "-/0"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/149"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/178"
+   },
+   {
+    "term": "ماں",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/198"
+   },
+   {
+    "term": "بوتل",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/187"
+   },
+   {
+    "term": "پیشاب",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/170"
+   },
+   {
+    "term": "پاخانہ",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/186"
+   },
+   {
+    "term": "نیند",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/113"
+   },
+   {
+    "term": "بچوں کا ڈاکٹر",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/1"
+   },
+   {
+    "term": "ٹائمر",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/196"
+   },
+   {
+    "term": "جڑواں",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/198"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/168"
+   },
+   {
+    "term": "بدلنا",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/24"
+   },
+   {
+    "term": "جھپکی",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/199"
+   },
+   {
+    "term": "ماں کا دودھ",
+    "kind": "dropped keyword",
+    "store": "pk",
+    "rank": "-/0"
+   },
+   {
+    "term": "ڈائپر بدلنا",
+    "kind": "dropped keyword",
+    "store": "pk",
+    "rank": "-/0"
+   },
+   {
+    "term": "بچہ",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/199"
+   },
+   {
+    "term": "ریمائنڈر",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/14"
+   },
+   {
+    "term": "پمپ",
+    "kind": "keyword",
+    "store": "pk",
+    "rank": "-/198"
+   }
+  ],
+  "vi": [
+   {
+    "term": "Nhật ký bé: Cho bú & Tã bỉm",
+    "kind": "name",
+    "store": "vn",
+    "rank": "1/60"
+   },
+   {
+    "term": "Nhật ký bé: Cho bú & Tã bỉm",
+    "kind": "name",
+    "store": "us",
+    "rank": "1/57"
+   },
+   {
+    "term": "Ghi chép trẻ sơ sinh đơn giản",
+    "kind": "subtitle",
+    "store": "vn",
+    "rank": "26/154"
+   },
+   {
+    "term": "Ghi chép trẻ sơ sinh đơn giản",
+    "kind": "subtitle",
+    "store": "us",
+    "rank": "3/150"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/150"
+   },
+   {
+    "term": "baby",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/160"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/181"
+   },
+   {
+    "term": "tracker",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/189"
+   },
+   {
+    "term": "sữa mẹ",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/171"
+   },
+   {
+    "term": "sữa mẹ",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/175"
+   },
+   {
+    "term": "bình sữa",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "82/115"
+   },
+   {
+    "term": "bình sữa",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "46/110"
+   },
+   {
+    "term": "tè",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/185"
+   },
+   {
+    "term": "tè",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/188"
+   },
+   {
+    "term": "ị",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/191"
+   },
+   {
+    "term": "ị",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/194"
+   },
+   {
+    "term": "giấc ngủ",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/185"
+   },
+   {
+    "term": "giấc ngủ",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "bác sĩ nhi",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "17/20"
+   },
+   {
+    "term": "bác sĩ nhi",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "12/20"
+   },
+   {
+    "term": "hẹn giờ",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/172"
+   },
+   {
+    "term": "hẹn giờ",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/193"
+   },
+   {
+    "term": "sữa công thức",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "58/73"
+   },
+   {
+    "term": "sữa công thức",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "46/69"
+   },
+   {
+    "term": "sinh đôi",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/178"
+   },
+   {
+    "term": "sinh đôi",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/174"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "vn",
+    "rank": "-/166"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/170"
+   },
+   {
+    "term": "sơ sinh",
+    "kind": "dropped keyword",
+    "store": "vn",
+    "rank": "-/186"
+   },
+   {
+    "term": "sơ sinh",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "-/156"
+   }
+  ],
+  "zh-Hans": [
+   {
+    "term": "宝宝记录：喂奶与尿布",
+    "kind": "name",
+    "store": "cn",
+    "rank": "2/182"
+   },
+   {
+    "term": "宝宝记录：喂奶与尿布",
+    "kind": "name",
+    "store": "us",
+    "rank": "1/194"
+   },
+   {
+    "term": "新生儿喂奶、尿布一键记录",
+    "kind": "subtitle",
+    "store": "cn",
+    "rank": "17/183"
+   },
+   {
+    "term": "新生儿喂奶、尿布一键记录",
+    "kind": "subtitle",
+    "store": "us",
+    "rank": "1/195"
+   },
+   {
+    "term": "育儿记录",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/174"
+   },
+   {
+    "term": "育儿记录",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "65/185"
+   },
+   {
+    "term": "喂养记录",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/183"
+   },
+   {
+    "term": "喂养记录",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "48/182"
+   },
+   {
+    "term": "母乳",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/163"
+   },
+   {
+    "term": "母乳",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "88/180"
+   },
+   {
+    "term": "奶瓶",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "140/146"
+   },
+   {
+    "term": "奶瓶",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "28/179"
+   },
+   {
+    "term": "尿尿",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/194"
+   },
+   {
+    "term": "尿尿",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "20/170"
+   },
+   {
+    "term": "便便",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/185"
+   },
+   {
+    "term": "便便",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "82/188"
+   },
+   {
+    "term": "睡眠",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/184"
+   },
+   {
+    "term": "睡眠",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/183"
+   },
+   {
+    "term": "婴儿",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/163"
+   },
+   {
+    "term": "婴儿",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/149"
+   },
+   {
+    "term": "儿科",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/143"
+   },
+   {
+    "term": "儿科",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "52/166"
+   },
+   {
+    "term": "计时器",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/182"
+   },
+   {
+    "term": "计时器",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/182"
+   },
+   {
+    "term": "双胞胎",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/138"
+   },
+   {
+    "term": "双胞胎",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/176"
+   },
+   {
+    "term": "奶粉",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/131"
+   },
+   {
+    "term": "奶粉",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "34/156"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/157"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/170"
+   },
+   {
+    "term": "换尿布",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "89/130"
+   },
+   {
+    "term": "换尿布",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "7/161"
+   },
+   {
+    "term": "宝宝日记",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/165"
+   },
+   {
+    "term": "宝宝日记",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "32/183"
+   },
+   {
+    "term": "新生儿",
+    "kind": "dropped keyword",
+    "store": "cn",
+    "rank": "-/178"
+   },
+   {
+    "term": "新生儿",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "64/187"
+   },
+   {
+    "term": "吸奶",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/177"
+   },
+   {
+    "term": "吸奶",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "109/186"
+   },
+   {
+    "term": "哺乳",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/158"
+   },
+   {
+    "term": "哺乳",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "提醒",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/176"
+   },
+   {
+    "term": "提醒",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "共享",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/180"
+   },
+   {
+    "term": "共享",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/174"
+   },
+   {
+    "term": "育儿日记",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/179"
+   },
+   {
+    "term": "育儿日记",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/188"
+   },
+   {
+    "term": "母乳喂养",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/161"
+   },
+   {
+    "term": "母乳喂养",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/172"
+   },
+   {
+    "term": "小睡",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/165"
+   },
+   {
+    "term": "小睡",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "小组件",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/176"
+   },
+   {
+    "term": "小组件",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/187"
+   },
+   {
+    "term": "夜奶",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/122"
+   },
+   {
+    "term": "夜奶",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/130"
+   },
+   {
+    "term": "哺乳日记",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/136"
+   },
+   {
+    "term": "哺乳日记",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/164"
+   },
+   {
+    "term": "奶量",
+    "kind": "keyword",
+    "store": "cn",
+    "rank": "-/180"
+   },
+   {
+    "term": "奶量",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/177"
+   }
+  ],
+  "zh-Hant": [
+   {
+    "term": "寶寶紀錄：餵奶與尿布",
+    "kind": "name",
+    "store": "tw",
+    "rank": "1/194"
+   },
+   {
+    "term": "寶寶紀錄：餵奶與尿布",
+    "kind": "name",
+    "store": "us",
+    "rank": "1/196"
+   },
+   {
+    "term": "新生兒餵奶、尿布一鍵紀錄",
+    "kind": "subtitle",
+    "store": "tw",
+    "rank": "8/189"
+   },
+   {
+    "term": "新生兒餵奶、尿布一鍵紀錄",
+    "kind": "subtitle",
+    "store": "us",
+    "rank": "1/195"
+   },
+   {
+    "term": "育兒紀錄",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/182"
+   },
+   {
+    "term": "育兒紀錄",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "28/187"
+   },
+   {
+    "term": "餵奶紀錄",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "38/186"
+   },
+   {
+    "term": "餵奶紀錄",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "7/179"
+   },
+   {
+    "term": "母乳",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/161"
+   },
+   {
+    "term": "母乳",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "88/180"
+   },
+   {
+    "term": "奶瓶",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "119/129"
+   },
+   {
+    "term": "奶瓶",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "28/179"
+   },
+   {
+    "term": "尿尿",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/181"
+   },
+   {
+    "term": "尿尿",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "20/170"
+   },
+   {
+    "term": "便便",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/165"
+   },
+   {
+    "term": "便便",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "82/188"
+   },
+   {
+    "term": "睡眠",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/183"
+   },
+   {
+    "term": "睡眠",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/183"
+   },
+   {
+    "term": "嬰兒",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/180"
+   },
+   {
+    "term": "嬰兒",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/161"
+   },
+   {
+    "term": "小兒科",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "64/72"
+   },
+   {
+    "term": "小兒科",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "4/74"
+   },
+   {
+    "term": "計時器",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/184"
+   },
+   {
+    "term": "計時器",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/182"
+   },
+   {
+    "term": "雙胞胎",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "143/163"
+   },
+   {
+    "term": "雙胞胎",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "102/170"
+   },
+   {
+    "term": "配方奶",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "41/86"
+   },
+   {
+    "term": "配方奶",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "13/108"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/168"
+   },
+   {
+    "term": "watch",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/170"
+   },
+   {
+    "term": "換尿布",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "39/111"
+   },
+   {
+    "term": "換尿布",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "8/161"
+   },
+   {
+    "term": "寶寶日記",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/179"
+   },
+   {
+    "term": "寶寶日記",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "132/189"
+   },
+   {
+    "term": "新生兒",
+    "kind": "dropped keyword",
+    "store": "tw",
+    "rank": "-/184"
+   },
+   {
+    "term": "新生兒",
+    "kind": "dropped keyword",
+    "store": "us",
+    "rank": "110/175"
+   },
+   {
+    "term": "擠奶",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/176"
+   },
+   {
+    "term": "擠奶",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "97/187"
+   },
+   {
+    "term": "哺乳",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/159"
+   },
+   {
+    "term": "哺乳",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "提醒",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/182"
+   },
+   {
+    "term": "提醒",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "共享",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/191"
+   },
+   {
+    "term": "共享",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/174"
+   },
+   {
+    "term": "育兒日記",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/179"
+   },
+   {
+    "term": "育兒日記",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/186"
+   },
+   {
+    "term": "母乳哺育",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/15"
+   },
+   {
+    "term": "母乳哺育",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/15"
+   },
+   {
+    "term": "小睡",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/182"
+   },
+   {
+    "term": "小睡",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/180"
+   },
+   {
+    "term": "小工具",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/185"
+   },
+   {
+    "term": "小工具",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/178"
+   },
+   {
+    "term": "夜奶",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/159"
+   },
+   {
+    "term": "夜奶",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/130"
+   },
+   {
+    "term": "母乳日誌",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/85"
+   },
+   {
+    "term": "母乳日誌",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/91"
+   },
+   {
+    "term": "奶量",
+    "kind": "keyword",
+    "store": "tw",
+    "rank": "-/171"
+   },
+   {
+    "term": "奶量",
+    "kind": "keyword",
+    "store": "us",
+    "rank": "-/177"
+   }
+  ]
+ }
+}
