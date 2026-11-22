@@ -50,6 +50,7 @@ What changed:
 - Birth date: stored as noon UTC of the calendar day (`DateHelpers.birthStamp`), read with `DateHelpers.birthDay`, displayed with `Format.birthDate`. A value that is not exactly noon UTC came from an earlier build (local midnight) and is read in the phone's current zone, as before, so existing logs keep their day on the phone that entered it. A legacy midnight that falls on exactly 12:00 UTC (UTC+12 standard time, e.g. New Zealand winter) is read as the day before until the date is saved again.
 - Day start: steps back a day before setting the hour, as iOS does.
 - Day N: `NowSummary` keeps `birthDate` and `dayOfLife(now, zone)` counts from the time it is read.
+- Next checkup: stored as noon UTC of the picked day (`DateHelpers.birthStamp`) and read with `birthDay`, so the visit and the evening-before note keep the picked day in any zone; a value that is not exactly noon UTC is read as before in the phone's zone; `NextCheckupTest` (LA entry read in Tokyo, Auckland, London, Honolulu, legacy value), 78 tests passed via gh-gradle `testDebugUnitTest assembleDebug`.
 
 Tests (`gh-gradle`, fm-gradle is not installed on jmbp; public snapshot, GitHub Linux, JDK 17):
 

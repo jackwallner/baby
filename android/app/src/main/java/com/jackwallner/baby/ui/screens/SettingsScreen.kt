@@ -336,11 +336,11 @@ fun RemindersScreen(onBack: () -> Unit) {
             if (settings.checkupRemindersOn) {
                 RowDivider()
                 ToggleRow("Add next checkup date", settings.nextCheckup != null, tag = "reminders.hasDate") { on ->
-                    settings.updateNextCheckup(if (on) DateHelpers.addDays(DateHelpers.startOfDay(System.currentTimeMillis(), zone), 7, zone) + 10 * 3_600_000L else null)
+                    settings.updateNextCheckup(if (on) DateHelpers.birthStamp(DateHelpers.localDate(System.currentTimeMillis(), zone).plusDays(7)) else null)
                 }
                 settings.nextCheckup?.let {
                     RowDivider()
-                    ValueRow("Next checkup", Format.monthDayYear(it, zone), tag = "reminders.date") { picking = true }
+                    ValueRow("Next checkup", Format.birthDate(it, zone), tag = "reminders.date") { picking = true }
                 }
             }
             if (denied && anyOn) {
@@ -352,8 +352,8 @@ fun RemindersScreen(onBack: () -> Unit) {
         }
     }
     if (picking) {
-        DateDialog(DateHelpers.localDate(settings.nextCheckup ?: System.currentTimeMillis(), zone), zone, allowFuture = true, onDismiss = { picking = false }) {
-            settings.updateNextCheckup(it.atTime(10, 0).atZone(zone).toInstant().toEpochMilli())
+        DateDialog(settings.nextCheckup?.let { DateHelpers.birthDay(it, zone) } ?: DateHelpers.localDate(System.currentTimeMillis(), zone), zone, allowFuture = true, onDismiss = { picking = false }) {
+            settings.updateNextCheckup(DateHelpers.birthStamp(it))
         }
     }
 }

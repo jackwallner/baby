@@ -156,9 +156,15 @@ object ReminderPlan {
         return Planned(FEED_ID, due, "${interval.label} since ${summary.childName}'s last feed", body, null)
     }
 
+    /**
+     * [nextCheckup] is a stored visit date: noon UTC of the picked day ([DateHelpers.birthStamp]),
+     * or an earlier build's local instant, both read by [DateHelpers.birthDay]. The visit counts
+     * as noon of that day in [zone], so the note stays on the evening before the picked day.
+     */
     fun checkupReminders(birthDate: Long?, nextCheckup: Long?, now: Long, zone: ZoneId): List<Planned> {
-        if (nextCheckup != null && nextCheckup > now) {
-            val evening = eveningBefore(nextCheckup, zone)
+        val visitDay = nextCheckup?.let { DateHelpers.birthDay(it, zone) }
+        if (visitDay != null && DateHelpers.dayStartOf(visitDay, zone) + 12 * 3_600_000L > now) {
+            val evening = eveningBefore(DateHelpers.dayStartOf(visitDay, zone), zone)
             if (evening <= now) return emptyList()
             return listOf(Planned(CHECKUP_PREFIX + "entered", evening, "Checkup tomorrow",
                 "Feeds, diapers, sleep and weight since the last visit are in Baby Tracker.", CHECKUP_ROUTE))
