@@ -289,6 +289,9 @@ struct Leaf {
     let inScroll: Bool
     /// Inside a system tab bar, toolbar or navigation bar, which floats over scrolling content by design.
     var inBar = false
+    /// Inside a scroll view: the part of the screen its scroll views show, and whether they can scroll it sideways.
+    var scrollClip: CGRect? = nil
+    var scrollAxis: Layout.ScrollAxis = .fixedWidth
 
     var name: String { identifier.isEmpty ? label : identifier }
 }
@@ -298,6 +301,25 @@ enum Layout {
     static let textual: Set<XCUIElement.ElementType> = [.staticText, .button, .textField, .secureTextField, .switch, .link]
     static let scrolling: Set<XCUIElement.ElementType> = [.scrollView, .collectionView, .table, .webView]
     static let bars: Set<XCUIElement.ElementType> = [.tabBar, .toolbar, .navigationBar]
+
+    /// How a scroll view can move its content, read from where that content lies. XCUITest reports no scroll
+    /// axis, so a scroll view whose content runs past one side only, and not much, is `unclear`.
+    enum ScrollAxis {
+        /// Its content cannot move sideways: it scrolls vertically, or its content fits its width, or runs past
+        /// both sides (a horizontal scroll view at rest starts at its leading edge).
+        case fixedWidth
+        /// A horizontal carousel: content well past one side and none above or below.
+        case sideways
+        case unclear
+    }
+
+    static func axis(frame: CGRect, content: CGRect) -> ScrollAxis {
+        guard !content.isNull else { return .fixedWidth }
+        if content.height > frame.height + 8 { return .fixedWidth }
+        let left = content.minX < frame.minX - 2, right = content.maxX > frame.maxX + 2
+        if left && right || !left && !right { return .fixedWidth }
+        return content.width >= frame.width * 1.25 ? .sideways : .unclear
+    }
 
     struct Result {
         var final: [Leaf]
@@ -315,11 +337,19 @@ enum Layout {
         let window = root.children.first { $0.elementType == .window }?.frame ?? root.frame
         var seen: [String: Int] = [:]
         var out: [Leaf] = []
-        func walk(_ node: XCUIElementSnapshot, inScroll: Bool, inBar: Bool = false) {
-            let scroll = inScroll || scrolling.contains(node.elementType)
+        // Every scroll view on the way down: its frame, the extent of its content, and the one it sits in.
+        var boxes: [(frame: CGRect, content: CGRect, parent: Int?)] = []
+        var boxOf: [Int?] = []
+        /// Walks the subtree and returns the extent of what it draws. A nested scroll view clips its own
+        /// content, so to the scroll view around it only its frame counts.
+        @discardableResult
+        func walk(_ node: XCUIElementSnapshot, inScroll: Bool, inBar: Bool = false, box: Int? = nil) -> CGRect {
+            let isScroll = scrolling.contains(node.elementType)
+            let scroll = inScroll || isScroll
             let bar = inBar || bars.contains(node.elementType)
+            let frame = node.frame
+            let drawn = frame.width > 0.5 && frame.height > 0.5 ? frame : CGRect.null
             if node.children.isEmpty || node.elementType == .button || node.elementType == .switch {
-                let frame = node.frame
                 let label = node.label
                 if frame.width > 0.5, frame.height > 0.5, frame.intersects(window),
                    !(node.elementType == .other && label.isEmpty) {
@@ -328,12 +358,41 @@ enum Layout {
                     seen[base] = n + 1
                     out.append(Leaf(key: "\(base)#\(n)", type: node.elementType, label: label,
                                     identifier: node.identifier, frame: frame, inScroll: scroll, inBar: bar))
+                    boxOf.append(box)
                 }
-                return
+                return drawn
             }
-            for child in node.children { walk(child, inScroll: scroll, inBar: bar) }
+            var inner = box
+            if isScroll {
+                boxes.append((frame, .null, box))
+                inner = boxes.count - 1
+            }
+            var content = CGRect.null
+            for child in node.children { content = content.union(walk(child, inScroll: scroll, inBar: bar, box: inner)) }
+            if isScroll, let inner {
+                boxes[inner].content = content
+                return drawn
+            }
+            return content.union(drawn)
         }
         walk(root, inScroll: false)
+        for index in out.indices {
+            var box = boxOf[index]
+            guard box != nil else { continue }
+            var clip = window
+            var axis = ScrollAxis.fixedWidth
+            while let at = box {
+                clip = clip.intersection(boxes[at].frame)
+                switch Self.axis(frame: boxes[at].frame, content: boxes[at].content) {
+                case .sideways: axis = .sideways
+                case .unclear where axis != .sideways: axis = .unclear
+                default: break
+                }
+                box = boxes[at].parent
+            }
+            out[index].scrollClip = clip
+            out[index].scrollAxis = axis
+        }
         return (out, window.width, window.height)
     }
 
@@ -448,14 +507,41 @@ enum Layout {
         return deltas.filter { abs($0 - first) <= 1 }.count * 10 >= deltas.count * 8
     }
 
-    /// Anything cut by the left or right screen edge outside a scroll view.
+    /// Anything cut by the left or right screen edge, or by the side of the scroll view it sits in. A scroll view
+    /// clips what runs past its sides, and one that scrolls vertically never brings it back (a 7-tile rack on a
+    /// 375pt iPhone, Mahj 1-star review, Nov 21 2026). A horizontal carousel that ends partway through a card is
+    /// deliberate and never reported; one FleetQA cannot tell from a clipping scroll view is reported at P2.
+    /// Outside scroll views: text and controls, and any other labelled element narrower than the screen (a
+    /// full-bleed picture is meant to bleed).
     static func offscreen(_ leaves: [Leaf], width: CGFloat, context: QA.Context) {
-        for leaf in leaves where !leaf.inScroll && textual.contains(leaf.type) {
-            let cut = max(0, -leaf.frame.minX) + max(0, leaf.frame.maxX - width)
+        let screen = CGRect(x: 0, y: -CGFloat.greatestFiniteMagnitude / 2, width: width, height: .greatestFiniteMagnitude)
+        for leaf in leaves where leaf.scrollAxis != .sideways {
+            let labelled = textual.contains(leaf.type) || !leaf.name.isEmpty && leaf.frame.width < width * 0.9
+            guard labelled else { continue }
+            let clip = leaf.scrollClip ?? screen
+            let cut = max(0, clip.minX - leaf.frame.minX) + max(0, leaf.frame.maxX - clip.maxX)
             guard cut > 2 else { continue }
-            QA.record(context, "offscreen", "P1", leaf.name,
-                      String(format: "%@ \"%@\" runs %.0fpt past the screen edge (x %.0f to %.0f, screen %.0f)",
-                             typeName(leaf.type), leaf.name, cut, leaf.frame.minX, leaf.frame.maxX, width))
+            guard leaf.scrollClip != nil else {
+                QA.record(context, "offscreen", "P1", leaf.name,
+                          String(format: "%@ \"%@\" runs %.0fpt past the screen edge (x %.0f to %.0f, screen %.0f)",
+                                 typeName(leaf.type), leaf.name, cut, leaf.frame.minX, leaf.frame.maxX, width))
+                continue
+            }
+            let edge = clip.minX > 0.5 || clip.maxX < width - 0.5 ? "its scroll view's side" : "the screen edge"
+            let span = String(format: "x %.0f to %.0f, visible %.0f to %.0f", leaf.frame.minX, leaf.frame.maxX,
+                                clip.minX, clip.maxX)
+            if leaf.scrollAxis == .unclear {
+                QA.record(context, "offscreen", "P2", leaf.name,
+                          String(format: "%@ \"%@\" is cut %.0fpt by %@ (%@) in a scroll view whose content runs past one "
+                                 + "side only: fine if it is a horizontal carousel, a clipping bug if it scrolls vertically "
+                                 + "(XCUITest cannot tell which; see the screenshot)",
+                                 typeName(leaf.type), leaf.name, cut, edge, span))
+            } else {
+                QA.record(context, "offscreen", "P1", leaf.name,
+                          String(format: "%@ \"%@\" is cut %.0fpt by %@ (%@) in a scroll view that cannot scroll it "
+                                 + "back into view; make the row fit or wrap at this width",
+                                 typeName(leaf.type), leaf.name, cut, edge, span))
+            }
         }
     }
 
