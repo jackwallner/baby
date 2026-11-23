@@ -26,8 +26,8 @@ enum PDFReport {
 
     private enum Ink {
         static let primary = UIColor(white: 0.11, alpha: 1)
-        static let secondary = UIColor(white: 0.42, alpha: 1)
-        static let faint = UIColor(white: 0.72, alpha: 1)
+        static let secondary = UIColor(white: 0.25, alpha: 1)
+        static let faint = UIColor(white: 0.42, alpha: 1)
         static let rule = UIColor(white: 0.85, alpha: 1)
         static let band = UIColor(white: 0.965, alpha: 1)
     }
