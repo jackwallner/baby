@@ -43,11 +43,11 @@
       "alternateName": "Baby Tracker",
       "description": "Baby Tracker is a baby tracker app for iPhone and Apple Watch. One tap logs a feed, a wet or dirty diaper, or sleep, and you can share the log with your partner for free. It shows the first-week diaper count and when the baby last ate, with no ads and no AI. Typical ranges are general guidance, not medical advice.",
       "applicationCategory": "HealthApplication",
-      "operatingSystem": "iOS 17.0 or later, watchOS 10.0 or later",
+      "operatingSystem": "iOS 17.0 or later, watchOS 10.0 or later, Android 8.0+",
       "url": "https://jackwallner.com/ios/baby/",
-      "downloadUrl": "https://apps.apple.com/us/app/id6811133796",
-      "installUrl": "https://apps.apple.com/us/app/id6811133796",
-      "sameAs": "https://apps.apple.com/us/app/id6811133796",
+      "downloadUrl": ["https://apps.apple.com/us/app/id6811133796", "https://play.google.com/store/apps/details?id=com.jackwallner.baby"],
+      "installUrl": ["https://apps.apple.com/us/app/id6811133796", "https://play.google.com/store/apps/details?id=com.jackwallner.baby"],
+      "sameAs": ["https://apps.apple.com/us/app/id6811133796", "https://play.google.com/store/apps/details?id=com.jackwallner.baby"],
       "featureList": [
         "One-tap logging for feeds, wet and dirty diapers, and sleep",
         "Optional Pump button and buttons you name yourself",
@@ -173,6 +173,15 @@
       .faq details p { margin: 10px 0 0; }
         summary > h2.faq-q { display: inline; margin: 0; font: inherit; letter-spacing: inherit; color: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.store-badges { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; }
+.store-badges.start { justify-content: flex-start; margin-top: 22px; }
+.store-badges.start .cta { margin-top: 0; }
+.play-badge { display: inline-flex; transition: opacity 0.15s; }
+.play-badge:hover { opacity: 0.85; }
+.play-badge img { display: block; height: 46px; width: auto; }
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.nav-actions .play-badge img { height: 36px; }
+@media (max-width: 480px) { .nav-actions .play-badge { display: none; } }
 </style>
 </head>
   <body>
@@ -195,7 +204,8 @@
               time you look, it tells you when she last ate and which side.
               Free to log, free to share with your partner, and free to keep.
             </p>
-            <a class="cta" href="https://apps.apple.com/us/app/baby-tracker-feeds-diapers/id6811133796?pt=128748779&amp;ct=jw-baby-home&amp;mt=8">Download on the App Store</a>
+            <div class="store-badges start"><a class="cta" href="https://apps.apple.com/us/app/baby-tracker-feeds-diapers/id6811133796?pt=128748779&amp;ct=jw-baby-home&amp;mt=8">Download on the App Store</a>
+<a class="play-badge" href="https://play.google.com/store/apps/details?id=com.jackwallner.baby" rel="noopener"><img src="google-play-badge.webp" alt="Get it on Google Play" width="155" height="46"></a></div>
           </div>
           <div class="icon-card" role="img" aria-label="A seven-day tally sheet">
             <svg viewBox="0 0 280 280" role="img" aria-hidden="true">
