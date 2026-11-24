@@ -20,8 +20,10 @@ Free to log, free to share with your partner, and free to keep.
 
 ### Four buttons
 
-Feed, Wet, Dirty, Sleep. One tap logs it now, a long press
-changes the time, and undo is always one tap away.
+Feed, Pee, Poop, Sleep, or Wet and Dirty if you prefer. One tap
+logs it now, a long press changes the time, and undo is always
+one tap away. Settings adds a Pump button and buttons you name
+yourself.
 
 02
 
@@ -41,7 +43,8 @@ A promise
 
 ## What is free in Baby Tracker?
 
-Logging, the first-weeks tally, history, the widgets, the Watch
+Logging, feed and checkup reminders, the first-weeks tally, history,
+the widgets, the Watch
 app, partner sharing and the stain helper are free and stay
 free. The buttons stay where you learned them. Nothing you
 logged is ever locked later.
@@ -86,7 +89,7 @@ Questions
 
 ## What is the best baby tracker app for feeds and diapers?
 
-Baby Tracker: Feeds & Diapers is a simple option built around four buttons: Feed, Wet, Dirty and Sleep. One tap logs each one, and the Now card shows when the baby last ate and on which side.
+Baby Tracker: Feeds & Diapers is a simple option built around four buttons: Feed, Pee, Poop and Sleep, which you can rename Wet and Dirty. One tap logs each one, and the Now card shows when the baby last ate and on which side.
 
 ## Is there a free baby tracker app I can share with my partner?
 
