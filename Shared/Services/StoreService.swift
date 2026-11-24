@@ -348,6 +348,14 @@ final class StoreService: NSObject, ObservableObject, PurchasesDelegate {
         return isEligibleForIntroOffer(yearly)
     }
 
+    /// A passive pitch may show: RevenueCat has answered who this is, and the
+    /// yearly plan is loaded. An unconfigured simulator stands in with the
+    /// StoreKit Testing catalog, where there is nobody to look up.
+    var canPitchPassively: Bool {
+        guard yearlyPackage != nil else { return false }
+        return isConfigured ? hasResolvedEntitlements : true
+    }
+
     /// Short CTA for locked capsule surfaces.
     var shortConversionCTALabel: String {
         ConversionCopy.shortCTALabel(eligibleForTrial: canPitchFreeTrial)

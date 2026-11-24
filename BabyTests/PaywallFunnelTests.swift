@@ -304,3 +304,23 @@ final class PurchaseEntitlementTests: XCTestCase {
     }
 
 }
+
+final class TrialPitchTests: XCTestCase {
+    private let now = Date(timeIntervalSince1970: 1_800_000_000)
+
+    func testShowsOnceTheLogHasAFewEntries() {
+        XCTAssertFalse(TrialPitch.shouldShow(entries: 2, isPro: false, canPitch: true, lastShown: nil, now: now))
+        XCTAssertTrue(TrialPitch.shouldShow(entries: 3, isPro: false, canPitch: true, lastShown: nil, now: now))
+    }
+
+    func testNeverForASubscriberOrBeforeThePlanLoads() {
+        XCTAssertFalse(TrialPitch.shouldShow(entries: 40, isPro: true, canPitch: true, lastShown: nil, now: now))
+        XCTAssertFalse(TrialPitch.shouldShow(entries: 40, isPro: false, canPitch: false, lastShown: nil, now: now))
+    }
+
+    func testFourteenDayCooldown() {
+        let day: TimeInterval = 86_400
+        XCTAssertFalse(TrialPitch.shouldShow(entries: 40, isPro: false, canPitch: true, lastShown: now - 13.9 * day, now: now))
+        XCTAssertTrue(TrialPitch.shouldShow(entries: 40, isPro: false, canPitch: true, lastShown: now - 14 * day, now: now))
+    }
+}

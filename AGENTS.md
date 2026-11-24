@@ -27,7 +27,12 @@ until Baby+ is active, then becomes Reports. No top navigation buttons.
 Everything else lives in Settings: baby, buttons, diaper words, totals,
 appearance, logging together, babies, First Weeks, stain helper, and Baby+
 status. No automatic review prompts, promotional cards, or purchase screen
-during onboarding. Ratings: no in-app rating question and no automatic ask
+during onboarding. One passive Baby+ sheet instead (Jack, 2026-11-24, because
+66% of new users never saw an offer): `TrialPitchSheet`, raised by
+`BabyHomeView` after a log's Undo window runs out, once the log has 3 entries,
+never for Baby+, never on Reports or over another sheet, at most every 14
+days (`TrialPitch`). It buys yearly with its free week; the plan list stays on
+Upgrade. Ratings: no in-app rating question and no automatic ask
 (App Review 5.6.1); Settings > About has separate "Rate Baby Tracker"
 (write-review link, App Store ID `6811133796`) and "Send Feedback" (mail) rows.
 Onboarding is one screen with two paths: Start a new log (optional name,
@@ -137,7 +142,7 @@ one baby is free; History's Today and Yesterday tiles and the full log are free.
   never in this repo.
 - Products: `com.jackwallner.baby.monthly` $3.99 (1-week trial),
   `.yearly` $24.99 (1-week trial), `.pro.lifetime` $39.99. All three are
-  `READY_TO_SUBMIT`.
+  `APPROVED` (checked 2026-11-24).
 
 ## Screenshots and renders
 

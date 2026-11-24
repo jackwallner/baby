@@ -28,7 +28,11 @@ Settings. No onboarding paywall. Two exceptions to "nothing but logging on
 Log" (2026-10-18, Jack approved): the one-time reminder offer sheet after a
 feed, and a checkup note that opens the paywall focused on the pediatrician
 summary. The offer stays out of UI tests (`ReminderOfferGate`: off with
-`-NoCloudKit`, back with `-ShowReminderOffer`).
+`-NoCloudKit`, back with `-ShowReminderOffer`). A third (2026-11-24, Jack): the passive
+Baby+ half sheet after a log stands (`TrialPitch`, AGENTS.md), which yields to
+the reminder offer after a first feed. It stays out of captures, probes and `-NoCloudKit` UI tests;
+`-TrialPitchTest` brings it back and `-TrialPitchShownDaysAgo N` sets the
+cooldown (`TrialPitchUITests`).
 
 2026-10-02 (Jack): all navigation belongs in one small translucent bottom
 capsule, like Total Calories, not a full-width bar. Tabs are Log, History,

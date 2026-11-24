@@ -316,6 +316,11 @@ private struct RevenueCatProbeStatusView: View {
 /// Unfolded on iPhone Duo, History takes its own pane beside the open tab.
 struct BabyHomeView: View {
     @EnvironmentObject private var store: StoreService
+    @EnvironmentObject private var events: EventStore
+    @EnvironmentObject private var settings: BabySettings
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var showsTrialPitch = false
+    @State private var trialPitchDetent: PresentationDetent = .height(TrialPitchSheet.detentHeight)
     @ObservedObject private var router = AppRouter.shared
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var selected: HomeTab
@@ -405,9 +410,42 @@ struct BabyHomeView: View {
         .onChange(of: selected) { _, tab in
             if tab != .reports { router.showsCheckupPitch = false }
         }
+        // A log's Undo window ran out, so the entry stands: the one moment the
+        // passive Baby+ sheet may ask.
+        .onChange(of: events.lastLogged) { old, new in
+            guard new == nil, let old, old.deleted == nil else { return }
+            Task { await offerTrialPitch(after: old) }
+        }
+        .sheet(isPresented: $showsTrialPitch) {
+            TrialPitchSheet()
+                .presentationDetents([.height(TrialPitchSheet.detentHeight), .large], selection: $trialPitchDetent)
+                .presentationDragIndicator(.visible)
+                .presentationContentInteraction(.scrolls)
+                .onAppear {
+                    if dynamicTypeSize.isAccessibilitySize { trialPitchDetent = .large }
+                }
+        }
         #if DEBUG
         .task { await runDuoTour() }
         #endif
+    }
+
+    /// The passive Baby+ sheet (`TrialPitch`). Reports already pitches, and
+    /// the one-time feed reminder offer owns the moment after a first feed.
+    private func offerTrialPitch(after logged: EventStore.LoggedEvent) async {
+        guard TrialPitch.isEnabled, settings.hasCompletedSetup, selected != .reports else { return }
+        if logged.kind == .feed, ReminderOfferGate.isEnabled, !Reminders.hasOfferedFeedReminder { return }
+        try? await Task.sleep(for: .milliseconds(600))
+        guard !showsTrialPitch, !TrialPitch.isSomethingPresented,
+              TrialPitch.shouldShow(
+                entries: events.child?.eventCount ?? 0,
+                isPro: store.isPro,
+                canPitch: store.canPitchPassively,
+                lastShown: TrialPitch.lastShown()
+              )
+        else { return }
+        TrialPitch.markShown()
+        showsTrialPitch = true
     }
 
     /// Unfolded, History is already beside every tab, so it opens Log.
