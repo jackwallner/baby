@@ -324,12 +324,18 @@ private struct LogTimeRow: View {
                 LogCountdown(clock: clock)
             }
         } else {
-            Label("Logging at", systemImage: "clock")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(AppTheme.ink2)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .frame(minHeight: 44)
+            // On a 320pt screen (Display Zoom) the words would show as "Lo...",
+            // so the clock stands alone there.
+            ViewThatFits(in: .horizontal) {
+                Label("Logging at", systemImage: "clock")
+                    .lineLimit(1)
+                    .fixedSize()
+                Image(systemName: "clock")
+                    .accessibilityLabel("Logging at")
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(AppTheme.ink2)
+            .frame(minHeight: 44)
         }
     }
 

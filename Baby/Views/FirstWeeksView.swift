@@ -123,13 +123,17 @@ struct FirstWeeksView: View {
 
     private enum RowState { case past, today, future, unlogged }
 
+    /// Wide enough for "8 to 12"; any wider and DIRTY and FEEDS were cut off
+    /// on a 320pt screen (Display Zoom, 2026-11-25 gate).
+    private static let referenceWidth: CGFloat = 76
+
     private var header: some View {
         HStack(spacing: AppTheme.tightSpacing) {
             Text("DAY").lineLimit(1).minimumScaleFactor(0.7).frame(width: 44, alignment: .leading)
-            if settings.tracked.contains(.wet) { Text("WET").lineLimit(1).minimumScaleFactor(0.7).frame(maxWidth: .infinity) }
-            if settings.tracked.contains(.dirty) { Text("DIRTY").lineLimit(1).minimumScaleFactor(0.7).frame(maxWidth: .infinity) }
-            if settings.tracked.contains(.feed) { Text("FEEDS").lineLimit(1).minimumScaleFactor(0.7).frame(maxWidth: .infinity).accessibilityLabel("Feeds") }
-            Text("REFERENCE").lineLimit(1).minimumScaleFactor(0.7).frame(width: 92, alignment: .trailing)
+            if settings.tracked.contains(.wet) { Text("WET").lineLimit(1).minimumScaleFactor(0.6).frame(maxWidth: .infinity) }
+            if settings.tracked.contains(.dirty) { Text("DIRTY").lineLimit(1).minimumScaleFactor(0.6).frame(maxWidth: .infinity) }
+            if settings.tracked.contains(.feed) { Text("FEEDS").lineLimit(1).minimumScaleFactor(0.6).frame(maxWidth: .infinity).accessibilityLabel("Feeds") }
+            Text("REFERENCE").lineLimit(1).minimumScaleFactor(0.6).frame(width: Self.referenceWidth, alignment: .trailing)
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(AppTheme.ink3)
@@ -172,7 +176,9 @@ struct FirstWeeksView: View {
                     .font(.caption)
                     .foregroundStyle(AppTheme.ink2)
                     .monospacedDigit()
-                    .frame(width: 92, alignment: .trailing)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .frame(width: Self.referenceWidth, alignment: .trailing)
                 }
             }
         }

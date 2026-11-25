@@ -169,6 +169,18 @@ struct EventEditorView: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // "Log a pee diaper" between Cancel and Log was cut to
+                // "Log a pee di..." on a 320pt screen; the bare noun fits.
+                ToolbarItem(placement: .principal) {
+                    ViewThatFits(in: .horizontal) {
+                        Text(title).fixedSize()
+                        Text(shortTitle).lineLimit(1).minimumScaleFactor(0.8)
+                    }
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.ink)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityLabel(title)
+                }
                 if isNew {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel") { dismiss() }
@@ -217,7 +229,12 @@ struct EventEditorView: View {
         }
     }
 
-    private var title: String {
+    private var title: String { title(new: isNew) }
+
+    /// The bare noun ("Pee diaper") for a toolbar too narrow for "Log a pee diaper".
+    private var shortTitle: String { title(new: false) }
+
+    private func title(new isNew: Bool) -> String {
         switch kind {
         case .feed: isNew ? String(localized: "Log a feed") : String(localized: "Feed")
         case .wet:
