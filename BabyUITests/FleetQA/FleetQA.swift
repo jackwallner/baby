@@ -1442,3 +1442,52 @@ extension QA {
         return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 }
+
+/// Display Zoom for qa-gate's zoomed persona. A 6.1-inch iPhone set to Larger Text lays out at 320pt, 55pt
+/// narrower than the narrowest unzoomed iPhone, and no simulator device type starts that way. The setting lives in
+/// Settings and resets on every boot, so qa-gate runs this after booting the persona's throwaway: the first run
+/// picks Larger Text and the device restarts under it (the runner dies with it); the second run finds the screen
+/// already at QA_DISPLAY_ZOOM_WIDTH and passes. Every other run skips it.
+@MainActor
+final class FleetQADisplayZoom: XCTestCase {
+    func testDisplayZoom() throws {
+        guard let wanted = QA.env["QA_DISPLAY_ZOOM_WIDTH"].flatMap(Double.init) else {
+            throw XCTSkip("qa-gate sets Display Zoom for the zoomed persona only")
+        }
+        continueAfterFailure = false
+        let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
+        settings.launch()
+        let window = settings.windows.firstMatch
+        XCTAssertTrue(window.waitForExistence(timeout: 30), "Settings did not open")
+        let width = window.frame.width
+        if width <= wanted + 0.5 {
+            // Left in front, Settings puts its back link in the app's status bar, which Apple's element-detection
+            // audit reports as inaccessible text on every early checkpoint (Mahj zoomed onboarding, Nov 23).
+            settings.terminate()
+            XCUIDevice.shared.press(.home)
+            return
+        }
+        // iOS 27 keeps Display Zoom under Appearance; iOS 26 (some GitHub runners) under Display & Brightness.
+        let page = settings.staticTexts.matching(NSPredicate(format: "label IN %@", ["Appearance", "Display & Brightness"]))
+        let steps: [(String, XCUIElement)] = [
+            ("Appearance", page.firstMatch),
+            ("Display Zoom", settings.staticTexts["Display Zoom"].firstMatch),
+            ("Larger Text", settings.otherElements["Zoomed"].firstMatch),
+        ]
+        for (name, element) in steps {
+            if !element.waitForExistence(timeout: 15) || !element.isHittable { settings.swipeUp() }
+            XCTAssertTrue(element.waitForExistence(timeout: 5), "Settings has no \(name) at \(width)pt:\n\(settings.debugDescription)")
+            element.tap()
+        }
+        let bar = settings.navigationBars["Display Zoom"]
+        let done = bar.buttons.element(boundBy: max(bar.buttons.count - 1, 0))
+        XCTAssertTrue(done.waitForExistence(timeout: 5), "Display Zoom has no confirm button:\n\(settings.debugDescription)")
+        done.tap()
+        let use = settings.buttons["Use Zoomed"].firstMatch
+        XCTAssertTrue(use.waitForExistence(timeout: 10), "Display Zoom asked nothing:\n\(settings.debugDescription)")
+        use.tap()
+        // The device restarts here and the runner goes with it; reaching the next line means it did not.
+        sleep(30)
+        XCTFail("Display Zoom stayed at \(width)pt after Use Zoomed")
+    }
+}
